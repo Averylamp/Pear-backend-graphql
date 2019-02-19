@@ -103,7 +103,13 @@ export const start = async () => {
 
     }
 
-    const server = new ApolloServer({typeDefs, resolvers});
+    const server = new ApolloServer({
+      typeDefs: typeDefs,
+      resolvers: resolvers,
+      engine: {
+        apiKey: "service:pear-matchmaking-8936:V43kf4Urhi-63wQycK_yoA"
+      }
+    });
     console.log("Created server")
     const app = express();
     // app.use(cors())
