@@ -25,7 +25,9 @@ export const start = async () => {
 
     const mongoose = require('mongoose');
 
-    mongoose.connect(MONGO_URL, {useNewUrlParser: true });
+    mongoose.connect(MONGO_URL, {useNewUrlParser: true })
+    mongoose.Promise = global.Promise;
+
     var db = mongoose.connection
     db.on('error', console.error.bind(console, 'MongoDB connection error:'));
     console.log("Mongoose Connected")
@@ -72,17 +74,6 @@ export const start = async () => {
         userMatches: UserMatches!
       }
 
-      type UserMatches{
-        _id: ID!
-        user_id: ID!
-        user_obj: User!
-        matchRequest_ids: [ID!]!
-        matchRequest_objs: [MatchRequest!]!
-        matchRejected_ids: [ID!]!
-        matchRejected_objs: [MatchRequest!]!
-        matches_ids: [ID!]!
-        matches_objs: [Match!]!
-      }
 
       type UserStatData{
         toatlNumberOfMatchRequests: Int!
@@ -110,6 +101,18 @@ export const start = async () => {
         minHeightRange: Int!
         maxHeightRange: Int!
         heightDealbreaker: Int!
+      }
+
+      type UserMatches{
+        _id: ID!
+        user_id: ID!
+        user_obj: User!
+        matchRequest_ids: [ID!]!
+        matchRequest_objs: [MatchRequest!]!
+        matchRejected_ids: [ID!]!
+        matchRejected_objs: [MatchRequest!]!
+        matches_ids: [ID!]!
+        matches_objs: [Match!]!
       }
 
       type UserProfile{
