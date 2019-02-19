@@ -7,6 +7,14 @@ import { GraphQLScalarType } from 'graphql';
 import cors from 'cors'
 import {prepare} from "../util/index"
 
+import { typeDef as User } from "./models/usermodel.js"
+import { typeDef as UserProfile } from "./models/userprofilemodel.js"
+import { typeDef as Match } from "./models/matchmodel.js"
+import { typeDef as UserMatches } from "./models/usermatchesmodel.js"
+import { typeDef as MatchRequest } from "./models/matchrequestmodel.js"
+import { typeDef as Discovery } from "./models/discoverymodel.js"
+import { merge } from 'lodash';
+
 
 const app = express()
 
@@ -27,7 +35,7 @@ export const start = async () => {
 
     mongoose.connect(MONGO_URL, {useNewUrlParser: true })
     mongoose.Promise = global.Promise;
-
+    mongoose.set('useCreateIndex', true);
     var db = mongoose.connection
     db.on('error', console.error.bind(console, 'MongoDB connection error:'));
     console.log("Mongoose Connected")
@@ -39,214 +47,16 @@ export const start = async () => {
     const MatchRequestsDB = db.collection('matchrequests')
     const MatchesDB = db.collection('matches')
 
-    const typeDefs = [`
-      type Query {
-        user(_id: ID): User
-        users: [User]
-        userProfile(_id: ID): UserProfile
-      }
+    const Query = `
+    type Query {
+      user(_id: ID): User
+      users: [User]
+      userProfile(_id: ID): UserProfile
+    }
 
-      scalar Date
+    scalar Date
+    `
 
-      type User {
-        _id: ID!
-        firebaseToken: String!
-        facebookId: String
-        facebookAccessToken: String
-        email: String!
-        phoneNumber: String!
-        fullName: String!
-        firstName: String!
-        lastName: String!
-        userPreferences: UserPreferences!
-        thumbnailURL: String
-        gender: Gender
-        locationName: String
-        locationCoordinates: String
-        school: String
-        age: Int
-        ethnicities: [String!]
-        profile_ids: [ID!]!
-        profile_objs: [UserProfile!]!
-        endorsedProfile_ids: [ID!]!
-        endorsedProfile_objs: [UserProfile!]!
-        userStatData: UserStatData
-        userMatches: UserMatches!
-      }
-
-
-      type UserStatData{
-        toatlNumberOfMatchRequests: Int!
-        totalNumberOfMatches: Int!
-        totalNumberOfProfilesCreated: Int!
-        totalNumberOfEndorsementsCreated: Int!
-        conversationTotalNumber: Int!
-        conversationTotalNumberFirstMessage: Int!
-        conversationTotalNumberTenMessages: Int!
-        conversationTotalNumberHundredMessages: Int!
-      }
-
-      type UserPreferences{
-        ethnicities: [String!]!
-        seekingGender: [Gender!]!
-        seekingReason: [String!]!
-        reasonDealbreaker: Int!
-        seekingEthnicity: [String!]!
-        ethnicityDealbreaker: Int!
-        maxDistance: Int!
-        distanceDealbreaker: Int!
-        minAgeRange: Int!
-        maxAgeRange: Int!
-        ageDealbreaker: Int!
-        minHeightRange: Int!
-        maxHeightRange: Int!
-        heightDealbreaker: Int!
-      }
-
-      type UserMatches{
-        _id: ID!
-        user_id: ID!
-        user_obj: User!
-        matchRequest_ids: [ID!]!
-        matchRequest_objs: [MatchRequest!]!
-        matchRejected_ids: [ID!]!
-        matchRejected_objs: [MatchRequest!]!
-        matches_ids: [ID!]!
-        matches_objs: [Match!]!
-      }
-
-      type UserProfile{
-        _id: ID!
-        creator_id: ID!
-        creator_obj: User!
-        user_id: ID!
-        user_obj: User!
-        activeProfile: Boolean!
-        activeDiscovery: Boolean!
-        fullName: String!
-        firstName: String!
-        lastName: String!
-        gender: Gender!
-        age: Int!
-        height: Int
-        locationName: String
-        locationCoordinates: String
-        school: String
-
-        profileImageIDs: [String!]!
-        profileImages: ImageSizes!
-        discovery_id: ID!
-        discovery_obj: Discovery!
-        userProfileData: UserProfileData!
-      }
-
-      type UserProfileData{
-        totalProfileViews: Int!
-        totalProfileLikes: Int!
-      }
-
-      type ImageSizes{
-        original: [ImageMetadata!]!
-        large:    [ImageMetadata!]!
-        medium:   [ImageMetadata!]!
-        small:    [ImageMetadata!]!
-        thumb:    [ImageMetadata!]!
-      }
-
-      type ImageMetadata{
-        imageURL: String!
-        imageID: String!
-        imageSize: ImageSize!
-      }
-
-      type ImageSize{
-        width: Int!
-        height: Int!
-      }
-
-      type Discovery{
-        _id: ID!
-        profile_id: ID!
-        profile_obj: UserProfile!
-
-
-      }
-
-      type MatchRequest{
-        _id: ID!
-
-        firstPersonMessageRequest: String!
-        secondPersonMessageRequest: String!
-
-        firstPersonEndorserUser_id: ID!
-        firstPersonEndorserUser_obj: User!
-        secondPersonEndorserUser_id: ID!
-        secondPersonEndorserUser_obj: User!
-
-        firstPersonUser_id: ID!
-        firstPersonUser_obj: User!
-        firstPersonProfile_id: ID!
-        firstPersonProfile_obj: UserProfile!
-        secondPersonUser_id: ID!
-        secondPersonUser_obj: User!
-        secondPersonProfile_id: ID!
-        secondPersonProfile_obj: UserProfile!
-
-        timestampCreated: Date!
-        firstPersonResponse: MatchResponse
-        firstPersonResponseTimestamp: Date
-        secondPersonResponse: MatchResponse
-        secondPersonResponseTimestamp: Date
-
-        matchStatus: MatchStatus!
-        matchStatusTimestamp: Date!
-        matchCreated: Boolean!
-        acceptedMatch_id: ID
-        acceptedMatch_obj: Match
-      }
-
-      type Match{
-        _id: ID!
-        matchRequest_id: ID!
-        matchRequest_obj: MatchRequest
-        firstPersonUser_id: ID!
-        firstPersonUser_obj: User!
-        firstPersonProfile_id: ID!
-        firstPersonProfile_obj: UserProfile!
-        secondPersonUser_id: ID!
-        secondPersonUser_obj: User!
-        secondPersonProfile_id: ID!
-        secondPersonProfile_obj: UserProfile!
-        timestampCreated: Date
-        conversationFirstMessageSent: Boolean!
-        conversationTenMessagesSent: Boolean!
-        conversationHundredMessagesSent: Boolean!
-        firebaseConversationDocumentID: String!
-      }
-
-      enum MatchStatus{
-        requests
-        rejected
-        accepted
-      }
-
-      enum MatchResponse{
-        unseen
-        seen
-        rejected
-        accepted
-      }
-
-      enum Gender{
-        male
-        female
-        nonbinary
-      }
-
-      schema {
-        query: Query
-      }
-    `];
 
     const resolvers = {
       Query: {
@@ -295,74 +105,8 @@ export const start = async () => {
       }),
 
     }
-    // const typeDefs = [`
-    //   type Query {
-    //     post(_id: String): Post
-    //     posts: [Post]
-    //     comment(_id: String): Comment
-    //   }
-    //
-    //   type Post {
-    //     _id: String
-    //     title: String
-    //     content: String
-    //     comments: [Comment]
-    //   }
-    //
-    //   type Comment {
-    //     _id: String
-    //     postId: String
-    //     content: String
-    //     post: Post
-    //   }
-    //
-    //   type Mutation {
-    //     createPost(title: String, content: String): Post
-    //     createComment(postId: String, content: String): Comment
-    //   }
-    //
-    //   schema {
-    //     query: Query
-    //     mutation: Mutation
-    //   }
-    // `];
-
-    // const resolvers = {
-    //   Query: {
-    //     post: async (root, {_id}) => {
-    //       return prepare(await Posts.findOne(ObjectId(_id)))
-    //     },
-    //     posts: async () => {
-    //       return (await Posts.find({}).toArray()).map(prepare)
-    //     },
-    //     comment: async (root, {_id}) => {
-    //       return prepare(await Comments.findOne(ObjectId(_id)))
-    //     },
-    //   },
-    //   Post: {
-    //     comments: async ({_id}) => {
-    //       return (await Comments.find({postId: _id}).toArray()).map(prepare)
-    //     }
-    //   },
-    //   Comment: {
-    //     post: async ({postId}) => {
-    //       return prepare(await Posts.findOne(ObjectId(postId)))
-    //     }
-    //   },
-    //   Mutation: {
-    //     createPost: async (root, args, context, info) => {
-    //       const res = await Posts.insertOne(args)
-    //       return prepare(res.ops[0])  // https://mongodb.github.io/node-mongodb-native/3.1/api/Collection.html#~insertOneWriteOpResult
-    //     },
-    //     createComment: async (root, args) => {
-    //       const res = await Comments.insert(args)
-    //       return prepare(await Comments.findOne({_id: res.insertedIds[1]}))
-    //     },
-    //   },
-    // }
-
     const schema = makeExecutableSchema({
-      typeDefs,
+      typeDefs: [Query, User, UserProfile,  Match, UserMatches, MatchRequest, Discovery],
       resolvers
     })
 

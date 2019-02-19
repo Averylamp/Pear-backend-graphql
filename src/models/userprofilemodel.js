@@ -1,6 +1,65 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
+export const typeDef = `
+type UserProfile{
+  _id: ID!
+  creator_id: ID!
+  creator_obj: User!
+  user_id: ID!
+  user_obj: User!
+  activeProfile: Boolean!
+  activeDiscovery: Boolean!
+  fullName: String!
+  firstName: String!
+  lastName: String!
+  gender: Gender!
+  age: Int!
+  height: Int
+  locationName: String
+  locationCoordinates: String
+  school: String
+
+  profileImageIDs: [String!]!
+  profileImages: ImageSizes!
+  discovery_id: ID!
+  discovery_obj: Discovery!
+  userProfileData: UserProfileData!
+}
+
+type UserProfileData{
+  totalProfileViews: Int!
+  totalProfileLikes: Int!
+}
+
+type ImageSizes{
+  original: [ImageMetadata!]!
+  large:    [ImageMetadata!]!
+  medium:   [ImageMetadata!]!
+  small:    [ImageMetadata!]!
+  thumb:    [ImageMetadata!]!
+}
+
+type ImageMetadata{
+  imageURL: String!
+  imageID: String!
+  imageSize: ImageSize!
+}
+
+type ImageSize{
+  width: Int!
+  height: Int!
+}
+
+enum Gender{
+  male
+  female
+  nonbinary
+}
+
+
+`
+
 var UserProfileSchema = new Schema ({
   _id: { type: Schema.Types.ObjectId, required: true },
   creator_id: { type: Schema.Types.ObjectId, required: true, index: true },
@@ -39,4 +98,4 @@ var UserProfileSchema = new Schema ({
 // user_obj: User!
 // discovery_obj: Discovery!
 
-module.exports = mongoose.model("UserProfile", UserProfileSchema)
+export const UserProfile = mongoose.model("UserProfile", UserProfileSchema)

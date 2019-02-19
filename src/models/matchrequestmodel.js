@@ -1,6 +1,56 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
+export const typeDef = `
+type MatchRequest{
+  _id: ID!
+
+  firstPersonMessageRequest: String!
+  secondPersonMessageRequest: String!
+
+  firstPersonEndorserUser_id: ID!
+  firstPersonEndorserUser_obj: User!
+  secondPersonEndorserUser_id: ID!
+  secondPersonEndorserUser_obj: User!
+
+  firstPersonUser_id: ID!
+  firstPersonUser_obj: User!
+  firstPersonProfile_id: ID!
+  firstPersonProfile_obj: UserProfile!
+  secondPersonUser_id: ID!
+  secondPersonUser_obj: User!
+  secondPersonProfile_id: ID!
+  secondPersonProfile_obj: UserProfile!
+
+  timestampCreated: Date!
+  firstPersonResponse: MatchResponse
+  firstPersonResponseTimestamp: Date
+  secondPersonResponse: MatchResponse
+  secondPersonResponseTimestamp: Date
+
+  matchStatus: MatchStatus!
+  matchStatusTimestamp: Date!
+  matchCreated: Boolean!
+  acceptedMatch_id: ID
+  acceptedMatch_obj: Match
+}
+
+enum MatchStatus{
+  requests
+  rejected
+  accepted
+}
+
+enum MatchResponse{
+  unseen
+  seen
+  rejected
+  accepted
+}
+
+`
+
+
 var MatchRequestSchema = new Schema ({
   _id: { type: Schema.Types.ObjectId, required: true },
   firstPersonMessageRequest: { type: String, required: true },
@@ -31,4 +81,4 @@ var MatchRequestSchema = new Schema ({
 // secondPersonUser_obj: User!
 // secondPersonProfile_obj: UserProfile!
 // acceptedMatch_obj: Match
-module.exports = mongoose.model("MatchRequest", MatchRequestSchema)
+export const MatchRequest = mongoose.model("MatchRequest", MatchRequestSchema)

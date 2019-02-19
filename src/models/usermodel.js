@@ -1,6 +1,63 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
+export const typeDef = `
+type User {
+  _id: ID!
+  firebaseToken: String!
+  facebookId: String
+  facebookAccessToken: String
+  email: String!
+  phoneNumber: String!
+  fullName: String!
+  firstName: String!
+  lastName: String!
+  userPreferences: UserPreferences!
+  thumbnailURL: String
+  gender: Gender
+  locationName: String
+  locationCoordinates: String
+  school: String
+  age: Int
+  ethnicities: [String!]
+  profile_ids: [ID!]!
+  profile_objs: [UserProfile!]!
+  endorsedProfile_ids: [ID!]!
+  endorsedProfile_objs: [UserProfile!]!
+  userStatData: UserStatData
+  userMatches: UserMatches!
+}
+
+
+type UserStatData{
+  toatlNumberOfMatchRequests: Int!
+  totalNumberOfMatches: Int!
+  totalNumberOfProfilesCreated: Int!
+  totalNumberOfEndorsementsCreated: Int!
+  conversationTotalNumber: Int!
+  conversationTotalNumberFirstMessage: Int!
+  conversationTotalNumberTenMessages: Int!
+  conversationTotalNumberHundredMessages: Int!
+}
+
+type UserPreferences{
+  ethnicities: [String!]!
+  seekingGender: [Gender!]!
+  seekingReason: [String!]!
+  reasonDealbreaker: Int!
+  seekingEthnicity: [String!]!
+  ethnicityDealbreaker: Int!
+  maxDistance: Int!
+  distanceDealbreaker: Int!
+  minAgeRange: Int!
+  maxAgeRange: Int!
+  ageDealbreaker: Int!
+  minHeightRange: Int!
+  maxHeightRange: Int!
+  heightDealbreaker: Int!
+}
+`
+
 var UserSchema = new Schema ({
   _id: { type: Schema.Types.ObjectId, required: true },
   firebaseToken: { type: String, required: true },
@@ -55,4 +112,4 @@ var UserSchema = new Schema ({
 
 // profile_objs: { type: [, required: true,  UserProfile!]!
 // endorsedProfile_objs: { type: [, required: true,  UserProfile!]!
-module.exports = mongoose.model("User", UserSchema)
+export const User = mongoose.model("User", UserSchema)

@@ -1,6 +1,27 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
+export const typeDef = `
+type Match{
+  _id: ID!
+  matchRequest_id: ID!
+  matchRequest_obj: MatchRequest
+  firstPersonUser_id: ID!
+  firstPersonUser_obj: User!
+  firstPersonProfile_id: ID!
+  firstPersonProfile_obj: UserProfile!
+  secondPersonUser_id: ID!
+  secondPersonUser_obj: User!
+  secondPersonProfile_id: ID!
+  secondPersonProfile_obj: UserProfile!
+  timestampCreated: Date
+  conversationFirstMessageSent: Boolean!
+  conversationTenMessagesSent: Boolean!
+  conversationHundredMessagesSent: Boolean!
+  firebaseConversationDocumentID: String!
+}
+`
+
 var MatchRequestSchema = new Schema ({
   _id: { type: Schema.Types.ObjectId, required: true },
   matchRequest_id: { type: Schema.Types.ObjectId, required: true },
@@ -21,4 +42,4 @@ var MatchRequestSchema = new Schema ({
 // firstPersonProfile_obj: UserProfile!
 // secondPersonUser_obj: User!
 // secondPersonProfile_obj: UserProfile!
-module.exports = mongoose.model("MatchRequest", MatchRequestSchema)
+export const Match = mongoose.model("Match", MatchRequestSchema)
