@@ -3,6 +3,7 @@ import express from 'express'
 import bodyParser from 'body-parser'
 import {graphqlExpress, graphiqlExpress} from 'graphql-server-express'
 import {makeExecutableSchema} from 'graphql-tools'
+import { GraphQLScalarType } from 'graphql';
 import cors from 'cors'
 import {prepare} from "../util/index"
 
@@ -14,8 +15,8 @@ app.use(cors())
 const homePath = '/graphiql'
 const URL = 'http://localhost'
 const PORT = 3001
-const MONGO_URL = "mongodb://avery:E5YXUKiv2Uyt_pM@cluster0-shard-00-00-moobp.mongodb.net:27017,cluster0-shard-00-01-moobp.mongodb.net:27017,cluster0-shard-00-02-moobp.mongodb.net:27017/dev?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true"
-// 'mongodb://avery:E5YXUKiv2Uyt_pM@cluster0-moobp.mongodb.net/dev'
+const MONGO_URL = "mongodb+srv://avery:0bz8M0eMEtyXlj2aZodIPpJpy@cluster0-w4ecv.mongodb.net/dev?retryWrites=true"
+
 
 export const start = async () => {
   try {
@@ -23,80 +24,93 @@ export const start = async () => {
     const db = await MongoClient.connect(MONGO_URL)
     console.log("Mongo Connected")
 
-    const Users = db.collection('users')
-    const UserProfiles = db.collection('userprofiles')
-    const EndorsedProfiles = db.collection('endorsedprofiles')
+    const UsersDB = db.collection('users')
+    const UserProfilesDB = db.collection('userprofiles')
+    const UserMatchesDB = db.collection('usermatches')
+    const MatchRequestsDB = db.collection('matchrequests')
+    const MatchesDB = db.collection('matches')
 
     const typeDefs = [`
       type Query {
         user(_id: ID): User
         users: [User]
         userProfile(_id: ID): UserProfile
-        endorsementProfile(_id: ID): EndorsementProfile
       }
+
+      scalar Date
 
       type User {
         _id: ID!
-        facebookId: String!
+        firebaseToken: String!
+        facebookId: String
+        facebookAccessToken: String
         email: String!
+        phoneNumber: String!
         fullName: String!
         firstName: String!
         lastName: String!
-        gender: Gender!
+        userPreferences: UserPreferences!
+        thumbnailURL: String
+        gender: Gender
         locationName: String
         locationCoordinates: String
         school: String
-        age: Int!
-        ethnicities: [String!]!
-        facebookAccessToken: String
-        photoURL: String
-        facebookProfileLink: String
-        firebaseId: String
-        personalProfile_id: UserProfile
-        endorsedProfiles_ids: [ID!]!
-        friendEndorsedProfile_ids: [ID!]!
+        age: Int
+        ethnicities: [String!]
+        profile_ids: [ID!]!
+        profile_objs: [UserProfile!]!
+        endorsedProfile_ids: [ID!]!
+        endorsedProfile_objs: [UserProfile!]!
+        userStatData: UserStatData
+        userMatches: UserMatches!
       }
 
-      type UserProfile{
-        profileType: ProfileType!
-        user_id: User!
-        activeProfile: Boolean!
-        activeDiscovery: Boolean!
-        fullName: String!
-        firstName: String!
-        lastName: String!
-        gender: Gender!
-        age: Int!
-        height: Int
-        locationName: String
-        locationCoordinates: String
-        school: String
+      type UserMatches{
+        _id: ID!
+        user_id: ID!
+        user_obj: User!
+        matchRequest_ids: [ID!]!
+        matchRequest_objs: [MatchRequest!]!
+        matchRejected_ids: [ID!]!
+        matchRejected_objs: [MatchRequest!]!
+        matches_ids: [ID!]!
+        matches_objs: [Match!]!
+      }
+
+      type UserStatData{
+        toatlNumberOfMatchRequests: Int!
+        totalNumberOfMatches: Int!
+        totalNumberOfProfilesCreated: Int!
+        totalNumberOfEndorsementsCreated: Int!
+        conversationTotalNumber: Int!
+        conversationTotalNumberFirstMessage: Int!
+        conversationTotalNumberTenMessages: Int!
+        conversationTotalNumberHundredMessages: Int!
+      }
+
+      type UserPreferences{
         ethnicities: [String!]!
         seekingGender: [Gender!]!
         seekingReason: [String!]!
+        reasonDealbreaker: Int!
         seekingEthnicity: [String!]!
+        ethnicityDealbreaker: Int!
         maxDistance: Int!
+        distanceDealbreaker: Int!
         minAgeRange: Int!
         maxAgeRange: Int!
+        ageDealbreaker: Int!
         minHeightRange: Int!
         maxHeightRange: Int!
-        profileEmail: String
-        facebookProfileLink: String
-        profileImageIDs: [String!]!
-        profileImageURLs: [String!]
-        discovery_id: ID!
-        matches_id: ID!
-        traitScores: [Int]
-        questions: [String]
+        heightDealbreaker: Int!
       }
 
-      type EndorsementProfile{
-        approvedEndorsement: Boolean!
-        endorsedUser_id: ID
-        creatorEmail: String
-        creatorProfileLink: String
-        profileType: ProfileType!
-        user_id: String!
+      type UserProfile{
+        _id: ID!
+        creator_id: ID!
+        creator_obj: User!
+        user_id: ID!
+        user_obj: User!
         activeProfile: Boolean!
         activeDiscovery: Boolean!
         fullName: String!
@@ -108,28 +122,109 @@ export const start = async () => {
         locationName: String
         locationCoordinates: String
         school: String
-        ethnicities: [String!]!
-        seekingGender: [Gender!]!
-        seekingReason: String
-        seekingEthnicity: String
-        maxDistance: Int!
-        minAgeRange: Int!
-        maxAgeRange: Int!
-        minHeightRange: Int!
-        maxHeightRange: Int!
-        profileEmail: String
-        facebookProfileLink: String
+
         profileImageIDs: [String!]!
-        profileImageURLs: [String!]!
+        profileImages: ImageSizes!
         discovery_id: ID!
-        matches_id: ID!
-        traitScores: [Int]
-        questions: [String]
+        discovery_obj: Discovery!
+        userProfileData: UserProfileData!
       }
 
-      enum ProfileType{
-        personalProfile
-        endorsedProfile
+      type UserProfileData{
+        totalProfileViews: Int!
+        totalProfileLikes: Int!
+      }
+
+      type ImageSizes{
+        original: [ImageMetadata!]!
+        large:    [ImageMetadata!]!
+        medium:   [ImageMetadata!]!
+        small:    [ImageMetadata!]!
+        thumb:    [ImageMetadata!]!
+      }
+
+      type ImageMetadata{
+        imageURL: String!
+        imageID: String!
+        imageSize: ImageSize!
+      }
+
+      type ImageSize{
+        width: Int!
+        height: Int!
+      }
+
+      type Discovery{
+        _id: ID!
+        profile_id: ID!
+        profile_obj: UserProfile!
+
+
+      }
+
+      type MatchRequest{
+        _id: ID!
+
+        firstPersonMessageRequest: String!
+        secondPersonMessageRequest: String!
+
+        firstPersonEndorserUser_id: ID!
+        firstPersonEndorserUser_obj: User!
+        secondPersonEndorserUser_id: ID!
+        secondPersonEndorserUser_obj: User!
+
+        firstPersonUser_id: ID!
+        firstPersonUser_obj: User!
+        firstPersonProfile_id: ID!
+        firstPersonProfile_obj: UserProfile!
+        secondPersonUser_id: ID!
+        secondPersonUser_obj: User!
+        secondPersonProfile_id: ID!
+        secondPersonProfile_obj: UserProfile!
+
+        timestampCreated: Date!
+        firstPersonResponse: MatchResponse
+        firstPersonResponseTimestamp: Date
+        secondPersonResponse: MatchResponse
+        secondPersonResponseTimestamp: Date
+
+        matchStatus: MatchStatus!
+        matchStatusTimestamp: Date!
+        matchCreated: Boolean!
+        acceptedMatch_id: ID
+        acceptedMatch_obj: Match
+      }
+
+      type Match{
+        _id: ID!
+        matchRequest_id: ID!
+        matchRequest_obj: MatchRequest
+        firstPersonUser_id: ID!
+        firstPersonUser_obj: User!
+        firstPersonProfile_id: ID!
+        firstPersonProfile_obj: UserProfile!
+        secondPersonUser_id: ID!
+        secondPersonUser_obj: User!
+        secondPersonProfile_id: ID!
+        secondPersonProfile_obj: UserProfile!
+        timestampCreated: Date
+        conversationFirstMessageSent: Boolean!
+        conversationTenMessagesSent: Boolean!
+        conversationHundredMessagesSent: Boolean!
+        firebaseConversationDocumentID: String!
+      }
+
+      enum MatchStatus{
+        requests
+        rejected
+        accepted
+      }
+
+      enum MatchResponse{
+        unseen
+        seen
+        rejected
+        accepted
       }
 
       enum Gender{
@@ -147,31 +242,48 @@ export const start = async () => {
       Query: {
         user: async (root, {_id}) => {
           console.log("Getting user by id: " + _id)
-          return (await Users.findOne({"_id":ObjectId(_id)}))
+          return (await UsersDB.findOne({"_id":ObjectId(_id)}))
         },
         users: async () => {
-          return (await Users.find({}).toArray()).map(prepare)
+          return (await UsersDB.find({}).toArray()).map(prepare)
         },
         userProfile: async (root, {_id}) => {
           console.log("Getting user profile by id: " + _id)
-          return prepare(await UserProfiles.findOne({"_id":ObjectId(_id)}))
+          return prepare(await UserProfilesDB.findOne({"_id":ObjectId(_id)}))
         },
-        endorsementProfile: async (root, {_id}) => {
-          console.log("Getting endorsement profile by id: " + _id)
-          return prepare(await EndorsedProfiles.findOne({"_id":ObjectId(_id)}))
-        }
+        // endorsementProfile: async (root, {_id}) => {
+        //   console.log("Getting endorsement profile by id: " + _id)
+        //   return prepare(await EndorsedProfiles.findOne({"_id":ObjectId(_id)}))
+        // }
       },
       User: {
-        personalProfile_id: async ({personalProfile_id}) => {
-          return prepare(await UserProfiles.findOne({"_id":ObjectId(personalProfile_id)}))
-        }
+        // personalProfile_id: async ({personalProfile_id}) => {
+        //   return prepare(await UserProfiles.findOne({"_id":ObjectId(personalProfile_id)}))
+        // }
       },
       UserProfile: {
-        user_id: async (root, {user_id}) => {
+        user_obj: async (root, {user_id}) => {
           console.log("Getting user by id: " + user_id)
-          return prepare(await Users.findOne({"_id":ObjectId(user_id)}))
+          return prepare(await UsersDB.findOne({"_id":ObjectId(user_id)}))
         },
       },
+      Date: new GraphQLScalarType({
+        name: 'Date',
+        description: 'Date custom scalar type',
+        parseValue(value) {
+          return new Date(value); // value from the client
+        },
+        serialize(value) {
+          return value.getTime(); // value sent to the client
+        },
+        parseLiteral(ast) {
+          if (ast.kind === Kind.INT) {
+            return new Date(ast.value) // ast value is always in string format
+          }
+          return null;
+        },
+      }),
+
     }
     // const typeDefs = [`
     //   type Query {
