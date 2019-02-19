@@ -106,13 +106,13 @@ export const start = async () => {
     const server = new ApolloServer({typeDefs, resolvers});
     console.log("Created server")
     const app = express();
-    app.use(cors())
+    // app.use(cors())
     console.log("Applying middlewear")
     server.applyMiddleware({ app });
 
 
-    app.listen({ port: PORT }, () =>
-      console.log(`🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`),
+    app.listen({ port: PORT, ip: URL }, () =>
+      console.log(`🚀 Server ready at ${URL}:${PORT}${server.graphqlPath}`),
     );
 
 
