@@ -20,9 +20,16 @@ const MONGO_URL = "mongodb+srv://avery:0bz8M0eMEtyXlj2aZodIPpJpy@cluster0-w4ecv.
 
 export const start = async () => {
   try {
-    console.log("Starting mongo connect")
-    const db = await MongoClient.connect(MONGO_URL)
-    console.log("Mongo Connected")
+    console.log("Starting Mongoose connect")
+
+
+    const mongoose = require('mongoose');
+
+    mongoose.connect(MONGO_URL, {useNewUrlParser: true });
+    var db = mongoose.connection
+    db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+    console.log("Mongoose Connected")
+
 
     const UsersDB = db.collection('users')
     const UserProfilesDB = db.collection('userprofiles')
