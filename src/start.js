@@ -1,11 +1,9 @@
-import {MongoClient, ObjectId} from 'mongodb'
-import express from 'express'
-import bodyParser from 'body-parser'
-import {graphqlExpress, graphiqlExpress} from 'graphql-server-express'
-import {makeExecutableSchema} from 'graphql-tools'
-import { GraphQLScalarType } from 'graphql';
+const { gql } = require('apollo-server');
+const { ApolloServer } = require('apollo-server-express');
+import express from 'express';
 import cors from 'cors'
-import {prepare} from "../util/index"
+import { GraphQLScalarType } from 'graphql';
+import {makeExecutableSchema} from 'graphql-tools'
 
 import { typeDef as User } from "./models/usermodel.js"
 import { typeDef as UserProfile } from "./models/userprofilemodel.js"
@@ -16,9 +14,6 @@ import { typeDef as Discovery } from "./models/discoverymodel.js"
 import { merge } from 'lodash';
 
 
-const app = express()
-
-app.use(cors())
 
 const homePath = '/graphiql'
 const URL = 'http://localhost'
@@ -29,8 +24,6 @@ const MONGO_URL = "mongodb+srv://avery:0bz8M0eMEtyXlj2aZodIPpJpy@cluster0-w4ecv.
 export const start = async () => {
   try {
     console.log("Starting Mongoose connect")
-
-
     const mongoose = require('mongoose');
 
     mongoose.connect(MONGO_URL, {useNewUrlParser: true })
@@ -46,6 +39,7 @@ export const start = async () => {
     const UserMatchesDB = db.collection('usermatches')
     const MatchRequestsDB = db.collection('matchrequests')
     const MatchesDB = db.collection('matches')
+    const DiscoveriesDB = db.collection('discoveries')
 
     const Query = `
     type Query {
@@ -55,8 +49,11 @@ export const start = async () => {
     }
 
     scalar Date
-    `
 
+    `
+    // const combinedTypeDefs = Query + User + UserProfile +  Match + UserMatches + MatchRequest + Discovery
+    // console.log(combinedTypeDefs)
+    const typeDefs = [Query, User, UserProfile, Match, UserMatches, MatchRequest, Discovery]
 
     const resolvers = {
       Query: {
@@ -105,22 +102,19 @@ export const start = async () => {
       }),
 
     }
-    const schema = makeExecutableSchema({
-      typeDefs: [Query, User, UserProfile,  Match, UserMatches, MatchRequest, Discovery],
-      resolvers
-    })
+
+    const server = new ApolloServer({typeDefs, resolvers});
+    console.log("Created server")
+    const app = express();
+    app.use(cors())
+    console.log("Applying middlewear")
+    server.applyMiddleware({ app });
 
 
-    app.use('/graphql', bodyParser.json(), graphqlExpress({schema}))
+    app.listen({ port: PORT }, () =>
+      console.log(`🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`),
+    );
 
-
-    app.use(homePath, graphiqlExpress({
-      endpointURL: '/graphql'
-    }))
-
-    app.listen(PORT, () => {
-      console.log(`Visit ${URL}:${PORT}${homePath}`)
-    })
 
   } catch (e) {
     console.log(e)

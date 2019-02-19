@@ -22,14 +22,14 @@ type MatchRequest{
   secondPersonProfile_id: ID!
   secondPersonProfile_obj: UserProfile!
 
-  timestampCreated: Date!
+  timestampCreated: Int!
   firstPersonResponse: MatchResponse
-  firstPersonResponseTimestamp: Date
+  firstPersonResponseTimestamp: Int
   secondPersonResponse: MatchResponse
-  secondPersonResponseTimestamp: Date
+  secondPersonResponseTimestamp: Int
 
   matchStatus: MatchStatus!
-  matchStatusTimestamp: Date!
+  matchStatusTimestamp: Int!
   matchCreated: Boolean!
   acceptedMatch_id: ID
   acceptedMatch_obj: Match
@@ -50,6 +50,14 @@ enum MatchResponse{
 
 `
 
+export const resolvers = {
+  Query: {
+
+  },
+  MatchRequest: {
+
+  }
+}
 
 var MatchRequestSchema = new Schema ({
   _id: { type: Schema.Types.ObjectId, required: true },
@@ -62,13 +70,13 @@ var MatchRequestSchema = new Schema ({
   secondPersonUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
   secondPersonProfile_id: { type: Schema.Types.ObjectId, required: true, index: true },
 
-  timestampCreated: { type: Date, required: true},
+  timestampCreated: { type: Number, required: true},
   firstPersonResponse: { type: String, required: true, enum: ["unseen", "seen", "rejected", "accepted"] },
-  firstPersonResponseTimestamp: { type: Date, required: true},
+  firstPersonResponseTimestamp: { type: Number, required: true},
   secondPersonResponse: { type: String, required: true, enum: ["unseen", "seen", "rejected", "accepted"] },
-  secondPersonResponseTimestamp: { type: Date, required: true},
+  secondPersonResponseTimestamp: { type: Number, required: true},
   matchStatus: { type: String, required: true, enum: ["reuests", "rejected", "accepted"] },
-  matchStatusTimestamp: { type: Date, required: true},
+  matchStatusTimestamp: { type: Number, required: true},
   matchCreated: { type: Boolean, required: true, default: false},
   acceptedMatch_id: { type: Schema.Types.ObjectId, required: false, index: true },
 })

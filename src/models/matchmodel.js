@@ -14,13 +14,22 @@ type Match{
   secondPersonUser_obj: User!
   secondPersonProfile_id: ID!
   secondPersonProfile_obj: UserProfile!
-  timestampCreated: Date
+  timestampCreated: Int
   conversationFirstMessageSent: Boolean!
   conversationTenMessagesSent: Boolean!
   conversationHundredMessagesSent: Boolean!
   firebaseConversationDocumentID: String!
 }
 `
+
+export const resolvers = {
+  Query: {
+
+  },
+  Match: {
+
+  }
+}
 
 var MatchRequestSchema = new Schema ({
   _id: { type: Schema.Types.ObjectId, required: true },
@@ -29,7 +38,7 @@ var MatchRequestSchema = new Schema ({
   firstPersonProfile_id: { type: Schema.Types.ObjectId, required: true },
   secondPersonUser_id: { type: Schema.Types.ObjectId, required: true },
   secondPersonProfile_id: { type: Schema.Types.ObjectId, required: true },
-  timestampCreated: { type: Date, required: true},
+  timestampCreated: { type: Number, required: true},
   conversationFirstMessageSent: { type: Boolean, required: true, default: false},
   conversationTenMessagesSent: { type: Boolean, required: true, default: false},
   conversationHundredMessagesSent: { type: Boolean, required: true, default: false},

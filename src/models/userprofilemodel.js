@@ -56,9 +56,16 @@ enum Gender{
   female
   nonbinary
 }
-
-
 `
+
+export const resolvers = {
+  Query: {
+
+  },
+  UserProfile: {
+
+  }
+}
 
 var UserProfileSchema = new Schema ({
   _id: { type: Schema.Types.ObjectId, required: true },

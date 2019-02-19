@@ -58,6 +58,15 @@ type UserPreferences{
 }
 `
 
+export const resolvers = {
+  Query: {
+
+  },
+  User: {
+
+  }
+}
+
 var UserSchema = new Schema ({
   _id: { type: Schema.Types.ObjectId, required: true },
   firebaseToken: { type: String, required: true },

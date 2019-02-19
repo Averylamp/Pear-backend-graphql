@@ -14,6 +14,14 @@ type UserMatches{
   matches_objs: [Match!]!
 }
 `
+export const resolvers = {
+  Query: {
+
+  },
+  UserMatches: {
+
+  }
+}
 
 var UserMatchesSchema = new Schema ({
   _id: { type: Schema.Types.ObjectId, required: true },
