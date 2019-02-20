@@ -5,12 +5,18 @@ import cors from 'cors'
 import { GraphQLScalarType } from 'graphql';
 import {makeExecutableSchema} from 'graphql-tools'
 
-import { typeDef as User } from "./models/usermodel.js"
-import { typeDef as UserProfile } from "./models/userprofilemodel.js"
-import { typeDef as Match } from "./models/matchmodel.js"
-import { typeDef as UserMatches } from "./models/usermatchesmodel.js"
-import { typeDef as MatchRequest } from "./models/matchrequestmodel.js"
-import { typeDef as Discovery } from "./models/discoverymodel.js"
+import { typeDef as User,
+         resolvers as UserResolvers } from "./models/usermodel.js"
+import { typeDef as UserProfile,
+         resolvers as UserProfileResolvers } from "./models/userprofilemodel.js"
+import { typeDef as Match,
+         resolvers as MatchResolvers } from "./models/matchmodel.js"
+import { typeDef as UserMatches,
+         resolvers as UserMatchesResolvers } from "./models/usermatchesmodel.js"
+import { typeDef as MatchRequest,
+         resolvers as MatchRequestResolvers } from "./models/matchrequestmodel.js"
+import { typeDef as Discovery,
+         resolvers as DiscoveryResolvers } from "./models/discoverymodel.js"
 import { merge } from 'lodash';
 
 
@@ -45,7 +51,6 @@ export const start = async () => {
     type Query {
       user(_id: ID): User
       users: [User]
-      userProfile(_id: ID): UserProfile
     }
 
     scalar Date
@@ -53,61 +58,30 @@ export const start = async () => {
     `
     // const combinedTypeDefs = Query + User + UserProfile +  Match + UserMatches + MatchRequest + Discovery
     // console.log(combinedTypeDefs)
-    const typeDefs = [Query, User, UserProfile, Match, UserMatches, MatchRequest, Discovery]
-
+    const finalTypeDefs = [Query, User, UserProfile, Match, UserMatches, MatchRequest, Discovery]
     const resolvers = {
       Query: {
-        user: async (root, {_id}) => {
-          console.log("Getting user by id: " + _id)
-          return (await UsersDB.findOne({"_id":ObjectId(_id)}))
-        },
-        users: async () => {
-          return (await UsersDB.find({}).toArray()).map(prepare)
-        },
-        userProfile: async (root, {_id}) => {
-          console.log("Getting user profile by id: " + _id)
-          return prepare(await UserProfilesDB.findOne({"_id":ObjectId(_id)}))
-        },
-        // endorsementProfile: async (root, {_id}) => {
-        //   console.log("Getting endorsement profile by id: " + _id)
-        //   return prepare(await EndorsedProfiles.findOne({"_id":ObjectId(_id)}))
-        // }
-      },
-      User: {
-        // personalProfile_id: async ({personalProfile_id}) => {
-        //   return prepare(await UserProfiles.findOne({"_id":ObjectId(personalProfile_id)}))
-        // }
-      },
-      UserProfile: {
-        user_obj: async (root, {user_id}) => {
-          console.log("Getting user by id: " + user_id)
-          return prepare(await UsersDB.findOne({"_id":ObjectId(user_id)}))
-        },
-      },
-      Date: new GraphQLScalarType({
-        name: 'Date',
-        description: 'Date custom scalar type',
-        parseValue(value) {
-          return new Date(value); // value from the client
-        },
-        serialize(value) {
-          return value.getTime(); // value sent to the client
-        },
-        parseLiteral(ast) {
-          if (ast.kind === Kind.INT) {
-            return new Date(ast.value) // ast value is always in string format
-          }
-          return null;
-        },
-      }),
+      }
+    };
 
-    }
+    const finalResolvers = merge(resolvers, UserResolvers, UserProfileResolvers, MatchResolvers, UserMatchesResolvers, MatchRequestResolvers, DiscoveryResolvers,);
+
 
     const server = new ApolloServer({
-      typeDefs: typeDefs,
-      resolvers: resolvers,
+      typeDefs: finalTypeDefs,
+      resolvers: finalResolvers,
       engine: {
         apiKey: "service:pear-matchmaking-8936:V43kf4Urhi-63wQycK_yoA"
+      },
+      dataSources: () => {
+        return {
+          usersDB: UsersDB,
+          userProfilesDB: UserProfilesDB,
+          userMatchesDB: UserMatchesDB,
+          matchRequestsDB: MatchRequestsDB,
+          matchesDB: MatchesDB,
+          discoveriesDB: DiscoveriesDB,
+        }
       }
     });
     console.log("Created server")

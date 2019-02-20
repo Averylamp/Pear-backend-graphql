@@ -77,7 +77,13 @@ type UserPreferences{
 
 export const resolvers = {
   Query: {
-
+    user: async (_source, {_id}, { dataSources }) => {
+      console.log("Getting user by id: " + _id)
+      return (await dataSources.usersDB.findOne({"_id":ObjectId(_id)}))
+    },
+    users: async (_source, _args, { dataSources }) => {
+      return (await dataSources.usersDB.find({}).toArray()).map(prepare)
+    },
   },
   User: {
 
