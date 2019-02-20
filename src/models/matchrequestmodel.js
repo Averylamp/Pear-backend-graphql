@@ -5,22 +5,24 @@ export const typeDef = `
 type MatchRequest{
   _id: ID!
 
-  firstPersonMessageRequest: String!
-  secondPersonMessageRequest: String!
+  globalOneLiner: String
+  firstPersonMessageRequest: String
+  secondPersonMessageRequest: String
 
-  firstPersonEndorserUser_id: ID!
-  firstPersonEndorserUser_obj: User!
-  secondPersonEndorserUser_id: ID!
-  secondPersonEndorserUser_obj: User!
+  endorserCreated: Boolean!
+  firstPersonEndorserUser_id: ID
+  firstPersonEndorserUser_obj: User
+  secondPersonEndorserUser_id: ID
+  secondPersonEndorserUser_obj: User
 
   firstPersonUser_id: ID!
   firstPersonUser_obj: User!
-  firstPersonProfile_id: ID!
-  firstPersonProfile_obj: UserProfile!
+  firstPersonProfile_id: ID
+  firstPersonProfile_obj: UserProfile
   secondPersonUser_id: ID!
   secondPersonUser_obj: User!
-  secondPersonProfile_id: ID!
-  secondPersonProfile_obj: UserProfile!
+  secondPersonProfile_id: ID
+  secondPersonProfile_obj: UserProfile
 
   timestampCreated: Int!
   firstPersonResponse: MatchResponse

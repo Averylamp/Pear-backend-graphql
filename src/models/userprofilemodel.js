@@ -13,18 +13,29 @@ type UserProfile{
   fullName: String!
   firstName: String!
   lastName: String!
-  gender: Gender!
-  age: Int!
-  height: Int
-  locationName: String
-  locationCoordinates: String
-  school: String
+
+  demographics: ProfileDemographics!
 
   profileImageIDs: [String!]!
   profileImages: ImageSizes!
   discovery_id: ID!
   discovery_obj: Discovery!
   userProfileData: UserProfileData!
+}
+
+type ProfileDemographics{
+  gender: Gender!
+  age: Int!
+  height: Int
+  locationName: String
+  locationCoordinates: String
+  school: String
+  ethnicities: [String!]
+  religion: [String!]
+  political: [String!]
+  smoking: [String!]
+  drinking: [String!]
+
 }
 
 type UserProfileData{
@@ -106,7 +117,7 @@ var UserProfileSchema = new Schema ({
   },
 
   discovery_id: { type: Schema.Types.ObjectId, required: true },
-  
+
 })
 
 

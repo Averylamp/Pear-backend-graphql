@@ -6,6 +6,7 @@ type UserMatches{
   _id: ID!
   user_id: ID!
   user_obj: User!
+  alreadyMatchedUser_ids:[ID!]!
   matchRequest_ids: [ID!]!
   matchRequest_objs: [MatchRequest!]!
   matchRejected_ids: [ID!]!

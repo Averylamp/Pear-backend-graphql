@@ -8,17 +8,21 @@ type Match{
   matchRequest_obj: MatchRequest
   firstPersonUser_id: ID!
   firstPersonUser_obj: User!
-  firstPersonProfile_id: ID!
-  firstPersonProfile_obj: UserProfile!
+  firstPersonProfile_id: ID
+  firstPersonProfile_obj: UserProfile
   secondPersonUser_id: ID!
   secondPersonUser_obj: User!
-  secondPersonProfile_id: ID!
-  secondPersonProfile_obj: UserProfile!
+  secondPersonProfile_id: ID
+  secondPersonProfile_obj: UserProfile
   timestampCreated: Int
+  matchStats: MatchStats
+  firebaseConversationDocumentID: String!
+}
+
+type MatchStats{
   conversationFirstMessageSent: Boolean!
   conversationTenMessagesSent: Boolean!
   conversationHundredMessagesSent: Boolean!
-  firebaseConversationDocumentID: String!
 }
 `
 

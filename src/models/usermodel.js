@@ -4,28 +4,45 @@ var Schema = mongoose.Schema;
 export const typeDef = `
 type User {
   _id: ID!
-  firebaseToken: String!
+  deactivated: Boolean!
+  firebaseToken: String
+  firebaseAuthID: String
   facebookId: String
   facebookAccessToken: String
   email: String!
   phoneNumber: String!
+  phoneNumberVerified: Boolean!
   fullName: String!
   firstName: String!
   lastName: String!
-  userPreferences: UserPreferences!
   thumbnailURL: String
   gender: Gender
   locationName: String
   locationCoordinates: String
   school: String
+  schoolEmail: String
+  schoolEmailVerified: Boolean
+  birthdate: Int
   age: Int
-  ethnicities: [String!]
   profile_ids: [ID!]!
   profile_objs: [UserProfile!]!
   endorsedProfile_ids: [ID!]!
   endorsedProfile_objs: [UserProfile!]!
-  userStatData: UserStatData
+  userPreferences: UserPreferences!
+  userStatData: UserStatData!
+  userDemographics: UserDemographics!
+  userMatches_id: ID!
   userMatches: UserMatches!
+  pearPoints: Int
+}
+
+type UserDemographics{
+  ethnicities: [String!]
+  religion: [String!]
+  political: [String!]
+  smoking: [String!]
+  drinking: [String!]
+  height: Int
 }
 
 
