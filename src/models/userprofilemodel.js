@@ -74,16 +74,28 @@ var UserProfileSchema = new Schema ({
 
   activeProfile: { type: Boolean, required: true},
   activeDiscovery: { type: Boolean, required: true},
-  fullName: { type: String, required: true },
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
-  gender: { type: String, required: false, enum: ["male", "female", "nonbinary"] },
-  age: { type: Number, required: false, min: 18, max: 80, index: true },
 
-  height: { type: Number, required: false, min: 20, max: 100, index: true },
-  locationName: { type: String, required: false },
-  locationCoordinates: { type: String, required: false },
-  school: { type: String, required: false },
+  demographics:  {
+    gender: { type: String, required: true, enum: ["male", "female", "nonbinary"], index: true },
+    age: { type: Number, required: true, min: 18, max: 80, index: true },
+    height: { type: Number, required: false, min: 20, max: 100, index: true },
+    locationName: { type: String, required: false },
+    locationCoordinates: { type: String, required: false },
+    school: { type: String, required: false },
+    ethnicities: { type: [String], required: false },
+    religion: { type: [String], required: false },
+    political: { type: [String], required: false },
+    smoking: { type: [String], required: false },
+    drinking: { type: [String], required: false },
+  },
+
+  userProfileData: {
+    totalProfileViews: { type: Number, required: true, min: 0, default: 0 },
+    totalProfileLikes: { type: Number, required: true, min: 0, default: 0 },
+  },
+
   profileImageIDs: { type: [String], required: true },
   profileImages: {
     original: { type: [ Schema.Types.Mixed], required: true },
@@ -92,12 +104,9 @@ var UserProfileSchema = new Schema ({
     small: { type: [ Schema.Types.Mixed], required: true },
     thumb: { type: [ Schema.Types.Mixed], required: true },
   },
-  discovery_id: { type: Schema.Types.ObjectId, required: true },
 
-  userProfileData: {
-    totalProfileViews: { type: Number, required: true, min: 0, default: 0 },
-    totalProfileLikes: { type: Number, required: true, min: 0, default: 0 },
-  },
+  discovery_id: { type: Schema.Types.ObjectId, required: true },
+  
 })
 
 

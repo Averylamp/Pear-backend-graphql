@@ -26,6 +26,7 @@ export const resolvers = {
 var UserMatchesSchema = new Schema ({
   _id: { type: Schema.Types.ObjectId, required: true },
   user_id: { type: Schema.Types.ObjectId, required: true, index: true },
+  alreadyMatchedUser_ids: { type: [Schema.Types.ObjectId], required: true, index: true },
   matchRequest_ids: { type: [Schema.Types.ObjectId], required: true, index: true },
   matchRejected_ids: { type: [Schema.Types.ObjectId], required: true, index: true },
   matches_ids: { type: [Schema.Types.ObjectId], required: true, index: true },

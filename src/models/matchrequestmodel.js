@@ -61,21 +61,26 @@ export const resolvers = {
 
 var MatchRequestSchema = new Schema ({
   _id: { type: Schema.Types.ObjectId, required: true },
-  firstPersonMessageRequest: { type: String, required: true },
-  secondPersonMessageRequest: { type: String, required: true },
-  firstPersonEndorserUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
-  secondPersonEndorserUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
+
+  globalOneLiner: { type: String, required: false},
+  firstPersonMessageRequest: { type: String, required: false},
+  secondPersonMessageRequest: { type: String, required: false},
+
+  endorserCreated: {type: Boolean, required: true, default: false },
+  firstPersonEndorserUser_id: { type: Schema.Types.ObjectId, required: false, index: true },
+  secondPersonEndorserUser_id: { type: Schema.Types.ObjectId, required: false, index: true },
+
   firstPersonUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
-  firstPersonProfile_id: { type: Schema.Types.ObjectId, required: true, index: true },
+  firstPersonProfile_id: { type: Schema.Types.ObjectId, required: false, index: true },
   secondPersonUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
-  secondPersonProfile_id: { type: Schema.Types.ObjectId, required: true, index: true },
+  secondPersonProfile_id: { type: Schema.Types.ObjectId, required: false, index: true },
 
   timestampCreated: { type: Number, required: true},
   firstPersonResponse: { type: String, required: true, enum: ["unseen", "seen", "rejected", "accepted"] },
   firstPersonResponseTimestamp: { type: Number, required: true},
   secondPersonResponse: { type: String, required: true, enum: ["unseen", "seen", "rejected", "accepted"] },
   secondPersonResponseTimestamp: { type: Number, required: true},
-  matchStatus: { type: String, required: true, enum: ["reuests", "rejected", "accepted"] },
+  matchStatus: { type: String, required: true, enum: ["request", "rejected", "accepted"] },
   matchStatusTimestamp: { type: Number, required: true},
   matchCreated: { type: Boolean, required: true, default: false},
   acceptedMatch_id: { type: Schema.Types.ObjectId, required: false, index: true },

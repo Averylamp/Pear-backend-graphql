@@ -31,7 +31,7 @@ export const resolvers = {
   }
 }
 
-var MatchRequestSchema = new Schema ({
+var MatchSchema = new Schema ({
   _id: { type: Schema.Types.ObjectId, required: true },
   matchRequest_id: { type: Schema.Types.ObjectId, required: true },
   firstPersonUser_id: { type: Schema.Types.ObjectId, required: true },
@@ -39,9 +39,11 @@ var MatchRequestSchema = new Schema ({
   secondPersonUser_id: { type: Schema.Types.ObjectId, required: true },
   secondPersonProfile_id: { type: Schema.Types.ObjectId, required: true },
   timestampCreated: { type: Number, required: true},
-  conversationFirstMessageSent: { type: Boolean, required: true, default: false},
-  conversationTenMessagesSent: { type: Boolean, required: true, default: false},
-  conversationHundredMessagesSent: { type: Boolean, required: true, default: false},
+  matchStats: {
+    conversationFirstMessageSent: { type: Boolean, required: true, default: false},
+    conversationTenMessagesSent: { type: Boolean, required: true, default: false},
+    conversationHundredMessagesSent: { type: Boolean, required: true, default: false},
+  },
   firebaseConversationDocumentID: { type: String, required: true},
 })
 
@@ -51,4 +53,4 @@ var MatchRequestSchema = new Schema ({
 // firstPersonProfile_obj: UserProfile!
 // secondPersonUser_obj: User!
 // secondPersonProfile_obj: UserProfile!
-export const Match = mongoose.model("Match", MatchRequestSchema)
+export const Match = mongoose.model("Match", MatchSchema)
