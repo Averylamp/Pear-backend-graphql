@@ -2,6 +2,27 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 export const typeDef = `
+extend type Query {
+  user(id: ID): User
+  users: [User]
+}
+
+extend type Mutation{
+  createUser(userInput: UserInput): UserCreation
+}
+
+input UserInput{
+  email: String!
+  phoneNumber: String!
+  firstName: String!
+  lastName: String!
+  userPreferences: UserPreferencesInput!
+}
+
+input UserPreferencesInput {
+  seekingGender: [String!]!
+}
+
 type User {
   _id: ID!
   deactivated: Boolean!
@@ -12,7 +33,6 @@ type User {
   email: String!
   phoneNumber: String!
   phoneNumberVerified: Boolean!
-  fullName: String!
   firstName: String!
   lastName: String!
   thumbnailURL: String
@@ -47,7 +67,7 @@ type UserDemographics{
 
 
 type UserStatData{
-  toatlNumberOfMatchRequests: Int!
+  totalNumberOfMatchRequests: Int!
   totalNumberOfMatches: Int!
   totalNumberOfProfilesCreated: Int!
   totalNumberOfEndorsementsCreated: Int!
@@ -73,32 +93,22 @@ type UserPreferences{
   maxHeightRange: Int!
   heightDealbreaker: Int!
 }
-`
 
-export const resolvers = {
-  Query: {
-    user: async (_source, {_id}, { dataSources }) => {
-      console.log("Getting user by id: " + _id)
-      return (await dataSources.usersDB.findOne({"_id":ObjectId(_id)}))
-    },
-    users: async (_source, _args, { dataSources }) => {
-      return (await dataSources.usersDB.find({}).toArray()).map(prepare)
-    },
-  },
-  User: {
-
-  }
+type UserCreation {
+  user: User
+  success: Boolean!
+  message: String
 }
-
+`
 var UserSchema = new Schema ({
-  _id: { type: Schema.Types.ObjectId, required: true },
   deactivated : { type: Boolean, required: true, default: false},
   firebaseToken: { type: String, required: false },
   firebaseAuthID: { type: String, required: false },
   facebookId: { type: String, required: false },
   facebookAccessToken: { type: String, required: false },
   email: { type: String, required: false },
-  phoneNumber: { type: String, required: true, match: "+1^\d{10}$", index: true },
+  phoneNumber: { type: String, required: true, validate: {
+      validator: function(v) { return /\d{10}$/.test(v); }}, index: true },
   phoneNumberVerified: { type: Boolean, required: true, default: false},
   firstName: { type: String, required: false },
   lastName: { type: String, required: false },
@@ -139,11 +149,11 @@ var UserSchema = new Schema ({
   },
 
   userPreferences: {
-    ethnicities: { type: [String], required: true },
-    seekingGender: { type: [String], required: true },
-    seekingReason: { type: [String], required: true },
+    ethnicities: { type: [String], required: true, default: ["No Preference"] },
+    seekingGender: { type: [String], required: true, enum: ["male", "female", "nonbinary"], default:  ["male", "female", "nonbinary"]},
+    seekingReason: { type: [String], required: true, default: ["No Preference"] },
     reasonDealbreaker: { type: Number, required: true, min: 0, max: 1, default: 0 },
-    seekingEthnicity: { type: [String], required: true },
+    seekingEthnicity: { type: [String], required: true, default: ["No Preference"] },
     ethnicityDealbreaker: { type: Number, required: true, min: 0, max: 1, default: 0},
     maxDistance: { type: Number, required: true, min: 1, max: 100, default: 25 },
     distanceDealbreaker: { type: Number, required: true, min: 0, max: 1, default: 0},
@@ -157,6 +167,51 @@ var UserSchema = new Schema ({
 
 })
 
+
+
 // profile_objs: { type: [, required: true,  UserProfile!]!
 // endorsedProfile_objs: { type: [, required: true,  UserProfile!]!
 export const User = mongoose.model("User", UserSchema)
+
+
+export const resolvers = {
+  Query: {
+    user: async (_source, {id}, { dataSources }) => {
+      console.log("Getting user by id: " + id)
+      return (await dataSources.usersDB.findOne({"_id":ObjectId(id)}))
+    },
+    users: async (_source, _args, { dataSources }) => {
+      return (await dataSources.usersDB.find({}).toArray()).map(prepare)
+    },
+  },
+  User: {
+  },
+  Mutation: {
+    createUser: async (_source, _args, { dataSources }) => {
+      console.log(_args)
+      var userModel = new User(_args.userInput)
+
+      userModel.userMatches_id = mongoose.Types.ObjectId()
+
+      var results = new Promise((resolve, reject) => {
+        userModel.save(function (err) {
+          if (err){
+            console.log(err.toString())
+            resolve({
+              message: "err.toString()",
+              success: false,
+
+            })
+          }
+          console.log("Success creating user")
+          resolve({
+            success: true,
+            message: "You did it",
+            user: userModel
+          })
+        })
+      })
+      return results
+    }
+  }
+}

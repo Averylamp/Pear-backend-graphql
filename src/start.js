@@ -49,15 +49,17 @@ export const start = async () => {
 
     const Query = `
     type Query {
-      user(_id: ID): User
-      users: [User]
+      noOp: String
+    }
+
+    type Mutation {
+      noOp: String
     }
 
     scalar Date
 
+
     `
-    // const combinedTypeDefs = Query + User + UserProfile +  Match + UserMatches + MatchRequest + Discovery
-    // console.log(combinedTypeDefs)
     const finalTypeDefs = [Query, User, UserProfile, Match, UserMatches, MatchRequest, Discovery]
     const resolvers = {
       Query: {
