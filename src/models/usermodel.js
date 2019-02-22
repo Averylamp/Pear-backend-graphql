@@ -1,3 +1,6 @@
+import { createUserMatchesObject as createUserMatchesObject } from "./usermatchesmodel.js"
+import { createDiscoveryObject as createDiscoveryObject } from "./discoverymodel.js"
+
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
@@ -53,6 +56,8 @@ type User {
   userDemographics: UserDemographics!
   userMatches_id: ID!
   userMatches: UserMatches!
+  discovery_id: ID!
+  discovery_obj: Discovery!
   pearPoints: Int
 }
 
@@ -124,6 +129,7 @@ var UserSchema = new Schema ({
   profile_ids: { type: [Schema.Types.ObjectId], required: true, index: true },
   endorsedProfile_ids: { type: [Schema.Types.ObjectId], required: true, index: true },
   userMatches_id: { type: Schema.Types.ObjectId, required: true },
+  discovery_id: { type: Schema.Types.ObjectId, required: true },
 
   pearPoints: { type: Number, required: true, default: 0 },
 
@@ -173,6 +179,23 @@ var UserSchema = new Schema ({
 // endorsedProfile_objs: { type: [, required: true,  UserProfile!]!
 export const User = mongoose.model("User", UserSchema)
 
+var createUserObject = function createUserObject(userInput, _id = mongoose.Types.ObjectId()) {
+  var userModel = new User(userInput)
+
+  userModel._id = _id
+
+  return new Promise((resolve, reject) => {
+    userModel.save(function (err) {
+      if (err){
+        reject(err)
+      }
+      resolve( userModel )
+    })
+  })
+
+}
+
+
 
 export const resolvers = {
   Query: {
@@ -188,30 +211,79 @@ export const resolvers = {
   },
   Mutation: {
     createUser: async (_source, _args, { dataSources }) => {
-      console.log(_args)
-      var userModel = new User(_args.userInput)
 
-      userModel.userMatches_id = mongoose.Types.ObjectId()
+      var userObject_id = mongoose.Types.ObjectId()
+      var userMatchesObject_id = mongoose.Types.ObjectId()
+      var discoveryObject_id = mongoose.Types.ObjectId()
+      console.log("IDs:" + userObject_id + ", " + userMatchesObject_id + ", " + discoveryObject_id )
 
-      var results = new Promise((resolve, reject) => {
-        userModel.save(function (err) {
-          if (err){
-            console.log(err.toString())
-            resolve({
-              message: "err.toString()",
+      var userInput = _args.userInput
+      userInput.userMatches_id = userMatchesObject_id
+      userInput.discovery_id = discoveryObject_id
+      var createUserObj = createUserObject(userInput, userObject_id).catch(function(err){ return err});
+
+      var createUserMatchesObj = createUserMatchesObject({ user_id: userObject_id }, userMatchesObject_id).catch(function(err){ return err });
+
+      var createDiscoveryObj = createDiscoveryObject({ user_id: userObject_id }, discoveryObject_id).catch(function(err){ return err });
+
+      return Promise.all([createUserObj, createUserMatchesObj, createDiscoveryObj]).then(function ([userObject, userMatchesObject, discoveryObject]) {
+        if (userObject instanceof Error || userMatchesObject instanceof Error || discoveryObject instanceof Error){
+            var message = ""
+            if (userObject instanceof Error) {
+              message += userObject.toString()
+            }else{
+              userObject.remove(function (err) {
+                if (err){
+                  console.log("Failed to remove user object" + err)
+                }else {
+                  console.log("Removed created user object successfully")
+                }
+              })
+            }
+            if (userMatchesObject instanceof Error) {
+              message += userMatchesObject.toString()
+            }else{
+              userMatchesObject.remove(function (err) {
+                if (err){
+                  console.log("Failed to remove user matches object" + err)
+                }else {
+                  console.log("Removed created user matches object successfully")
+                }
+              })
+            }
+            if (discoveryObject instanceof Error){
+              message += discoveryObject.toString()
+            }else{
+              discoveryObject.remove(function (err) {
+                if (err){
+                  console.log("Failed to remove discovery object" + err)
+                }else {
+                  console.log("Removed created discovery object successfully")
+                }
+              })
+            }
+            return {
               success: false,
-
-            })
-          }
-          console.log("Success creating user")
-          resolve({
-            success: true,
-            message: "You did it",
-            user: userModel
-          })
-        })
+              message: message
+            }
+        }
+        return {
+          success: true,
+          user: userObject
+        }
       })
-      return results
+
+      // return createUserObject(_args.userInput).then( user => {
+      //   return {
+      //     success: true,
+      //     user: user,
+      //   }
+      // }, err => {
+      //   return {
+      //     success: false,
+      //     message: err.toString()
+      //   }
+      // })
     }
   }
 }
