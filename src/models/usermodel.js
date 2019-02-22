@@ -11,11 +11,11 @@ extend type Query {
 }
 
 extend type Mutation{
-  createUser(userInput: UserInput): UserMutationResponse
+  createUser(userInput: CreationUserInput): UserMutationResponse
   updateUser(id: ID, updateUserInput: UpdateUserInput) : UserMutationResponse
 }
 
-input UserInput{
+input CreationUserInput{
   email: String!
   phoneNumber: String!
   firstName: String!
@@ -102,6 +102,7 @@ type User {
   phoneNumberVerified: Boolean!
   firstName: String!
   lastName: String!
+  fullName: String!
   thumbnailURL: String
   gender: Gender
   locationName: String
@@ -239,13 +240,16 @@ var UserSchema = new Schema ({
 
 })
 
+UserSchema.virtual("fullName").get(function () {
+  return this.firstName + " " + this.lastName
+})
 
 
 // profile_objs: { type: [, required: true,  UserProfile!]!
 // endorsedProfile_objs: { type: [, required: true,  UserProfile!]!
 export const User = mongoose.model("User", UserSchema)
 
-var createUserObject = function createUserObject(userInput, _id = mongoose.Types.ObjectId()) {
+export const createUserObject = function createUserObject(userInput, _id = mongoose.Types.ObjectId()) {
   var userModel = new User(userInput)
 
   userModel._id = _id
@@ -276,14 +280,13 @@ export const resolvers = {
   User: {
   },
   Mutation: {
-    createUser: async (_source, _args, { dataSources }) => {
+    createUser: async (_source, { userInput }, { dataSources }) => {
 
       var userObject_id = mongoose.Types.ObjectId()
       var userMatchesObject_id = mongoose.Types.ObjectId()
       var discoveryObject_id = mongoose.Types.ObjectId()
       console.log("IDs:" + userObject_id + ", " + userMatchesObject_id + ", " + discoveryObject_id )
 
-      var userInput = _args.userInput
       userInput.userMatches_id = userMatchesObject_id
       userInput.discovery_id = discoveryObject_id
       var createUserObj = createUserObject(userInput, userObject_id).catch(function(err){ return err});
@@ -341,17 +344,13 @@ export const resolvers = {
 
     },
     updateUser: async (_source, { id, updateUserInput }, { dataSources }) => {
-      console.log("Updating user: " + id)
-      console.log(updateUserInput)
       return new Promise((resolve, reject) => User.findByIdAndUpdate(id, updateUserInput, { new: true, runValidators: true}, function (err, user) {
         if (err) {
-          console.log("User not found")
           resolve ({
             success:false,
             message: err.toString()
           })
         }else{
-          console.log(user)
           resolve({
             success: true,
             user: user,

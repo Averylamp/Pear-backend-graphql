@@ -1,13 +1,67 @@
+import { createDiscoveryObject as createDiscoveryObject } from "./discoverymodel.js"
+
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 export const typeDef = `
-type UserProfile{
+
+extend type Mutation {
+  createUserProfile(userProfileInput: CreationUserProfileInput): UserProfileMutationResponse
+  updateUserProfile(id: ID, updateUserProfileInput: UpdateUserProfileInput) : UserProfileMutationResponse
+}
+
+input CreationUserProfileInput {
+  creator_id: ID!
+  firstName: String!
+  lastName: String!
+  demographics: CreationUserProfileDemographicsInput!
+}
+
+input CreationUserProfileDemographicsInput {
+  gender: Gender!
+  age: Int!
+}
+
+input UpdateUserProfileInput {
+  activeProfile: Boolean
+  activeDiscovery: Boolean
+  firstName: String
+  lastName: String
+  demographics: UpdateProfileDemographicsInput
+  userProfileData: UpdateUserProfileDataInput
+}
+
+input UpdateProfileDemographicsInput {
+  gender: Gender
+  age: Int
+  height: Int
+  locationName: String
+  locationCoordinates: String
+  school: String
+  ethnicities: [String!]
+  religion: [String!]
+  political: [String!]
+  smoking: [String!]
+  drinking: [String!]
+}
+
+input UpdateUserProfileDataInput{
+  totalProfileViews: Int
+  totalProfileLikes: Int
+}
+
+type UserProfileMutationResponse{
+  success: Boolean!
+  message: String
+  userProfile: UserProfile
+}
+
+type UserProfile {
   _id: ID!
   creator_id: ID!
   creator_obj: User!
-  user_id: ID!
-  user_obj: User!
+  user_id: ID
+  user_obj: User
   activeProfile: Boolean!
   activeDiscovery: Boolean!
   fullName: String!
@@ -35,7 +89,6 @@ type ProfileDemographics{
   political: [String!]
   smoking: [String!]
   drinking: [String!]
-
 }
 
 type UserProfileData{
@@ -69,22 +122,13 @@ enum Gender{
 }
 `
 
-export const resolvers = {
-  Query: {
-
-  },
-  UserProfile: {
-
-  }
-}
 
 var UserProfileSchema = new Schema ({
   _id: { type: Schema.Types.ObjectId, required: true },
   creator_id: { type: Schema.Types.ObjectId, required: true, index: true },
-  user_id: { type: Schema.Types.ObjectId, required: true, index: true },
-
-  activeProfile: { type: Boolean, required: true},
-  activeDiscovery: { type: Boolean, required: true},
+  user_id: { type: Schema.Types.ObjectId, required: false, index: true },
+  activeProfile: { type: Boolean, required: true, defualt: false },
+  activeDiscovery: { type: Boolean, required: true, defualt: false },
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
 
@@ -107,17 +151,21 @@ var UserProfileSchema = new Schema ({
     totalProfileLikes: { type: Number, required: true, min: 0, default: 0 },
   },
 
-  profileImageIDs: { type: [String], required: true },
+  profileImageIDs: { type: [String], required: true, default: [] },
   profileImages: {
-    original: { type: [ Schema.Types.Mixed], required: true },
-    large: { type: [ Schema.Types.Mixed], required: true },
-    medium: { type: [ Schema.Types.Mixed], required: true },
-    small: { type: [ Schema.Types.Mixed], required: true },
-    thumb: { type: [ Schema.Types.Mixed], required: true },
+    original: { type: [ Schema.Types.Mixed], required: true, default: [] },
+    large: { type: [ Schema.Types.Mixed], required: true, default: [] },
+    medium: { type: [ Schema.Types.Mixed], required: true, default: []  },
+    small: { type: [ Schema.Types.Mixed], required: true, default: [] },
+    thumb: { type: [ Schema.Types.Mixed], required: true, default: [] },
   },
 
   discovery_id: { type: Schema.Types.ObjectId, required: true },
 
+})
+
+UserProfileSchema.virtual("fullName").get(function () {
+  return this.firstName + " " + this.lastName
 })
 
 
@@ -126,3 +174,82 @@ var UserProfileSchema = new Schema ({
 // discovery_obj: Discovery!
 
 export const UserProfile = mongoose.model("UserProfile", UserProfileSchema)
+
+export const createUserProfileObject = function createUserProfileObject(userProfileInput, _id = mongoose.Types.ObjectId()) {
+  var userProfileModel = new UserProfile(userProfileInput)
+  userProfileModel._id = _id
+  userProfileModel.activeProfile = false
+  userProfileModel.activeDiscovery = false
+  console.log(userProfileModel)
+  return new Promise((resolve, reject) => {
+    userProfileModel.save(function (err) {
+      if (err) {
+        console.log(err)
+        reject(err)
+      }
+      resolve(userProfileModel)
+    })
+  })
+}
+
+
+
+export const resolvers = {
+  Query: {
+
+  },
+  UserProfile: {
+
+  },
+  Mutation: {
+    createUserProfile: async (_source, {userProfileInput}, { dataSources }) => {
+
+      var userProfileObject_id = mongoose.Types.ObjectId()
+      var discoveryObject_id = mongoose.Types.ObjectId()
+      console.log("IDs:" + userProfileObject_id + ", " + discoveryObject_id )
+      console.log(userProfileInput)
+      userProfileInput.discovery_id = discoveryObject_id
+      var createUserProfileObj = createUserProfileObject(userProfileInput, userProfileObject_id).catch(function(err){ return err});
+
+      var createDiscoveryObj = createDiscoveryObject({ profile_id: userProfileObject_id }, discoveryObject_id).catch(function(err){ return err });
+
+      return Promise.all([createUserProfileObj, createDiscoveryObj]).then(function ([userProfileObject, discoveryObject]) {
+        if (userProfileObject instanceof Error || discoveryObject instanceof Error){
+            var message = ""
+            if (userProfileObject instanceof Error) {
+              message += userProfileObject.toString()
+            }else{
+              userProfileObject.remove(function (err) {
+                if (err){
+                  console.log("Failed to remove user profile object" + err)
+                }else {
+                  console.log("Removed created user profile object successfully")
+                }
+              })
+            }
+            if (discoveryObject instanceof Error){
+              message += discoveryObject.toString()
+            }else{
+              discoveryObject.remove(function (err) {
+                if (err){
+                  console.log("Failed to remove discovery object" + err)
+                }else {
+                  console.log("Removed created discovery object successfully")
+                }
+              })
+            }
+            return {
+              success: false,
+              message: message
+            }
+        }
+        return {
+          success: true,
+          userProfile: userProfileObject
+        }
+      })
+
+    },
+
+  }
+}
