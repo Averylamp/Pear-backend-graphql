@@ -11,7 +11,8 @@ extend type Query {
 }
 
 extend type Mutation{
-  createUser(userInput: UserInput): UserCreation
+  createUser(userInput: UserInput): UserMutationResponse
+  updateUser(id: ID, updateUserInput: UpdateUserInput) : UserMutationResponse
 }
 
 input UserInput{
@@ -19,11 +20,74 @@ input UserInput{
   phoneNumber: String!
   firstName: String!
   lastName: String!
-  userPreferences: UserPreferencesInput!
+  userPreferences: UserPreferencesInitialInput!
 }
 
-input UserPreferencesInput {
+input UserPreferencesInitialInput {
   seekingGender: [String!]!
+}
+
+input UserPreferencesInput{
+  ethnicities: [String!]
+  seekingGender: [Gender!]
+  seekingReason: [String!]
+  reasonDealbreaker: Int
+  seekingEthnicity: [String!]
+  ethnicityDealbreaker: Int
+  maxDistance: Int
+  distanceDealbreaker: Int
+  minAgeRange: Int
+  maxAgeRange: Int
+  ageDealbreaker: Int
+  minHeightRange: Int
+  maxHeightRange: Int
+  heightDealbreaker: Int
+}
+
+input UserDemographicsInput{
+  ethnicities: [String!]
+  religion: [String!]
+  political: [String!]
+  smoking: [String!]
+  drinking: [String!]
+  height: Int
+}
+
+input UserStatDataInput{
+  totalNumberOfMatchRequests: Int
+  totalNumberOfMatches: Int
+  totalNumberOfProfilesCreated: Int
+  totalNumberOfEndorsementsCreated: Int
+  conversationTotalNumber: Int
+  conversationTotalNumberFirstMessage: Int
+  conversationTotalNumberTenMessages: Int
+  conversationTotalNumberHundredMessages: Int
+}
+
+input UpdateUserInput {
+  deactivated: Boolean
+  firebaseToken: String
+  firebaseAuthID: String
+  facebookId: String
+  facebookAccessToken: String
+  email: String
+  phoneNumber: String
+  phoneNumberVerified: Boolean
+  firstName: String
+  lastName: String
+  thumbnailURL: String
+  gender: Gender
+  locationName: String
+  locationCoordinates: String
+  school: String
+  schoolEmail: String
+  schoolEmailVerified: Boolean
+  birthdate: Int
+  age: Int
+  userPreferences: UserPreferencesInput
+  userStatData: UserStatDataInput
+  userDemographics: UserDemographicsInput
+  pearPoints: Int
 }
 
 type User {
@@ -99,11 +163,13 @@ type UserPreferences{
   heightDealbreaker: Int!
 }
 
-type UserCreation {
-  user: User
+
+type UserMutationResponse{
   success: Boolean!
   message: String
+  user: User
 }
+
 `
 var UserSchema = new Schema ({
   deactivated : { type: Boolean, required: true, default: false},
@@ -273,17 +339,28 @@ export const resolvers = {
         }
       })
 
-      // return createUserObject(_args.userInput).then( user => {
-      //   return {
-      //     success: true,
-      //     user: user,
-      //   }
-      // }, err => {
-      //   return {
-      //     success: false,
-      //     message: err.toString()
-      //   }
-      // })
+    },
+    updateUser: async (_source, { id, updateUserInput }, { dataSources }) => {
+      console.log("Updating user: " + id)
+      console.log(updateUserInput)
+      return new Promise((resolve, reject) => User.findByIdAndUpdate(id, updateUserInput, { new: true, runValidators: true}, function (err, user) {
+        if (err) {
+          console.log("User not found")
+          resolve ({
+            success:false,
+            message: err.toString()
+          })
+        }else{
+          console.log(user)
+          resolve({
+            success: true,
+            user: user,
+            message: "Successfully updated"
+          })
+        }
+      }))
+
+
     }
   }
 }
