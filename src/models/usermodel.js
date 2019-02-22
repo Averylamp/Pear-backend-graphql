@@ -3,6 +3,7 @@ import { createDiscoveryObject as createDiscoveryObject } from "./discoverymodel
 
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+var $ = require('mongo-dot-notation')
 
 export const typeDef = `
 extend type Query {
@@ -344,6 +345,7 @@ export const resolvers = {
 
     },
     updateUser: async (_source, { id, updateUserInput }, { dataSources }) => {
+      updateUserInput = $.flatten(updateUserInput)
       return new Promise((resolve, reject) => User.findByIdAndUpdate(id, updateUserInput, { new: true, runValidators: true}, function (err, user) {
         if (err) {
           resolve ({
@@ -358,8 +360,6 @@ export const resolvers = {
           })
         }
       }))
-
-
     }
   }
 }

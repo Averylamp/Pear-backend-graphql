@@ -2,6 +2,8 @@ import { createDiscoveryObject as createDiscoveryObject } from "./discoverymodel
 
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+var $ = require('mongo-dot-notation')
+
 
 export const typeDef = `
 
@@ -15,6 +17,8 @@ input CreationUserProfileInput {
   firstName: String!
   lastName: String!
   demographics: CreationUserProfileDemographicsInput!
+  activeProfile: Boolean!
+  activeDiscovery: Boolean!
 }
 
 input CreationUserProfileDemographicsInput {
@@ -178,8 +182,6 @@ export const UserProfile = mongoose.model("UserProfile", UserProfileSchema)
 export const createUserProfileObject = function createUserProfileObject(userProfileInput, _id = mongoose.Types.ObjectId()) {
   var userProfileModel = new UserProfile(userProfileInput)
   userProfileModel._id = _id
-  userProfileModel.activeProfile = false
-  userProfileModel.activeDiscovery = false
   console.log(userProfileModel)
   return new Promise((resolve, reject) => {
     userProfileModel.save(function (err) {
@@ -249,6 +251,28 @@ export const resolvers = {
         }
       })
 
+    },
+    updateUserProfile: async (_source, { id, updateUserProfileInput }, { dataSources }) => {
+      console.log("Updating User Profile: " + id)
+      console.log(updateUserProfileInput)
+      updateUserProfileInput = $.flatten(updateUserProfileInput)
+      console.log(updateUserProfileInput)
+      return new Promise((resolve, reject) => UserProfile.findByIdAndUpdate(id, updateUserProfileInput, { new: true, runValidators: true}, function (err, userProfile) {
+        if (err) {
+          console.log(err)
+          resolve ({
+            success:false,
+            message: err.toString()
+          })
+        }else{
+          console.log(userProfile)
+          resolve({
+            success: true,
+            userProfile: userProfile,
+            message: "Successfully updated"
+          })
+        }
+      }))
     },
 
   }

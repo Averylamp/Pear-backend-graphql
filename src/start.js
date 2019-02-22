@@ -35,6 +35,7 @@ export const start = async () => {
     mongoose.connect(MONGO_URL, {useNewUrlParser: true })
     mongoose.Promise = global.Promise;
     mongoose.set('useCreateIndex', true);
+    mongoose.set('useFindAndModify', false);
     var db = mongoose.connection
     db.on('error', console.error.bind(console, 'MongoDB connection error:'));
     console.log("Mongoose Connected")
