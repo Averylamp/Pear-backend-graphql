@@ -1,5 +1,6 @@
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
+const mongoose = require('mongoose');
+
+const { Schema } = mongoose;
 
 export const typeDef = `
 type UserMatches{
@@ -14,47 +15,52 @@ type UserMatches{
   matches_ids: [ID!]!
   matches_objs: [Match!]!
 }
-`
+`;
 export const resolvers = {
   Query: {
 
   },
   UserMatches: {
 
-  }
-}
+  },
+};
 
-var UserMatchesSchema = new Schema ({
+const UserMatchesSchema = new Schema({
   _id: { type: Schema.Types.ObjectId, required: true },
   user_id: { type: Schema.Types.ObjectId, required: true, index: true },
-  alreadyMatchedUser_ids: { type: [Schema.Types.ObjectId], required: true, index: true, default: [] },
-  matchRequest_ids: { type: [Schema.Types.ObjectId], required: true, index: true, default: [] },
-  matchRejected_ids: { type: [Schema.Types.ObjectId], required: true, index: true, default: [] },
-  matches_ids: { type: [Schema.Types.ObjectId], required: true, index: true, default: [] },
-})
-
-
+  alreadyMatchedUser_ids: {
+    type: [Schema.Types.ObjectId], required: true, index: true, default: [],
+  },
+  matchRequest_ids: {
+    type: [Schema.Types.ObjectId], required: true, index: true, default: [],
+  },
+  matchRejected_ids: {
+    type: [Schema.Types.ObjectId], required: true, index: true, default: [],
+  },
+  matches_ids: {
+    type: [Schema.Types.ObjectId], required: true, index: true, default: [],
+  },
+});
 
 
 // user_obj: User!
 // matchRequest_objs: [MatchRequest!]!
 // matchRejected_objs: [MatchRequest!]!
 // matches_objs: [Match!]!
-export const UserMatches = mongoose.model("UserMatches", UserMatchesSchema)
+export const UserMatches = mongoose.model('UserMatches', UserMatchesSchema);
 
 
 export const createUserMatchesObject = function createUserMatchesObject(userMatchesInput, _id = mongoose.Types.ObjectId()) {
-  var userMatchesModel = new UserMatches(userMatchesInput)
+  const userMatchesModel = new UserMatches(userMatchesInput);
 
-  userMatchesModel._id = _id
+  userMatchesModel._id = _id;
 
   return new Promise((resolve, reject) => {
-    userMatchesModel.save(function (err) {
-      if (err){
-        reject(err)
+    userMatchesModel.save((err) => {
+      if (err) {
+        reject(err);
       }
-      resolve( userMatchesModel )
-    })
-  })
-
-}
+      resolve(userMatchesModel);
+    });
+  });
+};

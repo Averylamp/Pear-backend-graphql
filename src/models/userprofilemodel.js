@@ -1,8 +1,9 @@
-import { createDiscoveryObject as createDiscoveryObject } from "./discoverymodel.js"
+import { createDiscoveryObject } from './discoverymodel';
 
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
-var $ = require('mongo-dot-notation')
+const mongoose = require('mongoose');
+
+const { Schema } = mongoose;
+const $ = require('mongo-dot-notation');
 
 
 export const typeDef = `
@@ -124,10 +125,10 @@ enum Gender{
   female
   nonbinary
 }
-`
+`;
 
 
-var UserProfileSchema = new Schema ({
+const UserProfileSchema = new Schema({
   _id: { type: Schema.Types.ObjectId, required: true },
   creator_id: { type: Schema.Types.ObjectId, required: true, index: true },
   user_id: { type: Schema.Types.ObjectId, required: false, index: true },
@@ -136,10 +137,16 @@ var UserProfileSchema = new Schema ({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
 
-  demographics:  {
-    gender: { type: String, required: true, enum: ["male", "female", "nonbinary"], index: true },
-    age: { type: Number, required: true, min: 18, max: 80, index: true },
-    height: { type: Number, required: false, min: 20, max: 100, index: true },
+  demographics: {
+    gender: {
+      type: String, required: true, enum: ['male', 'female', 'nonbinary'], index: true,
+    },
+    age: {
+      type: Number, required: true, min: 18, max: 80, index: true,
+    },
+    height: {
+      type: Number, required: false, min: 20, max: 100, index: true,
+    },
     locationName: { type: String, required: false },
     locationCoordinates: { type: String, required: false },
     school: { type: String, required: false },
@@ -151,49 +158,52 @@ var UserProfileSchema = new Schema ({
   },
 
   userProfileData: {
-    totalProfileViews: { type: Number, required: true, min: 0, default: 0 },
-    totalProfileLikes: { type: Number, required: true, min: 0, default: 0 },
+    totalProfileViews: {
+      type: Number, required: true, min: 0, default: 0,
+    },
+    totalProfileLikes: {
+      type: Number, required: true, min: 0, default: 0,
+    },
   },
 
   profileImageIDs: { type: [String], required: true, default: [] },
   profileImages: {
-    original: { type: [ Schema.Types.Mixed], required: true, default: [] },
-    large: { type: [ Schema.Types.Mixed], required: true, default: [] },
-    medium: { type: [ Schema.Types.Mixed], required: true, default: []  },
-    small: { type: [ Schema.Types.Mixed], required: true, default: [] },
-    thumb: { type: [ Schema.Types.Mixed], required: true, default: [] },
+    original: { type: [Schema.Types.Mixed], required: true, default: [] },
+    large: { type: [Schema.Types.Mixed], required: true, default: [] },
+    medium: { type: [Schema.Types.Mixed], required: true, default: [] },
+    small: { type: [Schema.Types.Mixed], required: true, default: [] },
+    thumb: { type: [Schema.Types.Mixed], required: true, default: [] },
   },
 
   discovery_id: { type: Schema.Types.ObjectId, required: true },
 
-})
+});
 
-UserProfileSchema.virtual("fullName").get(function () {
-  return this.firstName + " " + this.lastName
-})
+UserProfileSchema.virtual('fullName').get(function () {
+  return `${this.firstName} ${this.lastName}`;
+});
 
 
 // creator_obj: User!
 // user_obj: User!
 // discovery_obj: Discovery!
 
-export const UserProfile = mongoose.model("UserProfile", UserProfileSchema)
+export const UserProfile = mongoose.model('UserProfile', UserProfileSchema);
 
 export const createUserProfileObject = function createUserProfileObject(userProfileInput, _id = mongoose.Types.ObjectId()) {
-  var userProfileModel = new UserProfile(userProfileInput)
-  userProfileModel._id = _id
-  console.log(userProfileModel)
+  const userProfileModel = new UserProfile(userProfileInput);
+  userProfileModel._id = _id;
+  console.log(userProfileModel);
   return new Promise((resolve, reject) => {
-    userProfileModel.save(function (err) {
+    userProfileModel.save((err) => {
       if (err) {
-        console.log(err)
-        reject(err)
+        console.log(err);
+        reject(err);
       }
-      resolve(userProfileModel)
-    })
-  })
-}
-
+      resolve(userProfileModel);
+    });
+  });
+};
 
 
 export const resolvers = {
@@ -204,76 +214,74 @@ export const resolvers = {
 
   },
   Mutation: {
-    createUserProfile: async (_source, {userProfileInput}, { dataSources }) => {
+    createUserProfile: async (_source, { userProfileInput }, { dataSources }) => {
+      const userProfileObject_id = mongoose.Types.ObjectId();
+      const discoveryObject_id = mongoose.Types.ObjectId();
+      console.log(`IDs:${userProfileObject_id}, ${discoveryObject_id}`);
+      console.log(userProfileInput);
+      userProfileInput.discovery_id = discoveryObject_id;
+      const createUserProfileObj = createUserProfileObject(userProfileInput, userProfileObject_id).catch(err => err);
 
-      var userProfileObject_id = mongoose.Types.ObjectId()
-      var discoveryObject_id = mongoose.Types.ObjectId()
-      console.log("IDs:" + userProfileObject_id + ", " + discoveryObject_id )
-      console.log(userProfileInput)
-      userProfileInput.discovery_id = discoveryObject_id
-      var createUserProfileObj = createUserProfileObject(userProfileInput, userProfileObject_id).catch(function(err){ return err});
+      const createDiscoveryObj = createDiscoveryObject({ profile_id: userProfileObject_id }, discoveryObject_id).catch(err => err);
 
-      var createDiscoveryObj = createDiscoveryObject({ profile_id: userProfileObject_id }, discoveryObject_id).catch(function(err){ return err });
-
-      return Promise.all([createUserProfileObj, createDiscoveryObj]).then(function ([userProfileObject, discoveryObject]) {
-        if (userProfileObject instanceof Error || discoveryObject instanceof Error){
-            var message = ""
-            if (userProfileObject instanceof Error) {
-              message += userProfileObject.toString()
-            }else{
-              userProfileObject.remove(function (err) {
-                if (err){
-                  console.log("Failed to remove user profile object" + err)
-                }else {
-                  console.log("Removed created user profile object successfully")
-                }
-              })
-            }
-            if (discoveryObject instanceof Error){
-              message += discoveryObject.toString()
-            }else{
-              discoveryObject.remove(function (err) {
-                if (err){
-                  console.log("Failed to remove discovery object" + err)
-                }else {
-                  console.log("Removed created discovery object successfully")
-                }
-              })
-            }
-            return {
-              success: false,
-              message: message
-            }
+      return Promise.all([createUserProfileObj, createDiscoveryObj]).then(([userProfileObject, discoveryObject]) => {
+        if (userProfileObject instanceof Error || discoveryObject instanceof Error) {
+          let message = '';
+          if (userProfileObject instanceof Error) {
+            message += userProfileObject.toString();
+          } else {
+            userProfileObject.remove((err) => {
+              if (err) {
+                console.log(`Failed to remove user profile object${err}`);
+              } else {
+                console.log('Removed created user profile object successfully');
+              }
+            });
+          }
+          if (discoveryObject instanceof Error) {
+            message += discoveryObject.toString();
+          } else {
+            discoveryObject.remove((err) => {
+              if (err) {
+                console.log(`Failed to remove discovery object${err}`);
+              } else {
+                console.log('Removed created discovery object successfully');
+              }
+            });
+          }
+          return {
+            success: false,
+            message,
+          };
         }
         return {
           success: true,
-          userProfile: userProfileObject
-        }
-      })
-
+          userProfile: userProfileObject,
+        };
+      });
     },
     updateUserProfile: async (_source, { id, updateUserProfileInput }, { dataSources }) => {
-      console.log("Updating User Profile: " + id)
-      console.log(updateUserProfileInput)
-      updateUserProfileInput = $.flatten(updateUserProfileInput)
-      console.log(updateUserProfileInput)
-      return new Promise((resolve, reject) => UserProfile.findByIdAndUpdate(id, updateUserProfileInput, { new: true, runValidators: true}, function (err, userProfile) {
+      console.log(`Updating User Profile: ${id}`);
+      console.log(updateUserProfileInput);
+      updateUserProfileInput = $.flatten(updateUserProfileInput);
+      console.log(updateUserProfileInput);
+      return new Promise((resolve, reject) => UserProfile.findByIdAndUpdate(id, updateUserProfileInput, { new: true, runValidators: true }, (err, userProfile) => {
         if (err) {
-          console.log(err)
-          resolve ({
-            success:false,
-            message: err.toString()
-          })
-        }else{
-          console.log(userProfile)
+          console.log(err);
+          resolve({
+            success: false,
+            message: err.toString(),
+          });
+        } else {
+          console.log(userProfile);
           resolve({
             success: true,
-            userProfile: userProfile,
-            message: "Successfully updated"
-          })
+            userProfile,
+            message: 'Successfully updated',
+          });
         }
-      }))
+      }));
     },
 
-  }
-}
+  },
+};

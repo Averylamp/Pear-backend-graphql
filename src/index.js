@@ -1,4 +1,5 @@
-import 'babel-core/register'
-import 'babel-polyfill'
-import {start} from './start'
-start()
+import 'babel-core/register';
+import 'babel-polyfill';
+import { start } from './start';
+
+start();

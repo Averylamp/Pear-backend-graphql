@@ -1,5 +1,6 @@
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
+const mongoose = require('mongoose');
+
+const { Schema } = mongoose;
 
 export const typeDef = `
 type Match{
@@ -24,7 +25,7 @@ type MatchStats{
   conversationTenMessagesSent: Boolean!
   conversationHundredMessagesSent: Boolean!
 }
-`
+`;
 
 export const resolvers = {
   Query: {
@@ -32,24 +33,24 @@ export const resolvers = {
   },
   Match: {
 
-  }
-}
+  },
+};
 
-var MatchSchema = new Schema ({
+const MatchSchema = new Schema({
   _id: { type: Schema.Types.ObjectId, required: true },
   matchRequest_id: { type: Schema.Types.ObjectId, required: true },
   firstPersonUser_id: { type: Schema.Types.ObjectId, required: true },
   firstPersonProfile_id: { type: Schema.Types.ObjectId, required: true },
   secondPersonUser_id: { type: Schema.Types.ObjectId, required: true },
   secondPersonProfile_id: { type: Schema.Types.ObjectId, required: true },
-  timestampCreated: { type: Number, required: true},
+  timestampCreated: { type: Number, required: true },
   matchStats: {
-    conversationFirstMessageSent: { type: Boolean, required: true, default: false},
-    conversationTenMessagesSent: { type: Boolean, required: true, default: false},
-    conversationHundredMessagesSent: { type: Boolean, required: true, default: false},
+    conversationFirstMessageSent: { type: Boolean, required: true, default: false },
+    conversationTenMessagesSent: { type: Boolean, required: true, default: false },
+    conversationHundredMessagesSent: { type: Boolean, required: true, default: false },
   },
-  firebaseConversationDocumentID: { type: String, required: true},
-})
+  firebaseConversationDocumentID: { type: String, required: true },
+});
 
 
 // matchRequest_obj: MatchRequest
@@ -57,4 +58,4 @@ var MatchSchema = new Schema ({
 // firstPersonProfile_obj: UserProfile!
 // secondPersonUser_obj: User!
 // secondPersonProfile_obj: UserProfile!
-export const Match = mongoose.model("Match", MatchSchema)
+export const Match = mongoose.model('Match', MatchSchema);

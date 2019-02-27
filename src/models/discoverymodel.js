@@ -1,5 +1,6 @@
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
+const mongoose = require('mongoose');
+
+const { Schema } = mongoose;
 
 export const typeDef = `
 type Discovery{
@@ -7,7 +8,7 @@ type Discovery{
   profile_id: ID
   user_id: ID
 }
-`
+`;
 
 export const resolvers = {
   Query: {
@@ -15,32 +16,31 @@ export const resolvers = {
   },
   Discovery: {
 
-  }
-}
+  },
+};
 
-var DiscoverySchema = new Schema ({
+const DiscoverySchema = new Schema({
   _id: { type: Schema.Types.ObjectId, required: true },
   profile_id: { type: Schema.Types.ObjectId, required: false, index: true },
   user_id: { type: Schema.Types.ObjectId, required: false, index: true },
-})
+});
 
 
-export const Discovery = mongoose.model("Discovery", DiscoverySchema)
+export const Discovery = mongoose.model('Discovery', DiscoverySchema);
 
 
 export const createDiscoveryObject = function createDiscoveryObject(discoveryInput, _id = mongoose.Types.ObjectId) {
-  var discoveryModel = new Discovery(discoveryInput)
+  const discoveryModel = new Discovery(discoveryInput);
 
-  discoveryModel._id = _id
+  discoveryModel._id = _id;
 
   return new Promise((resolve, reject) => {
-    discoveryModel.save(function (err) {
-      if (err){
-        console.log(err)
-        reject(err)
+    discoveryModel.save((err) => {
+      if (err) {
+        console.log(err);
+        reject(err);
       }
-      resolve( discoveryModel )
-    })
-  })
-
-}
+      resolve(discoveryModel);
+    });
+  });
+};

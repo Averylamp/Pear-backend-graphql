@@ -1,5 +1,6 @@
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
+const mongoose = require('mongoose');
+
+const { Schema } = mongoose;
 
 export const typeDef = `
 type MatchRequest{
@@ -50,7 +51,7 @@ enum MatchResponse{
   accepted
 }
 
-`
+`;
 
 export const resolvers = {
   Query: {
@@ -58,17 +59,17 @@ export const resolvers = {
   },
   MatchRequest: {
 
-  }
-}
+  },
+};
 
-var MatchRequestSchema = new Schema ({
+const MatchRequestSchema = new Schema({
   _id: { type: Schema.Types.ObjectId, required: true },
 
-  globalOneLiner: { type: String, required: false},
-  firstPersonMessageRequest: { type: String, required: false},
-  secondPersonMessageRequest: { type: String, required: false},
+  globalOneLiner: { type: String, required: false },
+  firstPersonMessageRequest: { type: String, required: false },
+  secondPersonMessageRequest: { type: String, required: false },
 
-  endorserCreated: {type: Boolean, required: true, default: false },
+  endorserCreated: { type: Boolean, required: true, default: false },
   firstPersonEndorserUser_id: { type: Schema.Types.ObjectId, required: false, index: true },
   secondPersonEndorserUser_id: { type: Schema.Types.ObjectId, required: false, index: true },
 
@@ -77,16 +78,16 @@ var MatchRequestSchema = new Schema ({
   secondPersonUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
   secondPersonProfile_id: { type: Schema.Types.ObjectId, required: false, index: true },
 
-  timestampCreated: { type: Number, required: true},
-  firstPersonResponse: { type: String, required: true, enum: ["unseen", "seen", "rejected", "accepted"] },
-  firstPersonResponseTimestamp: { type: Number, required: true},
-  secondPersonResponse: { type: String, required: true, enum: ["unseen", "seen", "rejected", "accepted"] },
-  secondPersonResponseTimestamp: { type: Number, required: true},
-  matchStatus: { type: String, required: true, enum: ["request", "rejected", "accepted"] },
-  matchStatusTimestamp: { type: Number, required: true},
-  matchCreated: { type: Boolean, required: true, default: false},
+  timestampCreated: { type: Number, required: true },
+  firstPersonResponse: { type: String, required: true, enum: ['unseen', 'seen', 'rejected', 'accepted'] },
+  firstPersonResponseTimestamp: { type: Number, required: true },
+  secondPersonResponse: { type: String, required: true, enum: ['unseen', 'seen', 'rejected', 'accepted'] },
+  secondPersonResponseTimestamp: { type: Number, required: true },
+  matchStatus: { type: String, required: true, enum: ['request', 'rejected', 'accepted'] },
+  matchStatusTimestamp: { type: Number, required: true },
+  matchCreated: { type: Boolean, required: true, default: false },
   acceptedMatch_id: { type: Schema.Types.ObjectId, required: false, index: true },
-})
+});
 
 
 // firstPersonEndorserUser_obj: User!
@@ -96,4 +97,4 @@ var MatchRequestSchema = new Schema ({
 // secondPersonUser_obj: User!
 // secondPersonProfile_obj: UserProfile!
 // acceptedMatch_obj: Match
-export const MatchRequest = mongoose.model("MatchRequest", MatchRequestSchema)
+export const MatchRequest = mongoose.model('MatchRequest', MatchRequestSchema);
