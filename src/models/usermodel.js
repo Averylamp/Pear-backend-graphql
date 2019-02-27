@@ -18,10 +18,13 @@ extend type Mutation{
 
 input CreationUserInput{
   email: String!
+  emailVerified: Boolean!
   phoneNumber: String!
+  phoneNumberVerified: Boolean!
   firstName: String!
   lastName: String!
-  userPreferences: UserPreferencesInitialInput!
+  firebaseToken: String
+  firebaseAuthID: String
 }
 
 input UserPreferencesInitialInput {
@@ -99,6 +102,7 @@ type User {
   facebookId: String
   facebookAccessToken: String
   email: String!
+  emailVerified: Boolean!
   phoneNumber: String!
   phoneNumberVerified: Boolean!
   firstName: String!
@@ -180,6 +184,7 @@ var UserSchema = new Schema ({
   facebookId: { type: String, required: false },
   facebookAccessToken: { type: String, required: false },
   email: { type: String, required: false },
+  emailVerified: { type: Boolean, required: true, default: false},
   phoneNumber: { type: String, required: true, validate: {
       validator: function(v) { return /\d{10}$/.test(v); }}, index: true },
   phoneNumberVerified: { type: Boolean, required: true, default: false},
@@ -267,7 +272,6 @@ export const createUserObject = function createUserObject(userInput, _id = mongo
 }
 
 
-
 export const resolvers = {
   Query: {
     user: async (_source, {id}, { dataSources }) => {
@@ -282,7 +286,6 @@ export const resolvers = {
   },
   Mutation: {
     createUser: async (_source, { userInput }, { dataSources }) => {
-
       var userObject_id = mongoose.Types.ObjectId()
       var userMatchesObject_id = mongoose.Types.ObjectId()
       var discoveryObject_id = mongoose.Types.ObjectId()
