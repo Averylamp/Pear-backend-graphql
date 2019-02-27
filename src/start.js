@@ -37,6 +37,9 @@ const homePath = '/graphiql';
 const URL = 'http://localhost';
 const PORT = 3001;
 const MONGO_URL = 'mongodb+srv://avery:0bz8M0eMEtyXlj2aZodIPpJpy@cluster0-w4ecv.mongodb.net/dev?retryWrites=true';
+const debug = require('debug')('dev')
+const name = 'Pear'
+debug('Booting %s', name)
 
 
 export const start = async () => {
@@ -50,6 +53,7 @@ export const start = async () => {
     const db = mongoose.connection;
     db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
+    debug("Mongo connected")
 
     const UsersDB = db.collection('users');
     const UserProfilesDB = db.collection('userprofiles');
