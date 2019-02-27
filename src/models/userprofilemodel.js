@@ -180,7 +180,7 @@ const UserProfileSchema = new Schema({
 
 });
 
-UserProfileSchema.virtual('fullName').get(function () {
+UserProfileSchema.virtual('fullName').get(function fullName() {
   return `${this.firstName} ${this.lastName}`;
 });
 
@@ -191,7 +191,8 @@ UserProfileSchema.virtual('fullName').get(function () {
 
 export const UserProfile = mongoose.model('UserProfile', UserProfileSchema);
 
-export const createUserProfileObject = function createUserProfileObject(userProfileInput, _id = mongoose.Types.ObjectId()) {
+export const createUserProfileObject = function
+createUserProfileObject(userProfileInput, _id = mongoose.Types.ObjectId()) {
   const userProfileModel = new UserProfile(userProfileInput);
   userProfileModel._id = _id;
   debug(userProfileModel);
@@ -215,73 +216,86 @@ export const resolvers = {
 
   },
   Mutation: {
-    createUserProfile: async (_source, { userProfileInput }, { dataSources }) => {
-      const userProfileObject_id = mongoose.Types.ObjectId();
-      const discoveryObject_id = mongoose.Types.ObjectId();
-      debug(`IDs:${userProfileObject_id}, ${discoveryObject_id}`);
+    createUserProfile: async (_source, { userProfileInput }) => {
+      const userProfileObjectID = mongoose.Types.ObjectId();
+      const discoveryObjectID = mongoose.Types.ObjectId();
+      debug(`IDs:${userProfileObjectID}, ${discoveryObjectID}`);
       debug(userProfileInput);
-      userProfileInput.discovery_id = discoveryObject_id;
-      const createUserProfileObj = createUserProfileObject(userProfileInput, userProfileObject_id).catch(err => err);
+      const finalUserProfileInput = userProfileInput;
+      finalUserProfileInput.discovery_id = discoveryObjectID;
+      const createUserProfileObj = createUserProfileObject(
+        finalUserProfileInput, userProfileObjectID,
+      )
+        .catch(err => err);
 
-      const createDiscoveryObj = createDiscoveryObject({ profile_id: userProfileObject_id }, discoveryObject_id).catch(err => err);
+      const createDiscoveryObj = createDiscoveryObject(
+        { profile_id: userProfileObjectID }, discoveryObjectID,
+      )
+        .catch(err => err);
 
-      return Promise.all([createUserProfileObj, createDiscoveryObj]).then(([userProfileObject, discoveryObject]) => {
-        if (userProfileObject instanceof Error || discoveryObject instanceof Error) {
-          let message = '';
-          if (userProfileObject instanceof Error) {
-            message += userProfileObject.toString();
-          } else {
-            userProfileObject.remove((err) => {
-              if (err) {
-                debug(`Failed to remove user profile object${err}`);
-              } else {
-                debug('Removed created user profile object successfully');
-              }
-            });
-          }
-          if (discoveryObject instanceof Error) {
-            message += discoveryObject.toString();
-          } else {
-            discoveryObject.remove((err) => {
-              if (err) {
-                debug(`Failed to remove discovery object${err}`);
-              } else {
-                debug('Removed created discovery object successfully');
-              }
-            });
+      return Promise.all(
+        [createUserProfileObj, createDiscoveryObj],
+      )
+        .then(([userProfileObject, discoveryObject]) => {
+          if (userProfileObject instanceof Error || discoveryObject instanceof Error) {
+            let message = '';
+            if (userProfileObject instanceof Error) {
+              message += userProfileObject.toString();
+            } else {
+              userProfileObject.remove((err) => {
+                if (err) {
+                  debug(`Failed to remove user profile object${err}`);
+                } else {
+                  debug('Removed created user profile object successfully');
+                }
+              });
+            }
+            if (discoveryObject instanceof Error) {
+              message += discoveryObject.toString();
+            } else {
+              discoveryObject.remove((err) => {
+                if (err) {
+                  debug(`Failed to remove discovery object${err}`);
+                } else {
+                  debug('Removed created discovery object successfully');
+                }
+              });
+            }
+            return {
+              success: false,
+              message,
+            };
           }
           return {
-            success: false,
-            message,
+            success: true,
+            userProfile: userProfileObject,
           };
-        }
-        return {
-          success: true,
-          userProfile: userProfileObject,
-        };
-      });
+        });
     },
-    updateUserProfile: async (_source, { id, updateUserProfileInput }, { dataSources }) => {
+    updateUserProfile: async (_source, { id, updateUserProfileInput }) => {
       debug(`Updating User Profile: ${id}`);
       debug(updateUserProfileInput);
-      updateUserProfileInput = $.flatten(updateUserProfileInput);
-      debug(updateUserProfileInput);
-      return new Promise((resolve, reject) => UserProfile.findByIdAndUpdate(id, updateUserProfileInput, { new: true, runValidators: true }, (err, userProfile) => {
-        if (err) {
-          debug(err);
-          resolve({
-            success: false,
-            message: err.toString(),
-          });
-        } else {
-          debug(userProfile);
-          resolve({
-            success: true,
-            userProfile,
-            message: 'Successfully updated',
-          });
-        }
-      }));
+      const flattenedUpdateUserProfileInput = $.flatten(updateUserProfileInput);
+      debug(flattenedUpdateUserProfileInput);
+      return new Promise(resolve => UserProfile.findByIdAndUpdate(
+        id, flattenedUpdateUserProfileInput, { new: true, runValidators: true },
+        (err, userProfile) => {
+          if (err) {
+            debug(err);
+            resolve({
+              success: false,
+              message: err.toString(),
+            });
+          } else {
+            debug(userProfile);
+            resolve({
+              success: true,
+              userProfile,
+              message: 'Successfully updated',
+            });
+          }
+        },
+      ));
     },
 
   },

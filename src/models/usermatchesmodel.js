@@ -50,7 +50,8 @@ const UserMatchesSchema = new Schema({
 export const UserMatches = mongoose.model('UserMatches', UserMatchesSchema);
 
 
-export const createUserMatchesObject = function createUserMatchesObject(userMatchesInput, _id = mongoose.Types.ObjectId()) {
+export const createUserMatchesObject = function
+createUserMatchesObject(userMatchesInput, _id = mongoose.Types.ObjectId()) {
   const userMatchesModel = new UserMatches(userMatchesInput);
 
   userMatchesModel._id = _id;

@@ -1,8 +1,4 @@
 import express from 'express';
-import cors from 'cors';
-import { GraphQLScalarType } from 'graphql';
-import { makeExecutableSchema } from 'graphql-tools';
-
 import { merge } from 'lodash';
 import {
   typeDef as User,
@@ -29,15 +25,13 @@ import {
   resolvers as DiscoveryResolvers,
 } from './models/discoverymodel';
 
-const { gql } = require('apollo-server');
 const { ApolloServer } = require('apollo-server-express');
 
-
-const homePath = '/graphiql';
 const URL = 'http://localhost';
 const PORT = 3001;
 const MONGO_URL = 'mongodb+srv://avery:0bz8M0eMEtyXlj2aZodIPpJpy@cluster0-w4ecv.mongodb.net/dev?retryWrites=true';
 const debug = require('debug')('dev:Start');
+const mongoose = require('mongoose');
 
 const name = 'Pear';
 debug('Booting %s', name);
@@ -45,14 +39,12 @@ debug('Booting %s', name);
 
 export const start = async () => {
   try {
-    const mongoose = require('mongoose');
-
     mongoose.connect(MONGO_URL, { useNewUrlParser: true });
     mongoose.Promise = global.Promise;
     mongoose.set('useCreateIndex', true);
     mongoose.set('useFindAndModify', false);
     const db = mongoose.connection;
-    db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+    db.on('error', debug.bind(console, 'MongoDB connection error:'));
 
     debug('Mongo connected');
 
@@ -82,7 +74,13 @@ export const start = async () => {
       },
     };
 
-    const finalResolvers = merge(resolvers, UserResolvers, UserProfileResolvers, MatchResolvers, UserMatchesResolvers, MatchRequestResolvers, DiscoveryResolvers);
+    const finalResolvers = merge(resolvers,
+      UserResolvers,
+      UserProfileResolvers,
+      MatchResolvers,
+      UserMatchesResolvers,
+      MatchRequestResolvers,
+      DiscoveryResolvers);
 
 
     const server = new ApolloServer({
@@ -110,3 +108,6 @@ export const start = async () => {
     debug(e);
   }
 };
+
+
+export default start;

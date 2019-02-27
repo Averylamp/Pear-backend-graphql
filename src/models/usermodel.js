@@ -10,7 +10,6 @@ const debug = require('debug')('dev:User');
 export const typeDef = `
 extend type Query {
   user(id: ID): User
-  users: [User]
 }
 
 extend type Mutation{
@@ -278,7 +277,7 @@ const UserSchema = new Schema({
 
 });
 
-UserSchema.virtual('fullName').get(function () {
+UserSchema.virtual('fullName').get(function fullName() {
   return `${this.firstName} ${this.lastName}`;
 });
 
@@ -287,7 +286,8 @@ UserSchema.virtual('fullName').get(function () {
 // endorsedProfile_objs: { type: [, required: true,  UserProfile!]!
 export const User = mongoose.model('User', UserSchema);
 
-export const createUserObject = function createUserObject(userInput, _id = mongoose.Types.ObjectId()) {
+export const createUserObject = function
+createUserObject(userInput, _id = mongoose.Types.ObjectId()) {
   const userModel = new User(userInput);
 
   userModel._id = _id;
@@ -307,90 +307,103 @@ export const resolvers = {
   Query: {
     user: async (_source, { id }, { dataSources }) => {
       debug(`Getting user by id: ${id}`);
-      return (await dataSources.usersDB.findOne({ _id: ObjectId(id) }));
+      return dataSources.usersDB.findOne({ _id: id });
     },
-    users: async (_source, _args, { dataSources }) => (await dataSources.usersDB.find({}).toArray()).map(prepare),
   },
   User: {
   },
   Mutation: {
-    createUser: async (_source, { userInput }, { dataSources }) => {
-      const userObject_id = mongoose.Types.ObjectId();
-      const userMatchesObject_id = mongoose.Types.ObjectId();
-      const discoveryObject_id = mongoose.Types.ObjectId();
-      debug(`IDs:${userObject_id}, ${userMatchesObject_id}, ${discoveryObject_id}`);
+    createUser: async (_source, { userInput }) => {
+      const userObjectID = mongoose.Types.ObjectId();
+      const userMatchesObjectID = mongoose.Types.ObjectId();
+      const discoveryObjectID = mongoose.Types.ObjectId();
+      debug(`IDs:${userObjectID}, ${userMatchesObjectID}, ${discoveryObjectID}`);
 
-      userInput.userMatches_id = userMatchesObject_id;
-      userInput.discovery_id = discoveryObject_id;
-      const createUserObj = createUserObject(userInput, userObject_id).catch(err => err);
+      const finalUserInput = userInput;
+      finalUserInput.userMatches_id = userMatchesObjectID;
+      finalUserInput.discovery_id = discoveryObjectID;
+      const createUserObj = createUserObject(finalUserInput, userObjectID)
+        .catch(err => err);
 
-      const createUserMatchesObj = createUserMatchesObject({ user_id: userObject_id }, userMatchesObject_id).catch(err => err);
+      const createUserMatchesObj = createUserMatchesObject(
+        { user_id: userObjectID }, userMatchesObjectID,
+      )
+        .catch(err => err);
 
-      const createDiscoveryObj = createDiscoveryObject({ user_id: userObject_id }, discoveryObject_id).catch(err => err);
+      const createDiscoveryObj = createDiscoveryObject(
+        { user_id: userObjectID }, discoveryObjectID,
+      )
+        .catch(err => err);
 
-      return Promise.all([createUserObj, createUserMatchesObj, createDiscoveryObj]).then(([userObject, userMatchesObject, discoveryObject]) => {
-        if (userObject instanceof Error || userMatchesObject instanceof Error || discoveryObject instanceof Error) {
-          let message = '';
-          if (userObject instanceof Error) {
-            message += userObject.toString();
-          } else {
-            userObject.remove((err) => {
-              if (err) {
-                debug(`Failed to remove user object${err}`);
-              } else {
-                debug('Removed created user object successfully');
-              }
-            });
-          }
-          if (userMatchesObject instanceof Error) {
-            message += userMatchesObject.toString();
-          } else {
-            userMatchesObject.remove((err) => {
-              if (err) {
-                debug(`Failed to remove user matches object${err}`);
-              } else {
-                debug('Removed created user matches object successfully');
-              }
-            });
-          }
-          if (discoveryObject instanceof Error) {
-            message += discoveryObject.toString();
-          } else {
-            discoveryObject.remove((err) => {
-              if (err) {
-                debug(`Failed to remove discovery object${err}`);
-              } else {
-                debug('Removed created discovery object successfully');
-              }
-            });
+      return Promise.all([createUserObj, createUserMatchesObj, createDiscoveryObj])
+        .then(([userObject, userMatchesObject, discoveryObject]) => {
+          if (userObject instanceof Error
+          || userMatchesObject instanceof Error
+          || discoveryObject instanceof Error) {
+            let message = '';
+            if (userObject instanceof Error) {
+              message += userObject.toString();
+            } else {
+              userObject.remove((err) => {
+                if (err) {
+                  debug(`Failed to remove user object${err}`);
+                } else {
+                  debug('Removed created user object successfully');
+                }
+              });
+            }
+            if (userMatchesObject instanceof Error) {
+              message += userMatchesObject.toString();
+            } else {
+              userMatchesObject.remove((err) => {
+                if (err) {
+                  debug(`Failed to remove user matches object${err}`);
+                } else {
+                  debug('Removed created user matches object successfully');
+                }
+              });
+            }
+            if (discoveryObject instanceof Error) {
+              message += discoveryObject.toString();
+            } else {
+              discoveryObject.remove((err) => {
+                if (err) {
+                  debug(`Failed to remove discovery object${err}`);
+                } else {
+                  debug('Removed created discovery object successfully');
+                }
+              });
+            }
+            return {
+              success: false,
+              message,
+            };
           }
           return {
-            success: false,
-            message,
-          };
-        }
-        return {
-          success: true,
-          user: userObject,
-        };
-      });
-    },
-    updateUser: async (_source, { id, updateUserInput }, { dataSources }) => {
-      updateUserInput = $.flatten(updateUserInput);
-      return new Promise((resolve, reject) => User.findByIdAndUpdate(id, updateUserInput, { new: true, runValidators: true }, (err, user) => {
-        if (err) {
-          resolve({
-            success: false,
-            message: err.toString(),
-          });
-        } else {
-          resolve({
             success: true,
-            user,
-            message: 'Successfully updated',
-          });
-        }
-      }));
+            user: userObject,
+          };
+        });
+    },
+    updateUser: async (_source, { id, updateUserInput }) => {
+      const finalUpdateUserInput = $.flatten(updateUserInput);
+      return new Promise(resolve => User.findByIdAndUpdate(
+        id, finalUpdateUserInput, { new: true, runValidators: true },
+        (err, user) => {
+          if (err) {
+            resolve({
+              success: false,
+              message: err.toString(),
+            });
+          } else {
+            resolve({
+              success: true,
+              user,
+              message: 'Successfully updated',
+            });
+          }
+        },
+      ));
     },
   },
 };

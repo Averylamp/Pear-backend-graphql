@@ -30,7 +30,8 @@ const DiscoverySchema = new Schema({
 export const Discovery = mongoose.model('Discovery', DiscoverySchema);
 
 
-export const createDiscoveryObject = function createDiscoveryObject(discoveryInput, _id = mongoose.Types.ObjectId) {
+export const createDiscoveryObject = function
+createDiscoveryObject(discoveryInput, _id = mongoose.Types.ObjectId) {
   const discoveryModel = new Discovery(discoveryInput);
 
   discoveryModel._id = _id;
