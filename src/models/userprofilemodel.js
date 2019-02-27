@@ -89,8 +89,8 @@ type ProfileDemographics{
   height: Int
   locationName: String
   locationCoordinates: String
-  ethnicities: [String!]
   religion: [String!]
+  ethnicities: [String!]
   political: [String!]
   school: String
   smoking: [String!]
