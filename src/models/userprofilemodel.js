@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const $ = require('mongo-dot-notation');
 
+const debug = require('debug')('dev:UserProfile');
 
 export const typeDef = `
 
@@ -193,11 +194,11 @@ export const UserProfile = mongoose.model('UserProfile', UserProfileSchema);
 export const createUserProfileObject = function createUserProfileObject(userProfileInput, _id = mongoose.Types.ObjectId()) {
   const userProfileModel = new UserProfile(userProfileInput);
   userProfileModel._id = _id;
-  console.log(userProfileModel);
+  debug(userProfileModel);
   return new Promise((resolve, reject) => {
     userProfileModel.save((err) => {
       if (err) {
-        console.log(err);
+        debug(err);
         reject(err);
       }
       resolve(userProfileModel);
@@ -217,8 +218,8 @@ export const resolvers = {
     createUserProfile: async (_source, { userProfileInput }, { dataSources }) => {
       const userProfileObject_id = mongoose.Types.ObjectId();
       const discoveryObject_id = mongoose.Types.ObjectId();
-      console.log(`IDs:${userProfileObject_id}, ${discoveryObject_id}`);
-      console.log(userProfileInput);
+      debug(`IDs:${userProfileObject_id}, ${discoveryObject_id}`);
+      debug(userProfileInput);
       userProfileInput.discovery_id = discoveryObject_id;
       const createUserProfileObj = createUserProfileObject(userProfileInput, userProfileObject_id).catch(err => err);
 
@@ -232,9 +233,9 @@ export const resolvers = {
           } else {
             userProfileObject.remove((err) => {
               if (err) {
-                console.log(`Failed to remove user profile object${err}`);
+                debug(`Failed to remove user profile object${err}`);
               } else {
-                console.log('Removed created user profile object successfully');
+                debug('Removed created user profile object successfully');
               }
             });
           }
@@ -243,9 +244,9 @@ export const resolvers = {
           } else {
             discoveryObject.remove((err) => {
               if (err) {
-                console.log(`Failed to remove discovery object${err}`);
+                debug(`Failed to remove discovery object${err}`);
               } else {
-                console.log('Removed created discovery object successfully');
+                debug('Removed created discovery object successfully');
               }
             });
           }
@@ -261,19 +262,19 @@ export const resolvers = {
       });
     },
     updateUserProfile: async (_source, { id, updateUserProfileInput }, { dataSources }) => {
-      console.log(`Updating User Profile: ${id}`);
-      console.log(updateUserProfileInput);
+      debug(`Updating User Profile: ${id}`);
+      debug(updateUserProfileInput);
       updateUserProfileInput = $.flatten(updateUserProfileInput);
-      console.log(updateUserProfileInput);
+      debug(updateUserProfileInput);
       return new Promise((resolve, reject) => UserProfile.findByIdAndUpdate(id, updateUserProfileInput, { new: true, runValidators: true }, (err, userProfile) => {
         if (err) {
-          console.log(err);
+          debug(err);
           resolve({
             success: false,
             message: err.toString(),
           });
         } else {
-          console.log(userProfile);
+          debug(userProfile);
           resolve({
             success: true,
             userProfile,

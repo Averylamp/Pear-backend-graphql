@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
+const debug = require('debug')('dev:Discovery');
 
 export const typeDef = `
 type Discovery{
@@ -37,7 +38,7 @@ export const createDiscoveryObject = function createDiscoveryObject(discoveryInp
   return new Promise((resolve, reject) => {
     discoveryModel.save((err) => {
       if (err) {
-        console.log(err);
+        debug(err);
         reject(err);
       }
       resolve(discoveryModel);

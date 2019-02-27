@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
 const $ = require('mongo-dot-notation');
+const debug = require('debug')('dev:User');
 
 export const typeDef = `
 extend type Query {
@@ -305,7 +306,7 @@ export const createUserObject = function createUserObject(userInput, _id = mongo
 export const resolvers = {
   Query: {
     user: async (_source, { id }, { dataSources }) => {
-      console.log(`Getting user by id: ${id}`);
+      debug(`Getting user by id: ${id}`);
       return (await dataSources.usersDB.findOne({ _id: ObjectId(id) }));
     },
     users: async (_source, _args, { dataSources }) => (await dataSources.usersDB.find({}).toArray()).map(prepare),
@@ -317,7 +318,7 @@ export const resolvers = {
       const userObject_id = mongoose.Types.ObjectId();
       const userMatchesObject_id = mongoose.Types.ObjectId();
       const discoveryObject_id = mongoose.Types.ObjectId();
-      console.log(`IDs:${userObject_id}, ${userMatchesObject_id}, ${discoveryObject_id}`);
+      debug(`IDs:${userObject_id}, ${userMatchesObject_id}, ${discoveryObject_id}`);
 
       userInput.userMatches_id = userMatchesObject_id;
       userInput.discovery_id = discoveryObject_id;
@@ -335,9 +336,9 @@ export const resolvers = {
           } else {
             userObject.remove((err) => {
               if (err) {
-                console.log(`Failed to remove user object${err}`);
+                debug(`Failed to remove user object${err}`);
               } else {
-                console.log('Removed created user object successfully');
+                debug('Removed created user object successfully');
               }
             });
           }
@@ -346,9 +347,9 @@ export const resolvers = {
           } else {
             userMatchesObject.remove((err) => {
               if (err) {
-                console.log(`Failed to remove user matches object${err}`);
+                debug(`Failed to remove user matches object${err}`);
               } else {
-                console.log('Removed created user matches object successfully');
+                debug('Removed created user matches object successfully');
               }
             });
           }
@@ -357,9 +358,9 @@ export const resolvers = {
           } else {
             discoveryObject.remove((err) => {
               if (err) {
-                console.log(`Failed to remove discovery object${err}`);
+                debug(`Failed to remove discovery object${err}`);
               } else {
-                console.log('Removed created discovery object successfully');
+                debug('Removed created discovery object successfully');
               }
             });
           }
