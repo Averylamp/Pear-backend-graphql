@@ -18,6 +18,7 @@ extend type Mutation{
 }
 
 input CreationUserInput{
+  age: Int!
   email: String!
   emailVerified: Boolean!
   phoneNumber: String!
@@ -28,6 +29,7 @@ input CreationUserInput{
   firebaseAuthID: String
   facebookId: String
   facebookAccessToken: String
+  birthdate: Int
 }
 
 input UserPreferencesInitialInput {
@@ -119,7 +121,7 @@ type User {
   schoolEmail: String
   schoolEmailVerified: Boolean
   birthdate: Int
-  age: Int
+  age: Int!
   profile_ids: [ID!]!
   profile_objs: [UserProfile!]!
   endorsedProfile_ids: [ID!]!
@@ -206,7 +208,7 @@ const UserSchema = new Schema({
   schoolEmailVerified: { type: Boolean, required: false, default: false },
   birthdate: { type: Date, required: false },
   age: {
-    type: Number, required: false, min: 18, max: 100, index: true,
+    type: Number, required: true, min: 18, max: 100, index: true,
   },
   profile_ids: { type: [Schema.Types.ObjectId], required: true, index: true },
   endorsedProfile_ids: { type: [Schema.Types.ObjectId], required: true, index: true },
@@ -314,6 +316,7 @@ export const resolvers = {
   },
   Mutation: {
     createUser: async (_source, { userInput }) => {
+      console.log(userInput);
       const userObjectID = mongoose.Types.ObjectId();
       const userMatchesObjectID = mongoose.Types.ObjectId();
       const discoveryObjectID = mongoose.Types.ObjectId();
