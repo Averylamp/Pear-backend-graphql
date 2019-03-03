@@ -25,8 +25,8 @@ input CreationUserInput{
   phoneNumberVerified: Boolean!
   firstName: String!
   lastName: String!
-  firebaseToken: String
-  firebaseAuthID: String
+  firebaseToken: String!
+  firebaseAuthID: String!
   facebookId: String
   facebookAccessToken: String
   birthdate: Int
@@ -184,10 +184,14 @@ type UserMutationResponse{
 `;
 const UserSchema = new Schema({
   deactivated: { type: Boolean, required: true, default: false },
-  firebaseToken: { type: String, required: false },
-  firebaseAuthID: { type: String, required: false },
-  facebookId: { type: String, required: false },
-  facebookAccessToken: { type: String, required: false },
+  firebaseToken: {
+    type: String, required: true,
+  },
+  firebaseAuthID: {
+    type: String, required: true, index: true, unique: true,
+  },
+  facebookId: { type: String, required: false, unique: true },
+  facebookAccessToken: { type: String, required: false, unique: true },
   email: { type: String, required: false },
   emailVerified: { type: Boolean, required: true, default: false },
   phoneNumber: {
@@ -316,7 +320,7 @@ export const resolvers = {
   },
   Mutation: {
     createUser: async (_source, { userInput }) => {
-      console.log(userInput);
+      debug(userInput);
       const userObjectID = mongoose.Types.ObjectId();
       const userMatchesObjectID = mongoose.Types.ObjectId();
       const discoveryObjectID = mongoose.Types.ObjectId();
