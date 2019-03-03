@@ -6,6 +6,14 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const $ = require('mongo-dot-notation');
 const debug = require('debug')('dev:User');
+const firebaseAdmin = require('firebase-admin');
+
+const serviceAccount = require('../../pear-firebase-adminsdk.json');
+
+firebaseAdmin.initializeApp({
+  credential: firebaseAdmin.credential.cert(serviceAccount),
+  databaseURL: 'https://pear-59123.firebaseio.com',
+});
 
 export const typeDef = `
 extend type Query {
@@ -14,7 +22,13 @@ extend type Query {
 
 extend type Mutation{
   createUser(userInput: CreationUserInput): UserMutationResponse
+  getUser(userInput: GetUserInput): UserMutationResponse
   updateUser(id: ID, updateUserInput: UpdateUserInput) : UserMutationResponse
+}
+
+input GetUserInput{
+  firebaseToken: String!
+  firebaseAuthID: String!
 }
 
 input CreationUserInput{
@@ -127,7 +141,7 @@ type User {
   endorsedProfile_ids: [ID!]!
   endorsedProfile_objs: [UserProfile!]!
   userPreferences: UserPreferences!
-  userStatData: UserStatData!
+  userStats: UserStats!
   userDemographics: UserDemographics!
   userMatches_id: ID!
   userMatches: UserMatches!
@@ -146,7 +160,7 @@ type UserDemographics{
 }
 
 
-type UserStatData{
+type UserStats{
   totalNumberOfMatchRequests: Int!
   totalNumberOfMatches: Int!
   totalNumberOfProfilesCreated: Int!
@@ -221,7 +235,7 @@ const UserSchema = new Schema({
 
   pearPoints: { type: Number, required: true, default: 0 },
 
-  userStatData: {
+  UserStats: {
     totalNumberOfMatchRequests: { type: Number, required: true, default: 0 },
     totalNumberOfMatches: { type: Number, required: true, default: 0 },
     totalNumberOfProfilesCreated: { type: Number, required: true, default: 0 },
@@ -391,6 +405,42 @@ export const resolvers = {
             user: userObject,
           };
         });
+    },
+    getUser: async (_source, { userInput }) => {
+      debug(userInput);
+      const idToken = userInput.firebaseToken;
+      const uid = userInput.firebaseAuthID;
+      return new Promise(resolve => firebaseAdmin.auth().verifyIdToken(idToken)
+        .then((decodedToken) => {
+          debug('Decoded token');
+          const firebaseUID = decodedToken.uid;
+          debug(firebaseUID);
+          debug(uid);
+          if (uid === firebaseUID) {
+            debug('tokenUID matches provided UID');
+            const user = User.findOne({ firebaseAuthID: uid });
+            if (user) {
+              resolve({
+                success: true,
+                message: 'Successfully fetched',
+                user,
+              });
+            } else {
+              resolve({
+                success: false,
+                message: 'Failed to fetch user',
+              });
+            }
+          }
+        }).catch((error) => {
+          debug('Failed to Decoded token');
+          // Handle error
+          debug(error);
+          resolve({
+            success: false,
+            message: 'Failed to verify token',
+          });
+        }));
     },
     updateUser: async (_source, { id, updateUserInput }) => {
       const finalUpdateUserInput = $.flatten(updateUserInput);
