@@ -29,6 +29,7 @@
     "cors": "^2.8.5",
     "debug": "^4.1.1",
     "express": "^4.16.4",
+    "firebase-admin": "^7.0.0",
     "graphql": "^14.1.1",
     "lodash": "^4.17.11",
     "mongo-dot-notation": "^1.2.0",
