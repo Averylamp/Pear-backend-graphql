@@ -76,7 +76,7 @@ input UserDemographicsInput{
   height: Int
 }
 
-input UserStatDataInput{
+input UserStatsInput{
   totalNumberOfMatchRequests: Int
   totalNumberOfMatches: Int
   totalNumberOfProfilesCreated: Int
@@ -108,7 +108,7 @@ input UpdateUserInput {
   birthdate: Int
   age: Int
   userPreferences: UserPreferencesInput
-  userStatData: UserStatDataInput
+  userStats: UserStatsInput
   userDemographics: UserDemographicsInput
   pearPoints: Int
 }
@@ -235,7 +235,7 @@ const UserSchema = new Schema({
 
   pearPoints: { type: Number, required: true, default: 0 },
 
-  UserStats: {
+  userStats: {
     totalNumberOfMatchRequests: { type: Number, required: true, default: 0 },
     totalNumberOfMatches: { type: Number, required: true, default: 0 },
     totalNumberOfProfilesCreated: { type: Number, required: true, default: 0 },
