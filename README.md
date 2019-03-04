@@ -10,8 +10,8 @@ npm install
 yarn startdev
 ```
 
-To set up linting scripts run from root .git folder: 
+To set up linting scripts run from root project folder: 
 ```
-cp pre-commit ./git/hooks
+cp pre-commit .git/hooks
 ```
 
