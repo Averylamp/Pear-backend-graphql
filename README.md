@@ -2,18 +2,15 @@
 
 All the important code is in `src/start.js`.
 
-Install, build and run:
+Install, build and run development server:
 
 ```
-yarn install
-yarn run build
-yarn start
+npm install
+yarn startdev
 ```
 
-For Local Development
-
-You need to start Mongodb for Local development
-
+To set up linting scripts run from root .git folder: 
 ```
-npm run startdev
+cp pre-commit ./git/hooks
 ```
+
