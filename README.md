@@ -1,6 +1,7 @@
 # GraphQL-MongoDB
 
-All the important code is in `src/start.js`.
+All the important starting code is in `src/start.js`.
+Models and the schema representation is split up in files in `src/models`
 
 Install, build and run development server:
 
