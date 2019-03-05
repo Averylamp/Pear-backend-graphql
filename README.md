@@ -1,19 +1,17 @@
 # GraphQL-MongoDB
 
-All the important code is in `src/start.js`.
+All the important starting code is in `src/start.js`.
+Models and the schema representation is split up in files in `src/models`
 
-Install, build and run:
-
-```
-yarn install
-yarn run build
-yarn start
-```
-
-For Local Development
-
-You need to start Mongodb for Local development
+Install, build and run development server:
 
 ```
-npm run startdev
+npm install
+yarn startdev
 ```
+
+To set up linting scripts run from root project folder: 
+```
+cp pre-commit .git/hooks
+```
+
