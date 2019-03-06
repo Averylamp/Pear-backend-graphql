@@ -1,7 +1,7 @@
 import { createUserMatchesObject } from './usermatchesmodel';
 import { createDiscoveryObject } from './discoverymodel';
-import { MatchingDemographicsSchema, MatchingPreferencesSchema } from './sharedmongoosesubdocuments';
-
+import { MatchingDemographicsSchema, MatchingPreferencesSchema } from './matchingschemas';
+import { GeoJSONSchema } from './typeschemas';
 
 const mongoose = require('mongoose');
 
@@ -46,7 +46,7 @@ input CreationUserInput{
   firebaseAuthID: String!
   facebookId: String
   facebookAccessToken: String
-  birthdate: Int
+  birthdate: String
 }
 
 input UserPreferencesInitialInput {
@@ -108,7 +108,7 @@ input UpdateUserInput {
   school: String
   schoolEmail: String
   schoolEmailVerified: Boolean
-  birthdate: Int
+  birthdate: String
   age: Int
   userPreferences: UserPreferencesInput
   userStats: UserStatsInput
@@ -133,7 +133,7 @@ type User {
   thumbnailURL: String
   gender: String
   age: Int!
-  birthdate: Int!
+  birthdate: String!
   locationName: String
   locationCoordinates: String
   school: String
@@ -160,7 +160,7 @@ type User {
 type MatchingDemographics{
   gender: Gender!
   age: Int!
-  birthdate: Int!
+  birthdate: String!
   height: Int
   religion: [String!]
   ethnicities: [String!]
@@ -204,6 +204,8 @@ type UserMutationResponse{
   user: User
 }
 
+
+
 `;
 
 const UserStatsSchema = new Schema({
@@ -242,7 +244,7 @@ const UserSchema = new Schema({
   thumbnailURL: { type: String, required: false },
   gender: { type: String, required: true, enum: ['male', 'female', 'nonbinary'] },
   locationName: { type: String, required: false },
-  locationCoordinates: { type: String, required: false },
+  locationCoordinates: { type: GeoJSONSchema, required: false },
   school: { type: String, required: false },
   schoolEmail: { type: String, required: false },
   schoolEmailVerified: { type: Boolean, required: false, default: false },
@@ -257,7 +259,7 @@ const UserSchema = new Schema({
 
   pearPoints: { type: Number, required: true, default: 0 },
 
-  userStats: UserStatsSchema,
+  userStats: { type: UserStatsSchema, required: true, default: UserStatsSchema },
 
   matchingDemographics: {
     type: MatchingDemographicsSchema,
@@ -270,7 +272,7 @@ const UserSchema = new Schema({
     default: MatchingPreferencesSchema,
   },
 
-});
+}, { timestamps: true });
 
 UserSchema.virtual('fullName').get(function fullName() {
   return `${this.firstName} ${this.lastName}`;
