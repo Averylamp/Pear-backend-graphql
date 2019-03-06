@@ -6,16 +6,17 @@ export const typeDef = `
 type UserMatches{
   _id: ID!
   user_id: ID!
-  user_obj: User!
+  userObj: User!
   alreadyMatchedUser_ids:[ID!]!
   matchRequest_ids: [ID!]!
-  matchRequest_objs: [MatchRequest!]!
+  matchRequestObjs: [MatchRequest!]!
   matchRejected_ids: [ID!]!
-  matchRejected_objs: [MatchRequest!]!
+  matchRejectedObjs: [MatchRequest!]!
   matches_ids: [ID!]!
-  matches_objs: [Match!]!
+  matchesObjs: [Match!]!
 }
 `;
+
 export const resolvers = {
   Query: {
 
@@ -43,10 +44,10 @@ const UserMatchesSchema = new Schema({
 });
 
 
-// user_obj: User!
-// matchRequest_objs: [MatchRequest!]!
-// matchRejected_objs: [MatchRequest!]!
-// matches_objs: [Match!]!
+// userObj: User!
+// matchRequestObjs: [MatchRequest!]!
+// matchRejectedObjs: [MatchRequest!]!
+// matchesObjs: [Match!]!
 export const UserMatches = mongoose.model('UserMatches', UserMatchesSchema);
 
 

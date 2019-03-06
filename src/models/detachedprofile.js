@@ -26,7 +26,7 @@ input CreationDetachedUserProfileDemographicsInput {
 type DetachedProfile {
   _id: ID!
   creator_id: ID!
-  creator_obj: User!
+  creatorObj: User!
   firstName: String!
   thumbnailURL: String
 
@@ -128,9 +128,9 @@ const DetachedProfileSchema = new Schema({
 });
 
 
-// creator_obj: User!
-// user_obj: User!
-// discovery_obj: Discovery!
+// creatorObj: User!
+// userObj: User!
+// discoveryObj: Discovery!
 
 export const DetachedProfile = mongoose.model('DetachedProfile', DetachedProfileSchema);
 

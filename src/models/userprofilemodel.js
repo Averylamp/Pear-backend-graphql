@@ -64,9 +64,9 @@ type UserProfileMutationResponse{
 type UserProfile {
   _id: ID!
   creator_id: ID!
-  creator_obj: User!
+  creatorObj: User!
   user_id: ID
-  user_obj: User
+  userObj: User
   activeProfile: Boolean!
   activeDiscovery: Boolean!
   fullName: String!
@@ -82,7 +82,7 @@ type UserProfile {
   profileImageIDs: [String!]!
   profileImages: ImageSizes!
   discovery_id: ID!
-  discovery_obj: Discovery!
+  discoveryObj: Discovery!
   userProfileData: UserProfileData!
 }
 
@@ -175,9 +175,9 @@ UserProfileSchema.virtual('fullName').get(function fullName() {
 });
 
 
-// creator_obj: User!
-// user_obj: User!
-// discovery_obj: Discovery!
+// creatorObj: User!
+// userObj: User!
+// discoveryObj: Discovery!
 
 export const UserProfile = mongoose.model('UserProfile', UserProfileSchema);
 
