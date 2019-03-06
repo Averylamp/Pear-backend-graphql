@@ -6,7 +6,7 @@ Models and the schema representation is split up in files in `src/models`
 Install, build and run development server:
 
 ```
-npm install
+yarn install
 yarn startdev
 ```
 
