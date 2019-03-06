@@ -1,4 +1,6 @@
 import express from 'express';
+import bodyParser from 'body-parser';
+import sendMessage from './SMSHelper';
 import { merge } from 'lodash';
 import {
   typeDef as User,
@@ -43,7 +45,7 @@ const { ApolloServer } = require('apollo-server-express');
 
 const URL = 'http://localhost';
 const PORT = 1234;
-const MONGO_URL = 'mongodb+srv://avery:0bz8M0eMEtyXlj2aZodIPpJpy@cluster0-w4ecv.mongodb.net/dev?retryWrites=true';
+const MONGO_URL = 'mongodb+srv://avery:0bz8M0eMEtyXlj2aZodIPpJpy@cluster0-w4ecv.mongodb.net/dev-brian?retryWrites=true';
 const debug = require('debug')('dev:Start');
 const mongoose = require('mongoose');
 
@@ -129,8 +131,21 @@ export const start = async () => {
         }),
       });
       const app = express();
+      app.use(bodyParser.json());
+      app.use(bodyParser.urlencoded({ extended: true }));
       // app.use(cors())
+
       server.applyMiddleware({ app });
+      app.post('/echo', (req, res) => {
+        console.log(req.body);
+        res.json(req.body);
+      });
+
+      app.post('/sms-test', (req, res) => {
+        console.log(req.body);
+        sendMessage('+12067789236', 'hello!')
+        res.json(req.body);
+      });
 
 
       app.listen({ port: PORT, ip: URL }, () => debug(`🚀 Server ready at ${URL}:${PORT}${server.graphqlPath}`));
