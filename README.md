@@ -15,3 +15,4 @@ To set up linting scripts run from root project folder:
 cp pre-commit .git/hooks
 ```
 
+You shouldn't be able to push directly to master; instead, create and merge PRs.
