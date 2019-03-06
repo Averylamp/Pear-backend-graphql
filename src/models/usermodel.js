@@ -1,21 +1,9 @@
-import { createUserMatchesObject } from './usermatchesmodel';
-import { createDiscoveryObject } from './discoverymodel';
 import { MatchingDemographicsSchema, MatchingPreferencesSchema } from './matchingschemas';
 import { GeoJSONSchema } from './typeschemas';
 
 const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
-const $ = require('mongo-dot-notation');
-const debug = require('debug')('dev:User');
-const firebaseAdmin = require('firebase-admin');
-
-const serviceAccount = require('../../pear-firebase-adminsdk.json');
-
-firebaseAdmin.initializeApp({
-  credential: firebaseAdmin.credential.cert(serviceAccount),
-  databaseURL: 'https://pear-59123.firebaseio.com',
-});
 
 export const typeDef = `
 extend type Query {
@@ -35,6 +23,7 @@ input GetUserInput{
 
 input CreationUserInput{
   age: Int!
+  birthdate: String!
   email: String!
   emailVerified: Boolean!
   phoneNumber: String!
@@ -46,7 +35,8 @@ input CreationUserInput{
   firebaseAuthID: String!
   facebookId: String
   facebookAccessToken: String
-  birthdate: String
+
+  thumbnailURL: String
 }
 
 input UserPreferencesInitialInput {
@@ -119,8 +109,8 @@ input UpdateUserInput {
 type User {
   _id: ID!
   deactivated: Boolean!
-  firebaseToken: String
-  firebaseAuthID: String
+  firebaseToken: String!
+  firebaseAuthID: String!
   facebookId: String
   facebookAccessToken: String
   email: String!
@@ -140,21 +130,22 @@ type User {
   schoolEmail: String
   schoolEmailVerified: Boolean
 
+  pearPoints: Int
+
   profile_ids: [ID!]!
-  profile_objs: [UserProfile!]!
+  profileObjs: [UserProfile!]!
   endorsedProfile_ids: [ID!]!
-  endorsedProfile_objs: [UserProfile!]!
+  endorsedProfileObjs: [UserProfile!]!
+
+  userMatches_id: ID!
+  userMatchesObj: UserMatches!
+  discoveryQueue_id: ID!
+  discoveryQueueObj: DiscoveryQueue!
 
   userStats: UserStats!
 
   matchingPreferences: MatchingPreferences!
   matchingDemographics: MatchingDemographics!
-
-  userMatches_id: ID!
-  userMatches: UserMatches!
-  discovery_id: ID!
-  discovery_obj: Discovery!
-  pearPoints: Int
 }
 
 type MatchingDemographics{
@@ -239,25 +230,27 @@ const UserSchema = new Schema({
     index: true,
   },
   phoneNumberVerified: { type: Boolean, required: true, default: false },
-  firstName: { type: String, required: false },
-  lastName: { type: String, required: false },
+  firstName: { type: String, required: true },
+  lastName: { type: String, required: true },
   thumbnailURL: { type: String, required: false },
   gender: { type: String, required: true, enum: ['male', 'female', 'nonbinary'] },
+  age: {
+    type: Number, required: true, min: 18, max: 100, index: true,
+  },
+  birthdate: { type: Date, required: true },
   locationName: { type: String, required: false },
   locationCoordinates: { type: GeoJSONSchema, required: false },
   school: { type: String, required: false },
   schoolEmail: { type: String, required: false },
   schoolEmailVerified: { type: Boolean, required: false, default: false },
-  birthdate: { type: Date, required: true },
-  age: {
-    type: Number, required: true, min: 18, max: 100, index: true,
-  },
-  profile_ids: { type: [Schema.Types.ObjectId], required: true, index: true },
-  endorsedProfile_ids: { type: [Schema.Types.ObjectId], required: true, index: true },
-  userMatches_id: { type: Schema.Types.ObjectId, required: true },
-  discovery_id: { type: Schema.Types.ObjectId, required: true },
 
   pearPoints: { type: Number, required: true, default: 0 },
+
+  profile_ids: { type: [Schema.Types.ObjectId], required: true, index: true },
+  endorsedProfile_ids: { type: [Schema.Types.ObjectId], required: true, index: true },
+
+  userMatches_id: { type: Schema.Types.ObjectId, required: true },
+  discoveryQueue_id: { type: Schema.Types.ObjectId, required: true },
 
   userStats: { type: UserStatsSchema, required: true, default: UserStatsSchema },
 
@@ -279,8 +272,8 @@ UserSchema.virtual('fullName').get(function fullName() {
 });
 
 
-// profile_objs: { type: [, required: true,  UserProfile!]!
-// endorsedProfile_objs: { type: [, required: true,  UserProfile!]!
+// profileObjs: { type: [, required: true,  UserProfile!]!
+// endorsedProfileObjs: { type: [, required: true,  UserProfile!]!
 export const User = mongoose.model('User', UserSchema);
 
 export const createUserObject = function
@@ -297,147 +290,4 @@ createUserObject(userInput, _id = mongoose.Types.ObjectId()) {
       resolve(userModel);
     });
   });
-};
-
-
-export const resolvers = {
-  Query: {
-    user: async (_source, { id }, { dataSources }) => {
-      debug(`Getting user by id: ${id}`);
-      return dataSources.usersDB.findOne({ _id: id });
-    },
-  },
-  User: {
-  },
-  Mutation: {
-    createUser: async (_source, { userInput }) => {
-      debug(userInput);
-      const userObjectID = mongoose.Types.ObjectId();
-      const userMatchesObjectID = mongoose.Types.ObjectId();
-      const discoveryObjectID = mongoose.Types.ObjectId();
-      debug(`IDs:${userObjectID}, ${userMatchesObjectID}, ${discoveryObjectID}`);
-
-      const finalUserInput = userInput;
-      finalUserInput.userMatches_id = userMatchesObjectID;
-      finalUserInput.discovery_id = discoveryObjectID;
-      const createUserObj = createUserObject(finalUserInput, userObjectID)
-        .catch(err => err);
-
-      const createUserMatchesObj = createUserMatchesObject(
-        { user_id: userObjectID }, userMatchesObjectID,
-      )
-        .catch(err => err);
-
-      const createDiscoveryObj = createDiscoveryObject(
-        { user_id: userObjectID }, discoveryObjectID,
-      )
-        .catch(err => err);
-
-      return Promise.all([createUserObj, createUserMatchesObj, createDiscoveryObj])
-        .then(([userObject, userMatchesObject, discoveryObject]) => {
-          if (userObject instanceof Error
-          || userMatchesObject instanceof Error
-          || discoveryObject instanceof Error) {
-            let message = '';
-            if (userObject instanceof Error) {
-              message += userObject.toString();
-            } else {
-              userObject.remove((err) => {
-                if (err) {
-                  debug(`Failed to remove user object${err}`);
-                } else {
-                  debug('Removed created user object successfully');
-                }
-              });
-            }
-            if (userMatchesObject instanceof Error) {
-              message += userMatchesObject.toString();
-            } else {
-              userMatchesObject.remove((err) => {
-                if (err) {
-                  debug(`Failed to remove user matches object${err}`);
-                } else {
-                  debug('Removed created user matches object successfully');
-                }
-              });
-            }
-            if (discoveryObject instanceof Error) {
-              message += discoveryObject.toString();
-            } else {
-              discoveryObject.remove((err) => {
-                if (err) {
-                  debug(`Failed to remove discovery object${err}`);
-                } else {
-                  debug('Removed created discovery object successfully');
-                }
-              });
-            }
-            return {
-              success: false,
-              message,
-            };
-          }
-          return {
-            success: true,
-            user: userObject,
-          };
-        });
-    },
-    getUser: async (_source, { userInput }) => {
-      debug(userInput);
-      const idToken = userInput.firebaseToken;
-      const uid = userInput.firebaseAuthID;
-      return new Promise(resolve => firebaseAdmin.auth().verifyIdToken(idToken)
-        .then((decodedToken) => {
-          debug('Decoded token');
-          const firebaseUID = decodedToken.uid;
-          debug(firebaseUID);
-          debug(uid);
-          if (uid === firebaseUID) {
-            debug('tokenUID matches provided UID');
-            const user = User.findOne({ firebaseAuthID: uid });
-            if (user) {
-              resolve({
-                success: true,
-                message: 'Successfully fetched',
-                user,
-              });
-            } else {
-              resolve({
-                success: false,
-                message: 'Failed to fetch user',
-              });
-            }
-          }
-        }).catch((error) => {
-          debug('Failed to Decoded token');
-          // Handle error
-          debug(error);
-          resolve({
-            success: false,
-            message: 'Failed to verify token',
-          });
-        }));
-    },
-    updateUser: async (_source, { id, updateUserInput }) => {
-      const finalUpdateUserInput = $.flatten(updateUserInput);
-      return new Promise(resolve => User.findByIdAndUpdate(
-        id, finalUpdateUserInput, { new: true, runValidators: true },
-        (err, user) => {
-          if (err) {
-            resolve({
-              success: false,
-              message: err.toString(),
-            });
-          } else {
-            resolve({
-              success: true,
-              user,
-              message: 'Successfully updated',
-            });
-          }
-        },
-      ));
-    },
-  },
 };

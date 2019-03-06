@@ -2,8 +2,10 @@ import express from 'express';
 import { merge } from 'lodash';
 import {
   typeDef as User,
-  resolvers as UserResolvers,
 } from './models/usermodel';
+import {
+  resolvers as UserResolvers,
+} from './resolvers/userresolver';
 import {
   typeDef as UserProfile,
   resolvers as UserProfileResolvers,
@@ -28,6 +30,12 @@ import {
   typeDef as Discovery,
   resolvers as DiscoveryResolvers,
 } from './models/discoverymodel';
+import {
+  typeDef as DiscoveryQueue,
+} from './models/discoveryqueuemodel';
+import {
+  resolvers as DiscoveryQueueResolvers,
+} from './resolvers/discoveryqueueresolver';
 
 const { ApolloServer } = require('apollo-server-express');
 
@@ -59,6 +67,7 @@ export const start = async () => {
     const MatchRequestsDB = db.collection('matchrequests');
     const MatchesDB = db.collection('matches');
     const DiscoveriesDB = db.collection('discoveries');
+    const DiscoveryQueuesDB = db.collection('discoveryqueues');
 
     const Query = `
     type Query {
@@ -79,7 +88,8 @@ export const start = async () => {
       DetachedProfile,
       Match, UserMatches,
       MatchRequest,
-      Discovery];
+      Discovery,
+      DiscoveryQueue];
 
     const resolvers = {
       Query: {
@@ -93,7 +103,8 @@ export const start = async () => {
       MatchResolvers,
       UserMatchesResolvers,
       MatchRequestResolvers,
-      DiscoveryResolvers);
+      DiscoveryResolvers,
+      DiscoveryQueueResolvers);
 
 
     const server = new ApolloServer({
@@ -110,6 +121,7 @@ export const start = async () => {
         matchRequestsDB: MatchRequestsDB,
         matchesDB: MatchesDB,
         discoveriesDB: DiscoveriesDB,
+        discoveryQueuesDB: DiscoveryQueuesDB,
       }),
     });
     const app = express();
