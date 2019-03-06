@@ -7,7 +7,8 @@
 #
 # To enable this hook, rename this file to "pre-commit".
 
-echo "Pre commit working"
+echo "Pre-commit eslinter running"
+exec npx eslint src --fix
 
 if git rev-parse --verify HEAD >/dev/null 2>&1
 then
@@ -46,9 +47,3 @@ If you know what you are doing you can disable this check using:
 EOF
 	exit 1
 fi
-
-# If there are whitespace errors, print the offending file names and fail.
-exec git diff-index --check --cached $against --
-
-
-
