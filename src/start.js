@@ -27,10 +27,6 @@ import {
   resolvers as MatchRequestResolvers,
 } from './models/matchrequestmodel';
 import {
-  typeDef as Discovery,
-  resolvers as DiscoveryResolvers,
-} from './models/discoverymodel';
-import {
   typeDef as DiscoveryQueue,
 } from './models/discoveryqueuemodel';
 import {
@@ -88,7 +84,6 @@ export const start = async () => {
       DetachedProfile,
       Match, UserMatches,
       MatchRequest,
-      Discovery,
       DiscoveryQueue];
 
     const resolvers = {
@@ -103,7 +98,6 @@ export const start = async () => {
       MatchResolvers,
       UserMatchesResolvers,
       MatchRequestResolvers,
-      DiscoveryResolvers,
       DiscoveryQueueResolvers);
 
 
