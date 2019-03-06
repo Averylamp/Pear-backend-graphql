@@ -9,6 +9,10 @@ import {
   resolvers as UserProfileResolvers,
 } from './models/userprofilemodel';
 import {
+  typeDef as DetachedProfile,
+  resolvers as DetachedProfileResolvers,
+} from './models/detachedprofile';
+import {
   typeDef as Match,
   resolvers as MatchResolvers,
 } from './models/matchmodel';
@@ -50,6 +54,7 @@ export const start = async () => {
 
     const UsersDB = db.collection('users');
     const UserProfilesDB = db.collection('userprofiles');
+    const DetachedProfilesDB = db.collection('detachedprofiles');
     const UserMatchesDB = db.collection('usermatches');
     const MatchRequestsDB = db.collection('matchrequests');
     const MatchesDB = db.collection('matches');
@@ -68,7 +73,14 @@ export const start = async () => {
 
 
     `;
-    const finalTypeDefs = [Query, User, UserProfile, Match, UserMatches, MatchRequest, Discovery];
+    const finalTypeDefs = [Query,
+      User,
+      UserProfile,
+      DetachedProfile,
+      Match, UserMatches,
+      MatchRequest,
+      Discovery];
+
     const resolvers = {
       Query: {
       },
@@ -77,6 +89,7 @@ export const start = async () => {
     const finalResolvers = merge(resolvers,
       UserResolvers,
       UserProfileResolvers,
+      DetachedProfileResolvers,
       MatchResolvers,
       UserMatchesResolvers,
       MatchRequestResolvers,
@@ -92,6 +105,7 @@ export const start = async () => {
       dataSources: () => ({
         usersDB: UsersDB,
         userProfilesDB: UserProfilesDB,
+        detachedUserProfilesDB: DetachedProfilesDB,
         userMatchesDB: UserMatchesDB,
         matchRequestsDB: MatchRequestsDB,
         matchesDB: MatchesDB,

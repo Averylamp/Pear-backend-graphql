@@ -1,5 +1,7 @@
 import { createUserMatchesObject } from './usermatchesmodel';
 import { createDiscoveryObject } from './discoverymodel';
+import { MatchingDemographicsSchema, MatchingPreferencesSchema } from './sharedmongoosesubdocuments';
+
 
 const mongoose = require('mongoose');
 
@@ -39,6 +41,7 @@ input CreationUserInput{
   phoneNumberVerified: Boolean!
   firstName: String!
   lastName: String!
+  gender: Gender!
   firebaseToken: String!
   firebaseAuthID: String!
   facebookId: String
@@ -128,21 +131,25 @@ type User {
   lastName: String!
   fullName: String!
   thumbnailURL: String
-  gender: Gender
+  gender: String
+  age: Int!
+  birthdate: Int!
   locationName: String
   locationCoordinates: String
   school: String
   schoolEmail: String
   schoolEmailVerified: Boolean
-  birthdate: Int
-  age: Int!
+
   profile_ids: [ID!]!
   profile_objs: [UserProfile!]!
   endorsedProfile_ids: [ID!]!
   endorsedProfile_objs: [UserProfile!]!
-  userPreferences: UserPreferences!
+
   userStats: UserStats!
-  userDemographics: UserDemographics!
+
+  matchingPreferences: MatchingPreferences!
+  matchingDemographics: MatchingDemographics!
+
   userMatches_id: ID!
   userMatches: UserMatches!
   discovery_id: ID!
@@ -150,31 +157,23 @@ type User {
   pearPoints: Int
 }
 
-type UserDemographics{
-  ethnicities: [String!]
+type MatchingDemographics{
+  gender: Gender!
+  age: Int!
+  birthdate: Int!
+  height: Int
   religion: [String!]
+  ethnicities: [String!]
   political: [String!]
   smoking: [String!]
   drinking: [String!]
-  height: Int
+  school: String
 }
 
-
-type UserStats{
-  totalNumberOfMatchRequests: Int!
-  totalNumberOfMatches: Int!
-  totalNumberOfProfilesCreated: Int!
-  totalNumberOfEndorsementsCreated: Int!
-  conversationTotalNumber: Int!
-  conversationTotalNumberFirstMessage: Int!
-  conversationTotalNumberTenMessages: Int!
-  conversationTotalNumberHundredMessages: Int!
-}
-
-type UserPreferences{
-  ethnicities: [String!]!
+type MatchingPreferences{
+  ethnicities: [String!]
   seekingGender: [Gender!]!
-  seekingReason: [String!]!
+  seekingReason: [String!]
   reasonDealbreaker: Int!
   seekingEthnicity: [String!]!
   ethnicityDealbreaker: Int!
@@ -188,6 +187,16 @@ type UserPreferences{
   heightDealbreaker: Int!
 }
 
+type UserStats{
+  totalNumberOfMatchRequests: Int!
+  totalNumberOfMatches: Int!
+  totalNumberOfProfilesCreated: Int!
+  totalNumberOfEndorsementsCreated: Int!
+  conversationTotalNumber: Int!
+  conversationTotalNumberFirstMessage: Int!
+  conversationTotalNumberTenMessages: Int!
+  conversationTotalNumberHundredMessages: Int!
+}
 
 type UserMutationResponse{
   success: Boolean!
@@ -196,6 +205,19 @@ type UserMutationResponse{
 }
 
 `;
+
+const UserStatsSchema = new Schema({
+  totalNumberOfMatchRequests: { type: Number, required: true, default: 0 },
+  totalNumberOfMatches: { type: Number, required: true, default: 0 },
+  totalNumberOfProfilesCreated: { type: Number, required: true, default: 0 },
+  totalNumberOfEndorsementsCreated: { type: Number, required: true, default: 0 },
+  conversationTotalNumber: { type: Number, required: true, default: 0 },
+  conversationTotalNumberFirstMessage: { type: Number, required: true, default: 0 },
+  conversationTotalNumberTenMessages: { type: Number, required: true, default: 0 },
+  conversationTotalNumberTwentyMessages: { type: Number, required: true, default: 0 },
+  conversationTotalNumberHundredMessages: { type: Number, required: true, default: 0 },
+});
+
 const UserSchema = new Schema({
   deactivated: { type: Boolean, required: true, default: false },
   firebaseToken: {
@@ -218,13 +240,13 @@ const UserSchema = new Schema({
   firstName: { type: String, required: false },
   lastName: { type: String, required: false },
   thumbnailURL: { type: String, required: false },
-  gender: { type: String, required: false, enum: ['male', 'female', 'nonbinary'] },
+  gender: { type: String, required: true, enum: ['male', 'female', 'nonbinary'] },
   locationName: { type: String, required: false },
   locationCoordinates: { type: String, required: false },
   school: { type: String, required: false },
   schoolEmail: { type: String, required: false },
   schoolEmailVerified: { type: Boolean, required: false, default: false },
-  birthdate: { type: Date, required: false },
+  birthdate: { type: Date, required: true },
   age: {
     type: Number, required: true, min: 18, max: 100, index: true,
   },
@@ -235,64 +257,17 @@ const UserSchema = new Schema({
 
   pearPoints: { type: Number, required: true, default: 0 },
 
-  userStats: {
-    totalNumberOfMatchRequests: { type: Number, required: true, default: 0 },
-    totalNumberOfMatches: { type: Number, required: true, default: 0 },
-    totalNumberOfProfilesCreated: { type: Number, required: true, default: 0 },
-    totalNumberOfEndorsementsCreated: { type: Number, required: true, default: 0 },
-    conversationTotalNumber: { type: Number, required: true, default: 0 },
-    conversationTotalNumberFirstMessage: { type: Number, required: true, default: 0 },
-    conversationTotalNumberTenMessages: { type: Number, required: true, default: 0 },
-    conversationTotalNumberTwentyMessages: { type: Number, required: true, default: 0 },
-    conversationTotalNumberHundredMessages: { type: Number, required: true, default: 0 },
-  },
+  userStats: UserStatsSchema,
 
-  userDemographics: {
-    ethnicities: { type: [String], required: false },
-    religion: { type: [String], required: false },
-    political: { type: [String], required: false },
-    smoking: { type: [String], required: false },
-    drinking: { type: [String], required: false },
-    height: { type: Number, required: false },
+  matchingDemographics: {
+    type: MatchingDemographicsSchema,
+    required: true,
+    default: MatchingDemographicsSchema,
   },
-
-  userPreferences: {
-    ethnicities: { type: [String], required: true, default: ['No Preference'] },
-    seekingGender: {
-      type: [String], required: true, enum: ['male', 'female', 'nonbinary'], default: ['male', 'female', 'nonbinary'],
-    },
-    seekingReason: { type: [String], required: true, default: ['No Preference'] },
-    reasonDealbreaker: {
-      type: Number, required: true, min: 0, max: 1, default: 0,
-    },
-    seekingEthnicity: { type: [String], required: true, default: ['No Preference'] },
-    ethnicityDealbreaker: {
-      type: Number, required: true, min: 0, max: 1, default: 0,
-    },
-    maxDistance: {
-      type: Number, required: true, min: 1, max: 100, default: 25,
-    },
-    distanceDealbreaker: {
-      type: Number, required: true, min: 0, max: 1, default: 0,
-    },
-    minAgeRange: {
-      type: Number, required: true, min: 18, max: 100, default: 18,
-    },
-    maxAgeRange: {
-      type: Number, required: true, min: 18, max: 100, default: 40,
-    },
-    ageDealbreaker: {
-      type: Number, required: true, min: 0, max: 1, default: 0,
-    },
-    minHeightRange: {
-      type: Number, required: true, min: 40, max: 100, default: 40,
-    },
-    maxHeightRange: {
-      type: Number, required: true, min: 40, max: 100, default: 100,
-    },
-    heightDealbreaker: {
-      type: Number, required: true, min: 0, max: 1, default: 0,
-    },
+  matchingPreferences: {
+    type: MatchingPreferencesSchema,
+    required: true,
+    default: MatchingPreferencesSchema,
   },
 
 });

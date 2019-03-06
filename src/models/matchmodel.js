@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 export const typeDef = `
+
 type Match{
   _id: ID!
   matchRequest_id: ID!

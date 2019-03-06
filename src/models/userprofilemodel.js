@@ -17,7 +17,6 @@ extend type Mutation {
 input CreationUserProfileInput {
   creator_id: ID!
   firstName: String!
-  lastName: String!
   demographics: CreationUserProfileDemographicsInput!
   activeProfile: Boolean!
   activeDiscovery: Boolean!
@@ -74,7 +73,11 @@ type UserProfile {
   firstName: String!
   lastName: String!
 
-  demographics: ProfileDemographics!
+  matchingDemographics: MatchingDemographics!
+  matchingPreferencees: MatchingPreferences!
+
+  locationName: String
+  locationCoordinates: String
 
   profileImageIDs: [String!]!
   profileImages: ImageSizes!
@@ -83,19 +86,6 @@ type UserProfile {
   userProfileData: UserProfileData!
 }
 
-type ProfileDemographics{
-  gender: Gender!
-  age: Int!
-  height: Int
-  locationName: String
-  locationCoordinates: String
-  religion: [String!]
-  ethnicities: [String!]
-  political: [String!]
-  school: String
-  smoking: [String!]
-  drinking: [String!]
-}
 
 type UserProfileData{
   totalProfileViews: Int!
