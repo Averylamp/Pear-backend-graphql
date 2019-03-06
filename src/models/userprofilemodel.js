@@ -1,9 +1,7 @@
-import { createDiscoveryObject } from './discoverymodel';
-
 const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
-const $ = require('mongo-dot-notation');
+// const $ = require('mongo-dot-notation');
 
 const debug = require('debug')('dev:UserProfile');
 
@@ -81,8 +79,6 @@ type UserProfile {
 
   profileImageIDs: [String!]!
   profileImages: ImageSizes!
-  discovery_id: ID!
-  discoveryObj: Discovery!
   userProfileData: UserProfileData!
 }
 
@@ -206,87 +202,83 @@ export const resolvers = {
 
   },
   Mutation: {
-    createUserProfile: async (_source, { userProfileInput }) => {
-      const userProfileObjectID = mongoose.Types.ObjectId();
-      const discoveryObjectID = mongoose.Types.ObjectId();
-      debug(`IDs:${userProfileObjectID}, ${discoveryObjectID}`);
-      debug(userProfileInput);
-      const finalUserProfileInput = userProfileInput;
-      finalUserProfileInput.discovery_id = discoveryObjectID;
-      const createUserProfileObj = createUserProfileObject(
-        finalUserProfileInput, userProfileObjectID,
-      )
-        .catch(err => err);
-
-      const createDiscoveryObj = createDiscoveryObject(
-        { profile_id: userProfileObjectID }, discoveryObjectID,
-      )
-        .catch(err => err);
-
-      return Promise.all(
-        [createUserProfileObj, createDiscoveryObj],
-      )
-        .then(([userProfileObject, discoveryObject]) => {
-          if (userProfileObject instanceof Error || discoveryObject instanceof Error) {
-            let message = '';
-            if (userProfileObject instanceof Error) {
-              message += userProfileObject.toString();
-            } else {
-              userProfileObject.remove((err) => {
-                if (err) {
-                  debug(`Failed to remove user profile object${err}`);
-                } else {
-                  debug('Removed created user profile object successfully');
-                }
-              });
-            }
-            if (discoveryObject instanceof Error) {
-              message += discoveryObject.toString();
-            } else {
-              discoveryObject.remove((err) => {
-                if (err) {
-                  debug(`Failed to remove discovery object${err}`);
-                } else {
-                  debug('Removed created discovery object successfully');
-                }
-              });
-            }
-            return {
-              success: false,
-              message,
-            };
-          }
-          return {
-            success: true,
-            userProfile: userProfileObject,
-          };
-        });
-    },
-    updateUserProfile: async (_source, { id, updateUserProfileInput }) => {
-      debug(`Updating User Profile: ${id}`);
-      debug(updateUserProfileInput);
-      const flattenedUpdateUserProfileInput = $.flatten(updateUserProfileInput);
-      debug(flattenedUpdateUserProfileInput);
-      return new Promise(resolve => UserProfile.findByIdAndUpdate(
-        id, flattenedUpdateUserProfileInput, { new: true, runValidators: true },
-        (err, userProfile) => {
-          if (err) {
-            debug(err);
-            resolve({
-              success: false,
-              message: err.toString(),
-            });
-          } else {
-            debug(userProfile);
-            resolve({
-              success: true,
-              userProfile,
-              message: 'Successfully updated',
-            });
-          }
-        },
-      ));
-    },
+    // createUserProfile: async (_source, { userProfileInput }) => {
+    //   const userProfileObjectID = mongoose.Types.ObjectId();
+    //   const discoveryObjectID = mongoose.Types.ObjectId();
+    //   debug(`IDs:${userProfileObjectID}, ${discoveryObjectID}`);
+    //   debug(userProfileInput);
+    //   const finalUserProfileInput = userProfileInput;
+    //   finalUserProfileInput.discovery_id = discoveryObjectID;
+    //   const createUserProfileObj = createUserProfileObject(
+    //     finalUserProfileInput, userProfileObjectID,
+    //   )
+    //     .catch(err => err);
+    //
+    //
+    //   return Promise.all(
+    //     [createUserProfileObj],
+    //   )
+    //     .then(([userProfileObject, discoveryObject]) => {
+    //       if (userProfileObject instanceof Error || discoveryObject instanceof Error) {
+    //         let message = '';
+    //         if (userProfileObject instanceof Error) {
+    //           message += userProfileObject.toString();
+    //         } else {
+    //           userProfileObject.remove((err) => {
+    //             if (err) {
+    //               debug(`Failed to remove user profile object${err}`);
+    //             } else {
+    //               debug('Removed created user profile object successfully');
+    //             }
+    //           });
+    //         }
+    //         if (discoveryObject instanceof Error) {
+    //           message += discoveryObject.toString();
+    //         } else {
+    //           discoveryObject.remove((err) => {
+    //             if (err) {
+    //               debug(`Failed to remove discovery object${err}`);
+    //             } else {
+    //               debug('Removed created discovery object successfully');
+    //             }
+    //           });
+    //         }
+    //         return {
+    //           success: false,
+    //           message,
+    //         };
+    //       }
+    //       return {
+    //         success: true,
+    //         userProfile: userProfileObject,
+    //       };
+    //     });
+    // },
+    // updateUserProfile: async (_source, { id, updateUserProfileInput }) => {
+    //   debug(`Updating User Profile: ${id}`);
+    //   debug(updateUserProfileInput);
+    //   const flattenedUpdateUserProfileInput = $.flatten(updateUserProfileInput);
+    //   debug(flattenedUpdateUserProfileInput);
+    //   return new Promise(resolve => UserProfile.findByIdAndUpdate(
+    //     id, flattenedUpdateUserProfileInput, { new: true, runValidators: true },
+    //     (err, userProfile) => {
+    //       if (err) {
+    //         debug(err);
+    //         resolve({
+    //           success: false,
+    //           message: err.toString(),
+    //         });
+    //       } else {
+    //         debug(userProfile);
+    //         resolve({
+    //           success: true,
+    //           userProfile,
+    //           message: 'Successfully updated',
+    //         });
+    //       }
+    //     },
+    //   ));
+    // },
 
   },
 };
