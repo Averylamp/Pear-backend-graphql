@@ -15,32 +15,13 @@ extend type Mutation {
 
 type TestObject {
   _id: ID!
-  test_field: String!
+  testField: String!
 }
 `;
 
-export const resolvers = {
-  Query: {
-    testObject: async (_source, { id }, { dataSources }) => {
-      debug(`Getting test object by id: ${id}`);
-      return dataSources.testObjectDB.findOne({ _id: id });
-    },
-    testObjects: async (_source, _, { dataSources }) => {
-      debug('Getting all test objects.');
-      return dataSources.testObjectDB.find();
-    },
-  },
-  Mutation: {
-    createTestObject: async (_source, { testField }, { dataSources }) => {
-      debug(testField);
-      const createdTestObj = createTestObjectFn()
-    }
-  }
-};
-
 const TestObjectSchema = new Schema({
   _id: { type: Schema.Types.ObjectId, required: true },
-  test_field: { type: Schema.Types.String, required: true },
+  testField: { type: Schema.Types.String, required: true },
 });
 
 export const TestObject = mongoose.model('TestObject', TestObjectSchema);
