@@ -12,18 +12,18 @@ type MatchRequest{
 
   endorserCreated: Boolean!
   firstPersonEndorserUser_id: ID
-  firstPersonEndorserUser_obj: User
+  firstPersonEndorserUserObj: User
   secondPersonEndorserUser_id: ID
-  secondPersonEndorserUser_obj: User
+  secondPersonEndorserUserObj: User
 
   firstPersonUser_id: ID!
-  firstPersonUser_obj: User!
+  firstPersonUserObj: User!
   firstPersonProfile_id: ID
-  firstPersonProfile_obj: UserProfile
+  firstPersonProfileObj: UserProfile
   secondPersonUser_id: ID!
-  secondPersonUser_obj: User!
+  secondPersonUserObj: User!
   secondPersonProfile_id: ID
-  secondPersonProfile_obj: UserProfile
+  secondPersonProfileObj: UserProfile
 
   timestampCreated: Int!
   firstPersonResponse: MatchResponse
@@ -35,7 +35,7 @@ type MatchRequest{
   matchStatusTimestamp: Int!
   matchCreated: Boolean!
   acceptedMatch_id: ID
-  acceptedMatch_obj: Match
+  acceptedMatchObj: Match
 }
 
 enum MatchStatus{
@@ -90,11 +90,11 @@ const MatchRequestSchema = new Schema({
 });
 
 
-// firstPersonEndorserUser_obj: User!
-// secondPersonEndorserUser_obj: User!
-// firstPersonUser_obj: User!
-// firstPersonProfile_obj: UserProfile!
-// secondPersonUser_obj: User!
-// secondPersonProfile_obj: UserProfile!
-// acceptedMatch_obj: Match
+// firstPersonEndorserUserObj: User!
+// secondPersonEndorserUserObj: User!
+// firstPersonUserObj: User!
+// firstPersonProfileObj: UserProfile!
+// secondPersonUserObj: User!
+// secondPersonProfileObj: UserProfile!
+// acceptedMatchObj: Match
 export const MatchRequest = mongoose.model('MatchRequest', MatchRequestSchema);

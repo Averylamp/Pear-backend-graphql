@@ -1,18 +1,15 @@
+// import { createDiscoveryObject } from './discoverymodel';
+
 const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
 // const $ = require('mongo-dot-notation');
-
-const debug = require('debug')('dev:UserProfile');
+//
+// const debug = require('debug')('dev:DetachedProfile');
 
 export const typeDef = `
 
-extend type Mutation {
-  createUserProfile(userProfileInput: CreationUserProfileInput): UserProfileMutationResponse
-  updateUserProfile(id: ID, updateUserProfileInput: UpdateUserProfileInput) : UserProfileMutationResponse
-}
-
-input CreationUserProfileInput {
+input CreationDetachedUserProfileInput {
   creator_id: ID!
   firstName: String!
   demographics: CreationUserProfileDemographicsInput!
@@ -20,109 +17,34 @@ input CreationUserProfileInput {
   activeDiscovery: Boolean!
 }
 
-input CreationUserProfileDemographicsInput {
+input CreationDetachedUserProfileDemographicsInput {
   gender: Gender!
   age: Int!
 }
 
-input UpdateUserProfileInput {
-  activeProfile: Boolean
-  activeDiscovery: Boolean
-  firstName: String
-  lastName: String
-  demographics: UpdateProfileDemographicsInput
-  userProfileData: UpdateUserProfileDataInput
-}
 
-input UpdateProfileDemographicsInput {
-  gender: Gender
-  age: Int
-  height: Int
-  locationName: String
-  locationCoordinates: String
-  school: String
-  ethnicities: [String!]
-  religion: [String!]
-  political: [String!]
-  smoking: [String!]
-  drinking: [String!]
-}
-
-input UpdateUserProfileDataInput{
-  totalProfileViews: Int
-  totalProfileLikes: Int
-}
-
-type UserProfileMutationResponse{
-  success: Boolean!
-  message: String
-  userProfile: UserProfile
-}
-
-type UserProfile {
+type DetachedProfile {
   _id: ID!
   creator_id: ID!
   creatorObj: User!
-  user_id: ID
-  userObj: User
-  activeProfile: Boolean!
-  activeDiscovery: Boolean!
-  fullName: String!
   firstName: String!
-  lastName: String!
+  thumbnailURL: String
 
   matchingDemographics: MatchingDemographics!
   matchingPreferencees: MatchingPreferences!
 
-  locationName: String
-  locationCoordinates: String
-
   profileImageIDs: [String!]!
   profileImages: ImageSizes!
-  userProfileData: UserProfileData!
 }
 
 
-type UserProfileData{
-  totalProfileViews: Int!
-  totalProfileLikes: Int!
-}
-
-type ImageSizes{
-  original: [ImageMetadata!]!
-  large:    [ImageMetadata!]!
-  medium:   [ImageMetadata!]!
-  small:    [ImageMetadata!]!
-  thumb:    [ImageMetadata!]!
-}
-
-type ImageMetadata{
-  imageURL: String!
-  imageID: String!
-  imageSize: ImageSize!
-}
-
-type ImageSize{
-  width: Int!
-  height: Int!
-}
-
-enum Gender{
-  male
-  female
-  nonbinary
-}
 `;
 
 
-const UserProfileSchema = new Schema({
+const DetachedProfileSchema = new Schema({
   _id: { type: Schema.Types.ObjectId, required: true },
   creator_id: { type: Schema.Types.ObjectId, required: true, index: true },
-  user_id: { type: Schema.Types.ObjectId, required: false, index: true },
-  activeProfile: { type: Boolean, required: true, defualt: false },
-  activeDiscovery: { type: Boolean, required: true, defualt: false },
   firstName: { type: String, required: true },
-  lastName: { type: String, required: true },
 
   demographics: {
     gender: {
@@ -164,10 +86,45 @@ const UserProfileSchema = new Schema({
 
   discovery_id: { type: Schema.Types.ObjectId, required: true },
 
-});
+  userPreferences: {
+    ethnicities: { type: [String], required: true, default: ['No Preference'] },
+    seekingGender: {
+      type: [String], required: true, enum: ['male', 'female', 'nonbinary'], default: ['male', 'female', 'nonbinary'],
+    },
+    seekingReason: { type: [String], required: true, default: ['No Preference'] },
+    reasonDealbreaker: {
+      type: Number, required: true, min: 0, max: 1, default: 0,
+    },
+    seekingEthnicity: { type: [String], required: true, default: ['No Preference'] },
+    ethnicityDealbreaker: {
+      type: Number, required: true, min: 0, max: 1, default: 0,
+    },
+    maxDistance: {
+      type: Number, required: true, min: 1, max: 100, default: 25,
+    },
+    distanceDealbreaker: {
+      type: Number, required: true, min: 0, max: 1, default: 0,
+    },
+    minAgeRange: {
+      type: Number, required: true, min: 18, max: 100, default: 18,
+    },
+    maxAgeRange: {
+      type: Number, required: true, min: 18, max: 100, default: 40,
+    },
+    ageDealbreaker: {
+      type: Number, required: true, min: 0, max: 1, default: 0,
+    },
+    minHeightRange: {
+      type: Number, required: true, min: 40, max: 100, default: 40,
+    },
+    maxHeightRange: {
+      type: Number, required: true, min: 40, max: 100, default: 100,
+    },
+    heightDealbreaker: {
+      type: Number, required: true, min: 0, max: 1, default: 0,
+    },
+  },
 
-UserProfileSchema.virtual('fullName').get(function fullName() {
-  return `${this.firstName} ${this.lastName}`;
 });
 
 
@@ -175,23 +132,23 @@ UserProfileSchema.virtual('fullName').get(function fullName() {
 // userObj: User!
 // discoveryObj: Discovery!
 
-export const UserProfile = mongoose.model('UserProfile', UserProfileSchema);
+export const DetachedProfile = mongoose.model('DetachedProfile', DetachedProfileSchema);
 
-export const createUserProfileObject = function
-createUserProfileObject(userProfileInput, _id = mongoose.Types.ObjectId()) {
-  const userProfileModel = new UserProfile(userProfileInput);
-  userProfileModel._id = _id;
-  debug(userProfileModel);
-  return new Promise((resolve, reject) => {
-    userProfileModel.save((err) => {
-      if (err) {
-        debug(err);
-        reject(err);
-      }
-      resolve(userProfileModel);
-    });
-  });
-};
+// export const createUserProfileObject = function
+// createUserProfileObject(userProfileInput, _id = mongoose.Types.ObjectId()) {
+//   const userProfileModel = new UserProfile(userProfileInput);
+//   userProfileModel._id = _id;
+//   debug(userProfileModel);
+//   return new Promise((resolve, reject) => {
+//     userProfileModel.save((err) => {
+//       if (err) {
+//         debug(err);
+//         reject(err);
+//       }
+//       resolve(userProfileModel);
+//     });
+//   });
+// };
 
 
 export const resolvers = {
@@ -214,9 +171,13 @@ export const resolvers = {
     //   )
     //     .catch(err => err);
     //
+    //   const createDiscoveryObj = createDiscoveryObject(
+    //     { profile_id: userProfileObjectID }, discoveryObjectID,
+    //   )
+    //     .catch(err => err);
     //
     //   return Promise.all(
-    //     [createUserProfileObj],
+    //     [createUserProfileObj, createDiscoveryObj],
     //   )
     //     .then(([userProfileObject, discoveryObject]) => {
     //       if (userProfileObject instanceof Error || discoveryObject instanceof Error) {

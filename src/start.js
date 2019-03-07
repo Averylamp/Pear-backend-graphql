@@ -2,28 +2,36 @@ import express from 'express';
 import { merge } from 'lodash';
 import {
   typeDef as User,
+} from './models/UserModel';
+import {
   resolvers as UserResolvers,
-} from './models/usermodel';
+} from './resolvers/UserResolver';
 import {
   typeDef as UserProfile,
   resolvers as UserProfileResolvers,
-} from './models/userprofilemodel';
+} from './models/UserProfileModel';
+import {
+  typeDef as DetachedProfile,
+  resolvers as DetachedProfileResolvers,
+} from './models/DetachedProfile';
 import {
   typeDef as Match,
   resolvers as MatchResolvers,
-} from './models/matchmodel';
+} from './models/MatchModel';
 import {
   typeDef as UserMatches,
   resolvers as UserMatchesResolvers,
-} from './models/usermatchesmodel';
+} from './models/UserMatchesModel';
 import {
   typeDef as MatchRequest,
   resolvers as MatchRequestResolvers,
-} from './models/matchrequestmodel';
+} from './models/MatchRequestModel';
 import {
-  typeDef as Discovery,
-  resolvers as DiscoveryResolvers,
-} from './models/discoverymodel';
+  typeDef as DiscoveryQueue,
+} from './models/DiscoveryQueueModel';
+import {
+  resolvers as DiscoveryQueueResolvers,
+} from './resolvers/DiscoveryQueueResolver';
 
 const { ApolloServer } = require('apollo-server-express');
 
@@ -50,10 +58,12 @@ export const start = async () => {
 
     const UsersDB = db.collection('users');
     const UserProfilesDB = db.collection('userprofiles');
+    const DetachedProfilesDB = db.collection('detachedprofiles');
     const UserMatchesDB = db.collection('usermatches');
     const MatchRequestsDB = db.collection('matchrequests');
     const MatchesDB = db.collection('matches');
     const DiscoveriesDB = db.collection('discoveries');
+    const DiscoveryQueuesDB = db.collection('discoveryqueues');
 
     const Query = `
     type Query {
@@ -68,7 +78,14 @@ export const start = async () => {
 
 
     `;
-    const finalTypeDefs = [Query, User, UserProfile, Match, UserMatches, MatchRequest, Discovery];
+    const finalTypeDefs = [Query,
+      User,
+      UserProfile,
+      DetachedProfile,
+      Match, UserMatches,
+      MatchRequest,
+      DiscoveryQueue];
+
     const resolvers = {
       Query: {
       },
@@ -77,10 +94,11 @@ export const start = async () => {
     const finalResolvers = merge(resolvers,
       UserResolvers,
       UserProfileResolvers,
+      DetachedProfileResolvers,
       MatchResolvers,
       UserMatchesResolvers,
       MatchRequestResolvers,
-      DiscoveryResolvers);
+      DiscoveryQueueResolvers);
 
 
     const server = new ApolloServer({
@@ -92,10 +110,12 @@ export const start = async () => {
       dataSources: () => ({
         usersDB: UsersDB,
         userProfilesDB: UserProfilesDB,
+        detachedUserProfilesDB: DetachedProfilesDB,
         userMatchesDB: UserMatchesDB,
         matchRequestsDB: MatchRequestsDB,
         matchesDB: MatchesDB,
         discoveriesDB: DiscoveriesDB,
+        discoveryQueuesDB: DiscoveryQueuesDB,
       }),
     });
     const app = express();
