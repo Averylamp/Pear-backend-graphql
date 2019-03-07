@@ -8,14 +8,8 @@ const debug = require('debug')('dev:UserProfile');
 export const typeDef = `
 
 extend type Mutation {
-  smsTestMutation(smsTestMutationInput: SmsTestMutationInput): SmsTestMutationObject
   createUserProfile(userProfileInput: CreationUserProfileInput): UserProfileMutationResponse
   updateUserProfile(id: ID, updateUserProfileInput: UpdateUserProfileInput) : UserProfileMutationResponse
-}
-
-input SmsTestMutationInput {
-  phoneNumber: String!
-  message: String!
 }
 
 input CreationUserProfileInput {
@@ -63,12 +57,6 @@ type UserProfileMutationResponse{
   success: Boolean!
   message: String
   userProfile: UserProfile
-}
-
-type SmsTestMutationObject {
-  _id: ID!
-  phoneNumber: String!
-  lastMessage: String!
 }
 
 type UserProfile {
