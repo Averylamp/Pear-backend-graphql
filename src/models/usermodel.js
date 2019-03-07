@@ -1,19 +1,9 @@
-import { createUserMatchesObject } from './usermatchesmodel';
-import { createDiscoveryObject } from './discoverymodel';
+import { MatchingDemographicsSchema, MatchingPreferencesSchema } from './MatchingSchemas';
+import { GeoJSONSchema } from './TypeSchemas';
 
 const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
-const $ = require('mongo-dot-notation');
-const debug = require('debug')('dev:User');
-const firebaseAdmin = require('firebase-admin');
-
-const serviceAccount = require('../../pear-firebase-adminsdk.json');
-
-firebaseAdmin.initializeApp({
-  credential: firebaseAdmin.credential.cert(serviceAccount),
-  databaseURL: 'https://pear-59123.firebaseio.com',
-});
 
 export const typeDef = `
 extend type Query {
@@ -33,17 +23,20 @@ input GetUserInput{
 
 input CreationUserInput{
   age: Int!
+  birthdate: String!
   email: String!
   emailVerified: Boolean!
   phoneNumber: String!
   phoneNumberVerified: Boolean!
   firstName: String!
   lastName: String!
+  gender: Gender!
   firebaseToken: String!
   firebaseAuthID: String!
   facebookId: String
   facebookAccessToken: String
-  birthdate: Int
+
+  thumbnailURL: String
 }
 
 input UserPreferencesInitialInput {
@@ -105,7 +98,7 @@ input UpdateUserInput {
   school: String
   schoolEmail: String
   schoolEmailVerified: Boolean
-  birthdate: Int
+  birthdate: String
   age: Int
   userPreferences: UserPreferencesInput
   userStats: UserStatsInput
@@ -116,8 +109,8 @@ input UpdateUserInput {
 type User {
   _id: ID!
   deactivated: Boolean!
-  firebaseToken: String
-  firebaseAuthID: String
+  firebaseToken: String!
+  firebaseAuthID: String!
   facebookId: String
   facebookAccessToken: String
   email: String!
@@ -128,53 +121,50 @@ type User {
   lastName: String!
   fullName: String!
   thumbnailURL: String
-  gender: Gender
+  gender: String
+  age: Int!
+  birthdate: String!
   locationName: String
   locationCoordinates: String
   school: String
   schoolEmail: String
   schoolEmailVerified: Boolean
-  birthdate: Int
-  age: Int!
-  profile_ids: [ID!]!
-  profile_objs: [UserProfile!]!
-  endorsedProfile_ids: [ID!]!
-  endorsedProfile_objs: [UserProfile!]!
-  userPreferences: UserPreferences!
-  userStats: UserStats!
-  userDemographics: UserDemographics!
-  userMatches_id: ID!
-  userMatches: UserMatches!
-  discovery_id: ID!
-  discovery_obj: Discovery!
+
   pearPoints: Int
+
+  profile_ids: [ID!]!
+  profileObjs: [UserProfile!]!
+  endorsedProfile_ids: [ID!]!
+  endorsedProfileObjs: [UserProfile!]!
+
+  userMatches_id: ID!
+  userMatchesObj: UserMatches!
+  discoveryQueue_id: ID!
+  discoveryQueueObj: DiscoveryQueue!
+
+  userStats: UserStats!
+
+  matchingPreferences: MatchingPreferences!
+  matchingDemographics: MatchingDemographics!
 }
 
-type UserDemographics{
-  ethnicities: [String!]
+type MatchingDemographics{
+  gender: Gender!
+  age: Int!
+  birthdate: String!
+  height: Int
   religion: [String!]
+  ethnicities: [String!]
   political: [String!]
   smoking: [String!]
   drinking: [String!]
-  height: Int
+  school: String
 }
 
-
-type UserStats{
-  totalNumberOfMatchRequests: Int!
-  totalNumberOfMatches: Int!
-  totalNumberOfProfilesCreated: Int!
-  totalNumberOfEndorsementsCreated: Int!
-  conversationTotalNumber: Int!
-  conversationTotalNumberFirstMessage: Int!
-  conversationTotalNumberTenMessages: Int!
-  conversationTotalNumberHundredMessages: Int!
-}
-
-type UserPreferences{
-  ethnicities: [String!]!
+type MatchingPreferences{
+  ethnicities: [String!]
   seekingGender: [Gender!]!
-  seekingReason: [String!]!
+  seekingReason: [String!]
   reasonDealbreaker: Int!
   seekingEthnicity: [String!]!
   ethnicityDealbreaker: Int!
@@ -188,6 +178,16 @@ type UserPreferences{
   heightDealbreaker: Int!
 }
 
+type UserStats{
+  totalNumberOfMatchRequests: Int!
+  totalNumberOfMatches: Int!
+  totalNumberOfProfilesCreated: Int!
+  totalNumberOfEndorsementsCreated: Int!
+  conversationTotalNumber: Int!
+  conversationTotalNumberFirstMessage: Int!
+  conversationTotalNumberTenMessages: Int!
+  conversationTotalNumberHundredMessages: Int!
+}
 
 type UserMutationResponse{
   success: Boolean!
@@ -195,7 +195,22 @@ type UserMutationResponse{
   user: User
 }
 
+
+
 `;
+
+const UserStatsSchema = new Schema({
+  totalNumberOfMatchRequests: { type: Number, required: true, default: 0 },
+  totalNumberOfMatches: { type: Number, required: true, default: 0 },
+  totalNumberOfProfilesCreated: { type: Number, required: true, default: 0 },
+  totalNumberOfEndorsementsCreated: { type: Number, required: true, default: 0 },
+  conversationTotalNumber: { type: Number, required: true, default: 0 },
+  conversationTotalNumberFirstMessage: { type: Number, required: true, default: 0 },
+  conversationTotalNumberTenMessages: { type: Number, required: true, default: 0 },
+  conversationTotalNumberTwentyMessages: { type: Number, required: true, default: 0 },
+  conversationTotalNumberHundredMessages: { type: Number, required: true, default: 0 },
+});
+
 const UserSchema = new Schema({
   deactivated: { type: Boolean, required: true, default: false },
   firebaseToken: {
@@ -215,95 +230,50 @@ const UserSchema = new Schema({
     index: true,
   },
   phoneNumberVerified: { type: Boolean, required: true, default: false },
-  firstName: { type: String, required: false },
-  lastName: { type: String, required: false },
+  firstName: { type: String, required: true },
+  lastName: { type: String, required: true },
   thumbnailURL: { type: String, required: false },
-  gender: { type: String, required: false, enum: ['male', 'female', 'nonbinary'] },
-  locationName: { type: String, required: false },
-  locationCoordinates: { type: String, required: false },
-  school: { type: String, required: false },
-  schoolEmail: { type: String, required: false },
-  schoolEmailVerified: { type: Boolean, required: false, default: false },
-  birthdate: { type: Date, required: false },
+  gender: { type: String, required: true, enum: ['male', 'female', 'nonbinary'] },
   age: {
     type: Number, required: true, min: 18, max: 100, index: true,
   },
-  profile_ids: { type: [Schema.Types.ObjectId], required: true, index: true },
-  endorsedProfile_ids: { type: [Schema.Types.ObjectId], required: true, index: true },
-  userMatches_id: { type: Schema.Types.ObjectId, required: true },
-  discovery_id: { type: Schema.Types.ObjectId, required: true },
+  birthdate: { type: Date, required: true },
+  locationName: { type: String, required: false },
+  locationCoordinates: { type: GeoJSONSchema, required: false },
+  school: { type: String, required: false },
+  schoolEmail: { type: String, required: false },
+  schoolEmailVerified: { type: Boolean, required: false, default: false },
 
   pearPoints: { type: Number, required: true, default: 0 },
 
-  userStats: {
-    totalNumberOfMatchRequests: { type: Number, required: true, default: 0 },
-    totalNumberOfMatches: { type: Number, required: true, default: 0 },
-    totalNumberOfProfilesCreated: { type: Number, required: true, default: 0 },
-    totalNumberOfEndorsementsCreated: { type: Number, required: true, default: 0 },
-    conversationTotalNumber: { type: Number, required: true, default: 0 },
-    conversationTotalNumberFirstMessage: { type: Number, required: true, default: 0 },
-    conversationTotalNumberTenMessages: { type: Number, required: true, default: 0 },
-    conversationTotalNumberTwentyMessages: { type: Number, required: true, default: 0 },
-    conversationTotalNumberHundredMessages: { type: Number, required: true, default: 0 },
+  profile_ids: { type: [Schema.Types.ObjectId], required: true, index: true },
+  endorsedProfile_ids: { type: [Schema.Types.ObjectId], required: true, index: true },
+
+  userMatches_id: { type: Schema.Types.ObjectId, required: true },
+  discoveryQueue_id: { type: Schema.Types.ObjectId, required: true },
+
+  userStats: { type: UserStatsSchema, required: true, default: UserStatsSchema },
+
+  matchingDemographics: {
+    type: MatchingDemographicsSchema,
+    required: true,
+    default: MatchingDemographicsSchema,
+  },
+  matchingPreferences: {
+    type: MatchingPreferencesSchema,
+    required: true,
+    default: MatchingPreferencesSchema,
   },
 
-  userDemographics: {
-    ethnicities: { type: [String], required: false },
-    religion: { type: [String], required: false },
-    political: { type: [String], required: false },
-    smoking: { type: [String], required: false },
-    drinking: { type: [String], required: false },
-    height: { type: Number, required: false },
-  },
-
-  userPreferences: {
-    ethnicities: { type: [String], required: true, default: ['No Preference'] },
-    seekingGender: {
-      type: [String], required: true, enum: ['male', 'female', 'nonbinary'], default: ['male', 'female', 'nonbinary'],
-    },
-    seekingReason: { type: [String], required: true, default: ['No Preference'] },
-    reasonDealbreaker: {
-      type: Number, required: true, min: 0, max: 1, default: 0,
-    },
-    seekingEthnicity: { type: [String], required: true, default: ['No Preference'] },
-    ethnicityDealbreaker: {
-      type: Number, required: true, min: 0, max: 1, default: 0,
-    },
-    maxDistance: {
-      type: Number, required: true, min: 1, max: 100, default: 25,
-    },
-    distanceDealbreaker: {
-      type: Number, required: true, min: 0, max: 1, default: 0,
-    },
-    minAgeRange: {
-      type: Number, required: true, min: 18, max: 100, default: 18,
-    },
-    maxAgeRange: {
-      type: Number, required: true, min: 18, max: 100, default: 40,
-    },
-    ageDealbreaker: {
-      type: Number, required: true, min: 0, max: 1, default: 0,
-    },
-    minHeightRange: {
-      type: Number, required: true, min: 40, max: 100, default: 40,
-    },
-    maxHeightRange: {
-      type: Number, required: true, min: 40, max: 100, default: 100,
-    },
-    heightDealbreaker: {
-      type: Number, required: true, min: 0, max: 1, default: 0,
-    },
-  },
-
-});
+}, { timestamps: true });
 
 UserSchema.virtual('fullName').get(function fullName() {
   return `${this.firstName} ${this.lastName}`;
 });
 
 
-// profile_objs: { type: [, required: true,  UserProfile!]!
-// endorsedProfile_objs: { type: [, required: true,  UserProfile!]!
+// profileObjs: { type: [, required: true,  UserProfile!]!
+// endorsedProfileObjs: { type: [, required: true,  UserProfile!]!
 export const User = mongoose.model('User', UserSchema);
 
 export const createUserObject = function
@@ -320,147 +290,4 @@ createUserObject(userInput, _id = mongoose.Types.ObjectId()) {
       resolve(userModel);
     });
   });
-};
-
-
-export const resolvers = {
-  Query: {
-    user: async (_source, { id }, { dataSources }) => {
-      debug(`Getting user by id: ${id}`);
-      return dataSources.usersDB.findOne({ _id: id });
-    },
-  },
-  User: {
-  },
-  Mutation: {
-    createUser: async (_source, { userInput }) => {
-      debug(userInput);
-      const userObjectID = mongoose.Types.ObjectId();
-      const userMatchesObjectID = mongoose.Types.ObjectId();
-      const discoveryObjectID = mongoose.Types.ObjectId();
-      debug(`IDs:${userObjectID}, ${userMatchesObjectID}, ${discoveryObjectID}`);
-
-      const finalUserInput = userInput;
-      finalUserInput.userMatches_id = userMatchesObjectID;
-      finalUserInput.discovery_id = discoveryObjectID;
-      const createUserObj = createUserObject(finalUserInput, userObjectID)
-        .catch(err => err);
-
-      const createUserMatchesObj = createUserMatchesObject(
-        { user_id: userObjectID }, userMatchesObjectID,
-      )
-        .catch(err => err);
-
-      const createDiscoveryObj = createDiscoveryObject(
-        { user_id: userObjectID }, discoveryObjectID,
-      )
-        .catch(err => err);
-
-      return Promise.all([createUserObj, createUserMatchesObj, createDiscoveryObj])
-        .then(([userObject, userMatchesObject, discoveryObject]) => {
-          if (userObject instanceof Error
-          || userMatchesObject instanceof Error
-          || discoveryObject instanceof Error) {
-            let message = '';
-            if (userObject instanceof Error) {
-              message += userObject.toString();
-            } else {
-              userObject.remove((err) => {
-                if (err) {
-                  debug(`Failed to remove user object${err}`);
-                } else {
-                  debug('Removed created user object successfully');
-                }
-              });
-            }
-            if (userMatchesObject instanceof Error) {
-              message += userMatchesObject.toString();
-            } else {
-              userMatchesObject.remove((err) => {
-                if (err) {
-                  debug(`Failed to remove user matches object${err}`);
-                } else {
-                  debug('Removed created user matches object successfully');
-                }
-              });
-            }
-            if (discoveryObject instanceof Error) {
-              message += discoveryObject.toString();
-            } else {
-              discoveryObject.remove((err) => {
-                if (err) {
-                  debug(`Failed to remove discovery object${err}`);
-                } else {
-                  debug('Removed created discovery object successfully');
-                }
-              });
-            }
-            return {
-              success: false,
-              message,
-            };
-          }
-          return {
-            success: true,
-            user: userObject,
-          };
-        });
-    },
-    getUser: async (_source, { userInput }) => {
-      debug(userInput);
-      const idToken = userInput.firebaseToken;
-      const uid = userInput.firebaseAuthID;
-      return new Promise(resolve => firebaseAdmin.auth().verifyIdToken(idToken)
-        .then((decodedToken) => {
-          debug('Decoded token');
-          const firebaseUID = decodedToken.uid;
-          debug(firebaseUID);
-          debug(uid);
-          if (uid === firebaseUID) {
-            debug('tokenUID matches provided UID');
-            const user = User.findOne({ firebaseAuthID: uid });
-            if (user) {
-              resolve({
-                success: true,
-                message: 'Successfully fetched',
-                user,
-              });
-            } else {
-              resolve({
-                success: false,
-                message: 'Failed to fetch user',
-              });
-            }
-          }
-        }).catch((error) => {
-          debug('Failed to Decoded token');
-          // Handle error
-          debug(error);
-          resolve({
-            success: false,
-            message: 'Failed to verify token',
-          });
-        }));
-    },
-    updateUser: async (_source, { id, updateUserInput }) => {
-      const finalUpdateUserInput = $.flatten(updateUserInput);
-      return new Promise(resolve => User.findByIdAndUpdate(
-        id, finalUpdateUserInput, { new: true, runValidators: true },
-        (err, user) => {
-          if (err) {
-            resolve({
-              success: false,
-              message: err.toString(),
-            });
-          } else {
-            resolve({
-              success: true,
-              user,
-              message: 'Successfully updated',
-            });
-          }
-        },
-      ));
-    },
-  },
 };

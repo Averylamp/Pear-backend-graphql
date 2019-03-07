@@ -3,18 +3,19 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 export const typeDef = `
+
 type Match{
   _id: ID!
   matchRequest_id: ID!
-  matchRequest_obj: MatchRequest
+  matchRequestObj: MatchRequest
   firstPersonUser_id: ID!
-  firstPersonUser_obj: User!
+  firstPersonUserObj: User!
   firstPersonProfile_id: ID
-  firstPersonProfile_obj: UserProfile
+  firstPersonProfileObj: UserProfile
   secondPersonUser_id: ID!
-  secondPersonUser_obj: User!
+  secondPersonUserObj: User!
   secondPersonProfile_id: ID
-  secondPersonProfile_obj: UserProfile
+  secondPersonProfileObj: UserProfile
   timestampCreated: Int
   matchStats: MatchStats
   firebaseConversationDocumentID: String!
@@ -53,9 +54,9 @@ const MatchSchema = new Schema({
 });
 
 
-// matchRequest_obj: MatchRequest
-// firstPersonUser_obj: User!
-// firstPersonProfile_obj: UserProfile!
-// secondPersonUser_obj: User!
-// secondPersonProfile_obj: UserProfile!
+// matchRequestObj: MatchRequest
+// firstPersonUserObj: User!
+// firstPersonProfileObj: UserProfile!
+// secondPersonUserObj: User!
+// secondPersonProfileObj: UserProfile!
 export const Match = mongoose.model('Match', MatchSchema);

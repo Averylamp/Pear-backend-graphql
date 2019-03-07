@@ -17,7 +17,7 @@ On MacOS:
 Then install dependencies with:
 
 ```
-brew install node npm yarn
+brew install node yarn
 yarn install
 ```
 
