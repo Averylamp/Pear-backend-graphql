@@ -2,36 +2,36 @@ import express from 'express';
 import { merge } from 'lodash';
 import {
   typeDef as User,
-} from './models/usermodel';
+} from './models/UserModel';
 import {
   resolvers as UserResolvers,
-} from './resolvers/userresolver';
+} from './resolvers/UserResolver';
 import {
   typeDef as UserProfile,
   resolvers as UserProfileResolvers,
-} from './models/userprofilemodel';
+} from './models/UserProfileModel';
 import {
   typeDef as DetachedProfile,
   resolvers as DetachedProfileResolvers,
-} from './models/detachedprofile';
+} from './models/DetachedProfile';
 import {
   typeDef as Match,
   resolvers as MatchResolvers,
-} from './models/matchmodel';
+} from './models/MatchModel';
 import {
   typeDef as UserMatches,
   resolvers as UserMatchesResolvers,
-} from './models/usermatchesmodel';
+} from './models/UserMatchesModel';
 import {
   typeDef as MatchRequest,
   resolvers as MatchRequestResolvers,
-} from './models/matchrequestmodel';
+} from './models/MatchRequestModel';
 import {
   typeDef as DiscoveryQueue,
-} from './models/discoveryqueuemodel';
+} from './models/DiscoveryQueueModel';
 import {
   resolvers as DiscoveryQueueResolvers,
-} from './resolvers/discoveryqueueresolver';
+} from './resolvers/DiscoveryQueueResolver';
 
 const { ApolloServer } = require('apollo-server-express');
 
