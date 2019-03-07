@@ -1,19 +1,41 @@
 # GraphQL-MongoDB
 
-All the important code is in `src/start.js`.
+All the important starting code is in `src/start.js`.
+Models and the schema representation is split up in files in `src/models`
 
-Install, build and run:
+We will be using yarn for this repo, not npm
+
+To install the required managers, use brew:
+
+On Linux:
+`sh -c "$(curl -fsSL https://raw.githubusercontent.com/Linuxbrew/install/master/install.sh)"`
+(You may need to add brew to the path afterwards)
+
+On MacOS:
+`/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"`
+
+Then install dependencies with:
 
 ```
+brew install node yarn
 yarn install
-yarn run build
+```
+
+Yarn Build / Run:
+```
+yarn build
 yarn start
 ```
 
-For Local Development
-
-You need to start Mongodb for Local development
-
+Dev Hot-Reload:
 ```
-npm run startdev
+yarn startdev
 ```
+
+
+To set up linting scripts run from root project folder: 
+```
+cp pre-commit .git/hooks
+```
+
+You shouldn't be able to push directly to master; instead, create and merge PRs.
