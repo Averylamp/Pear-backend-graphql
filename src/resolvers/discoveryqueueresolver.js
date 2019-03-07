@@ -1,6 +1,6 @@
 
-import { User } from '../models/usermodel';
-import { UserProfile } from '../models/userprofilemodel';
+import { User } from '../models/UserModel';
+import { UserProfile } from '../models/UserProfileModel';
 
 
 export const resolvers = {

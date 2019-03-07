@@ -1,5 +1,5 @@
-import { MatchingDemographicsSchema, MatchingPreferencesSchema } from './matchingschemas';
-import { GeoJSONSchema } from './typeschemas';
+import { MatchingDemographicsSchema, MatchingPreferencesSchema } from './MatchingSchemas';
+import { GeoJSONSchema } from './TypeSchemas';
 
 const mongoose = require('mongoose');
 

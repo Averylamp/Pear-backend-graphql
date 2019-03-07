@@ -1,6 +1,6 @@
-import { createUserMatchesObject, UserMatches } from '../models/usermatchesmodel';
-import { createDiscoveryQueueObject, DiscoveryQueue } from '../models/discoveryqueuemodel';
-import { createUserObject, User } from '../models/usermodel';
+import { createUserMatchesObject, UserMatches } from '../models/UserMatchesModel';
+import { createDiscoveryQueueObject, DiscoveryQueue } from '../models/DiscoveryQueueModel';
+import { createUserObject, User } from '../models/UserModel';
 
 const mongoose = require('mongoose');
 const $ = require('mongo-dot-notation');
