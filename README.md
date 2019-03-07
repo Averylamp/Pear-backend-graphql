@@ -39,3 +39,16 @@ cp pre-commit .git/hooks
 ```
 
 You shouldn't be able to push directly to master; instead, create and merge PRs.
+
+
+To add npm packages also user yarn
+```
+yarn add package
+yarn add --dev package
+```
+
+Upload schema to Apollo:
+```
+apollo service:push --key="service:pear-matchmaking-8936:V43kf4Urhi-63wQycK_yoA" --endpoint=host/graphql  --tags="Optional tags"
+```
+

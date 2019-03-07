@@ -14,7 +14,7 @@ export const resolvers = {
     },
   },
   Mutation: {
-    createTestObject: async (_source, { testField }, _) => {
+    createTestObject: async (_source, { testField }) => {
       debug(testField);
       const createdTestObj = await createTestObjectFn({ testField });
       return createdTestObj;
