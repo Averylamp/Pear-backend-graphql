@@ -12,6 +12,7 @@
   "author": "Avery Lamp <averylamp@gmail.com>",
   "license": "ISC",
   "devDependencies": {
+    "apollo": "^2.6.0",
     "babel-cli": "^6.26.0",
     "babel-core": "^6.20.0",
     "babel-plugin-syntax-async-functions": "^6.13.0",
