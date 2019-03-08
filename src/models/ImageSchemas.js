@@ -10,7 +10,7 @@ input CreateImageSizes {
   large:    [CreateImageMetadata!]!
   medium:   [CreateImageMetadata!]!
   small:    [CreateImageMetadata!]!
-  thumb:    [CreateImageMetadata!]!
+  thumbnail:    [CreateImageMetadata!]!
 }
 
 input CreateImageMetadata{
@@ -29,7 +29,7 @@ type ImageSizes{
   large:    [ImageMetadata!]!
   medium:   [ImageMetadata!]!
   small:    [ImageMetadata!]!
-  thumb:    [ImageMetadata!]!
+  thumbnail:    [ImageMetadata!]!
 }
 
 type ImageMetadata{

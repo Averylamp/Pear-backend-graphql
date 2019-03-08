@@ -114,6 +114,7 @@ export const resolvers = {
             debug('token matches provided UID');
             const user = User.findOne({ firebaseAuthID: uid });
             if (user) {
+              functionCallConsole('Validated');
               resolve({
                 success: true,
                 message: 'Successfully fetched',
