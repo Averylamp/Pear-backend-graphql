@@ -33,6 +33,7 @@ type DiscoveryItem {
 
 type DiscoveryMutationResponse {
   success: Boolean!
+  message: String
 }
 
 `;
