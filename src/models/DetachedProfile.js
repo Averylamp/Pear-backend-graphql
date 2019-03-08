@@ -12,14 +12,16 @@ export const typeDef = `
 input CreationDetachedUserProfileInput {
   creator_id: ID!
   firstName: String!
-  demographics: CreationUserProfileDemographicsInput!
-  activeProfile: Boolean!
-  activeDiscovery: Boolean!
-}
-
-input CreationDetachedUserProfileDemographicsInput {
-  gender: Gender!
+  phoneNumber: String!
   age: Int!
+  gender: Gender!
+  interests: [String!]!
+  vibes: [String!]!
+  bio: String!
+  dos: [String!]!
+  donts: [String!]!
+  images: [CreateImageSizes!]!
+
 }
 
 
@@ -34,7 +36,7 @@ type DetachedProfile {
   matchingPreferencees: MatchingPreferences!
 
   profileImageIDs: [String!]!
-  profileImages: ImageSizes!
+  profileImages: [ImageSizes!]!
 }
 
 

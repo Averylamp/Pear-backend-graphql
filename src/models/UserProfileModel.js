@@ -88,24 +88,6 @@ type UserProfileData{
   totalProfileLikes: Int!
 }
 
-type ImageSizes{
-  original: [ImageMetadata!]!
-  large:    [ImageMetadata!]!
-  medium:   [ImageMetadata!]!
-  small:    [ImageMetadata!]!
-  thumb:    [ImageMetadata!]!
-}
-
-type ImageMetadata{
-  imageURL: String!
-  imageID: String!
-  imageSize: ImageSize!
-}
-
-type ImageSize{
-  width: Int!
-  height: Int!
-}
 
 enum Gender{
   male
@@ -154,13 +136,6 @@ const UserProfileSchema = new Schema({
   },
 
   profileImageIDs: { type: [String], required: true, default: [] },
-  profileImages: {
-    original: { type: [Schema.Types.Mixed], required: true, default: [] },
-    large: { type: [Schema.Types.Mixed], required: true, default: [] },
-    medium: { type: [Schema.Types.Mixed], required: true, default: [] },
-    small: { type: [Schema.Types.Mixed], required: true, default: [] },
-    thumb: { type: [Schema.Types.Mixed], required: true, default: [] },
-  },
 
   discovery_id: { type: Schema.Types.ObjectId, required: true },
 
