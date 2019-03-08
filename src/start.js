@@ -48,11 +48,22 @@ import {
 
 const { ApolloServer } = require('apollo-server-express');
 
+let devMode = false;
+if (process.env.DEBUG) {
+  devMode = true;
+}
+
 const URL = 'http://localhost';
 const PORT = 1234;
-const MONGO_URL = 'mongodb+srv://avery:0bz8M0eMEtyXlj2aZodIPpJpy@cluster0-w4ecv.mongodb.net/dev?retryWrites=true';
+
+let MONGO_URL = 'mongodb+srv://avery:0bz8M0eMEtyXlj2aZodIPpJpy@cluster0-w4ecv.mongodb.net/prod?retryWrites=true';
+if (devMode) {
+  MONGO_URL = 'mongodb+srv://avery:0bz8M0eMEtyXlj2aZodIPpJpy@cluster0-w4ecv.mongodb.net/dev?retryWrites=true';
+}
 const debug = require('debug')('dev:Start');
 const mongoose = require('mongoose');
+
+debug(MONGO_URL);
 
 const name = 'Pear';
 debug('Booting %s', name);
@@ -136,6 +147,8 @@ export const start = async () => {
           testObjectsDB: TestObjectsDB,
         }),
         tracing: true,
+        playground: devMode,
+        introspection: devMode,
       });
       const app = express();
       app.use(bodyParser.json());
