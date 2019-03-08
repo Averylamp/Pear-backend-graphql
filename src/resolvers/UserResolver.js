@@ -23,6 +23,46 @@ export const resolvers = {
       debug(`Getting user by id: ${id}`);
       return User.findOne(id);
     },
+    getUser: async (_source, { userInput }) => {
+      functionCallConsole('Get User Called');
+      const idToken = userInput.firebaseToken;
+      const uid = userInput.firebaseAuthID;
+      return new Promise(resolve => firebaseAdmin.auth().verifyIdToken(idToken)
+        .then((decodedToken) => {
+          const firebaseUID = decodedToken.uid;
+          if (uid === firebaseUID) {
+            debug('token matches provided UID');
+            const user = User.findOne({ firebaseAuthID: uid });
+            if (user) {
+              functionCallConsole('Validated');
+              resolve({
+                success: true,
+                message: 'Successfully fetched',
+                user,
+              });
+            } else {
+              resolve({
+                success: false,
+                message: 'Failed to fetch user',
+              });
+            }
+          } else {
+            debug('token does not match');
+            resolve({
+              success: false,
+              message: 'Failed to fetch user',
+            });
+          }
+        }).catch((error) => {
+          debug('Failed to Decoded token');
+          // Handle error
+          debug(error);
+          resolve({
+            success: false,
+            message: 'Failed to verify token',
+          });
+        }));
+    },
   },
   User: {
     userMatchesObj: async ({ userMatches_id }) => UserMatches.findById(userMatches_id),
@@ -102,46 +142,6 @@ export const resolvers = {
             user: userObject,
           };
         });
-    },
-    getUser: async (_source, { userInput }) => {
-      functionCallConsole('Get User Called');
-      const idToken = userInput.firebaseToken;
-      const uid = userInput.firebaseAuthID;
-      return new Promise(resolve => firebaseAdmin.auth().verifyIdToken(idToken)
-        .then((decodedToken) => {
-          const firebaseUID = decodedToken.uid;
-          if (uid === firebaseUID) {
-            debug('token matches provided UID');
-            const user = User.findOne({ firebaseAuthID: uid });
-            if (user) {
-              functionCallConsole('Validated');
-              resolve({
-                success: true,
-                message: 'Successfully fetched',
-                user,
-              });
-            } else {
-              resolve({
-                success: false,
-                message: 'Failed to fetch user',
-              });
-            }
-          } else {
-            debug('token does not match');
-            resolve({
-              success: false,
-              message: 'Failed to fetch user',
-            });
-          }
-        }).catch((error) => {
-          debug('Failed to Decoded token');
-          // Handle error
-          debug(error);
-          resolve({
-            success: false,
-            message: 'Failed to verify token',
-          });
-        }));
     },
     updateUser: async (_source, { id, updateUserInput }) => {
       functionCallConsole('Update User Called');
