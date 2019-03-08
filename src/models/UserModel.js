@@ -248,9 +248,15 @@ const UserSchema = new Schema({
 
   pearPoints: { type: Number, required: true, default: 0 },
 
-  profile_ids: { type: [Schema.Types.ObjectId], required: true, index: true },
-  endorsedProfile_ids: { type: [Schema.Types.ObjectId], required: true, index: true },
-  detachedProfile_ids: { type: [Schema.Types.ObjectId], required: true, index: true },
+  profile_ids: {
+    type: [Schema.Types.ObjectId], required: true, index: true, default: [],
+  },
+  endorsedProfile_ids: {
+    type: [Schema.Types.ObjectId], required: true, index: true, default: [],
+  },
+  detachedProfile_ids: {
+    type: [Schema.Types.ObjectId], required: true, index: true, default: [],
+  },
 
   userMatches_id: { type: Schema.Types.ObjectId, required: true },
   discoveryQueue_id: { type: Schema.Types.ObjectId, required: true },

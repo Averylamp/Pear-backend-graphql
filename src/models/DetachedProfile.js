@@ -55,7 +55,7 @@ type DetachedProfile {
   images: ImageSizes!
 
   matchingDemographics: MatchingDemographics!
-  matchingPreferencees: MatchingPreferences!
+  matchingPreferences: MatchingPreferences!
 }
 
 type DetachedProfileMutationResponse{
@@ -142,7 +142,6 @@ export const resolvers = {
           detachedProfile_ids: detachedProfileID,
         },
       }, { new: true }).exec().then(err => err);
-
 
       const createDetachedProfileObj = createDetachedProfileObject(finalDetachedProfileInput)
         .catch(err => err);
