@@ -9,10 +9,10 @@ const functionCallConsole = require('debug')('dev:FunctionCalls');
 
 export const resolvers = {
   Query: {
-    findDetachedProfiles: async (_, phoneNumber) => {
+    findDetachedProfiles: async (_, { phoneNumber }) => {
       functionCallConsole('Find Detached Profile Called');
-      debug(`Looking for detached profiles for: ${phoneNumber.phoneNumber}`);
-      return DetachedProfile.find(phoneNumber);
+      debug(`Looking for detached profiles for: ${phoneNumber}`);
+      return DetachedProfile.find({ phoneNumber });
     },
   },
   DetachedProfile: {
