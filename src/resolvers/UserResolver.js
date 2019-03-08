@@ -39,16 +39,17 @@ export const resolvers = {
       const finalUserInput = userInput;
       finalUserInput.userMatches_id = userMatchesObjectID;
       finalUserInput.discoveryQueue_id = disoveryQueueObjectID;
-      const createUserObj = createUserObject(finalUserInput, userObjectID)
+      finalUserInput._id = userObjectID;
+      const createUserObj = createUserObject(finalUserInput)
         .catch(err => err);
 
       const createUserMatchesObj = createUserMatchesObject(
-        { user_id: userObjectID }, userMatchesObjectID,
+        { user_id: userObjectID, _id: userMatchesObjectID },
       )
         .catch(err => err);
 
       const createDiscoveryQueueObj = createDiscoveryQueueObject(
-        { user_id: userObjectID }, disoveryQueueObjectID,
+        { user_id: userObjectID, _id: disoveryQueueObjectID },
       )
         .catch(err => err);
 
