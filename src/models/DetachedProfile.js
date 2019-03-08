@@ -15,7 +15,7 @@ const functionCallConsole = require('debug')('dev:FunctionCalls');
 export const typeDef = `
 
 extend type Query {
-  findDetachedProfiles(phoneNumber: String): [DetachedProfile!]!
+  findDetachedProfiles(phoneNumber: PhoneNumberInput): [DetachedProfile!]!
 }
 
 extend type Mutation{
@@ -37,6 +37,10 @@ input CreationDetachedProfileInput {
   imageIDs: [String!]!
   images: CreateImageSizes!
 
+}
+
+input PhoneNumberInput{
+  phoneNumber: String!
 }
 
 
@@ -123,7 +127,7 @@ export const resolvers = {
     findDetachedProfiles: async (_, { phoneNumber }) => {
       functionCallConsole('Find Detached Profile Called');
       debug(phoneNumber);
-      return DetachedProfile.find(phoneNumber);
+      return DetachedProfile.find({ phoneNuber: phoneNumber });
     },
   },
   DetachedProfile: {
