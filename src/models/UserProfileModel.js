@@ -72,7 +72,7 @@ type UserProfile {
   lastName: String!
 
   matchingDemographics: MatchingDemographics!
-  matchingPreferencees: MatchingPreferences!
+  matchingPreferences: MatchingPreferences!
 
   locationName: String
   locationCoordinates: String
