@@ -45,10 +45,9 @@ export const DiscoveryQueue = mongoose.model('DiscoveryQueue', DiscoveryQueueSch
 
 
 export const createDiscoveryQueueObject = function
-createDiscoveryQueueObject(discoveryInput, _id = mongoose.Types.ObjectId) {
+createDiscoveryQueueObject(discoveryInput) {
   const discoveryQueueModel = new DiscoveryQueue(discoveryInput);
 
-  discoveryQueueModel._id = _id;
 
   return new Promise((resolve, reject) => {
     discoveryQueueModel.save((err) => {

@@ -136,6 +136,8 @@ type User {
   profileObjs: [UserProfile!]!
   endorsedProfile_ids: [ID!]!
   endorsedProfileObjs: [UserProfile!]!
+  detachedProfile_ids: [ID!]!
+  detachedProfileObjs: [DetachedProfile!]!
 
   userMatches_id: ID!
   userMatchesObj: UserMatches!
@@ -248,6 +250,7 @@ const UserSchema = new Schema({
 
   profile_ids: { type: [Schema.Types.ObjectId], required: true, index: true },
   endorsedProfile_ids: { type: [Schema.Types.ObjectId], required: true, index: true },
+  detachedProfile_ids: { type: [Schema.Types.ObjectId], required: true, index: true },
 
   userMatches_id: { type: Schema.Types.ObjectId, required: true },
   discoveryQueue_id: { type: Schema.Types.ObjectId, required: true },
@@ -277,10 +280,9 @@ UserSchema.virtual('fullName').get(function fullName() {
 export const User = mongoose.model('User', UserSchema);
 
 export const createUserObject = function
-createUserObject(userInput, _id = mongoose.Types.ObjectId()) {
+createUserObject(userInput) {
   const userModel = new User(userInput);
 
-  userModel._id = _id;
 
   return new Promise((resolve, reject) => {
     userModel.save((err) => {
