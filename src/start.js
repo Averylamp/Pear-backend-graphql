@@ -133,11 +133,13 @@ export const start = async () => {
           discoveryQueuesDB: DiscoveryQueuesDB,
           testObjectsDB: TestObjectsDB,
         }),
+        tracing: true,
       });
       const app = express();
       app.use(bodyParser.json());
       app.use(bodyParser.urlencoded({ extended: true }));
       // app.use(cors())
+
 
       server.applyMiddleware({ app });
       app.post('/echo', (req, res) => {
