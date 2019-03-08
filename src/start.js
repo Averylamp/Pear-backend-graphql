@@ -1,7 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
-import sendMessage from './SMSHelper';
 import { merge } from 'lodash';
+import sendMessage from './SMSHelper';
 import {
   typeDef as User,
 } from './models/UserModel';
@@ -137,13 +137,11 @@ export const start = async () => {
 
       server.applyMiddleware({ app });
       app.post('/echo', (req, res) => {
-        console.log(req.body);
         res.json(req.body);
       });
 
       app.post('/sms-test', (req, res) => {
-        console.log(req.body);
-        sendMessage('+12067789236', 'hello!')
+        sendMessage('+12067789236', 'hello!');
         res.json(req.body);
       });
 
