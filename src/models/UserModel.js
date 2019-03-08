@@ -11,9 +11,9 @@ extend type Query {
 }
 
 extend type Mutation{
-  createUser(userInput: CreationUserInput): UserMutationResponse
-  getUser(userInput: GetUserInput): UserMutationResponse
-  updateUser(id: ID, updateUserInput: UpdateUserInput) : UserMutationResponse
+  createUser(userInput: CreationUserInput): UserMutationResponse!
+  getUser(userInput: GetUserInput): UserMutationResponse!
+  updateUser(id: ID, updateUserInput: UpdateUserInput) : UserMutationResponse!
 }
 
 input GetUserInput{
@@ -136,6 +136,8 @@ type User {
   profileObjs: [UserProfile!]!
   endorsedProfile_ids: [ID!]!
   endorsedProfileObjs: [UserProfile!]!
+  detachedProfile_ids: [ID!]!
+  detachedProfileObjs: [DetachedProfile!]!
 
   userMatches_id: ID!
   userMatchesObj: UserMatches!
@@ -226,7 +228,7 @@ const UserSchema = new Schema({
   phoneNumber: {
     type: String,
     required: true,
-    validate: { validator(v) { return /\d{10}$/.test(v); } },
+    validate: { validator(v) { return /\d{10}$/.test(v) && v.length === 10; } },
     index: true,
   },
   phoneNumberVerified: { type: Boolean, required: true, default: false },
@@ -246,8 +248,15 @@ const UserSchema = new Schema({
 
   pearPoints: { type: Number, required: true, default: 0 },
 
-  profile_ids: { type: [Schema.Types.ObjectId], required: true, index: true },
-  endorsedProfile_ids: { type: [Schema.Types.ObjectId], required: true, index: true },
+  profile_ids: {
+    type: [Schema.Types.ObjectId], required: true, index: true, default: [],
+  },
+  endorsedProfile_ids: {
+    type: [Schema.Types.ObjectId], required: true, index: true, default: [],
+  },
+  detachedProfile_ids: {
+    type: [Schema.Types.ObjectId], required: true, index: true, default: [],
+  },
 
   userMatches_id: { type: Schema.Types.ObjectId, required: true },
   discoveryQueue_id: { type: Schema.Types.ObjectId, required: true },
@@ -277,10 +286,9 @@ UserSchema.virtual('fullName').get(function fullName() {
 export const User = mongoose.model('User', UserSchema);
 
 export const createUserObject = function
-createUserObject(userInput, _id = mongoose.Types.ObjectId()) {
+createUserObject(userInput) {
   const userModel = new User(userInput);
 
-  userModel._id = _id;
 
   return new Promise((resolve, reject) => {
     userModel.save((err) => {

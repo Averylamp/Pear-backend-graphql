@@ -13,9 +13,14 @@ import {
   resolvers as UserProfileResolvers,
 } from './models/UserProfileModel';
 import {
+  typeDef as ImageSizes,
+} from './models/ImageSchemas';
+import {
   typeDef as DetachedProfile,
-  resolvers as DetachedProfileResolvers,
 } from './models/DetachedProfile';
+import {
+  resolvers as DetachedProfileResolvers,
+} from './resolvers/DetachedProfileResolver';
 import {
   typeDef as Match,
   resolvers as MatchResolvers,
@@ -94,7 +99,8 @@ export const start = async () => {
         Match, UserMatches,
         MatchRequest,
         DiscoveryQueue,
-        TestObject];
+        TestObject,
+        ImageSizes];
 
       const resolvers = {
         Query: {
@@ -129,11 +135,13 @@ export const start = async () => {
           discoveryQueuesDB: DiscoveryQueuesDB,
           testObjectsDB: TestObjectsDB,
         }),
+        tracing: true,
       });
       const app = express();
       app.use(bodyParser.json());
       app.use(bodyParser.urlencoded({ extended: true }));
       // app.use(cors())
+
 
       server.applyMiddleware({ app });
       app.post('/echo', (req, res) => {

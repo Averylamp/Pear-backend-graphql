@@ -5,6 +5,7 @@ import { createUserObject, User } from '../models/UserModel';
 const mongoose = require('mongoose');
 const $ = require('mongo-dot-notation');
 const debug = require('debug')('dev:UserResolvers');
+const functionCallConsole = require('debug')('dev:FunctionCalls');
 
 const firebaseAdmin = require('firebase-admin');
 
@@ -29,7 +30,7 @@ export const resolvers = {
   },
   Mutation: {
     createUser: async (_source, { userInput }) => {
-      debug(userInput);
+      functionCallConsole('Create User');
       const userObjectID = mongoose.Types.ObjectId();
       const userMatchesObjectID = mongoose.Types.ObjectId();
       const disoveryQueueObjectID = mongoose.Types.ObjectId();
@@ -38,16 +39,17 @@ export const resolvers = {
       const finalUserInput = userInput;
       finalUserInput.userMatches_id = userMatchesObjectID;
       finalUserInput.discoveryQueue_id = disoveryQueueObjectID;
-      const createUserObj = createUserObject(finalUserInput, userObjectID)
+      finalUserInput._id = userObjectID;
+      const createUserObj = createUserObject(finalUserInput)
         .catch(err => err);
 
       const createUserMatchesObj = createUserMatchesObject(
-        { user_id: userObjectID }, userMatchesObjectID,
+        { user_id: userObjectID, _id: userMatchesObjectID },
       )
         .catch(err => err);
 
       const createDiscoveryQueueObj = createDiscoveryQueueObject(
-        { user_id: userObjectID }, disoveryQueueObjectID,
+        { user_id: userObjectID, _id: disoveryQueueObjectID },
       )
         .catch(err => err);
 
@@ -102,19 +104,17 @@ export const resolvers = {
         });
     },
     getUser: async (_source, { userInput }) => {
-      debug(userInput);
+      functionCallConsole('Get User Called');
       const idToken = userInput.firebaseToken;
       const uid = userInput.firebaseAuthID;
       return new Promise(resolve => firebaseAdmin.auth().verifyIdToken(idToken)
         .then((decodedToken) => {
-          debug('Decoded token');
           const firebaseUID = decodedToken.uid;
-          debug(firebaseUID);
-          debug(uid);
           if (uid === firebaseUID) {
-            debug('tokenUID matches provided UID');
+            debug('token matches provided UID');
             const user = User.findOne({ firebaseAuthID: uid });
             if (user) {
+              functionCallConsole('Validated');
               resolve({
                 success: true,
                 message: 'Successfully fetched',
@@ -126,6 +126,12 @@ export const resolvers = {
                 message: 'Failed to fetch user',
               });
             }
+          } else {
+            debug('token does not match');
+            resolve({
+              success: false,
+              message: 'Failed to fetch user',
+            });
           }
         }).catch((error) => {
           debug('Failed to Decoded token');
@@ -138,6 +144,7 @@ export const resolvers = {
         }));
     },
     updateUser: async (_source, { id, updateUserInput }) => {
+      functionCallConsole('Update User Called');
       const finalUpdateUserInput = $.flatten(updateUserInput);
       return new Promise(resolve => User.findByIdAndUpdate(
         id, finalUpdateUserInput, { new: true, runValidators: true },
