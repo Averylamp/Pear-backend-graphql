@@ -13,7 +13,7 @@ extend type Mutation {
 }
 
 input CreationUserProfileInput {
-  creator_id: ID!
+  creatorUser_id: ID!
   firstName: String!
   demographics: CreationUserProfileDemographicsInput!
   activeProfile: Boolean!
@@ -61,7 +61,7 @@ type UserProfileMutationResponse{
 
 type UserProfile {
   _id: ID!
-  creator_id: ID!
+  creatorUser_id: ID!
   creatorObj: User!
   user_id: ID
   userObj: User
@@ -72,7 +72,7 @@ type UserProfile {
   lastName: String!
 
   matchingDemographics: MatchingDemographics!
-  matchingPreferencees: MatchingPreferences!
+  matchingPreferences: MatchingPreferences!
 
   locationName: String
   locationCoordinates: String
@@ -88,24 +88,6 @@ type UserProfileData{
   totalProfileLikes: Int!
 }
 
-type ImageSizes{
-  original: [ImageMetadata!]!
-  large:    [ImageMetadata!]!
-  medium:   [ImageMetadata!]!
-  small:    [ImageMetadata!]!
-  thumb:    [ImageMetadata!]!
-}
-
-type ImageMetadata{
-  imageURL: String!
-  imageID: String!
-  imageSize: ImageSize!
-}
-
-type ImageSize{
-  width: Int!
-  height: Int!
-}
 
 enum Gender{
   male
@@ -117,7 +99,7 @@ enum Gender{
 
 const UserProfileSchema = new Schema({
   _id: { type: Schema.Types.ObjectId, required: true },
-  creator_id: { type: Schema.Types.ObjectId, required: true, index: true },
+  creatorUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
   user_id: { type: Schema.Types.ObjectId, required: false, index: true },
   activeProfile: { type: Boolean, required: true, defualt: false },
   activeDiscovery: { type: Boolean, required: true, defualt: false },
@@ -154,13 +136,6 @@ const UserProfileSchema = new Schema({
   },
 
   profileImageIDs: { type: [String], required: true, default: [] },
-  profileImages: {
-    original: { type: [Schema.Types.Mixed], required: true, default: [] },
-    large: { type: [Schema.Types.Mixed], required: true, default: [] },
-    medium: { type: [Schema.Types.Mixed], required: true, default: [] },
-    small: { type: [Schema.Types.Mixed], required: true, default: [] },
-    thumb: { type: [Schema.Types.Mixed], required: true, default: [] },
-  },
 
   discovery_id: { type: Schema.Types.ObjectId, required: true },
 
