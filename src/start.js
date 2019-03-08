@@ -53,14 +53,17 @@ if (process.env.DEBUG) {
   devMode = true;
 }
 
+const debug = require('debug')('dev:Start');
+
 const URL = 'http://localhost';
 const PORT = 1234;
-
-let MONGO_URL = 'mongodb+srv://avery:0bz8M0eMEtyXlj2aZodIPpJpy@cluster0-w4ecv.mongodb.net/prod?retryWrites=true';
+let dbName = 'prod';
 if (devMode) {
-  MONGO_URL = 'mongodb+srv://avery:0bz8M0eMEtyXlj2aZodIPpJpy@cluster0-w4ecv.mongodb.net/dev?retryWrites=true';
+  dbName = 'd';
+  debug('Debug Mode Detected');
+  debug(`Database: ${dbName}`);
 }
-const debug = require('debug')('dev:Start');
+const MONGO_URL = `mongodb+srv://avery:0bz8M0eMEtyXlj2aZodIPpJpy@cluster0-w4ecv.mongodb.net/${dbName}?retryWrites=true`;
 const mongoose = require('mongoose');
 
 debug(MONGO_URL);
