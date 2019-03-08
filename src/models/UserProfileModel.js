@@ -13,7 +13,7 @@ extend type Mutation {
 }
 
 input CreationUserProfileInput {
-  creator_id: ID!
+  creatorUser_id: ID!
   firstName: String!
   demographics: CreationUserProfileDemographicsInput!
   activeProfile: Boolean!
@@ -61,7 +61,7 @@ type UserProfileMutationResponse{
 
 type UserProfile {
   _id: ID!
-  creator_id: ID!
+  creatorUser_id: ID!
   creatorObj: User!
   user_id: ID
   userObj: User
@@ -99,7 +99,7 @@ enum Gender{
 
 const UserProfileSchema = new Schema({
   _id: { type: Schema.Types.ObjectId, required: true },
-  creator_id: { type: Schema.Types.ObjectId, required: true, index: true },
+  creatorUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
   user_id: { type: Schema.Types.ObjectId, required: false, index: true },
   activeProfile: { type: Boolean, required: true, defualt: false },
   activeDiscovery: { type: Boolean, required: true, defualt: false },
