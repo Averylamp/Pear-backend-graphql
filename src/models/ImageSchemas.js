@@ -56,9 +56,9 @@ export const ImageMetadataSchema = new Schema({
 });
 
 export const ImageSizes = new Schema({
-  original: { type: [ImageMetadataSchema], required: true },
-  large: { type: [ImageMetadataSchema], required: true },
-  medium: { type: [ImageMetadataSchema], required: true },
-  small: { type: [ImageMetadataSchema], required: true },
-  thumb: { type: [ImageMetadataSchema], required: true },
+  original: { type: [ImageMetadataSchema], required: true, default: [] },
+  large: { type: [ImageMetadataSchema], required: true, default: [] },
+  medium: { type: [ImageMetadataSchema], required: true, default: [] },
+  small: { type: [ImageMetadataSchema], required: true, default: [] },
+  thumb: { type: [ImageMetadataSchema], required: true, default: [] },
 });
