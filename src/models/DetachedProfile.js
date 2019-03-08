@@ -86,7 +86,7 @@ const DetachedProfileSchema = new Schema({
   dos: { type: [String], required: true },
   donts: { type: [String], required: true },
   imageIDs: { type: [String], required: true, default: [] },
-  images: { type: ImageSizes, required: true },
+  images: { type: ImageSizes, required: true, default: ImageSizes },
   matchingDemographics: {
     type: MatchingDemographicsSchema,
     required: true,
