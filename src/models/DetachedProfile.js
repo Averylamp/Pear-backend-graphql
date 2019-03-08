@@ -52,6 +52,7 @@ type DetachedProfile {
   bio: String!
   dos: [String!]!
   donts: [String!]!
+  imageIDs: [String!]!
   images: ImageSizes!
 
   matchingDemographics: MatchingDemographics!
