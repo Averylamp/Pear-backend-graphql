@@ -17,8 +17,10 @@ import {
 } from './models/ImageSchemas';
 import {
   typeDef as DetachedProfile,
-  resolvers as DetachedProfileResolvers,
 } from './models/DetachedProfile';
+import {
+  resolvers as DetachedProfileResolvers,
+} from './resolvers/DetachedProfileResolver';
 import {
   typeDef as Match,
   resolvers as MatchResolvers,
