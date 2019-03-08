@@ -11,9 +11,9 @@ extend type Query {
 }
 
 extend type Mutation{
-  createUser(userInput: CreationUserInput): UserMutationResponse
-  getUser(userInput: GetUserInput): UserMutationResponse
-  updateUser(id: ID, updateUserInput: UpdateUserInput) : UserMutationResponse
+  createUser(userInput: CreationUserInput): UserMutationResponse!
+  getUser(userInput: GetUserInput): UserMutationResponse!
+  updateUser(id: ID, updateUserInput: UpdateUserInput) : UserMutationResponse!
 }
 
 input GetUserInput{
