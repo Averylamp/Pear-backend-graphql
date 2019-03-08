@@ -20,7 +20,7 @@ export const resolvers = {
   Query: {
     user: async (_source, { id }) => {
       debug(`Getting user by id: ${id}`);
-      return User.findOne(id);
+      return User.findById(id);
     },
   },
   User: {
