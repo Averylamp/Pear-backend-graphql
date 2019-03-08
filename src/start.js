@@ -48,7 +48,7 @@ const { ApolloServer } = require('apollo-server-express');
 
 const URL = 'http://localhost';
 const PORT = 1234;
-const MONGO_URL = 'mongodb+srv://avery:0bz8M0eMEtyXlj2aZodIPpJpy@cluster0-w4ecv.mongodb.net/d?retryWrites=true';
+const MONGO_URL = 'mongodb+srv://avery:0bz8M0eMEtyXlj2aZodIPpJpy@cluster0-w4ecv.mongodb.net/dev?retryWrites=true';
 const debug = require('debug')('dev:Start');
 const mongoose = require('mongoose');
 
