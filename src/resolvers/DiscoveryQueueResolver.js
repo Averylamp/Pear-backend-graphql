@@ -12,14 +12,21 @@ export const resolvers = {
     },
   },
   Mutation: {
-    addToQueue: async (_, { user_id, addedUser_id }) => DiscoveryQueue.findOne({ user_id })
-      .then((discoveryQueue) => {
-        discoveryQueue.currentDiscoveryItems.push(new DiscoveryItem({ user_id: addedUser_id }));
-        discoveryQueue.save();
-      }).then(() => ({ success: true })),
+    addToQueue: async (_, { user_id, addedUser_id }) => DiscoveryQueue
+      .findOneAndUpdate({ user_id }, {
+        $push: {
+          currentDiscoveryItems: new DiscoveryItem({ user_id: addedUser_id }),
+        },
+      })
+      .then(() => ({ success: true, message: 'Successfully added to queue.' }))
+      .catch(err => ({ success: false, message: err.toString() })),
   },
   DiscoveryQueue: {
     user: async ({ user_id }) => User.findById(user_id),
+    currentDiscoveryItems: async () => {
+      const users = await User.find({ $where: 'this.profile_ids.length > 0' });
+      return users.map(({ _id }) => new DiscoveryItem({ user_id: _id }));
+    },
   },
   DiscoveryItem: {
     user: async ({ user_id }) => User.findById(user_id),
