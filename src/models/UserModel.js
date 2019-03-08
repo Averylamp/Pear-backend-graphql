@@ -228,7 +228,7 @@ const UserSchema = new Schema({
   phoneNumber: {
     type: String,
     required: true,
-    validate: { validator(v) { return /\d{10}$/.test(v); } },
+    validate: { validator(v) { return /\d{10}$/.test(v) && v.length === 10; } },
     index: true,
   },
   phoneNumberVerified: { type: Boolean, required: true, default: false },

@@ -74,7 +74,7 @@ const DetachedProfileSchema = new Schema({
   phoneNumber: {
     type: String,
     required: true,
-    validate: { validator(v) { return /\d{10}$/.test(v); } },
+    validate: { validator(v) { return /\d{10}$/.test(v) && v.length === 10; } },
     index: true,
   },
   age: { type: Number, required: true },
@@ -178,12 +178,13 @@ export const resolvers = {
                 }
               });
             }
-            debug('Completed successfully');
+            debug('Completed unsuccessfully');
             return {
               success: false,
               message,
             };
           }
+          debug('Completed successfully');
           return {
             success: true,
             detachedProfile: detachedProfileObject,
