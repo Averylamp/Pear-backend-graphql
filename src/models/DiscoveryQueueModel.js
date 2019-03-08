@@ -55,10 +55,9 @@ export const DiscoveryItem = mongoose.model('DiscoveryItem', DiscoveryItemSchema
 
 // discovery queue object is created when user is created
 export const createDiscoveryQueueObject = function
-createDiscoveryQueueObject(discoveryInput, _id = mongoose.Types.ObjectId) {
+createDiscoveryQueueObject(discoveryInput) {
   const discoveryQueueModel = new DiscoveryQueue(discoveryInput);
 
-  discoveryQueueModel._id = _id;
 
   return new Promise((resolve, reject) => {
     discoveryQueueModel.save((err) => {

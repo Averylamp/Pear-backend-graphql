@@ -52,11 +52,8 @@ export const UserMatches = mongoose.model('UserMatches', UserMatchesSchema);
 
 
 export const createUserMatchesObject = function
-createUserMatchesObject(userMatchesInput, _id = mongoose.Types.ObjectId()) {
+createUserMatchesObject(userMatchesInput) {
   const userMatchesModel = new UserMatches(userMatchesInput);
-
-  userMatchesModel._id = _id;
-
   return new Promise((resolve, reject) => {
     userMatchesModel.save((err) => {
       if (err) {
