@@ -149,7 +149,7 @@ export const start = async () => {
           discoveryQueuesDB: DiscoveryQueuesDB,
           testObjectsDB: TestObjectsDB,
         }),
-        tracing: true,
+        tracing: devMode,
         playground: devMode,
         introspection: devMode,
       });
