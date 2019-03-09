@@ -45,6 +45,7 @@ import {
 import {
   resolvers as TestObjectResolvers,
 } from './resolvers/TestObjectResolver';
+import createTestDB from './tests/CreateTestDB';
 
 const { ApolloServer } = require('apollo-server-express');
 
@@ -122,6 +123,7 @@ export const start = async () => {
         typeDefs: finalTypeDefs,
         resolvers: finalResolvers,
         engine: {
+          // must be null if creating test DB
           apiKey: 'service:pear-matchmaking-8936:V43kf4Urhi-63wQycK_yoA',
         },
         dataSources: () => ({
@@ -153,6 +155,10 @@ export const start = async () => {
         res.json(req.body);
       });
 
+      app.get('/test-client', (req, res) => {
+        createTestDB(server);
+        res.send('success');
+      });
 
       app.listen({ port: PORT, ip: URL }, () => debug(`🚀 Server ready at ${URL}:${PORT}${server.graphqlPath}`));
     });
