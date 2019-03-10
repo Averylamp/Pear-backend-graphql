@@ -49,11 +49,25 @@ import createTestDB from './tests/CreateTestDB';
 
 const { ApolloServer } = require('apollo-server-express');
 
+let devMode = false;
+if (process.env.DEBUG) {
+  devMode = true;
+}
+
+const debug = require('debug')('dev:Start');
+
 const URL = 'http://localhost';
 const PORT = 1234;
-const MONGO_URL = 'mongodb+srv://avery:0bz8M0eMEtyXlj2aZodIPpJpy@cluster0-w4ecv.mongodb.net/dev-test?retryWrites=true';
-const debug = require('debug')('dev:Start');
+let dbName = 'prod';
+if (devMode) {
+  dbName = 'd';
+  debug('Debug Mode Detected');
+  debug(`Database: ${dbName}`);
+}
+const MONGO_URL = `mongodb+srv://avery:0bz8M0eMEtyXlj2aZodIPpJpy@cluster0-w4ecv.mongodb.net/${dbName}?retryWrites=true`;
 const mongoose = require('mongoose');
+
+debug(MONGO_URL);
 
 const name = 'Pear';
 debug('Booting %s', name);
@@ -139,7 +153,9 @@ export const start = async () => {
           apiKey: 'service:pear-matchmaking-8936:V43kf4Urhi-63wQycK_yoA',
         },
         dataSources: () => dataSourcesObject,
-        tracing: true,
+        tracing: devMode,
+        playground: devMode,
+        introspection: devMode,
       });
       const app = express();
       app.use(bodyParser.json());
