@@ -45,6 +45,9 @@ import {
 import {
   resolvers as TestObjectResolvers,
 } from './resolvers/TestObjectResolver';
+import {
+  typeDef as MatchingSchemas,
+} from './models/MatchingSchemas'
 import createTestDB from './tests/CreateTestDB';
 
 const { ApolloServer } = require('apollo-server-express');
@@ -135,7 +138,8 @@ export const start = async () => {
         MatchRequest,
         DiscoveryQueue,
         TestObject,
-        ImageSizes];
+        ImageSizes,
+        MatchingSchemas];
 
       const resolvers = {
         Query: {},
