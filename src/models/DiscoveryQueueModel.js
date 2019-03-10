@@ -6,7 +6,7 @@ const debug = require('debug')('dev:DiscoveryQueue');
 
 export const typeDef = `
 extend type Query {
-  feed(user_id: ID!, last: Int): DiscoveryQueue
+  getDiscoveryFeed(user_id: ID!, last: Int): DiscoveryQueue
 }
 
 extend type Mutation {

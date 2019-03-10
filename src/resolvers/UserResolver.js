@@ -2,6 +2,7 @@ import { createUserMatchesObject, UserMatches } from '../models/UserMatchesModel
 import { createDiscoveryQueueObject, DiscoveryQueue } from '../models/DiscoveryQueueModel';
 import { createUserObject, User } from '../models/UserModel';
 import { UserProfile } from '../models/UserProfileModel';
+import { DetachedProfile } from '../models/DetachedProfile';
 
 const mongoose = require('mongoose');
 const $ = require('mongo-dot-notation');
@@ -69,7 +70,7 @@ export const resolvers = {
     profileObjs: async ({ profile_ids }) => UserProfile.find({ _id: { $in: profile_ids } }),
     endorsedProfileObjs: async ({ endorsedProfile_ids }) => UserProfile
       .find({ _id: { $in: endorsedProfile_ids } }),
-    detachedProfileObjs: async ({ detachedProfile_ids }) => UserProfile
+    detachedProfileObjs: async ({ detachedProfile_ids }) => DetachedProfile
       .find({ _id: { $in: detachedProfile_ids } }),
     userMatchesObj: async ({ userMatches_id }) => UserMatches.findById(userMatches_id),
     discoveryQueueObj: async ({ discoveryQueue_id }) => DiscoveryQueue.findById(discoveryQueue_id),
