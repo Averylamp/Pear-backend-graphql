@@ -5,6 +5,13 @@ const { Schema } = mongoose;
 const debug = require('debug')('dev:DiscoveryQueue');
 
 export const typeDef = `
+extend type Query {
+  getDiscoveryFeed(user_id: ID!, last: Int): DiscoveryQueue
+}
+
+extend type Mutation {
+  addToQueue(user_id: ID!, addedUser_id: ID!): DiscoveryMutationResponse! 
+}
 
 type DiscoveryQueue{
   _id: ID!
@@ -19,16 +26,18 @@ type DiscoveryQueue{
 
 type DiscoveryItem {
   _id: ID!
-  userProfile_id: ID!
-  userProfile: UserProfile!
   user_id: ID!
   user: User!
   timestamp: String
 }
 
+type DiscoveryMutationResponse {
+  success: Boolean!
+  message: String
+}
+
 `;
 const DiscoveryItemSchema = new Schema({
-  userProfile_id: { type: Schema.Types.ObjectId, required: true },
   user_id: { type: Schema.Types.ObjectId, required: true },
   timestamp: { type: Date, required: true, default: Date },
 });
@@ -42,8 +51,9 @@ const DiscoveryQueueSchema = new Schema({
 
 
 export const DiscoveryQueue = mongoose.model('DiscoveryQueue', DiscoveryQueueSchema);
+export const DiscoveryItem = mongoose.model('DiscoveryItem', DiscoveryItemSchema);
 
-
+// discovery queue object is created when user is created
 export const createDiscoveryQueueObject = function
 createDiscoveryQueueObject(discoveryInput) {
   const discoveryQueueModel = new DiscoveryQueue(discoveryInput);
