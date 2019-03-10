@@ -8,11 +8,11 @@ const { Schema } = mongoose;
 export const typeDef = `
 extend type Query {
   user(id: ID): User
+  getUser(userInput: GetUserInput): UserMutationResponse!
 }
 
 extend type Mutation{
   createUser(userInput: CreationUserInput): UserMutationResponse!
-  getUser(userInput: GetUserInput): UserMutationResponse!
   updateUser(id: ID, updateUserInput: UpdateUserInput) : UserMutationResponse!
 }
 
