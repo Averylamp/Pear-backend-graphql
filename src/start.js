@@ -47,7 +47,7 @@ import {
 } from './resolvers/TestObjectResolver';
 import {
   typeDef as MatchingSchemas,
-} from './models/MatchingSchemas'
+} from './models/MatchingSchemas';
 import createTestDB from './tests/CreateTestDB';
 
 const { ApolloServer } = require('apollo-server-express');
