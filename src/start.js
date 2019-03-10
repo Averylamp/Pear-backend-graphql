@@ -51,16 +51,16 @@ const { ApolloServer } = require('apollo-server-express');
 
 const URL = 'http://localhost';
 const PORT = 1234;
-const MONGO_URL = 'mongodb+srv://avery:0bz8M0eMEtyXlj2aZodIPpJpy@cluster0-w4ecv.mongodb.net/dev?retryWrites=true';
+const MONGO_URL = 'mongodb+srv://avery:0bz8M0eMEtyXlj2aZodIPpJpy@cluster0-w4ecv.mongodb.net/dev-test?retryWrites=true';
 const debug = require('debug')('dev:Start');
 const mongoose = require('mongoose');
 
 const name = 'Pear';
 debug('Booting %s', name);
 
-
 export const start = async () => {
   try {
+    const regenTestDB = process.env.REGENDB;
     mongoose.connect(MONGO_URL, { useNewUrlParser: true });
     mongoose.Promise = global.Promise;
     mongoose.set('useCreateIndex', true);
@@ -80,20 +80,33 @@ export const start = async () => {
       const DiscoveryQueuesDB = db.collection('discoveryqueues');
       const TestObjectsDB = db.collection('testobjects');
 
+      const dataSourcesObject = {
+        usersDB: UsersDB,
+        userProfilesDB: UserProfilesDB,
+        detachedUserProfilesDB: DetachedProfilesDB,
+        userMatchesDB: UserMatchesDB,
+        matchRequestsDB: MatchRequestsDB,
+        matchesDB: MatchesDB,
+        discoveriesDB: DiscoveriesDB,
+        discoveryQueuesDB: DiscoveryQueuesDB,
+        testObjectsDB: TestObjectsDB,
+      };
+
       const Query = `
-    type Query {
-      noOp: String
-    }
-
-    type Mutation {
-      noOp: String
-    }
-
-    scalar Date
-
-
-    `;
-      const finalTypeDefs = [Query,
+      type Query {
+        noOp: String
+      }
+  
+      type Mutation {
+        noOp: String
+      }
+  
+      scalar Date
+  
+  
+      `;
+      const finalTypeDefs = [
+        Query,
         User,
         UserProfile,
         DetachedProfile,
@@ -104,8 +117,7 @@ export const start = async () => {
         ImageSizes];
 
       const resolvers = {
-        Query: {
-        },
+        Query: {},
       };
 
       const finalResolvers = merge(resolvers,
@@ -122,21 +134,11 @@ export const start = async () => {
       const server = new ApolloServer({
         typeDefs: finalTypeDefs,
         resolvers: finalResolvers,
-        engine: {
-          // must be null if creating test DB
+        // engine must be null if creating test DB
+        engine: regenTestDB ? null : {
           apiKey: 'service:pear-matchmaking-8936:V43kf4Urhi-63wQycK_yoA',
         },
-        dataSources: () => ({
-          usersDB: UsersDB,
-          userProfilesDB: UserProfilesDB,
-          detachedUserProfilesDB: DetachedProfilesDB,
-          userMatchesDB: UserMatchesDB,
-          matchRequestsDB: MatchRequestsDB,
-          matchesDB: MatchesDB,
-          discoveriesDB: DiscoveriesDB,
-          discoveryQueuesDB: DiscoveryQueuesDB,
-          testObjectsDB: TestObjectsDB,
-        }),
+        dataSources: () => dataSourcesObject,
         tracing: true,
       });
       const app = express();
@@ -155,12 +157,36 @@ export const start = async () => {
         res.json(req.body);
       });
 
-      app.get('/test-client', (req, res) => {
-        createTestDB(server);
-        res.send('success');
+      app.get('/test-client', async (req, res) => {
+        if (MONGO_URL.includes('dev-test')) {
+          try {
+            debug('first, clearing all previous dev-test collections...');
+            const collectionDropPromises = [];
+            const collectionInfos = await db.db.listCollections()
+              .toArray();
+            collectionInfos.forEach((collectionInfo) => {
+              debug(`dropping collection ${collectionInfo.name}`);
+              collectionDropPromises.push(db.dropCollection(collectionInfo.name)
+                .then(() => {
+                  debug(`dropped collection ${collectionInfo.name}`);
+                }));
+            });
+            await Promise.all(collectionDropPromises);
+            createTestDB(server);
+            res.send('success');
+          } catch (e) {
+            debug(e);
+            res.send(`an error occurred ${e.toString()}`);
+          }
+        } else {
+          res.send('not pointing to dev-test db');
+        }
       });
 
-      app.listen({ port: PORT, ip: URL }, () => debug(`🚀 Server ready at ${URL}:${PORT}${server.graphqlPath}`));
+      app.listen({
+        port: PORT,
+        ip: URL,
+      }, () => debug(`🚀 Server ready at ${URL}:${PORT}${server.graphqlPath}`));
     });
   } catch (e) {
     debug(e);

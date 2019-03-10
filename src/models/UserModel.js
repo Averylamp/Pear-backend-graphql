@@ -22,6 +22,7 @@ input GetUserInput{
 }
 
 input CreationUserInput{
+  _id: ID
   age: Int!
   birthdate: String!
   email: String!
@@ -221,8 +222,8 @@ const UserSchema = new Schema({
   firebaseAuthID: {
     type: String, required: true, index: true, unique: true,
   },
-  facebookId: { type: String, required: false, unique: true },
-  facebookAccessToken: { type: String, required: false, unique: true },
+  facebookId: { type: String, required: false, unique: true, index: true, sparse: true },
+  facebookAccessToken: { type: String, required: false, unique: true, index: true, sparse: true },
   email: { type: String, required: false },
   emailVerified: { type: Boolean, required: true, default: false },
   phoneNumber: {
