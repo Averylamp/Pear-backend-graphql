@@ -50,8 +50,12 @@ import createTestDB from './tests/CreateTestDB';
 const { ApolloServer } = require('apollo-server-express');
 
 let devMode = false;
+let regenTestDBMode = false;
 if (process.env.DEBUG) {
   devMode = true;
+  if (process.env.REGENDB) {
+    regenTestDBMode = true;
+  }
 }
 
 const debug = require('debug')('dev:Start');
@@ -60,8 +64,12 @@ const URL = 'http://localhost';
 const PORT = 1234;
 let dbName = 'prod';
 if (devMode) {
-  dbName = 'd';
   debug('Debug Mode Detected');
+  dbName = 'd';
+  if (regenTestDBMode) {
+    debug('Regen Test DB Mode Detected');
+    dbName = 'dev-test';
+  }
   debug(`Database: ${dbName}`);
 }
 const MONGO_URL = `mongodb+srv://avery:0bz8M0eMEtyXlj2aZodIPpJpy@cluster0-w4ecv.mongodb.net/${dbName}?retryWrites=true`;
@@ -74,7 +82,6 @@ debug('Booting %s', name);
 
 export const start = async () => {
   try {
-    const regenTestDB = process.env.REGENDB;
     mongoose.connect(MONGO_URL, { useNewUrlParser: true });
     mongoose.Promise = global.Promise;
     mongoose.set('useCreateIndex', true);
@@ -149,7 +156,7 @@ export const start = async () => {
         typeDefs: finalTypeDefs,
         resolvers: finalResolvers,
         // engine must be null if creating test DB
-        engine: regenTestDB ? null : {
+        engine: (devMode && regenTestDBMode) ? null : {
           apiKey: 'service:pear-matchmaking-8936:V43kf4Urhi-63wQycK_yoA',
         },
         dataSources: () => dataSourcesObject,
@@ -173,8 +180,9 @@ export const start = async () => {
         res.json(req.body);
       });
 
-      app.get('/test-client', async (req, res) => {
-        if (MONGO_URL.includes('dev-test')) {
+      // only expose this route if in regenTestDBMode
+      if (devMode && regenTestDBMode) {
+        app.get('/test-client', async (req, res) => {
           try {
             debug('first, clearing all previous dev-test collections...');
             const collectionDropPromises = [];
@@ -194,10 +202,8 @@ export const start = async () => {
             debug(e);
             res.send(`an error occurred ${e.toString()}`);
           }
-        } else {
-          res.send('not pointing to dev-test db');
-        }
-      });
+        });
+      }
 
       app.listen({
         port: PORT,
