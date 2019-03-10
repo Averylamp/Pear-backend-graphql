@@ -37,15 +37,15 @@ export const resolvers = {
   Mutation: {
     createUser: async (_source, { userInput }) => {
       functionCallConsole('Create User');
-      const userObjectID = mongoose.Types.ObjectId();
+      const userObjectID = '_id' in userInput ? userInput._id : mongoose.Types.ObjectId();
       const userMatchesObjectID = mongoose.Types.ObjectId();
       const disoveryQueueObjectID = mongoose.Types.ObjectId();
       debug(`IDs:${userObjectID}, ${userMatchesObjectID}, ${disoveryQueueObjectID}`);
 
       const finalUserInput = userInput;
+      finalUserInput._id = userObjectID;
       finalUserInput.userMatches_id = userMatchesObjectID;
       finalUserInput.discoveryQueue_id = disoveryQueueObjectID;
-      finalUserInput._id = userObjectID;
       const createUserObj = createUserObject(finalUserInput)
         .catch(err => err);
 
