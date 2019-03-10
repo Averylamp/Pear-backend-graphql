@@ -6,7 +6,7 @@ const debug = require('debug')('dev:DiscoveryQueueResolver');
 
 export const resolvers = {
   Query: {
-    feed: async (_, { user_id }) => {
+    getDiscoveryFeed: async (_, { user_id }) => {
       debug(`Getting feed for user with id: ${user_id}`);
       return DiscoveryQueue.findOne({ user_id });
     },
