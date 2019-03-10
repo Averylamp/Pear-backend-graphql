@@ -1,6 +1,8 @@
 import { createUserMatchesObject, UserMatches } from '../models/UserMatchesModel';
 import { createDiscoveryQueueObject, DiscoveryQueue } from '../models/DiscoveryQueueModel';
 import { createUserObject, User } from '../models/UserModel';
+import { UserProfile } from '../models/UserProfileModel';
+import { DetachedProfile } from '../models/DetachedProfile';
 
 const mongoose = require('mongoose');
 const $ = require('mongo-dot-notation');
@@ -21,7 +23,7 @@ export const resolvers = {
   Query: {
     user: async (_source, { id }) => {
       debug(`Getting user by id: ${id}`);
-      return User.findOne(id);
+      return User.findById(id);
     },
     getUser: async (_source, { userInput }) => {
       functionCallConsole('Get User Called');
@@ -65,21 +67,26 @@ export const resolvers = {
     },
   },
   User: {
+    profileObjs: async ({ profile_ids }) => UserProfile.find({ _id: { $in: profile_ids } }),
+    endorsedProfileObjs: async ({ endorsedProfile_ids }) => UserProfile
+      .find({ _id: { $in: endorsedProfile_ids } }),
+    detachedProfileObjs: async ({ detachedProfile_ids }) => DetachedProfile
+      .find({ _id: { $in: detachedProfile_ids } }),
     userMatchesObj: async ({ userMatches_id }) => UserMatches.findById(userMatches_id),
     discoveryQueueObj: async ({ discoveryQueue_id }) => DiscoveryQueue.findById(discoveryQueue_id),
   },
   Mutation: {
     createUser: async (_source, { userInput }) => {
       functionCallConsole('Create User');
-      const userObjectID = mongoose.Types.ObjectId();
+      const userObjectID = '_id' in userInput ? userInput._id : mongoose.Types.ObjectId();
       const userMatchesObjectID = mongoose.Types.ObjectId();
       const disoveryQueueObjectID = mongoose.Types.ObjectId();
       debug(`IDs:${userObjectID}, ${userMatchesObjectID}, ${disoveryQueueObjectID}`);
 
       const finalUserInput = userInput;
+      finalUserInput._id = userObjectID;
       finalUserInput.userMatches_id = userMatchesObjectID;
       finalUserInput.discoveryQueue_id = disoveryQueueObjectID;
-      finalUserInput._id = userObjectID;
       const createUserObj = createUserObject(finalUserInput)
         .catch(err => err);
 

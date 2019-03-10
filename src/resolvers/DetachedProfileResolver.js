@@ -32,7 +32,7 @@ export const resolvers = {
         $push: {
           detachedProfile_ids: detachedProfileID,
         },
-      }, { new: true }).exec().then(err => err);
+      }, { new: true }).exec().catch(err => err);
 
       const createDetachedProfileObj = createDetachedProfileObject(finalDetachedProfileInput)
         .catch(err => err);

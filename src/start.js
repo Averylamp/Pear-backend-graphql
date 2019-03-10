@@ -45,12 +45,17 @@ import {
 import {
   resolvers as TestObjectResolvers,
 } from './resolvers/TestObjectResolver';
+import createTestDB from './tests/CreateTestDB';
 
 const { ApolloServer } = require('apollo-server-express');
 
 let devMode = false;
+let regenTestDBMode = false;
 if (process.env.DEBUG) {
   devMode = true;
+  if (process.env.REGENDB) {
+    regenTestDBMode = true;
+  }
 }
 
 const debug = require('debug')('dev:Start');
@@ -59,8 +64,12 @@ const URL = 'http://localhost';
 const PORT = 1234;
 let dbName = 'prod';
 if (devMode) {
-  dbName = 'd';
   debug('Debug Mode Detected');
+  dbName = 'd';
+  if (regenTestDBMode) {
+    debug('Regen Test DB Mode Detected');
+    dbName = 'dev-test';
+  }
   debug(`Database: ${dbName}`);
 }
 const MONGO_URL = `mongodb+srv://avery:0bz8M0eMEtyXlj2aZodIPpJpy@cluster0-w4ecv.mongodb.net/${dbName}?retryWrites=true`;
@@ -70,7 +79,6 @@ debug(MONGO_URL);
 
 const name = 'Pear';
 debug('Booting %s', name);
-
 
 export const start = async () => {
   try {
@@ -93,20 +101,33 @@ export const start = async () => {
       const DiscoveryQueuesDB = db.collection('discoveryqueues');
       const TestObjectsDB = db.collection('testobjects');
 
+      const dataSourcesObject = {
+        usersDB: UsersDB,
+        userProfilesDB: UserProfilesDB,
+        detachedUserProfilesDB: DetachedProfilesDB,
+        userMatchesDB: UserMatchesDB,
+        matchRequestsDB: MatchRequestsDB,
+        matchesDB: MatchesDB,
+        discoveriesDB: DiscoveriesDB,
+        discoveryQueuesDB: DiscoveryQueuesDB,
+        testObjectsDB: TestObjectsDB,
+      };
+
       const Query = `
-    type Query {
-      noOp: String
-    }
-
-    type Mutation {
-      noOp: String
-    }
-
-    scalar Date
-
-
-    `;
-      const finalTypeDefs = [Query,
+      type Query {
+        noOp: String
+      }
+  
+      type Mutation {
+        noOp: String
+      }
+  
+      scalar Date
+  
+  
+      `;
+      const finalTypeDefs = [
+        Query,
         User,
         UserProfile,
         DetachedProfile,
@@ -117,8 +138,7 @@ export const start = async () => {
         ImageSizes];
 
       const resolvers = {
-        Query: {
-        },
+        Query: {},
       };
 
       const finalResolvers = merge(resolvers,
@@ -135,20 +155,11 @@ export const start = async () => {
       const server = new ApolloServer({
         typeDefs: finalTypeDefs,
         resolvers: finalResolvers,
-        engine: {
+        // engine must be null if creating test DB
+        engine: (devMode && regenTestDBMode) ? null : {
           apiKey: 'service:pear-matchmaking-8936:V43kf4Urhi-63wQycK_yoA',
         },
-        dataSources: () => ({
-          usersDB: UsersDB,
-          userProfilesDB: UserProfilesDB,
-          detachedUserProfilesDB: DetachedProfilesDB,
-          userMatchesDB: UserMatchesDB,
-          matchRequestsDB: MatchRequestsDB,
-          matchesDB: MatchesDB,
-          discoveriesDB: DiscoveriesDB,
-          discoveryQueuesDB: DiscoveryQueuesDB,
-          testObjectsDB: TestObjectsDB,
-        }),
+        dataSources: () => dataSourcesObject,
         tracing: devMode,
         playground: devMode,
         introspection: devMode,
@@ -161,18 +172,43 @@ export const start = async () => {
 
       server.applyMiddleware({ app });
       app.post('/echo', (req, res) => {
-        debug(req.body);
         res.json(req.body);
       });
 
       app.post('/sms-test', (req, res) => {
-        debug(req.body);
         sendMessage('+12067789236', 'hello!');
         res.json(req.body);
       });
 
+      // only expose this route if in regenTestDBMode
+      if (devMode && regenTestDBMode) {
+        app.get('/test-client', async (req, res) => {
+          try {
+            debug('first, clearing all previous dev-test collections...');
+            const collectionDropPromises = [];
+            const collectionInfos = await db.db.listCollections()
+              .toArray();
+            collectionInfos.forEach((collectionInfo) => {
+              debug(`dropping collection ${collectionInfo.name}`);
+              collectionDropPromises.push(db.dropCollection(collectionInfo.name)
+                .then(() => {
+                  debug(`dropped collection ${collectionInfo.name}`);
+                }));
+            });
+            await Promise.all(collectionDropPromises);
+            await createTestDB(server);
+            res.send('success');
+          } catch (e) {
+            debug(e);
+            res.send(`an error occurred ${e.toString()}`);
+          }
+        });
+      }
 
-      app.listen({ port: PORT, ip: URL }, () => debug(`🚀 Server ready at ${URL}:${PORT}${server.graphqlPath}`));
+      app.listen({
+        port: PORT,
+        ip: URL,
+      }, () => debug(`🚀 Server ready at ${URL}:${PORT}${server.graphqlPath}`));
     });
   } catch (e) {
     debug(e);
