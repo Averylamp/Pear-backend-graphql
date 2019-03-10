@@ -52,6 +52,14 @@ import createTestDB from './tests/CreateTestDB';
 
 const { ApolloServer } = require('apollo-server-express');
 
+const debug = require('debug')('dev:Start');
+
+let tracing = false;
+if (process.env.PERF) {
+  tracing = true;
+  debug('Perf mode detected');
+}
+
 let devMode = false;
 let regenTestDBMode = false;
 if (process.env.DEBUG) {
@@ -61,7 +69,6 @@ if (process.env.DEBUG) {
   }
 }
 
-const debug = require('debug')('dev:Start');
 
 const URL = 'http://localhost';
 const PORT = 1234;
@@ -120,14 +127,14 @@ export const start = async () => {
       type Query {
         noOp: String
       }
-  
+
       type Mutation {
         noOp: String
       }
-  
+
       scalar Date
-  
-  
+
+
       `;
       const finalTypeDefs = [
         Query,
@@ -164,7 +171,7 @@ export const start = async () => {
           apiKey: 'service:pear-matchmaking-8936:V43kf4Urhi-63wQycK_yoA',
         },
         dataSources: () => dataSourcesObject,
-        tracing: devMode,
+        tracing,
         playground: devMode,
         introspection: devMode,
       });
