@@ -188,7 +188,7 @@ export const start = async () => {
                 }));
             });
             await Promise.all(collectionDropPromises);
-            createTestDB(server);
+            await createTestDB(server);
             res.send('success');
           } catch (e) {
             debug(e);
