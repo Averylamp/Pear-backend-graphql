@@ -1,4 +1,4 @@
-import { ImageContainer } from './ImageSchemas';
+import { ImageContainerSchema } from './ImageSchemas';
 import { MatchingDemographicsSchema, MatchingPreferencesSchema } from './MatchingSchemas';
 
 
@@ -78,12 +78,12 @@ const DetachedProfileSchema = new Schema({
   },
   age: { type: Number, required: true },
   gender: { type: String, required: true, enum: ['male', 'female', 'nonbinary'] },
-  interests: { type: [String], required: true },
-  vibes: { type: [String], required: true },
-  bio: { type: String, required: true },
-  dos: { type: [String], required: true },
-  donts: { type: [String], required: true },
-  images: { type: [ImageContainer], required: true, default: [] },
+  interests: { type: [String], required: true, default: [] },
+  vibes: { type: [String], required: true, default: [] },
+  bio: { type: String, required: true, default: '' },
+  dos: { type: [String], required: true, default: [] },
+  donts: { type: [String], required: true, default: [] },
+  images: { type: [ImageContainerSchema], required: true, default: [] },
   matchingDemographics: {
     type: MatchingDemographicsSchema,
     required: true,
