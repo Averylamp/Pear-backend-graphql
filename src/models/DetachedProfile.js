@@ -1,4 +1,4 @@
-import { ImageSizes } from './ImageSchemas';
+import { ImageContainer } from './ImageSchemas';
 import { MatchingDemographicsSchema, MatchingPreferencesSchema } from './MatchingSchemas';
 
 
@@ -30,8 +30,7 @@ input CreationDetachedProfileInput {
   bio: String!
   dos: [String!]!
   donts: [String!]!
-  imageIDs: [String!]!
-  images: CreateImageSizes!
+  images: [CreateImageContainer!]!
 
 }
 
@@ -52,8 +51,7 @@ type DetachedProfile {
   bio: String!
   dos: [String!]!
   donts: [String!]!
-  imageIDs: [String!]!
-  images: ImageSizes!
+  images: [ImageContainer!]!
 
   matchingDemographics: MatchingDemographics!
   matchingPreferences: MatchingPreferences!
@@ -85,8 +83,7 @@ const DetachedProfileSchema = new Schema({
   bio: { type: String, required: true },
   dos: { type: [String], required: true },
   donts: { type: [String], required: true },
-  imageIDs: { type: [String], required: true, default: [] },
-  images: { type: ImageSizes, required: true, default: ImageSizes },
+  images: { type: [ImageContainer], required: true, default: [] },
   matchingDemographics: {
     type: MatchingDemographicsSchema,
     required: true,
