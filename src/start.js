@@ -10,10 +10,9 @@ import {
 } from './resolvers/UserResolver';
 import {
   typeDef as UserProfile,
-  resolvers as UserProfileResolvers,
 } from './models/UserProfileModel';
 import {
-  typeDef as ImageSizes,
+  typeDef as ImageContainer,
 } from './models/ImageSchemas';
 import {
   typeDef as DetachedProfile,
@@ -45,6 +44,9 @@ import {
 import {
   resolvers as TestObjectResolvers,
 } from './resolvers/TestObjectResolver';
+import {
+  typeDef as MatchingSchemas,
+} from './models/MatchingSchemas';
 import createTestDB from './tests/CreateTestDB';
 
 const { ApolloServer } = require('apollo-server-express');
@@ -142,7 +144,8 @@ export const start = async () => {
         MatchRequest,
         DiscoveryQueue,
         TestObject,
-        ImageSizes];
+        ImageContainer,
+        MatchingSchemas];
 
       const resolvers = {
         Query: {},
@@ -150,7 +153,6 @@ export const start = async () => {
 
       const finalResolvers = merge(resolvers,
         UserResolvers,
-        UserProfileResolvers,
         DetachedProfileResolvers,
         MatchResolvers,
         UserMatchesResolvers,
