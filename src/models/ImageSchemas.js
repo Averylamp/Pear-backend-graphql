@@ -19,6 +19,7 @@ input CreateImage{
   imageURL: String!
   width: Int!
   height: Int!
+  imageType: ImageType!
 }
 
 type ImageContainer{
@@ -36,7 +37,7 @@ type Image{
   imageURL: String!
   width: Int!
   height: Int!
-  imageType: ImageType
+  imageType: ImageType!
 }
 
 enum ImageType{
