@@ -10,10 +10,9 @@ import {
 } from './resolvers/UserResolver';
 import {
   typeDef as UserProfile,
-  resolvers as UserProfileResolvers,
 } from './models/UserProfileModel';
 import {
-  typeDef as ImageSizes,
+  typeDef as ImageContainer,
 } from './models/ImageSchemas';
 import {
   typeDef as DetachedProfile,
@@ -145,7 +144,7 @@ export const start = async () => {
         MatchRequest,
         DiscoveryQueue,
         TestObject,
-        ImageSizes,
+        ImageContainer,
         MatchingSchemas];
 
       const resolvers = {
@@ -154,7 +153,6 @@ export const start = async () => {
 
       const finalResolvers = merge(resolvers,
         UserResolvers,
-        UserProfileResolvers,
         DetachedProfileResolvers,
         MatchResolvers,
         UserMatchesResolvers,

@@ -168,8 +168,11 @@ type UserMutationResponse{
   user: User
 }
 
-
-
+enum Gender{
+  male
+  female
+  nonbinary
+}
 `;
 
 const UserStatsSchema = new Schema({
