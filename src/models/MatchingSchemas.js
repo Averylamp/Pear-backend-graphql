@@ -3,6 +3,37 @@ const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
 
+export const typeDef = `
+type MatchingDemographics{
+  gender: Gender!
+  age: Int!
+  birthdate: String!
+  height: Int
+  religion: [String!]
+  ethnicities: [String!]
+  political: [String!]
+  smoking: [String!]
+  drinking: [String!]
+  school: String
+}
+
+type MatchingPreferences{
+  ethnicities: [String!]
+  seekingGender: [Gender!]!
+  seekingReason: [String!]
+  reasonDealbreaker: Int!
+  seekingEthnicity: [String!]!
+  ethnicityDealbreaker: Int!
+  maxDistance: Int!
+  distanceDealbreaker: Int!
+  minAgeRange: Int!
+  maxAgeRange: Int!
+  ageDealbreaker: Int!
+  minHeightRange: Int!
+  maxHeightRange: Int!
+  heightDealbreaker: Int!
+}
+`;
 
 export const MatchingDemographicsSchema = new Schema({
   ethnicities: { type: [String], required: false },

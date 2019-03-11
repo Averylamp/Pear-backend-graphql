@@ -171,5 +171,60 @@ export const resolvers = {
         },
       ));
     },
+    approveNewDetachedProfile: async (_source, { user_id, detachedProfile_id }) => {
+      functionCallConsole('Approve Profile Called');
+      const user = await User.findById(user_id);
+      if (!user) {
+        return {
+          success: false,
+          message: `User with id ${user_id} does not exist`,
+        };
+      }
+      const detachedProfile = DetachedProfile.findById(detachedProfile_id);
+      if (!detachedProfile) {
+        return {
+          success: false,
+          message: `Detached profile with id ${detachedProfile_id} does not exist`,
+        };
+      }
+      const creator = await User.findById(detachedProfile.creatorUser_id);
+      if (!creator) {
+        return {
+          success: false,
+          message: `Creator with id ${detachedProfile.creatorUser_id} does not exist`,
+        };
+      } if (creator._id === user_id) {
+        return {
+          success: false,
+          message: 'Can\'t create profile for yourself',
+        };
+      }
+      const endorserIDs = await UserProfile.find({ user_id });
+      if (detachedProfile.creatorUser_id in endorserIDs) {
+        return {
+          success: false,
+          message: `User already has a profile created by ${detachedProfile.creatorUser_id}`,
+        };
+      }
+
+      /*
+      const profileId = mongoose.Types.ObjectId();
+      const userProfileInput = {
+        _id: profileId,
+        creatorUser_id: creator._id,
+        user_id,
+        interests: detachedProfile.interests,
+        vibes: detachedProfile.vibes,
+        bios: detachedProfile.bios,
+        dos: detachedProfile.dos,
+        donts: detachedProfile.donts,
+      };
+
+      const createUserProfileResult = createUserProfileObject(userProfileInput)
+        .catch(err => err);
+        */
+
+      return null;
+    },
   },
 };
