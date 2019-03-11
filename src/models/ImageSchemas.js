@@ -5,40 +5,32 @@ const { Schema } = mongoose;
 
 export const typeDef = `
 
-input CreateImageSizes {
-  original: [CreateImageMetadata!]!
-  large:    [CreateImageMetadata!]!
-  medium:   [CreateImageMetadata!]!
-  small:    [CreateImageMetadata!]!
-  thumbnail:    [CreateImageMetadata!]!
-}
-
-input CreateImageMetadata{
-  imageURL: String!
+input CreateImageContainer {
   imageID: String!
-  imageSize: CreateImageSize!
+  original: CreateImage!
+  large:    CreateImage!
+  medium:   CreateImage!
+  small:    CreateImage!
+  thumbnail:    CreateImage!
 }
 
-input CreateImageSize{
+input CreateImage{
+  imageURL: String!
   width: Int!
   height: Int!
 }
 
-type ImageSizes{
-  original: [ImageMetadata!]!
-  large:    [ImageMetadata!]!
-  medium:   [ImageMetadata!]!
-  small:    [ImageMetadata!]!
-  thumbnail:    [ImageMetadata!]!
-}
-
-type ImageMetadata{
-  imageURL: String!
+type ImageContainer{
   imageID: String!
-  imageSize: ImageSize!
+  original: Image!
+  large:    Image!
+  medium:   Image!
+  small:    Image!
+  thumbnail:    Image!
 }
 
-type ImageSize{
+type Image{
+  imageURL: String!
   width: Int!
   height: Int!
 }
@@ -46,19 +38,17 @@ type ImageSize{
 
 `;
 
-export const ImageMetadataSchema = new Schema({
+export const Image = new Schema({
   imageURL: { type: String, required: true },
-  imageID: { type: String, required: true },
-  imageSize: {
-    width: { type: Number, required: true },
-    height: { type: Number, required: true },
-  },
+  width: { type: Number, required: true },
+  height: { type: Number, required: true },
 });
 
-export const ImageSizes = new Schema({
-  original: { type: [ImageMetadataSchema], required: true, default: [] },
-  large: { type: [ImageMetadataSchema], required: true, default: [] },
-  medium: { type: [ImageMetadataSchema], required: true, default: [] },
-  small: { type: [ImageMetadataSchema], required: true, default: [] },
-  thumbnail: { type: [ImageMetadataSchema], required: true, default: [] },
+export const ImageContainer = new Schema({
+  imageID: { type: String, required: true },
+  original: { type: Image, required: true },
+  large: { type: Image, required: true },
+  medium: { type: Image, required: true },
+  small: { type: Image, required: true },
+  thumbnail: { type: Image, required: true },
 });

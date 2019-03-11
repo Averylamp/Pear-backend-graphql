@@ -1,3 +1,5 @@
+import { ImageContainer } from './ImageSchemas';
+
 const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
@@ -65,20 +67,14 @@ type UserProfile {
   creatorObj: User!
   user_id: ID
   userObj: User
-  activeProfile: Boolean!
-  activeDiscovery: Boolean!
-  fullName: String!
-  firstName: String!
-  lastName: String!
+  
+  interests: [String!]!
+  vibes: [String!]!
+  bio: String!
+  dos: [String!]!
+  donts: [String!]!
 
-  matchingDemographics: MatchingDemographics!
-  matchingPreferences: MatchingPreferences!
-
-  locationName: String
-  locationCoordinates: String
-
-  profileImageIDs: [String!]!
-  profileImages: ImageSizes!
+  images: [ImageContainer!]!
   userProfileData: UserProfileData!
 }
 
@@ -89,11 +85,6 @@ type UserProfileData{
 }
 
 
-enum Gender{
-  male
-  female
-  nonbinary
-}
 `;
 
 
@@ -101,30 +92,11 @@ const UserProfileSchema = new Schema({
   _id: { type: Schema.Types.ObjectId, required: true },
   creatorUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
   user_id: { type: Schema.Types.ObjectId, required: false, index: true },
-  activeProfile: { type: Boolean, required: true, defualt: false },
-  activeDiscovery: { type: Boolean, required: true, defualt: false },
-  firstName: { type: String, required: true },
-  lastName: { type: String, required: true },
-
-  demographics: {
-    gender: {
-      type: String, required: true, enum: ['male', 'female', 'nonbinary'], index: true,
-    },
-    age: {
-      type: Number, required: true, min: 18, max: 80, index: true,
-    },
-    height: {
-      type: Number, required: false, min: 20, max: 100, index: true,
-    },
-    locationName: { type: String, required: false },
-    locationCoordinates: { type: String, required: false },
-    school: { type: String, required: false },
-    ethnicities: { type: [String], required: false },
-    religion: { type: [String], required: false },
-    political: { type: [String], required: false },
-    smoking: { type: [String], required: false },
-    drinking: { type: [String], required: false },
-  },
+  interests: { type: [String], required: true },
+  vibes: { type: [String], required: true },
+  bio: { type: String, required: true },
+  dos: { type: [String], required: true },
+  donts: { type: [String], required: true },
 
   userProfileData: {
     totalProfileViews: {
@@ -135,27 +107,15 @@ const UserProfileSchema = new Schema({
     },
   },
 
-  profileImageIDs: { type: [String], required: true, default: [] },
-
-  discovery_id: { type: Schema.Types.ObjectId, required: true },
+  images: { type: [ImageContainer], required: true, default: [ImageContainer] },
 
 });
 
-UserProfileSchema.virtual('fullName').get(function fullName() {
-  return `${this.firstName} ${this.lastName}`;
-});
-
-
-// creatorObj: User!
-// userObj: User!
-// discoveryObj: Discovery!
 
 export const UserProfile = mongoose.model('UserProfile', UserProfileSchema);
 
-export const createUserProfileObject = function
-createUserProfileObject(userProfileInput, _id = mongoose.Types.ObjectId()) {
+export const createUserProfileObject = function createUserProfileObject(userProfileInput) {
   const userProfileModel = new UserProfile(userProfileInput);
-  userProfileModel._id = _id;
   debug(userProfileModel);
   return new Promise((resolve, reject) => {
     userProfileModel.save((err) => {
@@ -168,92 +128,3 @@ createUserProfileObject(userProfileInput, _id = mongoose.Types.ObjectId()) {
   });
 };
 
-
-export const resolvers = {
-  Query: {
-
-  },
-  UserProfile: {
-
-  },
-  Mutation: {
-    // createUserProfile: async (_source, { userProfileInput }) => {
-    //   const userProfileObjectID = mongoose.Types.ObjectId();
-    //   const discoveryObjectID = mongoose.Types.ObjectId();
-    //   debug(`IDs:${userProfileObjectID}, ${discoveryObjectID}`);
-    //   debug(userProfileInput);
-    //   const finalUserProfileInput = userProfileInput;
-    //   finalUserProfileInput.discovery_id = discoveryObjectID;
-    //   const createUserProfileObj = createUserProfileObject(
-    //     finalUserProfileInput, userProfileObjectID,
-    //   )
-    //     .catch(err => err);
-    //
-    //
-    //   return Promise.all(
-    //     [createUserProfileObj],
-    //   )
-    //     .then(([userProfileObject, discoveryObject]) => {
-    //       if (userProfileObject instanceof Error || discoveryObject instanceof Error) {
-    //         let message = '';
-    //         if (userProfileObject instanceof Error) {
-    //           message += userProfileObject.toString();
-    //         } else {
-    //           userProfileObject.remove((err) => {
-    //             if (err) {
-    //               debug(`Failed to remove user profile object${err}`);
-    //             } else {
-    //               debug('Removed created user profile object successfully');
-    //             }
-    //           });
-    //         }
-    //         if (discoveryObject instanceof Error) {
-    //           message += discoveryObject.toString();
-    //         } else {
-    //           discoveryObject.remove((err) => {
-    //             if (err) {
-    //               debug(`Failed to remove discovery object${err}`);
-    //             } else {
-    //               debug('Removed created discovery object successfully');
-    //             }
-    //           });
-    //         }
-    //         return {
-    //           success: false,
-    //           message,
-    //         };
-    //       }
-    //       return {
-    //         success: true,
-    //         userProfile: userProfileObject,
-    //       };
-    //     });
-    // },
-    // updateUserProfile: async (_source, { id, updateUserProfileInput }) => {
-    //   debug(`Updating User Profile: ${id}`);
-    //   debug(updateUserProfileInput);
-    //   const flattenedUpdateUserProfileInput = $.flatten(updateUserProfileInput);
-    //   debug(flattenedUpdateUserProfileInput);
-    //   return new Promise(resolve => UserProfile.findByIdAndUpdate(
-    //     id, flattenedUpdateUserProfileInput, { new: true, runValidators: true },
-    //     (err, userProfile) => {
-    //       if (err) {
-    //         debug(err);
-    //         resolve({
-    //           success: false,
-    //           message: err.toString(),
-    //         });
-    //       } else {
-    //         debug(userProfile);
-    //         resolve({
-    //           success: true,
-    //           userProfile,
-    //           message: 'Successfully updated',
-    //         });
-    //       }
-    //     },
-    //   ));
-    // },
-
-  },
-};

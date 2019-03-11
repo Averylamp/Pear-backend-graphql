@@ -105,13 +105,6 @@ export const CREATE_AVERY_DETACHED_PROFILE_VARIABLES = {
     bio: 'This is my long bio',
     dos: ['feed him ramen', 'take him to the movies'],
     donts: ['feed him veggies'],
-    images: {
-      original: [],
-      large: [],
-      medium: [],
-      small: [],
-      thumbnail: [],
-    },
-    imageIDs: [],
+    images: [],
   },
 };
