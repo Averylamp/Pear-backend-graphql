@@ -13,7 +13,6 @@ input CreateImageContainer {
   small:    CreateImage!
   thumbnail:    CreateImage!
   uploadedByUser_id: ID!
-  uploadedForUser_id: ID!
 }
 
 input CreateImage{
@@ -31,8 +30,6 @@ type ImageContainer{
   thumbnail:    Image!
   uploadedByUser_id: ID!
   uploadedByUser: User!
-  uploadedForUser_id: ID!
-  uploadedForUser: User!
 }
 
 type Image{
