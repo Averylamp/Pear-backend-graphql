@@ -36,6 +36,15 @@ type Image{
   imageURL: String!
   width: Int!
   height: Int!
+  imageType: ImageType
+}
+
+enum ImageType{
+  original
+  large
+  medium
+  small
+  thumbnail
 }
 
 
@@ -45,6 +54,7 @@ export const ImageSchema = new Schema({
   imageURL: { type: String, required: true },
   width: { type: Number, required: true },
   height: { type: Number, required: true },
+  imageType: { type: String, required: true, enum: ['original', 'large', 'medium', 'small', 'thumbnail'] },
 });
 
 export const ImageContainerSchema = new Schema({
