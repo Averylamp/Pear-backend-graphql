@@ -19,7 +19,7 @@ input CreateImage{
   imageURL: String!
   width: Int!
   height: Int!
-}1
+}
 
 type ImageContainer{
   imageID: String!
