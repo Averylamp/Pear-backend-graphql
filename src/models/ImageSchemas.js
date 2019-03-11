@@ -12,6 +12,7 @@ input CreateImageContainer {
   medium:   CreateImage!
   small:    CreateImage!
   thumbnail:    CreateImage!
+  uploadedBy_id: ID!
 }
 
 input CreateImage{
@@ -27,6 +28,8 @@ type ImageContainer{
   medium:   Image!
   small:    Image!
   thumbnail:    Image!
+  uploadedBy_id: ID!
+  uploadedBy: User!
 }
 
 type Image{
@@ -51,4 +54,5 @@ export const ImageContainer = new Schema({
   medium: { type: Image, required: true },
   small: { type: Image, required: true },
   thumbnail: { type: Image, required: true },
+  uploadedBy_id: { type: Schema.Types.ObjectId, required: true, index: true, unique: false }
 });
