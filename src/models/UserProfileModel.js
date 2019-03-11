@@ -1,5 +1,3 @@
-import { ImageContainer } from './ImageSchemas';
-
 const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
@@ -73,8 +71,7 @@ type UserProfile {
   bio: String!
   dos: [String!]!
   donts: [String!]!
-
-  images: [ImageContainer!]!
+  
   userProfileData: UserProfileData!
 }
 
@@ -91,7 +88,8 @@ type UserProfileData{
 const UserProfileSchema = new Schema({
   _id: { type: Schema.Types.ObjectId, required: true },
   creatorUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
-  user_id: { type: Schema.Types.ObjectId, required: false, index: true },
+  user_id: { type: Schema.Types.ObjectId, required: true, index: true },
+
   interests: { type: [String], required: true },
   vibes: { type: [String], required: true },
   bio: { type: String, required: true },
@@ -106,8 +104,6 @@ const UserProfileSchema = new Schema({
       type: Number, required: true, min: 0, default: 0,
     },
   },
-
-  images: { type: [ImageContainer], required: true, default: [ImageContainer] },
 
 });
 

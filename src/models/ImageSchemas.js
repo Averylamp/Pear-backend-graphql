@@ -29,7 +29,7 @@ type ImageContainer{
   small:    Image!
   thumbnail:    Image!
   uploadedByUser_id: ID!
-  uploadedByUser: User!
+  uploadedByUser: User
 }
 
 type Image{
@@ -41,19 +41,19 @@ type Image{
 
 `;
 
-export const Image = new Schema({
+export const ImageSchema = new Schema({
   imageURL: { type: String, required: true },
   width: { type: Number, required: true },
   height: { type: Number, required: true },
 });
 
-export const ImageContainer = new Schema({
+export const ImageContainerSchema = new Schema({
   imageID: { type: String, required: true },
-  original: { type: Image, required: true },
-  large: { type: Image, required: true },
-  medium: { type: Image, required: true },
-  small: { type: Image, required: true },
-  thumbnail: { type: Image, required: true },
+  original: { type: ImageSchema, required: true },
+  large: { type: ImageSchema, required: true },
+  medium: { type: ImageSchema, required: true },
+  small: { type: ImageSchema, required: true },
+  thumbnail: { type: ImageSchema, required: true },
   uploadedBy_id: {
     type: Schema.Types.ObjectId, required: true, index: true, unique: false,
   },
