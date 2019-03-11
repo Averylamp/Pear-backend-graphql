@@ -127,4 +127,3 @@ export const createUserProfileObject = function createUserProfileObject(userProf
     });
   });
 };
-
