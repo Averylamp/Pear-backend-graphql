@@ -1,5 +1,6 @@
 import { MatchingDemographicsSchema, MatchingPreferencesSchema } from './MatchingSchemas';
 import { GeoJSONSchema } from './TypeSchemas';
+import { ImageContainerSchema } from './ImageSchemas';
 
 const mongoose = require('mongoose');
 
@@ -14,6 +15,8 @@ extend type Query {
 extend type Mutation{
   createUser(userInput: CreationUserInput): UserMutationResponse!
   updateUser(id: ID, updateUserInput: UpdateUserInput) : UserMutationResponse!
+  approveNewDetachedProfile(user_id: ID, detachedProfile_id: ID): UserMutationResponse!
+  updatePhotos(updateUserPhotosInput: UpdateUserPhotosInput): UserMutationResponse!
 }
 
 input GetUserInput{
@@ -107,6 +110,11 @@ input UpdateUserInput {
   pearPoints: Int
 }
 
+input UpdateUserPhotosInput {
+  updatedImagesDisplayed: [CreateImageContainer!]!
+  updatedImagesBank: [CreateImageContainer!]!
+}
+
 type User {
   _id: ID!
   deactivated: Boolean!
@@ -130,6 +138,9 @@ type User {
   school: String
   schoolEmail: String
   schoolEmailVerified: Boolean
+  
+  imagesDisplayed: [ImageContainer!]!
+  imagesBank: [ImageContainer!]!
 
   pearPoints: Int
 
@@ -225,6 +236,9 @@ const UserSchema = new Schema({
   schoolEmailVerified: { type: Boolean, required: false, default: false },
 
   pearPoints: { type: Number, required: true, default: 0 },
+
+  imagesDisplayed: { type: [ImageContainerSchema], required: true, default: [] },
+  imagesBank: { type: [ImageContainerSchema], required: true, default: [] },
 
   profile_ids: {
     type: [Schema.Types.ObjectId], required: true, index: true, default: [],
