@@ -43,6 +43,7 @@ input PhoneNumberInput{
 type DetachedProfile {
   _id: ID!
   creatorUser_id: ID!
+  creatorUser: User
   firstName: String!
   phoneNumber: String!
   age: Int!
