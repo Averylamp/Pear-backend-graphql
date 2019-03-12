@@ -67,6 +67,45 @@ export const ATTACH_DETACHED_PROFILE = gql`
   }
 `;
 
+export const UPDATE_DISPLAYED_PHOTOS = gql`
+  mutation UpdatePhotos($updateUserPhotosInput: UpdateUserPhotosInput) {
+    updatePhotos(updateUserPhotosInput: $updateUserPhotosInput) {
+      success
+      message
+      user {
+        _id
+        fullName
+        imagesDisplayed {
+          imageID
+          original {
+            imageURL
+            width
+            height
+            imageType
+          }
+          uploadedByUser {
+            _id
+            fullName
+          }
+        }
+        imagesBank {
+          imageID
+          original {
+            imageURL
+            width
+            height
+            imageType
+          }
+          uploadedByUser {
+            _id
+            fullName
+          }
+        }
+      }
+    }
+  }
+`;
+
 export const CREATE_AVERY_USER_VARIABLES = {
   userInput: {
     _id: '5c82162afec46c84e924a332',
@@ -120,44 +159,157 @@ export const CREATE_AVERY_DETACHED_PROFILE_VARIABLES = {
     bio: 'This is my long bio',
     dos: ['feed him ramen', 'take him to the movies'],
     donts: ['feed him veggies'],
-    images: [{
-      imageID: 'image1',
-      original: {
-        imageURL: 'https://scontent.fbed1-1.fna.fbcdn.net/v/t1.0-9/28279134_1636086206467671_3416662694523695438_n.jpg?_nc_cat=100&_nc_ht=scontent.fbed1-1.fna&oh=4a3dadd50b9104efffa1ead649e8e25e&oe=5D0CAC8D',
-        width: 1500,
-        height: 1500,
-        imageType: 'original',
-      },
-      large: {
-        imageURL: 'https://scontent.fbed1-1.fna.fbcdn.net/v/t1.0-9/28279134_1636086206467671_3416662694523695438_n.jpg?_nc_cat=100&_nc_ht=scontent.fbed1-1.fna&oh=4a3dadd50b9104efffa1ead649e8e25e&oe=5D0CAC8D',
-        width: 1000,
-        height: 1000,
-        imageType: 'large',
-      },
-      medium: {
-        imageURL: 'https://scontent.fbed1-1.fna.fbcdn.net/v/t1.0-9/28279134_1636086206467671_3416662694523695438_n.jpg?_nc_cat=100&_nc_ht=scontent.fbed1-1.fna&oh=4a3dadd50b9104efffa1ead649e8e25e&oe=5D0CAC8D',
-        width: 600,
-        height: 600,
-        imageType: 'medium',
-      },
-      small: {
-        imageURL: 'https://scontent.fbed1-1.fna.fbcdn.net/v/t1.0-9/28279134_1636086206467671_3416662694523695438_n.jpg?_nc_cat=100&_nc_ht=scontent.fbed1-1.fna&oh=4a3dadd50b9104efffa1ead649e8e25e&oe=5D0CAC8D',
-        width: 300,
-        height: 300,
-        imageType: 'small',
-      },
-      thumbnail: {
-        imageURL: 'https://scontent.fbed1-1.fna.fbcdn.net/v/t1.0-9/28279134_1636086206467671_3416662694523695438_n.jpg?_nc_cat=100&_nc_ht=scontent.fbed1-1.fna&oh=4a3dadd50b9104efffa1ead649e8e25e&oe=5D0CAC8D',
-        width: 150,
-        height: 150,
-        imageType: 'thumbnail',
-      },
-      uploadedByUser_id: '5c82162afec46c84e924a333',
-    }],
+    images: [
+      {
+        imageID: 'image1',
+        original: {
+          imageURL: 'https://scontent.fbed1-1.fna.fbcdn.net/v/t1.0-9/28279134_1636086206467671_3416662694523695438_n.jpg?_nc_cat=100&_nc_ht=scontent.fbed1-1.fna&oh=4a3dadd50b9104efffa1ead649e8e25e&oe=5D0CAC8D',
+          width: 1500,
+          height: 1500,
+          imageType: 'original',
+        },
+        large: {
+          imageURL: 'https://scontent.fbed1-1.fna.fbcdn.net/v/t1.0-9/28279134_1636086206467671_3416662694523695438_n.jpg?_nc_cat=100&_nc_ht=scontent.fbed1-1.fna&oh=4a3dadd50b9104efffa1ead649e8e25e&oe=5D0CAC8D',
+          width: 1000,
+          height: 1000,
+          imageType: 'large',
+        },
+        medium: {
+          imageURL: 'https://scontent.fbed1-1.fna.fbcdn.net/v/t1.0-9/28279134_1636086206467671_3416662694523695438_n.jpg?_nc_cat=100&_nc_ht=scontent.fbed1-1.fna&oh=4a3dadd50b9104efffa1ead649e8e25e&oe=5D0CAC8D',
+          width: 600,
+          height: 600,
+          imageType: 'medium',
+        },
+        small: {
+          imageURL: 'https://scontent.fbed1-1.fna.fbcdn.net/v/t1.0-9/28279134_1636086206467671_3416662694523695438_n.jpg?_nc_cat=100&_nc_ht=scontent.fbed1-1.fna&oh=4a3dadd50b9104efffa1ead649e8e25e&oe=5D0CAC8D',
+          width: 300,
+          height: 300,
+          imageType: 'small',
+        },
+        thumbnail: {
+          imageURL: 'https://scontent.fbed1-1.fna.fbcdn.net/v/t1.0-9/28279134_1636086206467671_3416662694523695438_n.jpg?_nc_cat=100&_nc_ht=scontent.fbed1-1.fna&oh=4a3dadd50b9104efffa1ead649e8e25e&oe=5D0CAC8D',
+          width: 150,
+          height: 150,
+          imageType: 'thumbnail',
+        },
+        uploadedByUser_id: '5c82162afec46c84e924a333',
+      }],
   },
 };
 
 export const ATTACH_AVERY_PROFILE_VARIABLES = {
   user_id: '5c82162afec46c84e924a332',
   detachedProfile_id: '5c82162afec46c84e924abcd',
+};
+
+export const ADD_AVERY_PHOTOS_VARIABLES = {
+  updateUserPhotosInput: {
+    user_id: '5c82162afec46c84e924a332',
+    updatedImagesDisplayed: [
+      {
+        imageID: 'image2',
+        original: {
+          imageURL: 'image2url',
+          width: 1500,
+          height: 1500,
+          imageType: 'original',
+        },
+        large: {
+          imageURL: 'image2url',
+          width: 1000,
+          height: 1000,
+          imageType: 'large',
+        },
+        medium: {
+          imageURL: 'image2url',
+          width: 600,
+          height: 600,
+          imageType: 'medium',
+        },
+        small: {
+          imageURL: 'image2url',
+          width: 300,
+          height: 300,
+          imageType: 'small',
+        },
+        thumbnail: {
+          imageURL: 'image2url',
+          width: 150,
+          height: 150,
+          imageType: 'thumbnail',
+        },
+        uploadedByUser_id: '5c82162afec46c84e924a332',
+      },
+      {
+        imageID: 'image1',
+        original: {
+          imageURL: 'https://scontent.fbed1-1.fna.fbcdn.net/v/t1.0-9/28279134_1636086206467671_3416662694523695438_n.jpg?_nc_cat=100&_nc_ht=scontent.fbed1-1.fna&oh=4a3dadd50b9104efffa1ead649e8e25e&oe=5D0CAC8D',
+          width: 1500,
+          height: 1500,
+          imageType: 'original',
+        },
+        large: {
+          imageURL: 'https://scontent.fbed1-1.fna.fbcdn.net/v/t1.0-9/28279134_1636086206467671_3416662694523695438_n.jpg?_nc_cat=100&_nc_ht=scontent.fbed1-1.fna&oh=4a3dadd50b9104efffa1ead649e8e25e&oe=5D0CAC8D',
+          width: 1000,
+          height: 1000,
+          imageType: 'large',
+        },
+        medium: {
+          imageURL: 'https://scontent.fbed1-1.fna.fbcdn.net/v/t1.0-9/28279134_1636086206467671_3416662694523695438_n.jpg?_nc_cat=100&_nc_ht=scontent.fbed1-1.fna&oh=4a3dadd50b9104efffa1ead649e8e25e&oe=5D0CAC8D',
+          width: 600,
+          height: 600,
+          imageType: 'medium',
+        },
+        small: {
+          imageURL: 'https://scontent.fbed1-1.fna.fbcdn.net/v/t1.0-9/28279134_1636086206467671_3416662694523695438_n.jpg?_nc_cat=100&_nc_ht=scontent.fbed1-1.fna&oh=4a3dadd50b9104efffa1ead649e8e25e&oe=5D0CAC8D',
+          width: 300,
+          height: 300,
+          imageType: 'small',
+        },
+        thumbnail: {
+          imageURL: 'https://scontent.fbed1-1.fna.fbcdn.net/v/t1.0-9/28279134_1636086206467671_3416662694523695438_n.jpg?_nc_cat=100&_nc_ht=scontent.fbed1-1.fna&oh=4a3dadd50b9104efffa1ead649e8e25e&oe=5D0CAC8D',
+          width: 150,
+          height: 150,
+          imageType: 'thumbnail',
+        },
+        uploadedByUser_id: '5c82162afec46c84e924a333',
+      },
+    ],
+    additionalImages: [
+      {
+        imageID: 'image3',
+        original: {
+          imageURL: 'image3url',
+          width: 1500,
+          height: 1500,
+          imageType: 'original',
+        },
+        large: {
+          imageURL: 'image3url',
+          width: 1000,
+          height: 1000,
+          imageType: 'large',
+        },
+        medium: {
+          imageURL: 'image3url',
+          width: 600,
+          height: 600,
+          imageType: 'medium',
+        },
+        small: {
+          imageURL: 'image3url',
+          width: 300,
+          height: 300,
+          imageType: 'small',
+        },
+        thumbnail: {
+          imageURL: 'image3url',
+          width: 150,
+          height: 150,
+          imageType: 'thumbnail',
+        },
+        uploadedByUser_id: '5c82162afec46c84e924a332',
+      },
+    ],
+  },
 };
