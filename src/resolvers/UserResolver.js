@@ -183,7 +183,7 @@ export const resolvers = {
         },
       ));
     },
-    approveNewDetachedProfile: async (_source, { user_id, detachedProfile_id, creator_id }) => {
+    approveNewDetachedProfile: async (_source, { user_id, detachedProfile_id, creatorUser_id }) => {
       functionCallConsole('Approve Profile Called');
 
       // check that user, detached profile, creator exist
@@ -191,7 +191,7 @@ export const resolvers = {
         .catch(() => null);
       const detachedProfilePromise = DetachedProfile.findById(detachedProfile_id).exec()
         .catch(() => null);
-      const creatorPromise = User.findById(creator_id).exec()
+      const creatorPromise = User.findById(creatorUser_id).exec()
         .catch(() => null);
       const [user, detachedProfile, creator] = await Promise.all([userPromise,
         detachedProfilePromise, creatorPromise]);
@@ -213,15 +213,18 @@ export const resolvers = {
           message: `Could not find creator with id ${detachedProfile.creatorUser_id}`,
         };
       }
+      debug(detachedProfile);
+      debug(detachedProfile.creatorUser_id);
+      debug(creatorUser_id);
       // check that creator made detached profile
-      if (creator_id !== detachedProfile.creatorUser_id) {
+      if (creatorUser_id !== detachedProfile.creatorUser_id) {
         return {
           success: false,
-          message: `${creator_id} is not creator of detached profile ${detachedProfile_id}`,
+          message: `${creatorUser_id} is not creator of detached profile ${detachedProfile_id}`,
         };
       }
       // check creator != user
-      if (creator_id === user_id) {
+      if (creatorUser_id === user_id) {
         return {
           success: false,
           message: 'Can\'t create profile for yourself',

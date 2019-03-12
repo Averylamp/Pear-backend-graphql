@@ -22,6 +22,7 @@ extend type Mutation{
 input CreationDetachedProfileInput {
   _id: ID
   creatorUser_id: ID!
+  creatorFirstName: String!
   firstName: String!
   phoneNumber: String!
   age: Int!
@@ -44,6 +45,7 @@ type DetachedProfile {
   _id: ID!
   creatorUser_id: ID!
   creatorUser: User
+  creatorFirstName: String!
   firstName: String!
   phoneNumber: String!
   age: Int!
@@ -70,7 +72,8 @@ type DetachedProfileMutationResponse{
 
 const DetachedProfileSchema = new Schema({
   _id: { type: Schema.Types.ObjectId, required: true },
-  creatorUser_id: { type: String, required: true, index: true },
+  creatorUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
+  creatorFirstName: { type: String, required: true },
   firstName: { type: String, required: true },
   phoneNumber: {
     type: String,

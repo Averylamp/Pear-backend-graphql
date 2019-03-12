@@ -15,7 +15,7 @@ extend type Query {
 extend type Mutation{
   createUser(userInput: CreationUserInput): UserMutationResponse!
   updateUser(id: ID, updateUserInput: UpdateUserInput) : UserMutationResponse!
-  approveNewDetachedProfile(user_id: ID!, detachedProfile_id: ID!, creator_id: ID!): UserMutationResponse!
+  approveNewDetachedProfile(user_id: ID!, detachedProfile_id: ID!, creatorUser_id: ID!): UserMutationResponse!
   updatePhotos(updateUserPhotosInput: UpdateUserPhotosInput): UserMutationResponse!
 }
 
@@ -139,7 +139,7 @@ type User {
   school: String
   schoolEmail: String
   schoolEmailVerified: Boolean
-  
+
   displayedImages: [ImageContainer!]!
   bankImages: [ImageContainer!]!
 
