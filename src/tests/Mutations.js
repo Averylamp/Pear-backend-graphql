@@ -54,8 +54,8 @@ export const CREATE_DETACHED_PROFILE = gql`
 `;
 
 export const ATTACH_DETACHED_PROFILE = gql`
-  mutation ApproveNewDetachedProfile($user_id: ID, $detachedProfile_id: ID) {
-    approveNewDetachedProfile(user_id: $user_id, detachedProfile_id: $detachedProfile_id) {
+  mutation ApproveNewDetachedProfile($user_id: ID!, $detachedProfile_id: ID!, $creator_id: ID!) {
+    approveNewDetachedProfile(user_id: $user_id, detachedProfile_id: $detachedProfile_id, creator_id: $creator_id) {
       success
       message
       user {
@@ -75,7 +75,7 @@ export const UPDATE_DISPLAYED_PHOTOS = gql`
       user {
         _id
         fullName
-        imagesDisplayed {
+        displayedImages {
           imageID
           original {
             imageURL
@@ -88,7 +88,7 @@ export const UPDATE_DISPLAYED_PHOTOS = gql`
             fullName
           }
         }
-        imagesBank {
+        bankImages {
           imageID
           original {
             imageURL
@@ -200,12 +200,13 @@ export const CREATE_AVERY_DETACHED_PROFILE_VARIABLES = {
 export const ATTACH_AVERY_PROFILE_VARIABLES = {
   user_id: '5c82162afec46c84e924a332',
   detachedProfile_id: '5c82162afec46c84e924abcd',
+  creator_id: '5c82162afec46c84e924a333',
 };
 
 export const ADD_AVERY_PHOTOS_VARIABLES = {
   updateUserPhotosInput: {
     user_id: '5c82162afec46c84e924a332',
-    updatedImagesDisplayed: [
+    displayedImages: [
       {
         imageID: 'image2',
         original: {
