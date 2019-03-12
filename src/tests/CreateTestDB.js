@@ -1,5 +1,7 @@
 import { createTestClient } from 'apollo-server-testing';
 import {
+  ATTACH_AVERY_PROFILE_VARIABLES,
+  ATTACH_DETACHED_PROFILE,
   CREATE_AVERY_DETACHED_PROFILE_VARIABLES,
   CREATE_AVERY_USER_VARIABLES, CREATE_BRIAN_USER_VARIABLES,
   CREATE_DETACHED_PROFILE,
@@ -29,6 +31,12 @@ const createTestDB = async (server) => {
     variables: CREATE_AVERY_DETACHED_PROFILE_VARIABLES,
   });
   debug(msg3);
+  debug('attaching Avery\'s profile');
+  const msg4 = await mutate({
+    mutation: ATTACH_DETACHED_PROFILE,
+    variables: ATTACH_AVERY_PROFILE_VARIABLES,
+  });
+  debug(msg4);
 };
 
 export default createTestDB;
