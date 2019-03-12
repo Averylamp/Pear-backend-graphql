@@ -16,7 +16,7 @@ export const resolvers = {
     },
   },
   DetachedProfile: {
-
+    creatorUser: async ({ creatorUser_id }) => User.findById(creatorUser_id),
   },
   Mutation: {
     createDetachedProfile: async (_, { detachedProfileInput }) => {
