@@ -54,7 +54,7 @@ export const ImageContainerSchema = new Schema({
   medium: { type: ImageSchema, required: true },
   small: { type: ImageSchema, required: true },
   thumbnail: { type: ImageSchema, required: true },
-  uploadedBy_id: {
+  uploadedByUser_id: {
     type: Schema.Types.ObjectId, required: true, index: true, unique: false,
   },
 });
