@@ -270,8 +270,8 @@ export const resolvers = {
         createUserProfileObjectePromise, updateUserObjectPromise,
         updateCreatorObjectPromise, deleteDetachedProfilePromise])
         .then(([
-          createUserProfileObjectResult, updateUserObjectResult,
-          updateCreatorObjectResult, deleteDetachedProfileResult]) => {
+                 createUserProfileObjectResult, updateUserObjectResult,
+                 updateCreatorObjectResult, deleteDetachedProfileResult]) => {
           // if at least one of the above four operations failed, roll back the others
           if (createUserProfileObjectResult instanceof Error
             || updateUserObjectResult instanceof Error
@@ -364,5 +364,61 @@ export const resolvers = {
           };
         });
     },
-  },
+    updatePhotos: async (_source, { updateUserPhotosInput }) => {
+      functionCallConsole('Update Photos Called');
+      debug(`input object is ${updateUserPhotosInput}`);
+      const { user_id, updatedImagesDisplayed, additionalImages } = updateUserPhotosInput;
+      const user = await User.findById(user_id);
+      if (!user) {
+        return {
+          success: false,
+          message: `User with id ${user_id} does not exist`,
+        };
+      }
+      const toAddToImageBank = [];
+      updatedImagesDisplayed.forEach((createImageContainer) => {
+        let imageAlreadyInBank = false;
+        for (const userImageContainer of user.imagesBank) {
+          if (userImageContainer.imageID === createImageContainer.imageID) {
+            imageAlreadyInBank = true;
+            break;
+          }
+        }
+        if (!imageAlreadyInBank) {
+          toAddToImageBank.push(createImageContainer);
+        }
+      });
+
+      additionalImages.forEach((createImageContainer) => {
+        let imageAlreadyInBank = false;
+        for (const userImageContainer of user.imagesBank) {
+          if (userImageContainer.imageID === createImageContainer.imageID) {
+            imageAlreadyInBank = true;
+            break;
+          }
+        }
+        if (!imageAlreadyInBank) {
+          toAddToImageBank.push(createImageContainer);
+        }
+      });
+
+      return User.findByIdAndUpdate(user_id, {
+        imagesDisplayed: updatedImagesDisplayed,
+        $push: {
+          imagesBank: {
+            $each: toAddToImageBank,
+          },
+        },
+      }, { new: true })
+        .then(res => ({
+          success: true,
+          user: res,
+        }))
+        .catch(err => ({
+          success: false,
+          message: `Failed to update user with new photos: ${err}`,
+        }));
+    },
+  }
+  ,
 };

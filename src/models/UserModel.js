@@ -111,8 +111,9 @@ input UpdateUserInput {
 }
 
 input UpdateUserPhotosInput {
+  user_id: ID!
   updatedImagesDisplayed: [CreateImageContainer!]!
-  updatedImagesBank: [CreateImageContainer!]!
+  additionalImages: [CreateImageContainer!]!
 }
 
 type User {
