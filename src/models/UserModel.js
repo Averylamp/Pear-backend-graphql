@@ -15,7 +15,7 @@ extend type Query {
 extend type Mutation{
   createUser(userInput: CreationUserInput): UserMutationResponse!
   updateUser(id: ID, updateUserInput: UpdateUserInput) : UserMutationResponse!
-  approveNewDetachedProfile(user_id: ID, detachedProfile_id: ID): UserMutationResponse!
+  approveNewDetachedProfile(user_id: ID!, detachedProfile_id: ID!, creator_id: ID!): UserMutationResponse!
   updatePhotos(updateUserPhotosInput: UpdateUserPhotosInput): UserMutationResponse!
 }
 
@@ -111,8 +111,9 @@ input UpdateUserInput {
 }
 
 input UpdateUserPhotosInput {
-  updatedImagesDisplayed: [CreateImageContainer!]!
-  updatedImagesBank: [CreateImageContainer!]!
+  user_id: ID!
+  displayedImages: [CreateImageContainer!]!
+  additionalImages: [CreateImageContainer!]!
 }
 
 type User {
@@ -139,8 +140,8 @@ type User {
   schoolEmail: String
   schoolEmailVerified: Boolean
   
-  imagesDisplayed: [ImageContainer!]!
-  imagesBank: [ImageContainer!]!
+  displayedImages: [ImageContainer!]!
+  bankImages: [ImageContainer!]!
 
   pearPoints: Int
 
@@ -237,8 +238,8 @@ const UserSchema = new Schema({
 
   pearPoints: { type: Number, required: true, default: 0 },
 
-  imagesDisplayed: { type: [ImageContainerSchema], required: true, default: [] },
-  imagesBank: { type: [ImageContainerSchema], required: true, default: [] },
+  displayedImages: { type: [ImageContainerSchema], required: true, default: [] },
+  bankImages: { type: [ImageContainerSchema], required: true, default: [] },
 
   profile_ids: {
     type: [Schema.Types.ObjectId], required: true, index: true, default: [],

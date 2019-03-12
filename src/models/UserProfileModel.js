@@ -62,8 +62,8 @@ type UserProfileMutationResponse{
 type UserProfile {
   _id: ID!
   creatorUser_id: ID!
-  creatorObj: User!
-  user_id: ID
+  creatorObj: User
+  user_id: ID!
   userObj: User
   
   interests: [String!]!

@@ -12,8 +12,14 @@ import {
   typeDef as UserProfile,
 } from './models/UserProfileModel';
 import {
+  resolvers as UserProfileResolvers,
+} from './resolvers/UserProfileResolver';
+import {
   typeDef as ImageContainer,
 } from './models/ImageSchemas';
+import {
+  resolvers as ImageResolvers,
+} from './resolvers/ImageResolver';
 import {
   typeDef as DetachedProfile,
 } from './models/DetachedProfile';
@@ -158,7 +164,9 @@ export const start = async () => {
         UserMatchesResolvers,
         MatchRequestResolvers,
         DiscoveryQueueResolvers,
-        TestObjectResolvers);
+        TestObjectResolvers,
+        ImageResolvers,
+        UserProfileResolvers);
 
 
       const server = new ApolloServer({
