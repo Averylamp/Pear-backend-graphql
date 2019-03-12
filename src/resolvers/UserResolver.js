@@ -270,8 +270,8 @@ export const resolvers = {
         createUserProfileObjectePromise, updateUserObjectPromise,
         updateCreatorObjectPromise, deleteDetachedProfilePromise])
         .then(([
-                 createUserProfileObjectResult, updateUserObjectResult,
-                 updateCreatorObjectResult, deleteDetachedProfileResult]) => {
+          createUserProfileObjectResult, updateUserObjectResult,
+          updateCreatorObjectResult, deleteDetachedProfileResult]) => {
           // if at least one of the above four operations failed, roll back the others
           if (createUserProfileObjectResult instanceof Error
             || updateUserObjectResult instanceof Error
