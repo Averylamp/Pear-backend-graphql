@@ -22,7 +22,8 @@ export const resolvers = {
     createDetachedProfile: async (_, { detachedProfileInput }) => {
       functionCallConsole('Create Detached Profile Called');
 
-      const detachedProfileID = mongoose.Types.ObjectId();
+      const detachedProfileID = '_id' in detachedProfileInput
+        ? detachedProfileInput._id : mongoose.Types.ObjectId();
       const finalDetachedProfileInput = detachedProfileInput;
       finalDetachedProfileInput._id = detachedProfileID;
 

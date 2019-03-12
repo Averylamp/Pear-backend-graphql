@@ -1,8 +1,9 @@
+import { pick } from 'lodash';
 import { createUserMatchesObject, UserMatches } from '../models/UserMatchesModel';
 import { createDiscoveryQueueObject, DiscoveryQueue } from '../models/DiscoveryQueueModel';
 import { createUserObject, User } from '../models/UserModel';
-import { UserProfile } from '../models/UserProfileModel';
-import { DetachedProfile } from '../models/DetachedProfile';
+import { createUserProfileObject, UserProfile } from '../models/UserProfileModel';
+import { createDetachedProfileObject, DetachedProfile } from '../models/DetachedProfile';
 
 const mongoose = require('mongoose');
 const $ = require('mongo-dot-notation');
@@ -29,7 +30,8 @@ export const resolvers = {
       functionCallConsole('Get User Called');
       const idToken = userInput.firebaseToken;
       const uid = userInput.firebaseAuthID;
-      return new Promise(resolve => firebaseAdmin.auth().verifyIdToken(idToken)
+      return new Promise(resolve => firebaseAdmin.auth()
+        .verifyIdToken(idToken)
         .then((decodedToken) => {
           const firebaseUID = decodedToken.uid;
           if (uid === firebaseUID) {
@@ -55,7 +57,8 @@ export const resolvers = {
               message: 'Failed to fetch user',
             });
           }
-        }).catch((error) => {
+        })
+        .catch((error) => {
           debug('Failed to Decoded token');
           // Handle error
           debug(error);
@@ -91,20 +94,26 @@ export const resolvers = {
         .catch(err => err);
 
       const createUserMatchesObj = createUserMatchesObject(
-        { user_id: userObjectID, _id: userMatchesObjectID },
+        {
+          user_id: userObjectID,
+          _id: userMatchesObjectID,
+        },
       )
         .catch(err => err);
 
       const createDiscoveryQueueObj = createDiscoveryQueueObject(
-        { user_id: userObjectID, _id: disoveryQueueObjectID },
+        {
+          user_id: userObjectID,
+          _id: disoveryQueueObjectID,
+        },
       )
         .catch(err => err);
 
       return Promise.all([createUserObj, createUserMatchesObj, createDiscoveryQueueObj])
         .then(([userObject, userMatchesObject, discoveryQueueObject]) => {
           if (userObject instanceof Error
-          || userMatchesObject instanceof Error
-          || discoveryQueueObject instanceof Error) {
+            || userMatchesObject instanceof Error
+            || discoveryQueueObject instanceof Error) {
             let message = '';
             if (userObject instanceof Error) {
               message += userObject.toString();
@@ -154,7 +163,10 @@ export const resolvers = {
       functionCallConsole('Update User Called');
       const finalUpdateUserInput = $.flatten(updateUserInput);
       return new Promise(resolve => User.findByIdAndUpdate(
-        id, finalUpdateUserInput, { new: true, runValidators: true },
+        id, finalUpdateUserInput, {
+          new: true,
+          runValidators: true,
+        },
         (err, user) => {
           if (err) {
             resolve({
@@ -173,6 +185,7 @@ export const resolvers = {
     },
     approveNewDetachedProfile: async (_source, { user_id, detachedProfile_id }) => {
       functionCallConsole('Approve Profile Called');
+      // check that user, detached profile, creator exist
       const user = await User.findById(user_id);
       if (!user) {
         return {
@@ -180,7 +193,7 @@ export const resolvers = {
           message: `User with id ${user_id} does not exist`,
         };
       }
-      const detachedProfile = DetachedProfile.findById(detachedProfile_id);
+      const detachedProfile = await DetachedProfile.findById(detachedProfile_id);
       if (!detachedProfile) {
         return {
           success: false,
@@ -193,12 +206,15 @@ export const resolvers = {
           success: false,
           message: `Creator with id ${detachedProfile.creatorUser_id} does not exist`,
         };
-      } if (creator._id === user_id) {
+      }
+      // check creator != user
+      if (creator._id === user_id) {
         return {
           success: false,
           message: 'Can\'t create profile for yourself',
         };
       }
+      // check creator has not already made a profile for user
       const endorserIDs = await UserProfile.find({ user_id });
       if (detachedProfile.creatorUser_id in endorserIDs) {
         return {
@@ -206,8 +222,6 @@ export const resolvers = {
           message: `User already has a profile created by ${detachedProfile.creatorUser_id}`,
         };
       }
-
-      /*
       const profileId = mongoose.Types.ObjectId();
       const userProfileInput = {
         _id: profileId,
@@ -215,16 +229,140 @@ export const resolvers = {
         user_id,
         interests: detachedProfile.interests,
         vibes: detachedProfile.vibes,
-        bios: detachedProfile.bios,
+        bio: detachedProfile.bio,
         dos: detachedProfile.dos,
         donts: detachedProfile.donts,
       };
 
-      const createUserProfileResult = createUserProfileObject(userProfileInput)
+      // create new user profile
+      const createUserProfileObjectePromise = createUserProfileObject(userProfileInput)
         .catch(err => err);
-        */
 
-      return null;
+      // link to first party, add photos to photobank
+      const updateUserObjectPromise = User
+        .findByIdAndUpdate(user_id, {
+          $push: {
+            profile_ids: profileId,
+            imagesBank: {
+              $each: detachedProfile.images,
+            },
+          },
+        }, { new: true })
+        .catch(err => err);
+
+      // unlink detached profile from creator, link new endorsed profile
+      const updateCreatorObjectPromise = User
+        .findByIdAndUpdate(creator._id, {
+          $pull: {
+            detachedProfile_ids: detachedProfile_id,
+          },
+          $push: {
+            endorsedProfile_ids: profileId,
+          },
+        }, { new: true })
+        .catch(err => err);
+
+      // delete detached profile
+      const deleteDetachedProfilePromise = DetachedProfile.deleteOne({ _id: detachedProfile_id })
+        .catch(err => err);
+
+      return Promise.all([
+        createUserProfileObjectePromise, updateUserObjectPromise,
+        updateCreatorObjectPromise, deleteDetachedProfilePromise])
+        .then(([
+          createUserProfileObjectResult, updateUserObjectResult,
+          updateCreatorObjectResult, deleteDetachedProfileResult]) => {
+          // if at least one of the above four operations failed, roll back the others
+          if (createUserProfileObjectResult instanceof Error
+            || updateUserObjectResult instanceof Error
+            || updateCreatorObjectResult instanceof Error
+            || deleteDetachedProfileResult instanceof Error) {
+            debug('error attaching profile, rolling back');
+            let message = '';
+            if (createUserProfileObjectResult instanceof Error) {
+              message += createUserProfileObjectResult.toString();
+            } else {
+              createUserProfileObjectResult.remove((err) => {
+                if (err) {
+                  debug(`Failed to remove user profile object: ${err}`);
+                } else {
+                  debug('Removed created user profile object successfully');
+                }
+              });
+            }
+            if (updateUserObjectResult instanceof Error) {
+              message += updateUserObjectResult.toString();
+            } else {
+              User.findByIdAndUpdate(user_id, {
+                $pull: {
+                  profile_ids: profileId,
+                  imagesBank: {
+                    uploadedBy_id: creator._id,
+                  },
+                },
+              }, {}, (err) => {
+                if (err) {
+                  debug(`Failed to rollback user updates: ${err}`);
+                } else {
+                  debug('Rolled back user updates successfully');
+                }
+              });
+            }
+            if (updateCreatorObjectResult instanceof Error) {
+              message += updateCreatorObjectResult.toString();
+            } else {
+              User.findByIdAndUpdate(user_id, {
+                $push: {
+                  detachedProfile_ids: detachedProfile_id,
+                },
+                $pull: {
+                  endorsedProfile_ids: profileId,
+                },
+              }, {}, (err) => {
+                if (err) {
+                  debug(`Failed to roll back creator object: ${err}`);
+                } else {
+                  debug('Rolled back creator object successfully');
+                }
+              });
+            }
+            if (deleteDetachedProfileResult instanceof Error) {
+              message += deleteDetachedProfileResult.toString();
+            } else {
+              const detachedProfileInput = pick(detachedProfile, [
+                '_id',
+                'creatorUser_id',
+                'firstName',
+                'phoneNumber',
+                'age',
+                'gender',
+                'interests',
+                'vibes',
+                'bio',
+                'dos',
+                'donts',
+                'images',
+                'matchingDemographics',
+                'matchingPreferences',
+              ]);
+              createDetachedProfileObject(detachedProfileInput)
+                .then(() => {
+                  debug('Recreated detached profile object successfully');
+                })
+                .catch((err) => {
+                  debug(`Failed to recreate detached profile ${err}`);
+                });
+            }
+            return {
+              success: false,
+              message,
+            };
+          }
+          return {
+            success: true,
+            user: updateUserObjectResult,
+          };
+        });
     },
   },
 };

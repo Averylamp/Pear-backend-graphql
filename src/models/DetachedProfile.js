@@ -20,6 +20,7 @@ extend type Mutation{
 
 
 input CreationDetachedProfileInput {
+  _id: ID
   creatorUser_id: ID!
   firstName: String!
   phoneNumber: String!
