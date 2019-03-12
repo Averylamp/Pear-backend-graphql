@@ -217,19 +217,20 @@ export const resolvers = {
       debug(detachedProfile.creatorUser_id);
       debug(creatorUser_id);
       // check that creator made detached profile
-      if (creatorUser_id !== detachedProfile.creatorUser_id) {
+
+      if (creatorUser_id !== detachedProfile.creatorUser_id.toString()) {
         return {
           success: false,
           message: `${creatorUser_id} is not creator of detached profile ${detachedProfile_id}`,
         };
       }
       // check creator != user
-      if (creatorUser_id === user_id) {
-        return {
-          success: false,
-          message: 'Can\'t create profile for yourself',
-        };
-      }
+      // if (creatorUser_id === user_id) {
+      //   return {
+      //     success: false,
+      //     message: 'Can\'t create profile for yourself',
+      //   };
+      // }
       // check creator has not already made a profile for user
       const endorserIDs = await UserProfile.find({ user_id });
       if (detachedProfile.creatorUser_id in endorserIDs) {
