@@ -183,32 +183,45 @@ export const resolvers = {
         },
       ));
     },
-    approveNewDetachedProfile: async (_source, { user_id, detachedProfile_id }) => {
+    approveNewDetachedProfile: async (_source, { user_id, detachedProfile_id, creator_id }) => {
       functionCallConsole('Approve Profile Called');
+
       // check that user, detached profile, creator exist
-      const user = await User.findById(user_id);
+      const userPromise = User.findById(user_id).exec()
+        .catch(() => null);
+      const detachedProfilePromise = DetachedProfile.findById(detachedProfile_id).exec()
+        .catch(() => null);
+      const creatorPromise = User.findById(creator_id).exec()
+        .catch(() => null);
+      const [user, detachedProfile, creator] = await Promise.all([userPromise,
+        detachedProfilePromise, creatorPromise]);
       if (!user) {
         return {
           success: false,
-          message: `User with id ${user_id} does not exist`,
+          message: `Could not find user with id ${user_id}`,
         };
       }
-      const detachedProfile = await DetachedProfile.findById(detachedProfile_id);
       if (!detachedProfile) {
         return {
           success: false,
-          message: `Detached profile with id ${detachedProfile_id} does not exist`,
+          message: `Could not find detached profile with id ${detachedProfile_id}`,
         };
       }
-      const creator = await User.findById(detachedProfile.creatorUser_id);
       if (!creator) {
         return {
           success: false,
-          message: `Creator with id ${detachedProfile.creatorUser_id} does not exist`,
+          message: `Could not find creator with id ${detachedProfile.creatorUser_id}`,
+        };
+      }
+      // check that creator made detached profile
+      if (creator_id !== detachedProfile.creatorUser_id) {
+        return {
+          success: false,
+          message: `${creator_id} is not creator of detached profile ${detachedProfile_id}`,
         };
       }
       // check creator != user
-      if (creator._id === user_id) {
+      if (creator_id === user_id) {
         return {
           success: false,
           message: 'Can\'t create profile for yourself',
@@ -243,7 +256,7 @@ export const resolvers = {
         .findByIdAndUpdate(user_id, {
           $push: {
             profile_ids: profileId,
-            imagesBank: {
+            bankImages: {
               $each: detachedProfile.images,
             },
           },
@@ -296,7 +309,7 @@ export const resolvers = {
               User.findByIdAndUpdate(user_id, {
                 $pull: {
                   profile_ids: profileId,
-                  imagesBank: {
+                  bankImages: {
                     uploadedBy_id: creator._id,
                   },
                 },
@@ -364,5 +377,61 @@ export const resolvers = {
           };
         });
     },
-  },
+    updatePhotos: async (_source, { updateUserPhotosInput }) => {
+      functionCallConsole('Update Photos Called');
+      debug(`input object is ${updateUserPhotosInput}`);
+      const { user_id, displayedImages, additionalImages } = updateUserPhotosInput;
+      const user = await User.findById(user_id);
+      if (!user) {
+        return {
+          success: false,
+          message: `User with id ${user_id} does not exist`,
+        };
+      }
+      const toAddToImageBank = [];
+      displayedImages.forEach((createImageContainer) => {
+        let imageAlreadyInBank = false;
+        for (const userImageContainer of user.bankImages) {
+          if (userImageContainer.imageID === createImageContainer.imageID) {
+            imageAlreadyInBank = true;
+            break;
+          }
+        }
+        if (!imageAlreadyInBank) {
+          toAddToImageBank.push(createImageContainer);
+        }
+      });
+
+      additionalImages.forEach((createImageContainer) => {
+        let imageAlreadyInBank = false;
+        for (const userImageContainer of user.bankImages) {
+          if (userImageContainer.imageID === createImageContainer.imageID) {
+            imageAlreadyInBank = true;
+            break;
+          }
+        }
+        if (!imageAlreadyInBank) {
+          toAddToImageBank.push(createImageContainer);
+        }
+      });
+
+      return User.findByIdAndUpdate(user_id, {
+        displayedImages,
+        $push: {
+          bankImages: {
+            $each: toAddToImageBank,
+          },
+        },
+      }, { new: true })
+        .then(res => ({
+          success: true,
+          user: res,
+        }))
+        .catch(err => ({
+          success: false,
+          message: `Failed to update user with new photos: ${err}`,
+        }));
+    },
+  }
+  ,
 };

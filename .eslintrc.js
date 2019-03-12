@@ -12,8 +12,9 @@ module.exports = {
     ecmaVersion: 2018,
   },
   rules: {
+    "no-restricted-syntax": "off",
     "no-underscore-dangle": "off",
     "import/prefer-default-export": "off",
-    "camelcase" : [ "error", { "allow": ["_id", "_ids", "_reconnect"]}]
+    "camelcase" : [ "error", { "allow": ["_id", "_ids"]}]
   },
 };
