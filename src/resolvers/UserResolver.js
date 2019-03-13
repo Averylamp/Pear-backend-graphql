@@ -243,8 +243,8 @@ export const resolvers = {
       const userProfileInput = {
         _id: profileId,
         creatorUser_id: creator._id,
-        user_id,
         creatorFirstName: creator.firstName,
+        user_id,
         interests: detachedProfile.interests,
         vibes: detachedProfile.vibes,
         bio: detachedProfile.bio,
@@ -315,7 +315,7 @@ export const resolvers = {
                 $pull: {
                   profile_ids: profileId,
                   bankImages: {
-                    uploadedBy_id: creator._id,
+                    uploadedByUser_id: creator._id,
                   },
                 },
               }, {}, (err) => {
@@ -347,10 +347,10 @@ export const resolvers = {
             if (deleteDetachedProfileResult instanceof Error) {
               message += deleteDetachedProfileResult.toString();
             } else {
-              // TODO: Fix error on creating user profile
               const detachedProfileInput = pick(detachedProfile, [
                 '_id',
                 'creatorUser_id',
+                'creatorFirstName',
                 'firstName',
                 'phoneNumber',
                 'age',
