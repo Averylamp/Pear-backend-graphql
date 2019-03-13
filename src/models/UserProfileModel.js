@@ -91,7 +91,6 @@ const UserProfileSchema = new Schema({
   creatorUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
   creatorFirstName: { type: String, required: true },
   user_id: { type: Schema.Types.ObjectId, required: true, index: true },
-  creatorFirstName: { type: String, required: true, default: '' },
 
   interests: { type: [String], required: true },
   vibes: { type: [String], required: true },
