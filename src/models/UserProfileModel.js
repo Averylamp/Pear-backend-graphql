@@ -72,7 +72,7 @@ type UserProfile {
   bio: String!
   dos: [String!]!
   donts: [String!]!
-  
+
   userProfileData: UserProfileData!
 }
 
@@ -89,6 +89,7 @@ type UserProfileData{
 const UserProfileSchema = new Schema({
   _id: { type: Schema.Types.ObjectId, required: true },
   creatorUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
+  creatorFirstName: { type: String, required: true },
   user_id: { type: Schema.Types.ObjectId, required: true, index: true },
   creatorFirstName: { type: String, required: true, default: '' },
 
