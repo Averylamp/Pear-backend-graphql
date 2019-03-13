@@ -244,6 +244,7 @@ export const resolvers = {
         _id: profileId,
         creatorUser_id: creator._id,
         user_id,
+        creatorFirstName: creator.firstName,
         interests: detachedProfile.interests,
         vibes: detachedProfile.vibes,
         bio: detachedProfile.bio,
@@ -346,6 +347,7 @@ export const resolvers = {
             if (deleteDetachedProfileResult instanceof Error) {
               message += deleteDetachedProfileResult.toString();
             } else {
+              // TODO: Fix error on creating user profile
               const detachedProfileInput = pick(detachedProfile, [
                 '_id',
                 'creatorUser_id',
