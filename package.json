@@ -8,7 +8,7 @@
     "startdevperf" : "DEBUG=dev:* PERF=1 nodemon --exec babel-node src/index.js",
     "start": "node dist/index.js",
     "build": "babel -d dist/ src/",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "scripts/test"
   },
   "author": "Avery Lamp <averylamp@gmail.com>",
   "license": "ISC",
