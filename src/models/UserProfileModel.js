@@ -47,7 +47,7 @@ const UserProfileSchema = new Schema({
   bio: { type: String, required: true },
   dos: { type: [String], required: true },
   donts: { type: [String], required: true },
-});
+}, { timestamps: true });
 
 
 export const UserProfile = mongoose.model('UserProfile', UserProfileSchema);
