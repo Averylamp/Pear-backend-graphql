@@ -87,7 +87,7 @@ const MatchRequestSchema = new Schema({
   matchStatusTimestamp: { type: Number, required: true },
   matchCreated: { type: Boolean, required: true, default: false },
   acceptedMatch_id: { type: Schema.Types.ObjectId, required: false, index: true },
-});
+}, { timestamps: true });
 
 
 // firstPersonEndorserUserObj: User!

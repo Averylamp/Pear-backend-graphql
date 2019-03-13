@@ -5,60 +5,7 @@ const { Schema } = mongoose;
 
 const debug = require('debug')('dev:UserProfile');
 
-export const typeDef = `
-
-extend type Mutation {
-  createUserProfile(userProfileInput: CreationUserProfileInput): UserProfileMutationResponse
-  updateUserProfile(id: ID, updateUserProfileInput: UpdateUserProfileInput) : UserProfileMutationResponse
-}
-
-input CreationUserProfileInput {
-  creatorUser_id: ID!
-  firstName: String!
-  demographics: CreationUserProfileDemographicsInput!
-  activeProfile: Boolean!
-  activeDiscovery: Boolean!
-}
-
-input CreationUserProfileDemographicsInput {
-  gender: Gender!
-  age: Int!
-}
-
-input UpdateUserProfileInput {
-  activeProfile: Boolean
-  activeDiscovery: Boolean
-  firstName: String
-  lastName: String
-  demographics: UpdateProfileDemographicsInput
-  userProfileData: UpdateUserProfileDataInput
-}
-
-input UpdateProfileDemographicsInput {
-  gender: Gender
-  age: Int
-  height: Int
-  locationName: String
-  locationCoordinates: String
-  school: String
-  ethnicities: [String!]
-  religion: [String!]
-  political: [String!]
-  smoking: [String!]
-  drinking: [String!]
-}
-
-input UpdateUserProfileDataInput{
-  totalProfileViews: Int
-  totalProfileLikes: Int
-}
-
-type UserProfileMutationResponse{
-  success: Boolean!
-  message: String
-  userProfile: UserProfile
-}
-
+const userProfileType = `
 type UserProfile {
   _id: ID!
   creatorUser_id: ID!
@@ -66,24 +13,28 @@ type UserProfile {
   creatorFirstName: String!
   user_id: ID!
   userObj: User
-  
+
   interests: [String!]!
   vibes: [String!]!
   bio: String!
   dos: [String!]!
   donts: [String!]!
 
-  userProfileData: UserProfileData!
 }
-
-
-type UserProfileData{
-  totalProfileViews: Int!
-  totalProfileLikes: Int!
-}
-
 
 `;
+
+const userProfileMutationResponse = `
+type UserProfileMutationResponse{
+  success: Boolean!
+  message: String
+  userProfile: UserProfile
+}
+`;
+
+
+export const typeDef = userProfileType
++ userProfileMutationResponse;
 
 
 const UserProfileSchema = new Schema({
@@ -91,22 +42,11 @@ const UserProfileSchema = new Schema({
   creatorUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
   creatorFirstName: { type: String, required: true },
   user_id: { type: Schema.Types.ObjectId, required: true, index: true },
-
   interests: { type: [String], required: true },
   vibes: { type: [String], required: true },
   bio: { type: String, required: true },
   dos: { type: [String], required: true },
   donts: { type: [String], required: true },
-
-  userProfileData: {
-    totalProfileViews: {
-      type: Number, required: true, min: 0, default: 0,
-    },
-    totalProfileLikes: {
-      type: Number, required: true, min: 0, default: 0,
-    },
-  },
-
 });
 
 
