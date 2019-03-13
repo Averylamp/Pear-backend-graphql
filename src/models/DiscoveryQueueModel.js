@@ -4,15 +4,21 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const debug = require('debug')('dev:DiscoveryQueue');
 
-export const typeDef = `
+const queryRoutes = `
 extend type Query {
+  # Retreives the discovery feed for the provided user
   getDiscoveryFeed(user_id: ID!, last: Int): DiscoveryQueue
 }
+`;
 
+const mutationRoutes = `
 extend type Mutation {
-  addToQueue(user_id: ID!, addedUser_id: ID!): DiscoveryMutationResponse! 
+  addToQueue(user_id: ID!, addedUser_id: ID!): DiscoveryMutationResponse!
 }
 
+`;
+
+const discoveryQueueType = `
 type DiscoveryQueue{
   _id: ID!
   user_id: ID!
@@ -20,8 +26,6 @@ type DiscoveryQueue{
 
   previousDiscoveryItems: [DiscoveryItem!]!
   currentDiscoveryItems: [DiscoveryItem!]!
-
-
 }
 
 type DiscoveryItem {
@@ -36,18 +40,24 @@ type DiscoveryMutationResponse {
   message: String
 }
 
+
 `;
+
+export const typeDef = queryRoutes
++ mutationRoutes
++ discoveryQueueType;
+
 const DiscoveryItemSchema = new Schema({
   user_id: { type: Schema.Types.ObjectId, required: true },
   timestamp: { type: Date, required: true, default: Date },
-});
+}, { timestamps: true });
 
 const DiscoveryQueueSchema = new Schema({
   _id: { type: Schema.Types.ObjectId, required: true },
   user_id: { type: Schema.Types.ObjectId, required: false, index: true },
   previousDiscoveryItems: { type: [DiscoveryItemSchema], required: true, default: [] },
   currentDiscoveryItems: { type: [DiscoveryItemSchema], required: true, default: [] },
-});
+}, { timestamps: true });
 
 
 export const DiscoveryQueue = mongoose.model('DiscoveryQueue', DiscoveryQueueSchema);

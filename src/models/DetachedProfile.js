@@ -8,19 +8,26 @@ const { Schema } = mongoose;
 
 const debug = require('debug')('dev:DetachedProfile');
 
-export const typeDef = `
-
+const queryRoutes = `
 extend type Query {
+  # Queries for existing detached profiles
   findDetachedProfiles(phoneNumber: String): [DetachedProfile!]!
 }
+`;
 
+const mutationRoutes = `
 extend type Mutation{
+  # Creates a new detached profile and attaches it to the creator's profile
   createDetachedProfile(detachedProfileInput: CreationDetachedProfileInput): DetachedProfileMutationResponse!
+  # Deletes the existing detached profile, converts it into a User Profile and attaches the user profile to both the creator's and user's User Object
+  approveNewDetachedProfile(user_id: ID!, detachedProfile_id: ID!, creatorUser_id: ID!): UserMutationResponse!
 }
+`;
 
-
+const createDetachedProfileInput = `
 input CreationDetachedProfileInput {
   _id: ID
+  # The creator's User Object ID
   creatorUser_id: ID!
   creatorFirstName: String!
   firstName: String!
@@ -35,14 +42,13 @@ input CreationDetachedProfileInput {
   images: [CreateImageContainer!]!
 
 }
+`;
 
-input PhoneNumberInput{
-  phoneNumber: String!
-}
-
-
+const detachedProfileType = `
 type DetachedProfile {
   _id: ID!
+  # The current status of this profile
+  status: DetachedProfileStatus!
   creatorUser_id: ID!
   creatorUser: User
   creatorFirstName: String!
@@ -61,17 +67,34 @@ type DetachedProfile {
   matchingPreferences: MatchingPreferences!
 }
 
+enum DetachedProfileStatus {
+unknown
+seen
+declined
+}
+
+`;
+
+const detachedProfileMutationResponse = `
 type DetachedProfileMutationResponse{
   success: Boolean!
   message: String
   detachedProfile: DetachedProfile
 }
-
 `;
+
+export const typeDef = queryRoutes
++ mutationRoutes
++ createDetachedProfileInput
++ detachedProfileType
++ detachedProfileMutationResponse;
 
 
 const DetachedProfileSchema = new Schema({
   _id: { type: Schema.Types.ObjectId, required: true },
+  status: {
+    type: String, required: true, enum: ['unknown', 'seen', 'declined'], default: 'unknown',
+  },
   creatorUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
   creatorFirstName: { type: String, required: true },
   firstName: { type: String, required: true },
@@ -100,7 +123,7 @@ const DetachedProfileSchema = new Schema({
     default: MatchingPreferencesSchema,
   },
 
-});
+}, { timestamps: true });
 
 
 export const DetachedProfile = mongoose.model('DetachedProfile', DetachedProfileSchema);

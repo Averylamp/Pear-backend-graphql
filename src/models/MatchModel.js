@@ -51,7 +51,7 @@ const MatchSchema = new Schema({
     conversationHundredMessagesSent: { type: Boolean, required: true, default: false },
   },
   firebaseConversationDocumentID: { type: String, required: true },
-});
+}, { timestamps: true });
 
 
 // matchRequestObj: MatchRequest
