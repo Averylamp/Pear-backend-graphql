@@ -63,6 +63,7 @@ type UserProfile {
   _id: ID!
   creatorUser_id: ID!
   creatorObj: User
+  creatorFirstName: String!
   user_id: ID!
   userObj: User
   
@@ -89,6 +90,7 @@ const UserProfileSchema = new Schema({
   _id: { type: Schema.Types.ObjectId, required: true },
   creatorUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
   user_id: { type: Schema.Types.ObjectId, required: true, index: true },
+  creatorFirstName: { type: String, required: true, default: '' },
 
   interests: { type: [String], required: true },
   vibes: { type: [String], required: true },
