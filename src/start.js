@@ -80,7 +80,7 @@ const PORT = 1234;
 let dbName = 'prod';
 if (devMode) {
   debug('Debug Mode Detected');
-  dbName = 'd';
+  dbName = 'dev-test';
   if (regenTestDBMode) {
     debug('Regen Test DB Mode Detected');
     dbName = 'dev-test';
