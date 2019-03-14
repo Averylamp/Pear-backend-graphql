@@ -164,7 +164,7 @@ type User {
   lastName: String!
   fullName: String!
   thumbnailURL: String
-  gender: String
+  gender: Gender
   age: Int!
   birthdate: String!
   locationName: String
