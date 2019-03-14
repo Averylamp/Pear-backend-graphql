@@ -68,8 +68,8 @@ type DetachedProfile {
 }
 
 enum DetachedProfileStatus {
-unknown
-seen
+waitingUnseen
+waitingSeen
 declined
 }
 
@@ -93,7 +93,7 @@ export const typeDef = queryRoutes
 const DetachedProfileSchema = new Schema({
   _id: { type: Schema.Types.ObjectId, required: true },
   status: {
-    type: String, required: true, enum: ['unknown', 'seen', 'declined'], default: 'unknown',
+    type: String, required: true, enum: ['waitingUnseen', 'waitingSeen', 'declined'], default: 'waitingUnseen',
   },
   creatorUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
   creatorFirstName: { type: String, required: true },
