@@ -68,7 +68,8 @@ if (process.env.PERF) {
 
 let devMode = false;
 let regenTestDBMode = false;
-if (process.env.DEV === true) {
+if (process.env.DEV === 'true') {
+  debug('Dev Mode detected');
   devMode = true;
   if (process.env.REGENDB === true) {
     regenTestDBMode = true;
@@ -80,7 +81,6 @@ const URL = 'http://localhost';
 const PORT = 1234;
 let dbName = 'prod';
 if (devMode) {
-  debug('Debug Mode Detected');
   dbName = 'dev-test';
   if (regenTestDBMode) {
     debug('Regen Test DB Mode Detected');
