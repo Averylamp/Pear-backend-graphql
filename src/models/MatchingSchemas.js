@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
 
-export const typeDef = `
+const matchingDemographicsType = `
 type MatchingDemographics{
   gender: Gender!
   age: Int!
@@ -16,7 +16,9 @@ type MatchingDemographics{
   drinking: [String!]
   school: String
 }
+`;
 
+const matchingPreferencesType = `
 type MatchingPreferences{
   ethnicities: [String!]
   seekingGender: [Gender!]!
@@ -35,6 +37,8 @@ type MatchingPreferences{
 }
 `;
 
+export const typeDef = matchingDemographicsType + matchingPreferencesType;
+
 export const MatchingDemographicsSchema = new Schema({
   ethnicities: { type: [String], required: false },
   religion: { type: [String], required: false },
@@ -42,7 +46,7 @@ export const MatchingDemographicsSchema = new Schema({
   smoking: { type: [String], required: false },
   drinking: { type: [String], required: false },
   height: { type: Number, required: false },
-});
+}, { timestamps: true });
 
 
 export const MatchingPreferencesSchema = new Schema({
@@ -82,4 +86,4 @@ export const MatchingPreferencesSchema = new Schema({
   heightDealbreaker: {
     type: Number, required: true, min: 0, max: 1, default: 0,
   },
-});
+}, { timestamps: true });
