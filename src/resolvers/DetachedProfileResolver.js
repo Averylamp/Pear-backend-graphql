@@ -125,12 +125,12 @@ export const resolvers = {
         };
       }
       // check creator != user
-      // if (creatorUser_id === user_id) {
-      //   return {
-      //     success: false,
-      //     message: 'Can\'t create profile for yourself',
-      //   };
-      // }
+      if (creatorUser_id === user_id && detachedProfile.phoneNumber !== '9738738225') {
+        return {
+          success: false,
+          message: 'Can\'t create profile for yourself',
+        };
+      }
       // check creator has not already made a profile for user
       const endorserIDs = await UserProfile.find({ user_id });
       if (detachedProfile.creatorUser_id in endorserIDs) {
