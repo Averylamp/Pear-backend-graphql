@@ -156,16 +156,24 @@ export const resolvers = {
       const createUserProfileObjectePromise = createUserProfileObject(userProfileInput)
         .catch(err => err);
 
+      const userObjectUpdate = {
+        $push: {
+          profile_ids: profileId,
+          bankImages: {
+            $each: detachedProfile.images,
+          },
+        },
+      };
+
+      if (user.displayedImages.length < 6) {
+        userObjectUpdate.$push.displayedImages = {
+          $each: detachedProfile.images.slice(0, user.displayedImages.length - 6),
+        };
+      }
+
       // link to first party, add photos to photobank
       const updateUserObjectPromise = User
-        .findByIdAndUpdate(user_id, {
-          $push: {
-            profile_ids: profileId,
-            bankImages: {
-              $each: detachedProfile.images,
-            },
-          },
-        }, { new: true })
+        .findByIdAndUpdate(user_id, userObjectUpdate, { new: true })
         .catch(err => err);
 
       // unlink detached profile from creator, link new endorsed profile
