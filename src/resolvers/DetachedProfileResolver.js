@@ -156,7 +156,7 @@ export const resolvers = {
       const createUserProfileObjectePromise = createUserProfileObject(userProfileInput)
         .catch(err => err);
 
-      const userObjectUpdate = {
+      let userObjectUpdate = {
         $push: {
           profile_ids: profileId,
           bankImages: {
@@ -169,8 +169,16 @@ export const resolvers = {
       prodDebug(user.displayedImages.length);
       if (user.displayedImages.length < 6) {
         prodDebug('Added default images');
-        userObjectUpdate.$push.displayedImages = {
-          $each: detachedProfile.images.slice(0, user.displayedImages.length - 6),
+        userObjectUpdate = {
+          $push: {
+            profile_ids: profileId,
+            bankImages: {
+              $each: detachedProfile.images,
+            },
+            displayedImages: {
+              $each: detachedProfile.images.slice(0, user.displayedImages.length - 6),
+            },
+          },
         };
       }
       prodDebug(userObjectUpdate);
