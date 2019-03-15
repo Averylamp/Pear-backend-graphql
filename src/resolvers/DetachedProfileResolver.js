@@ -6,7 +6,6 @@ import { createUserProfileObject, UserProfile } from '../models/UserProfileModel
 const mongoose = require('mongoose');
 const debug = require('debug')('dev:DetachedProfileResolvers');
 const functionCallConsole = require('debug')('dev:FunctionCalls');
-const prodDebug = require('debug')('prod:DetachedProfile');
 
 export const resolvers = {
   Query: {
@@ -164,11 +163,8 @@ export const resolvers = {
           },
         },
       };
-      prodDebug(user);
-      prodDebug(user.displayedImages);
-      prodDebug(user.displayedImages.length);
+
       if (user.displayedImages.length < 6) {
-        prodDebug('Added default images');
         userObjectUpdate = {
           $push: {
             profile_ids: profileId,
@@ -181,7 +177,6 @@ export const resolvers = {
           },
         };
       }
-      prodDebug(userObjectUpdate);
 
       // link to first party, add photos to photobank
       const updateUserObjectPromise = User
