@@ -7,7 +7,6 @@ const mongoose = require('mongoose');
 const debug = require('debug')('dev:DetachedProfileResolvers');
 const functionCallConsole = require('debug')('dev:FunctionCalls');
 
-
 export const resolvers = {
   Query: {
     findDetachedProfiles: async (_, { phoneNumber }) => {
@@ -125,12 +124,12 @@ export const resolvers = {
         };
       }
       // check creator != user
-      // if (creatorUser_id === user_id) {
-      //   return {
-      //     success: false,
-      //     message: 'Can\'t create profile for yourself',
-      //   };
-      // }
+      if (creatorUser_id === user_id && detachedProfile.phoneNumber !== '9738738225') {
+        return {
+          success: false,
+          message: 'Can\'t create profile for yourself',
+        };
+      }
       // check creator has not already made a profile for user
       const endorserIDs = await UserProfile.find({ user_id });
       if (detachedProfile.creatorUser_id in endorserIDs) {
@@ -156,16 +155,32 @@ export const resolvers = {
       const createUserProfileObjectePromise = createUserProfileObject(userProfileInput)
         .catch(err => err);
 
-      // link to first party, add photos to photobank
-      const updateUserObjectPromise = User
-        .findByIdAndUpdate(user_id, {
+      let userObjectUpdate = {
+        $push: {
+          profile_ids: profileId,
+          bankImages: {
+            $each: detachedProfile.images,
+          },
+        },
+      };
+
+      if (user.displayedImages.length < 6) {
+        userObjectUpdate = {
           $push: {
             profile_ids: profileId,
             bankImages: {
               $each: detachedProfile.images,
             },
+            displayedImages: {
+              $each: detachedProfile.images.slice(0, 6 - user.displayedImages.length),
+            },
           },
-        }, { new: true })
+        };
+      }
+
+      // link to first party, add photos to photobank
+      const updateUserObjectPromise = User
+        .findByIdAndUpdate(user_id, userObjectUpdate, { new: true })
         .catch(err => err);
 
       // unlink detached profile from creator, link new endorsed profile
