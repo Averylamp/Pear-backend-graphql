@@ -176,7 +176,7 @@ export const resolvers = {
               $each: detachedProfile.images,
             },
             displayedImages: {
-              $each: detachedProfile.images.slice(0, user.displayedImages.length - 6),
+              $each: detachedProfile.images.slice(0, 6 - user.displayedImages.length),
             },
           },
         };
