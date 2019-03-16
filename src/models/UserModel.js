@@ -132,7 +132,7 @@ input UpdateUserInput {
   birthdate: String
   age: Int
   userPreferences: UserPreferencesInput
-  userStats: UserStatsInputm
+  userStats: UserStatsInput
   userDemographics: UserDemographicsInput
   pearPoints: Int
 }
