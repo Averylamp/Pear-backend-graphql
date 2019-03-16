@@ -1,12 +1,15 @@
+import { pick } from 'lodash';
 import { User } from '../models/UserModel';
 import { UserProfile } from '../models/UserProfileModel';
 import { DetachedProfile } from '../models/DetachedProfile';
-import { DiscoveryQueue } from '../models/DiscoveryQueueModel';
+import { DiscoveryItem, DiscoveryQueue } from '../models/DiscoveryQueueModel';
 
 const debug = require('debug')('dev:DiscoverProfile');
 
 const getRandomFrom = array => (array.length > 0
   ? array[Math.floor(Math.random() * array.length)] : null);
+
+const getDemographicsFromUser = user => pick(user, ['age', 'gender']);
 
 const getUserSatisfyingConstraints = async (constraints, demographics, blacklist) => {
   try {
@@ -20,6 +23,13 @@ const getUserSatisfyingConstraints = async (constraints, demographics, blacklist
       },
       _id: {
         $nin: blacklist,
+      },
+      'matchingPreferences.seekingGender': demographics.gender,
+      'matchingPreferences.minAgeRange': {
+        $lte: demographics.age,
+      },
+      'matchingPreferences.maxAgeRange': {
+        $gte: demographics.age,
       },
     });
     return getRandomFrom(users);
@@ -50,7 +60,7 @@ export const nextDiscoveryItem = async (user) => {
     if (user.isDiscovering) {
       myPreferences.push({
         constraints: user.matchingPreferences,
-        demographics: user.matchingDemographics,
+        demographics: getDemographicsFromUser(user),
         blacklist: userBlacklist,
       });
     }
@@ -62,11 +72,11 @@ export const nextDiscoveryItem = async (user) => {
         .then(endorsedUserProfile => User
           .findById(endorsedUserProfile.user_id)
           .exec())
-        .then(endorsedUser => ({
+        .then(endorsedUser => (endorsedUser.isDiscovering ? {
           constraints: endorsedUser.matchingPreferences,
-          demographics: endorsedUser.matchingDemographics,
+          demographics: getDemographicsFromUser(user),
           blacklist: userBlacklist,
-        }))
+        } : null))
         .catch((err) => {
           debug(`error while retrieving profile with id ${profile_id}: ${err.toString()}`);
           return null;
@@ -83,7 +93,7 @@ export const nextDiscoveryItem = async (user) => {
         .exec()
         .then(detachedProfile => ({
           constraints: detachedProfile.matchingPreferences,
-          demographics: detachedProfile.matchingDemographics,
+          demographics: getDemographicsFromUser(user),
           blacklist: userBlacklist,
         }))
         .catch((err) => {
@@ -94,10 +104,55 @@ export const nextDiscoveryItem = async (user) => {
       .filter(Boolean);
 
     const allPreferences = myPreferences + endorsedProfilePreferences + detachedProfilePreferences;
+    if (allPreferences.length === 0) {
+      return null;
+    }
     const chosenPreference = getRandomFrom(allPreferences);
     return await getUserSatisfyingConstraints(chosenPreference.constraints,
       chosenPreference.demographics,
       chosenPreference.blacklist);
+  } catch (e) {
+    throw e;
+  }
+};
+
+export const updateDiscoveryWithNextItem = async (user) => {
+  try {
+    if (!user || user.deactivated) {
+      throw Error('User doesn\'t exist or is deactivated');
+    }
+    const nextUser = await nextDiscoveryItem(user);
+    if (nextUser === null) {
+      throw Error('Could not retrieve next discoveryitem for user');
+    }
+    return DiscoveryQueue
+      .findOneAndUpdate({ _id: user._id }, {
+        $push: {
+          currentDiscoveryItems: new DiscoveryItem({ user_id: nextUser._id }),
+        },
+      })
+      .then(() => ({
+        success: true,
+        message: 'Successfully added to queue.',
+      }))
+      .catch((err) => {
+        throw err;
+      });
+  } catch (e) {
+    throw e;
+  }
+};
+
+export const updateAllDiscovery = async (expectedTicksPerUpdate = 69) => {
+  try {
+    const users = await User.find({});
+    for (const user of users) {
+      if (Math.random() < (1 / expectedTicksPerUpdate)) {
+        updateDiscoveryWithNextItem(user).catch((err) => {
+          debug(`An error occurred: ${err.toString()}`);
+        });
+      }
+    }
   } catch (e) {
     throw e;
   }

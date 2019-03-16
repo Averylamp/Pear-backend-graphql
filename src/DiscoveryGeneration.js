@@ -1,3 +1,5 @@
+import { updateAllDiscovery } from './discovery/DiscoverProfile';
+
 const debug = require('debug')('dev:DiscoveryGeneration');
 const prodConsole = require('debug')('prod:DiscoveryGeneration');
 
@@ -46,6 +48,8 @@ export const start = async () => {
     db.once('open', () => {
       debug('Mongo connected');
       prodConsole('Mongo connected');
+
+      setInterval(updateAllDiscovery, 1000 * 60);
     });
   } catch (e) {
     debug(e);
