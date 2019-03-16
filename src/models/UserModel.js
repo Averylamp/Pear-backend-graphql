@@ -132,7 +132,7 @@ input UpdateUserInput {
   birthdate: String
   age: Int
   userPreferences: UserPreferencesInput
-  userStats: UserStatsInput
+  userStats: UserStatsInputm
   userDemographics: UserDemographicsInput
   pearPoints: Int
 }
@@ -172,6 +172,7 @@ type User {
   school: String
   schoolEmail: String
   schoolEmailVerified: Boolean
+  isDiscovering: Boolean!
 
   # The ordered images that currently make up the User's Profile
   displayedImages: [ImageContainer!]!
@@ -292,6 +293,7 @@ const UserSchema = new Schema({
   school: { type: String, required: false },
   schoolEmail: { type: String, required: false },
   schoolEmailVerified: { type: Boolean, required: false, default: false },
+  isDiscovering: { type: Boolean, required: true, default: false },
 
   pearPoints: { type: Number, required: true, default: 0 },
 
