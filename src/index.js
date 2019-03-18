@@ -1,7 +1,7 @@
 import 'babel-core/register';
 import 'babel-polyfill';
 import { start } from './start';
-import { uploadImagesFromFolder } from './tests/ImageUploads';
+import { runTests } from './tests/RunTests';
 
 const debug = require('debug')('dev:Index');
 
@@ -23,9 +23,8 @@ if (devMode && regenTestDBMode) {
   debug('Prepared to run tests in 5 seconds');
   setTimeout(async () => {
     debug('Running Tests');
-    const w = await uploadImagesFromFolder('avery');
-    debug(w);
-    process.exit(1);
+    await runTests();
+    debug('Tests Completed');
   }, 5000);
 }
 
