@@ -4,11 +4,11 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "startdev": "DEBUG=dev:* nodemon --exec babel-node src/index.js",
-    "startdevperf" : "DEBUG=dev:* PERF=1 nodemon --exec babel-node src/index.js",
-    "start": "node dist/index.js",
+    "startdev": "DEBUG=dev:* DEV=true nodemon --exec babel-node src/index.js",
+    "startdevperf" : "DEBUG=dev:* DEV=true PERF=1 nodemon --exec babel-node src/index.js",
+    "start": "DEBUG=prod* DEV=false node dist/index.js",
     "build": "babel -d dist/ src/",
-    "test": "scripts/test"
+    "test": "test-db-creation"
   },
   "author": "Avery Lamp <averylamp@gmail.com>",
   "license": "ISC",

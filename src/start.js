@@ -58,6 +58,7 @@ import createTestDB from './tests/CreateTestDB';
 const { ApolloServer } = require('apollo-server-express');
 
 const debug = require('debug')('dev:Start');
+const prodConsole = require('debug')('prod:Start');
 
 let tracing = false;
 if (process.env.PERF) {
@@ -67,9 +68,10 @@ if (process.env.PERF) {
 
 let devMode = false;
 let regenTestDBMode = false;
-if (process.env.DEBUG) {
+if (process.env.DEV === 'true') {
+  debug('Dev Mode detected');
   devMode = true;
-  if (process.env.REGENDB) {
+  if (process.env.REGENDB === true) {
     regenTestDBMode = true;
   }
 }
@@ -79,7 +81,6 @@ const URL = 'http://localhost';
 const PORT = 1234;
 let dbName = 'prod';
 if (devMode) {
-  debug('Debug Mode Detected');
   dbName = 'dev-test';
   if (regenTestDBMode) {
     debug('Regen Test DB Mode Detected');
@@ -87,6 +88,9 @@ if (devMode) {
   }
   debug(`Database: ${dbName}`);
 }
+prodConsole('Running in Prod');
+prodConsole(`Database: ${dbName}`);
+
 const MONGO_URL = `mongodb+srv://avery:0bz8M0eMEtyXlj2aZodIPpJpy@cluster0-w4ecv.mongodb.net/${dbName}?retryWrites=true`;
 const mongoose = require('mongoose');
 
@@ -105,6 +109,7 @@ export const start = async () => {
     db.on('error', debug.bind(console, 'MongoDB connection error:'));
     db.once('open', () => {
       debug('Mongo connected');
+      prodConsole('Mongo connected');
 
       const UsersDB = db.collection('users');
       const UserProfilesDB = db.collection('userprofiles');
@@ -225,7 +230,10 @@ export const start = async () => {
       app.listen({
         port: PORT,
         ip: URL,
-      }, () => debug(`🚀 Server ready at ${URL}:${PORT}${server.graphqlPath}`));
+      }, () => {
+        debug(`🚀 Server ready at ${URL}:${PORT}${server.graphqlPath}`);
+        prodConsole(`🚀 Server ready at ${URL}:${PORT}${server.graphqlPath}`);
+      });
     });
   } catch (e) {
     debug(e);
