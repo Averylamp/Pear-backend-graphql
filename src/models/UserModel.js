@@ -6,47 +6,74 @@ const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
 
-export const typeDef = `
+
+const queryRoutes = `
 extend type Query {
+  # Get a user by an ID
   user(id: ID): User
+  # Get a user by firebase tokens
   getUser(userInput: GetUserInput): UserMutationResponse!
 }
 
-extend type Mutation{
-  createUser(userInput: CreationUserInput): UserMutationResponse!
-  updateUser(id: ID, updateUserInput: UpdateUserInput) : UserMutationResponse!
-  approveNewDetachedProfile(user_id: ID!, detachedProfile_id: ID!, creatorUser_id: ID!): UserMutationResponse!
-  updatePhotos(updateUserPhotosInput: UpdateUserPhotosInput): UserMutationResponse!
-}
+`;
 
+const mutationRoutes = `
+extend type Mutation{
+  # Creates a new User Object
+  createUser(userInput: CreationUserInput): UserMutationResponse!
+
+  # Updates an existing User
+  updateUser(id: ID, updateUserInput: UpdateUserInput) : UserMutationResponse!
+
+  # Updates a User's photos or photo bank
+  updateUserPhotos(updateUserPhotosInput: UpdateUserPhotosInput): UserMutationResponse!
+}
+`;
+
+const getUserInputs = `
 input GetUserInput{
+  # The Firebase generated token
   firebaseToken: String!
+
+  #The UID of the Fireabse user
   firebaseAuthID: String!
 }
+`;
 
+const createUserInputs = `
 input CreationUserInput{
   _id: ID
+  # User's Age
   age: Int!
+  # User's birthday
   birthdate: String!
+  # User's email
   email: String!
   emailVerified: Boolean!
+  # User's phone number
   phoneNumber: String!
   phoneNumberVerified: Boolean!
   firstName: String!
   lastName: String!
   gender: Gender!
+
+  # The Firebase generated token
   firebaseToken: String!
+
+  # The Firebase generated token
   firebaseAuthID: String!
+
+  # Option ID of the Facebook User
   facebookId: String
+  # Option Facebook Graph API Access token
   facebookAccessToken: String
 
+  # Option url for profile thumbnail
   thumbnailURL: String
 }
+`;
 
-input UserPreferencesInitialInput {
-  seekingGender: [String!]!
-}
-
+const updateUserInputs = `
 input UserPreferencesInput{
   ethnicities: [String!]
   seekingGender: [Gender!]
@@ -110,12 +137,18 @@ input UpdateUserInput {
   pearPoints: Int
 }
 
+`;
+
+const updateUserPhotosInput = `
 input UpdateUserPhotosInput {
   user_id: ID!
   displayedImages: [CreateImageContainer!]!
   additionalImages: [CreateImageContainer!]!
 }
 
+`;
+
+const userType = `
 type User {
   _id: ID!
   deactivated: Boolean!
@@ -131,7 +164,7 @@ type User {
   lastName: String!
   fullName: String!
   thumbnailURL: String
-  gender: String
+  gender: Gender
   age: Int!
   birthdate: String!
   locationName: String
@@ -140,20 +173,31 @@ type User {
   schoolEmail: String
   schoolEmailVerified: Boolean
 
+  # The ordered images that currently make up the User's Profile
   displayedImages: [ImageContainer!]!
+  # All images uploaded for a user
   bankImages: [ImageContainer!]!
 
   pearPoints: Int
 
+  # All Attached Profile IDs for a user
   profile_ids: [ID!]!
+  # All Attached Profiles for a user
   profileObjs: [UserProfile!]!
+
+  # All Created and Attached Profile IDs for a user
   endorsedProfile_ids: [ID!]!
+  # All Created and Attached Profiles for a user
   endorsedProfileObjs: [UserProfile!]!
+
+  # All Detached Profile IDs for a user
   detachedProfile_ids: [ID!]!
+  # All Detached Profiles for a user
   detachedProfileObjs: [DetachedProfile!]!
 
   userMatches_id: ID!
   userMatchesObj: UserMatches!
+
   discoveryQueue_id: ID!
   discoveryQueueObj: DiscoveryQueue!
 
@@ -173,19 +217,32 @@ type UserStats{
   conversationTotalNumberTenMessages: Int!
   conversationTotalNumberHundredMessages: Int!
 }
+`;
 
+const mutationResponse = `
 type UserMutationResponse{
   success: Boolean!
   message: String
   user: User
 }
+`;
 
+const genderEnum = `
 enum Gender{
   male
   female
   nonbinary
 }
 `;
+export const typeDef = queryRoutes
++ mutationRoutes
++ getUserInputs
++ createUserInputs
++ updateUserInputs
++ updateUserPhotosInput
++ userType
++ mutationResponse
++ genderEnum;
 
 const UserStatsSchema = new Schema({
   totalNumberOfMatchRequests: { type: Number, required: true, default: 0 },
