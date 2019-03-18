@@ -49,7 +49,14 @@ export const start = async () => {
       debug('Mongo connected');
       prodConsole('Mongo connected');
 
-      setInterval(updateAllDiscovery, 1000 * 60);
+      setInterval(() => {
+        try {
+          debug('updating all discoveries');
+          updateAllDiscovery(60);
+        } catch (e) {
+          debug(`an error occurred in updating discoveries: ${e}`);
+        }
+      }, 1000 * 60);
     });
   } catch (e) {
     debug(e);

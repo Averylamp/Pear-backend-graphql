@@ -54,6 +54,7 @@ import {
   typeDef as MatchingSchemas,
 } from './models/MatchingSchemas';
 import createTestDB from './tests/CreateTestDB';
+import { updateDiscoveryForUserById } from './discovery/DiscoverProfile';
 
 const { ApolloServer } = require('apollo-server-express');
 
@@ -71,7 +72,8 @@ let regenTestDBMode = false;
 if (process.env.DEV === 'true') {
   debug('Dev Mode detected');
   devMode = true;
-  if (process.env.REGENDB === true) {
+  if (process.env.REGENDB === 'true') {
+    debug('Regen DB mode detected');
     regenTestDBMode = true;
   }
 }
@@ -82,10 +84,6 @@ const PORT = 1234;
 let dbName = 'prod';
 if (devMode) {
   dbName = 'dev-test';
-  if (regenTestDBMode) {
-    debug('Regen Test DB Mode Detected');
-    dbName = 'dev-test';
-  }
   debug(`Database: ${dbName}`);
 }
 prodConsole('Running in Prod');
@@ -201,6 +199,21 @@ export const start = async () => {
         sendMessage('+12067789236', 'hello!');
         res.json(req.body);
       });
+
+      // only expose this route if in devMode
+      if (devMode) {
+        app.post('/add-to-discovery', async (req, res) => {
+          try {
+            const { user_id } = req.body;
+            debug(`adding to discovery for user: ${user_id}`);
+            await updateDiscoveryForUserById(user_id);
+            res.send('success');
+          } catch (e) {
+            debug(e.toString());
+            res.send(`an error occurred ${e.toString()}`);
+          }
+        });
+      }
 
       // only expose this route if in regenTestDBMode
       if (devMode && regenTestDBMode) {
