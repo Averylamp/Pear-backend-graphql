@@ -32,6 +32,16 @@ Dev Hot-Reload:
 yarn startdev
 ```
 
+To run tests you must have the CircleCI CLI and Docker Installed
+To install CircleCI
+```
+brew install circleci
+```
+To install Docker it is recommended to go to their website and install Docker Desktop
+https://docs.docker.com/docker-for-mac/install/
+
+
+
 
 To set up linting scripts run from root project folder: 
 ```
