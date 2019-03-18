@@ -111,7 +111,7 @@ export const runTests = async function runTests() {
           process.exit(1);
         });
       if (verbose) createDetachedProfileResults.forEach((result) => { verboseDebug(result); });
-
+      debug('***** Success *****\n');
       // ATTACH DETACHED PROFILES
       debug('TESTING: Attaching Detached Profiles');
       const attachProfilePromises = [];
