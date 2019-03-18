@@ -87,7 +87,13 @@ debug(`Database: ${dbName}`);
 prodConsole('Running in Prod');
 prodConsole(`Database: ${dbName}`);
 
-export const MONGO_URL = `mongodb+srv://avery:0bz8M0eMEtyXlj2aZodIPpJpy@cluster0-w4ecv.mongodb.net/${dbName}?retryWrites=true`;
+let mongoUrl = `mongodb+srv://avery:0bz8M0eMEtyXlj2aZodIPpJpy@cluster0-w4ecv.mongodb.net/${dbName}?retryWrites=true`;
+if (process.env.CIRCLECI === 'true') {
+  // mongoUrl = `mongodb://${process.env.MONGO_INITDB_ROOT_USERNAME}:${process.env.MONGO_INITDB_ROOT_PASSWORD}.localhost:27017/${dbName}`;
+  mongoUrl = `mongodb://localhost:27017/${dbName}`;
+}
+
+export const MONGO_URL = mongoUrl;
 const mongoose = require('mongoose');
 
 debug(MONGO_URL);

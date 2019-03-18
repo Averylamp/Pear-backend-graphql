@@ -24,7 +24,6 @@ if (devMode && regenTestDBMode) {
   setTimeout(async () => {
     debug('Running Tests');
     await runTests();
-    debug('Tests Completed');
   }, 5000);
 }
 
