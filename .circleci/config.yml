@@ -39,6 +39,6 @@ jobs:
       - run: yarn build
 
       - run:
-        name: Run Tests
-        command: yarn test
-        no_output_timeout: 2m
+          name: Run Tests
+          command: yarn test
+          no_output_timeout: 2m
