@@ -79,15 +79,11 @@ if (process.env.DEV === 'true') {
 
 const URL = 'http://localhost';
 const PORT = 1234;
-let dbName = 'prod';
-if (devMode) {
-  dbName = 'dev-test';
-  if (regenTestDBMode) {
-    debug('Regen Test DB Mode Detected');
-    dbName = 'dev-test';
-  }
-  debug(`Database: ${dbName}`);
+let dbName = 'dev';
+if (process.env.DBNAME !== null) {
+  dbName = process.env.DBNAME;
 }
+debug(`Database: ${dbName}`);
 prodConsole('Running in Prod');
 prodConsole(`Database: ${dbName}`);
 
