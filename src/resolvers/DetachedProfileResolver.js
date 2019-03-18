@@ -156,7 +156,7 @@ export const resolvers = {
         .catch(err => err);
 
       let userObjectUpdate = {
-        isDiscovering: true,
+        isSeeking: true,
         $push: {
           profile_ids: profileId,
           bankImages: {
@@ -167,7 +167,7 @@ export const resolvers = {
 
       if (user.displayedImages.length < 6) {
         userObjectUpdate = {
-          isDiscovering: true,
+          isSeeking: true,
           $push: {
             profile_ids: profileId,
             bankImages: {
