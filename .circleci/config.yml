@@ -38,4 +38,7 @@ jobs:
           key: v1-dependencies-{{ checksum "package.json" }}
       - run: yarn build
 
-      - run: yarn test
+      - run:
+        name: Run Tests
+        command: yarn test
+          timeout: 120
