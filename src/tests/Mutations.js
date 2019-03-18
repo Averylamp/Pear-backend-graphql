@@ -69,7 +69,7 @@ export const ATTACH_DETACHED_PROFILE = gql`
 
 export const UPDATE_DISPLAYED_PHOTOS = gql`
   mutation UpdatePhotos($updateUserPhotosInput: UpdateUserPhotosInput) {
-    updatePhotos(updateUserPhotosInput: $updateUserPhotosInput) {
+    updateUserPhotos(updateUserPhotosInput: $updateUserPhotosInput) {
       success
       message
       user {

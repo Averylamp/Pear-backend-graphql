@@ -3,8 +3,7 @@ const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
 
-export const typeDef = `
-
+const createImageInput = `
 input CreateImageContainer {
   imageID: String!
   original: CreateImage!
@@ -21,14 +20,19 @@ input CreateImage{
   height: Int!
   imageType: ImageType!
 }
+`;
 
+const imageContainerType = `
 type ImageContainer{
+  # The generated ID of the image
   imageID: String!
   original: Image!
   large:    Image!
   medium:   Image!
   small:    Image!
   thumbnail:    Image!
+
+  # The user ID of the user that originally uploaded the image
   uploadedByUser_id: ID!
   uploadedByUser: User
 }
@@ -39,7 +43,9 @@ type Image{
   height: Int!
   imageType: ImageType!
 }
+`;
 
+const imageTypeEnum = `
 enum ImageType{
   original
   large
@@ -47,9 +53,11 @@ enum ImageType{
   small
   thumbnail
 }
-
-
 `;
+
+export const typeDef = imageContainerType
++ imageTypeEnum
++ createImageInput;
 
 export const ImageSchema = new Schema({
   imageURL: { type: String, required: true },
@@ -68,4 +76,4 @@ export const ImageContainerSchema = new Schema({
   uploadedByUser_id: {
     type: Schema.Types.ObjectId, required: true, index: true, unique: false,
   },
-});
+}, { timestamps: true });
