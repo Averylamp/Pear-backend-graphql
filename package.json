@@ -6,10 +6,10 @@
   "scripts": {
     "startdev": "DEBUG=dev:* DEV=true DBNAME=dev nodemon --exec babel-node src/index.js",
     "regendb": "DEBUG=dev:tests:* DEV=true REGENDB=true DBNAME=dev-test  babel-node src/index.js",
+    "test": "DEBUG=dev:* DEV=true REGENDB=true DBNAME=dev-test  babel-node src/index.js",
     "startdevperf": "DEBUG=dev:* DEV=true PERF=1 DBNAME=dev  nodemon --exec babel-node src/index.js",
     "start": "DEBUG=prod* DEV=false DBNAME=prod node dist/index.js",
-    "build": "babel -d dist/ src/",
-    "test": "DEBUG=dev:* DEV=true REGENDB=true DBNAME=dev-test  babel-node src/index.js"
+    "build": "babel -d dist/ src/"
   },
   "author": "Avery Lamp <averylamp@gmail.com>",
   "license": "ISC",
