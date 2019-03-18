@@ -53,8 +53,8 @@ const getMatchingSummaryFromDetachedProfile = async detachedProfile => ({
 });
 
 // gets a summary object from a user object
-// returns null if user.isDiscovering is false
-const getMatchingSummaryFromUser = async (user, generateBlacklist = false) => (user.isDiscovering
+// returns null if user.isSeeking is false
+const getMatchingSummaryFromUser = async (user, generateBlacklist = false) => (user.isSeeking
   ? {
     constraints: user.matchingPreferences,
     demographics: getDemographicsFromUserOrDetachedProfile(user),
@@ -66,7 +66,7 @@ const getMatchingSummaryFromUser = async (user, generateBlacklist = false) => (u
   : null);
 
 // gets a summary object from a user profile ID
-// returns null if the underlying user either has isDiscovering set to false,
+// returns null if the underlying user either has isSeeking set to false,
 // or if we can't find the underlying user object
 const getMatchingSummaryFromProfileId = async profile_id => (UserProfile
   .findById(profile_id)
