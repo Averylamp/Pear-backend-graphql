@@ -41,4 +41,4 @@ jobs:
       - run:
         name: Run Tests
         command: yarn test
-            timeout: 120
+        no_output_timeout: 2m
