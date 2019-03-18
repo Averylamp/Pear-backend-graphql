@@ -3,10 +3,9 @@ const fs = require('fs');
 const path = require('path');
 const request = require('request');
 
-export const uploadImagesFromFolder = async function uploadImagesFromFolder(folder) {
-  debug(folder);
+export const uploadImagesFromFolder = async function
+uploadImagesFromFolder(folder, uploadedByUser_id) {
   const filePath = path.join(__dirname, `testImages/${folder}`);
-  debug(filePath);
   const imageMetadataPromises = [];
 
   return new Promise((fsResolve, fsReject) => {
@@ -14,8 +13,9 @@ export const uploadImagesFromFolder = async function uploadImagesFromFolder(fold
       if (err) {
         fsReject(Error('Image folder not found'));
       }
+      // items = [items[0]];
       items.forEach((item) => {
-        debug(`Found image: ${item}`);
+        debug(`Uploading image for ${folder}: ${item}`);
         const itemPath = path.join(__dirname, `testImages/${folder}/${item}`);
         const base64Image = fs.readFileSync(itemPath, { encoding: 'base64' });
         const newPromise = new Promise((resolve) => {
@@ -42,7 +42,9 @@ export const uploadImagesFromFolder = async function uploadImagesFromFolder(fold
             debug(`Failed to upload image: ${imageResult}`);
             fsReject(Error('At least one image failed to upload'));
           } else {
-            imageMetadata.push(imageResult);
+            const finalImageResult = imageResult;
+            finalImageResult.uploadedByUser_id = uploadedByUser_id;
+            imageMetadata.push(finalImageResult);
           }
         });
         return imageResults;

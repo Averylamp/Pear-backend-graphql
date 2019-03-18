@@ -53,7 +53,6 @@ import {
 import {
   typeDef as MatchingSchemas,
 } from './models/MatchingSchemas';
-import createTestDB from './tests/CreateTestDB';
 
 const { ApolloServer } = require('apollo-server-express');
 
@@ -71,7 +70,8 @@ let regenTestDBMode = false;
 if (process.env.DEV === 'true') {
   debug('Dev Mode detected');
   devMode = true;
-  if (process.env.REGENDB === true) {
+  if (process.env.REGENDB === 'true') {
+    debug('RegenDB Mode detected');
     regenTestDBMode = true;
   }
 }
@@ -87,13 +87,70 @@ debug(`Database: ${dbName}`);
 prodConsole('Running in Prod');
 prodConsole(`Database: ${dbName}`);
 
-const MONGO_URL = `mongodb+srv://avery:0bz8M0eMEtyXlj2aZodIPpJpy@cluster0-w4ecv.mongodb.net/${dbName}?retryWrites=true`;
+export const MONGO_URL = `mongodb+srv://avery:0bz8M0eMEtyXlj2aZodIPpJpy@cluster0-w4ecv.mongodb.net/${dbName}?retryWrites=true`;
 const mongoose = require('mongoose');
 
 debug(MONGO_URL);
 
 const name = 'Pear';
 debug('Booting %s', name);
+
+function createApolloServer() {
+  const Query = `
+  type Query {
+    noOp: String
+  }
+
+  type Mutation {
+    noOp: String
+  }
+
+  scalar Date
+
+  `;
+  const finalTypeDefs = [
+    Query,
+    User,
+    UserProfile,
+    DetachedProfile,
+    Match, UserMatches,
+    MatchRequest,
+    DiscoveryQueue,
+    TestObject,
+    ImageContainer,
+    MatchingSchemas];
+
+  const resolvers = {
+    Query: {},
+  };
+
+  const finalResolvers = merge(resolvers,
+    UserResolvers,
+    DetachedProfileResolvers,
+    MatchResolvers,
+    UserMatchesResolvers,
+    MatchRequestResolvers,
+    DiscoveryQueueResolvers,
+    TestObjectResolvers,
+    ImageResolvers,
+    UserProfileResolvers);
+
+
+  const server = new ApolloServer({
+    typeDefs: finalTypeDefs,
+    resolvers: finalResolvers,
+    // engine must be null if creating test DB
+    engine: (devMode && regenTestDBMode) ? null : {
+      apiKey: 'service:pear-matchmaking-8936:V43kf4Urhi-63wQycK_yoA',
+    },
+    tracing,
+    playground: devMode,
+    introspection: devMode,
+  });
+  return server;
+}
+
+export const apolloServer = createApolloServer();
 
 export const start = async () => {
   try {
@@ -107,86 +164,12 @@ export const start = async () => {
       debug('Mongo connected');
       prodConsole('Mongo connected');
 
-      const UsersDB = db.collection('users');
-      const UserProfilesDB = db.collection('userprofiles');
-      const DetachedProfilesDB = db.collection('detachedprofiles');
-      const UserMatchesDB = db.collection('usermatches');
-      const MatchRequestsDB = db.collection('matchrequests');
-      const MatchesDB = db.collection('matches');
-      const DiscoveriesDB = db.collection('discoveries');
-      const DiscoveryQueuesDB = db.collection('discoveryqueues');
-      const TestObjectsDB = db.collection('testobjects');
 
-      const dataSourcesObject = {
-        usersDB: UsersDB,
-        userProfilesDB: UserProfilesDB,
-        detachedUserProfilesDB: DetachedProfilesDB,
-        userMatchesDB: UserMatchesDB,
-        matchRequestsDB: MatchRequestsDB,
-        matchesDB: MatchesDB,
-        discoveriesDB: DiscoveriesDB,
-        discoveryQueuesDB: DiscoveryQueuesDB,
-        testObjectsDB: TestObjectsDB,
-      };
-
-      const Query = `
-      type Query {
-        noOp: String
-      }
-
-      type Mutation {
-        noOp: String
-      }
-
-      scalar Date
-
-
-      `;
-      const finalTypeDefs = [
-        Query,
-        User,
-        UserProfile,
-        DetachedProfile,
-        Match, UserMatches,
-        MatchRequest,
-        DiscoveryQueue,
-        TestObject,
-        ImageContainer,
-        MatchingSchemas];
-
-      const resolvers = {
-        Query: {},
-      };
-
-      const finalResolvers = merge(resolvers,
-        UserResolvers,
-        DetachedProfileResolvers,
-        MatchResolvers,
-        UserMatchesResolvers,
-        MatchRequestResolvers,
-        DiscoveryQueueResolvers,
-        TestObjectResolvers,
-        ImageResolvers,
-        UserProfileResolvers);
-
-
-      const server = new ApolloServer({
-        typeDefs: finalTypeDefs,
-        resolvers: finalResolvers,
-        // engine must be null if creating test DB
-        engine: (devMode && regenTestDBMode) ? null : {
-          apiKey: 'service:pear-matchmaking-8936:V43kf4Urhi-63wQycK_yoA',
-        },
-        dataSources: () => dataSourcesObject,
-        tracing,
-        playground: devMode,
-        introspection: devMode,
-      });
       const app = express();
       app.use(bodyParser.json());
       app.use(bodyParser.urlencoded({ extended: true }));
       // app.use(cors())
-
+      const server = apolloServer;
 
       server.applyMiddleware({ app });
       app.post('/echo', (req, res) => {
@@ -198,30 +181,6 @@ export const start = async () => {
         res.json(req.body);
       });
 
-      // only expose this route if in regenTestDBMode
-      if (devMode && regenTestDBMode) {
-        app.get('/test-client', async (req, res) => {
-          try {
-            debug('first, clearing all previous dev-test collections...');
-            const collectionDropPromises = [];
-            const collectionInfos = await db.db.listCollections()
-              .toArray();
-            collectionInfos.forEach((collectionInfo) => {
-              debug(`dropping collection ${collectionInfo.name}`);
-              collectionDropPromises.push(db.dropCollection(collectionInfo.name)
-                .then(() => {
-                  debug(`dropped collection ${collectionInfo.name}`);
-                }));
-            });
-            await Promise.all(collectionDropPromises);
-            await createTestDB(server);
-            res.send('success');
-          } catch (e) {
-            debug(e);
-            res.send(`an error occurred ${e.toString()}`);
-          }
-        });
-      }
 
       app.listen({
         port: PORT,
