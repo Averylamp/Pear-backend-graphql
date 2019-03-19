@@ -33,23 +33,5 @@ jobs:
 
       - run:
           name: RegenDB Test
-          command: yarn circlecitest
-          no_output_timeout: 30s
-
-  test:
-    docker:
-      - image: circleci/node:11.10.1
-        environment:
-          DB_NAME: "test-database"
-          DB_HOST: "localhost"
-      - image: circleci/mongo:4.0.6
-        # environment:
-        #   MONGO_INITDB_ROOT_USERNAME: testuser
-        #   MONGO_INITDB_ROOT_PASSWORD: password
-    working_directory: ~/repo
-
-    steps:
-      - run:
-          name: Run Tests
-          command: yarn circlecitest
+          command: yarn localregendb
           no_output_timeout: 30s

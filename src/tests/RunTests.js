@@ -19,14 +19,12 @@ import {
 } from '../start';
 
 const debug = require('debug')('dev:tests:RunTests');
+const testLog = require('debug')('dev:tests:Test');
 const verboseDebug = require('debug')('dev:tests:verbose:RunTests');
 const errorLog = require('debug')('dev:error:RunTests');
 const mongoose = require('mongoose');
 
-let verbose = false;
-if (process.env.VERBOSE === 'true') {
-  verbose = true;
-}
+const verbose = process.env.VERBOSE ? process.env.VERBOSE : false;
 
 export const runTests = async function runTests() {
   try {
@@ -36,10 +34,14 @@ export const runTests = async function runTests() {
     mongoose.set('useCreateIndex', true);
     mongoose.set('useFindAndModify', false);
     const { connection } = mongoose;
-    connection.on('error', debug.bind(console, 'MongoDB connection error:'));
+    connection.on('error', async () => {
+      debug.bind(console, 'MongoDB connection error:');
+      errorLog('Failed to connect to mongo');
+      process.exit(1);
+    });
     connection.once('open', async () => {
       debug('Opened Test Mongo Connection');
-      debug('Clearing all previous dev-test collections...');
+      testLog('Clearing all previous dev-test collections...');
       const collectionDropPromises = [];
       const collectionInfos = await connection.db.listCollections()
         .toArray();
@@ -59,7 +61,7 @@ export const runTests = async function runTests() {
       const { mutate } = createTestClient(apolloServer);
 
       // CREATE USERS
-      debug('TESTING: Create Users');
+      testLog('TESTING: Create Users');
       const createUserPromises = [];
       for (const userVars of createUsers) {
         createUserPromises.push(mutate({
@@ -74,10 +76,10 @@ export const runTests = async function runTests() {
         });
 
       if (verbose) createUserResults.forEach((result) => { verboseDebug(result); });
-      debug('***** Success *****\n');
+      testLog('***** Success Creating Users *****\n');
 
       // UPLOAD DETACHED PROFILE IMAGES
-      debug('TESTING: Uploading Images');
+      testLog('TESTING: Uploading Images');
       const uploadDetachedProfileImages = [];
       for (const detachedProfileVars of createDetachedProfiles) {
         const detachedProfileFirstName = detachedProfileVars
@@ -95,10 +97,10 @@ export const runTests = async function runTests() {
           process.exit(1);
         });
       if (verbose) uploadImagesResults.forEach((result) => { verboseDebug(result); });
-      debug('***** Success *****\n');
+      testLog('***** Success Uploading Images *****\n');
 
       // CREATE DETACHED PROFILES
-      debug('TESTING: Creating Detached Profiles');
+      testLog('TESTING: Creating Detached Profiles');
       const createDetachedProfilePromises = [];
       for (let i = 0; i < createDetachedProfiles.length; i += 1) {
         const detachedProfileVars = createDetachedProfiles[i];
@@ -114,10 +116,10 @@ export const runTests = async function runTests() {
           process.exit(1);
         });
       if (verbose) createDetachedProfileResults.forEach((result) => { verboseDebug(result); });
-      debug('***** Success *****\n');
+      testLog('***** Success Creating Detached Profiles *****\n');
 
       // ATTACH DETACHED PROFILES
-      debug('TESTING: Attaching Detached Profiles');
+      testLog('TESTING: Attaching Detached Profiles');
       const attachProfilePromises = [];
       for (const attachProfileVars of attachProfiles) {
         attachProfilePromises.push(mutate({
@@ -131,7 +133,7 @@ export const runTests = async function runTests() {
           process.exit(1);
         });
       if (verbose) attachProfileResults.forEach((result) => { verboseDebug(result); });
-      debug('***** Success *****\n');
+      testLog('***** Success Attaching Detached Profiles *****\n');
 
       // UPDATE PHOTO ENDPOINT TESTING
       // const updatePhotoPromises = [];
