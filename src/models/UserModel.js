@@ -172,6 +172,7 @@ type User {
   school: String
   schoolEmail: String
   schoolEmailVerified: Boolean
+  isSeeking: Boolean!
 
   # The ordered images that currently make up the User's Profile
   displayedImages: [ImageContainer!]!
@@ -292,6 +293,7 @@ const UserSchema = new Schema({
   school: { type: String, required: false },
   schoolEmail: { type: String, required: false },
   schoolEmailVerified: { type: Boolean, required: false, default: false },
+  isSeeking: { type: Boolean, required: true, default: false },
 
   pearPoints: { type: Number, required: true, default: 0 },
 

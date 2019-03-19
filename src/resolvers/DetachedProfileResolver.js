@@ -2,6 +2,9 @@ import { pick } from 'lodash';
 import { DetachedProfile, createDetachedProfileObject } from '../models/DetachedProfile';
 import { User } from '../models/UserModel';
 import { createUserProfileObject, UserProfile } from '../models/UserProfileModel';
+import { updateDiscoveryWithNextItem } from '../discovery/DiscoverProfile';
+import { INITIALIZED_FEED_LENGTH } from '../constants';
+import { DiscoveryQueue } from '../models/DiscoveryQueueModel';
 
 const mongoose = require('mongoose');
 const debug = require('debug')('dev:DetachedProfileResolvers');
@@ -28,6 +31,13 @@ export const resolvers = {
       finalDetachedProfileInput._id = detachedProfileID;
 
       const { creatorUser_id } = detachedProfileInput;
+      const creator = await User.findById(creatorUser_id);
+      if (!creator) {
+        return {
+          success: false,
+          message: `Could not find creator with id ${creatorUser_id}`,
+        };
+      }
 
       const updateCreatorUserObject = User.findByIdAndUpdate(creatorUser_id, {
         $push: {
@@ -39,7 +49,7 @@ export const resolvers = {
         .catch(err => err);
 
       return Promise.all([updateCreatorUserObject, createDetachedProfileObj])
-        .then(([newUser, detachedProfileObject]) => {
+        .then(async ([newUser, detachedProfileObject]) => {
           if (newUser == null || detachedProfileObject instanceof Error) {
             let message = '';
             if (newUser == null) {
@@ -76,6 +86,17 @@ export const resolvers = {
             };
           }
           debug('Completed successfully');
+          // populate creator's feed if feed is empty (i.e. this is the first profile they've made)
+          try {
+            const feed = await DiscoveryQueue.findById(creator.discoveryQueue_id);
+            if (feed.currentDiscoveryItems.length === 0) {
+              for (let i = 0; i < INITIALIZED_FEED_LENGTH; i += 1) {
+                await updateDiscoveryWithNextItem(creator);
+              }
+            }
+          } catch (e) {
+            debug(`error occurred when trying to populate discovery feed: ${e}`);
+          }
           return {
             success: true,
             detachedProfile: detachedProfileObject,
@@ -156,6 +177,7 @@ export const resolvers = {
         .catch(err => err);
 
       let userObjectUpdate = {
+        isSeeking: true,
         $push: {
           profile_ids: profileId,
           bankImages: {
@@ -166,6 +188,7 @@ export const resolvers = {
 
       if (user.displayedImages.length < 6) {
         userObjectUpdate = {
+          isSeeking: true,
           $push: {
             profile_ids: profileId,
             bankImages: {
@@ -202,7 +225,7 @@ export const resolvers = {
       return Promise.all([
         createUserProfileObjectePromise, updateUserObjectPromise,
         updateCreatorObjectPromise, deleteDetachedProfilePromise])
-        .then(([
+        .then(async ([
           createUserProfileObjectResult, updateUserObjectResult,
           updateCreatorObjectResult, deleteDetachedProfileResult]) => {
           // if at least one of the above four operations failed, roll back the others
@@ -291,6 +314,17 @@ export const resolvers = {
               success: false,
               message,
             };
+          }
+          // all operations succeeded; populate discovery feeds if this the endorsee's first profile
+          try {
+            const feed = await DiscoveryQueue.findById(user.discoveryQueue_id);
+            if (feed.currentDiscoveryItems.length === 0) {
+              for (let i = 0; i < INITIALIZED_FEED_LENGTH; i += 1) {
+                await updateDiscoveryWithNextItem(user);
+              }
+            }
+          } catch (e) {
+            debug(`error occurred when trying to populate discovery feed: ${e}`);
           }
           return {
             success: true,
