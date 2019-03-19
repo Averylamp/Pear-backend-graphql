@@ -54,7 +54,6 @@ export const UserProfile = mongoose.model('UserProfile', UserProfileSchema);
 
 export const createUserProfileObject = function createUserProfileObject(userProfileInput) {
   const userProfileModel = new UserProfile(userProfileInput);
-  debug(userProfileModel);
   return new Promise((resolve, reject) => {
     userProfileModel.save((err) => {
       if (err) {
