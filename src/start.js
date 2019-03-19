@@ -87,7 +87,7 @@ debug(`Database: ${dbName}`);
 prodConsole('Running in Prod');
 prodConsole(`Database: ${dbName}`);
 
-export const MONGO_URL = `${mongoPrefix}${dbUser}:${dbPass}@${dbHost}/${dbName}?retryWrites=true`;
+export const MONGO_URL = `${mongoPrefix}${dbUser}${dbPass}${dbHost}/${dbName}?retryWrites=true`;
 const mongoose = require('mongoose');
 
 debug(MONGO_URL);
