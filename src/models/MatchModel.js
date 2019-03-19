@@ -2,6 +2,38 @@ const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
 
+const mutationRoutes = `
+extend type Mutation {
+  matchmakerCreateRequest(requestInput: MatchmakerCreateRequestInput!): MatchMutationResponse!
+  personalCreateRequest(requestInput: PersonalCreateRequestInput!): MatchMutationResponse!
+  viewRequest(user_id: ID!, match_id: ID!): MatchMutationResponse!
+  acceptRequest(user_id: ID!, match_id: ID!): MatchMutationResponse!
+  rejectRequest(user_id: ID!, match_id: ID!): MatchMutationResponse!
+  unmatch(user_id: ID!, match_id: ID!): MatchMutationResponse!
+}
+`;
+
+const createRequestMutationInputs = `
+input MatchmakerCreateRequestInput {
+  matchmakerUser_id: ID!
+  sentForUser_id: ID!
+  receivedByUser_id: ID!
+}
+
+input PersonalCreateRequestInput {
+  sentForUser_id: ID!
+  receivedByUser_id: ID!
+}
+`;
+
+const mutationResponse = `
+type MatchMutationResponse {
+  success: Boolean!
+  message: String
+  match: Match
+}
+`;
+
 const requestResponseEnum = `
 enum RequestResponse {
   unseen
@@ -36,7 +68,10 @@ type Match{
 }
 `;
 
-export const typeDef = requestResponseEnum
+export const typeDef = mutationRoutes
+  + createRequestMutationInputs
+  + mutationResponse
+  + requestResponseEnum
   + matchType;
 
 const MatchSchema = new Schema({
