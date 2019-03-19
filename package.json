@@ -8,7 +8,7 @@
     "regendb": "node -r dotenv/config -r babel-register src/index.js dotenv_config_path=.env.regendb",
     "test": "babel-node -r dotenv/config src/index.js dotenv_config_path=.env.test",
     "localtest": "circleci local execute --job test",
-    "circlecitest": "node -r dotenv/config -r babel-register src/index.js dotenv_config_path=.env.test",
+    "circlecitest": "node -r dotenv/config src/index.js dotenv_config_path=.env.test",
     "start": "node -r dotenv/config dist/index.js dotenv_config_path=.env.prod",
     "build": "babel -d dist/ src/"
   },

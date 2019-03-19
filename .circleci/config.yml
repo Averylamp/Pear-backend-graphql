@@ -34,7 +34,7 @@ jobs:
 
       - run:
           name: RegenDB Test
-          command: yarn test
+          command: yarn circlecitest
           no_output_timeout: 30s
 
   test:
