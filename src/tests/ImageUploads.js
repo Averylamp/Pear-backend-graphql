@@ -4,6 +4,11 @@ const fs = require('fs');
 const path = require('path');
 const request = require('request');
 
+const imageUploadHost = 'localhost:1337';
+const testImageLoad = process.env.TEST_IMAGE_LOAD === 'true';
+// const imageUploadHost = "koala.mit.edu:1337"
+
+
 export const uploadImagesFromFolder = async (folder, uploadedByUser_id) => {
   const filePath = path.join(__dirname, `testImages/${folder}`);
   const imageMetadataPromises = [];
@@ -14,13 +19,13 @@ export const uploadImagesFromFolder = async (folder, uploadedByUser_id) => {
         errorLog(err);
         fsReject(Error('Image folder not found'));
       }
-      // items = [items[0]];
-      items.forEach((item) => {
+      const finalItems = testImageLoad ? items.concat(items, items, items, items) : items;
+      finalItems.forEach((item) => {
         debug(`Uploading image for ${folder}: ${item}`);
         const itemPath = path.join(__dirname, `testImages/${folder}/${item}`);
         const base64Image = fs.readFileSync(itemPath, { encoding: 'base64' });
         const newPromise = new Promise((resolve, reject) => {
-          request.post('http://koala.mit.edu:1337/upload_image', {
+          request.post(`http://${imageUploadHost}/upload_image`, {
             json: {
               image: base64Image,
             },
