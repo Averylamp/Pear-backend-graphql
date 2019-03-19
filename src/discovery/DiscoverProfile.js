@@ -3,6 +3,7 @@ import { User } from '../models/UserModel';
 import { UserProfile } from '../models/UserProfileModel';
 import { DetachedProfile } from '../models/DetachedProfile';
 import { DiscoveryItem, DiscoveryQueue } from '../models/DiscoveryQueueModel';
+import { EXPECTED_TICKS_PER_NEW_PROFILE, MAX_FEED_LENGTH } from '../constants';
 
 const debug = require('debug')('dev:DiscoverProfile');
 
@@ -172,6 +173,7 @@ export const nextDiscoveryItem = async (user) => {
 // finds a suitable user for the passed-in user object's feed, and pushes to the user's feed object
 // throws if can't find the user, if the user is deactivated, if couldn't find suitable discovery
 // item, or if the update failed
+// TODO: Send a push notification to user through firebase
 export const updateDiscoveryWithNextItem = async (user) => {
   debug(`getting next discovery item and updating user feed: ${user._id}`);
   if (!user || user.deactivated) {
@@ -185,13 +187,13 @@ export const updateDiscoveryWithNextItem = async (user) => {
   return DiscoveryQueue
     .findOneAndUpdate({ user_id: user._id }, {
       $push: {
-        currentDiscoveryItems: new DiscoveryItem({ user_id: nextUser._id }),
+        currentDiscoveryItems: {
+          $each: [new DiscoveryItem({ user_id: nextUser._id })],
+          $slice: -1 * MAX_FEED_LENGTH,
+        },
       },
     })
-    .exec()
-    .catch((err) => {
-      throw err;
-    });
+    .exec();
 };
 
 // finds a suitable user for the feed of the user corresponding to the passed-in user_id
@@ -207,14 +209,16 @@ export const updateDiscoveryForUserById = async (user_id) => {
 // updates the discovery feeds of each user with some probability
 // if an update for any particular user fails, logs the error and continues to the next user
 // should only throw an error if the query to the Users collection fails
-export const updateAllDiscovery = async (expectedTicksPerUpdate = 60) => {
+export const updateAllDiscovery = async () => {
   const users = await User.find({});
   for (const user of users) {
-    if (Math.random() < (1 / expectedTicksPerUpdate)) {
-      updateDiscoveryWithNextItem(user)
-        .catch((err) => {
-          debug(`An error occurred: ${err.toString()}`);
-        });
+    if (user.isSeeking || user.endorsedProfile_ids.length + user.detachedProfile_ids.length > 0) {
+      if (Math.random() < (1 / EXPECTED_TICKS_PER_NEW_PROFILE)) {
+        updateDiscoveryWithNextItem(user)
+          .catch((err) => {
+            debug(`An error occurred: ${err.toString()}`);
+          });
+      }
     }
   }
 };
