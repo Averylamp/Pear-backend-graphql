@@ -19,11 +19,12 @@ export const uploadImagesFromFolder = async (folder, uploadedByUser_id) => {
         errorLog(err);
         fsReject(Error('Image folder not found'));
       }
-      const finalItems = items;
+      let finalItems = items;
       if (process.env.TEST_IMAGE_LOAD && Number(process.env.TEST_IMAGE_LOAD)) {
         const numCopies = Number(process.env.TEST_IMAGE_LOAD);
-        for (let i = 0; i < numCopies; i += 1) {
-          finalItems.concat(items);
+        debug(`Found Image Testing Config of ${numCopies}`);
+        for (let i = 0; i < numCopies - 1; i += 1) {
+          finalItems = finalItems.concat(items);
         }
       }
       finalItems.forEach((item) => {
