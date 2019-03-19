@@ -23,10 +23,12 @@ export const resolvers = {
   },
   DiscoveryQueue: {
     user: async ({ user_id }) => User.findById(user_id),
-    currentDiscoveryItems: async () => {
-      const users = await User.find({ $where: 'this.profile_ids.length > 0' });
+    /* currentDiscoveryItems: async () => {
+      const users = await User.find({
+        $where: 'this.profile_ids.length > 0',
+      });
       return users.map(({ _id }) => new DiscoveryItem({ user_id: _id }));
-    },
+    }, */
   },
   DiscoveryItem: {
     user: async ({ user_id }) => User.findById(user_id),

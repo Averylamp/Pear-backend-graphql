@@ -53,6 +53,9 @@ import {
 import {
   typeDef as MatchingSchemas,
 } from './models/MatchingSchemas';
+import {
+  updateDiscoveryForUserById,
+} from './discovery/DiscoverProfile';
 
 const { ApolloServer } = require('apollo-server-express');
 
@@ -180,6 +183,20 @@ export const start = async () => {
         res.json(req.body);
       });
 
+      // only expose this route if in devMode
+      if (devMode) {
+        app.post('/add-to-discovery', async (req, res) => {
+          try {
+            const { user_id } = req.body;
+            debug(`adding to discovery for user: ${user_id}`);
+            await updateDiscoveryForUserById(user_id);
+            res.send('success');
+          } catch (e) {
+            debug(e.toString());
+            res.send(`an error occurred ${e.toString()}`);
+          }
+        });
+      }
 
       app.listen({
         port: PORT,
