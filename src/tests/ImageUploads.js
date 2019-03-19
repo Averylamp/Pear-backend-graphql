@@ -22,7 +22,6 @@ export const uploadImagesFromFolder = async (folder, uploadedByUser_id) => {
       let finalItems = items;
       if (process.env.TEST_IMAGE_LOAD && Number(process.env.TEST_IMAGE_LOAD)) {
         const numCopies = Number(process.env.TEST_IMAGE_LOAD);
-        debug(`Found Image Testing Config of ${numCopies}`);
         for (let i = 0; i < numCopies - 1; i += 1) {
           finalItems = finalItems.concat(items);
         }
@@ -55,6 +54,7 @@ export const uploadImagesFromFolder = async (folder, uploadedByUser_id) => {
           finalImageResult.uploadedByUser_id = uploadedByUser_id;
           imageMetadata.push(finalImageResult);
         });
+
         fsResolve(imageResults);
       }).catch((allImagesError) => {
         errorLog(allImagesError);
