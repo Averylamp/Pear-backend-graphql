@@ -6,11 +6,10 @@
   "scripts": {
     "startdev": "nodemon --exec node -r dotenv/config -r babel-register src/index.js dotenv_config_path=.env.dev",
     "regendb": "node -r dotenv/config -r babel-register src/index.js dotenv_config_path=.env.regendb",
-    "test": "babel-node -r dotenv/config src/index.js dotenv_config_path=.env.test",
-    "localtest": "circleci local execute --job test",
-    "circlecitest": "node -r dotenv/config -r babel-register src/index.js dotenv_config_path=.env.test",
-    "start": "node -r dotenv/config dist/index.js dotenv_config_path=.env.prod",
-    "build": "babel -d dist/ src/"
+    "test": "circleci local execute --job build",
+    "localregendb": "node -r dotenv/config -r babel-register src/index.js dotenv_config_path=.env.test",
+    "build": "babel -d dist/ src/",
+    "start": "node -r dotenv/config dist/index.js dotenv_config_path=.env.prod"
   },
   "author": "Avery Lamp <averylamp@gmail.com>",
   "license": "ISC",
