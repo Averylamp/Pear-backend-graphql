@@ -4,25 +4,17 @@ import { start } from './start';
 import { runTests } from './tests/RunTests';
 
 const debug = require('debug')('dev:Index');
+const testsLog = require('debug')('dev:tests:Index');
 
 debug('Starting...');
-
-let devMode = false;
-let regenTestDBMode = false;
-if (process.env.DEV === 'true') {
-  devMode = true;
-  debug('Dev detected');
-  if (process.env.REGENDB === 'true') {
-    debug('Regendb detected');
-    regenTestDBMode = true;
-  }
-}
-
+testsLog('Starting...');
+const devMode = process.env.DEV === 'true';
+const regenTestDBMode = (process.env.REGEN_DB === 'true' && devMode);
 
 if (devMode && regenTestDBMode) {
-  debug('Prepared to run tests in 5 seconds');
+  testsLog('Prepared to run tests in 5 seconds');
   setTimeout(async () => {
-    debug('Running Tests');
+    testsLog('Running Tests');
     await runTests();
   }, 5000);
 }

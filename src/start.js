@@ -57,48 +57,43 @@ import {
 const { ApolloServer } = require('apollo-server-express');
 
 const debug = require('debug')('dev:Start');
+const errorLog = require('debug')('dev:error:Start');
 const prodConsole = require('debug')('prod:Start');
 
-let tracing = false;
-if (process.env.PERF) {
-  tracing = true;
-  debug('Perf mode detected');
-}
 
-let devMode = false;
-let regenTestDBMode = false;
-if (process.env.DEV === 'true') {
-  debug('Dev Mode detected');
-  devMode = true;
-  if (process.env.REGENDB === 'true') {
-    debug('RegenDB Mode detected');
-    regenTestDBMode = true;
+const devMode = process.env.DEV === 'true';
+const regenTestDBMode = (process.env.REGEN_DB === 'true' && devMode);
+if (devMode) debug('Dev Mode detected');
+if (regenTestDBMode) {
+  debug('RegenDB Mode detected');
+  if (!process.env.DB_NAME) {
+    errorLog('You must set the DB_NAME of the DB you wish to regenerate');
+    errorLog('Try again with:');
+    errorLog('DB_NAME=dev-test yarn regendb');
+    process.exit(1);
   }
 }
-
+const tracing = process.env.PERF ? process.env.PERF : false;
+if (tracing) debug('Perf mode detected');
 
 const URL = 'http://localhost';
 const PORT = 1234;
-let dbName = 'dev';
-if (process.env.DBNAME !== null) {
-  dbName = process.env.DBNAME;
-}
+const dbHost = process.env.DB_HOST ? process.env.DB_HOST : 'localhost';
+const mongoPrefix = dbHost.includes('localhost') ? 'mongodb://' : 'mongodb+srv://';
+const dbName = process.env.DB_NAME ? process.env.DB_NAME : 'dev';
+const dbUser = process.env.DB_USER ? process.env.DB_USER : '';
+const dbPass = process.env.DB_PASS ? process.env.DB_PASS : '';
 debug(`Database: ${dbName}`);
 prodConsole('Running in Prod');
 prodConsole(`Database: ${dbName}`);
 
-let mongoUrl = `mongodb+srv://avery:0bz8M0eMEtyXlj2aZodIPpJpy@cluster0-w4ecv.mongodb.net/${dbName}?retryWrites=true`;
-if (process.env.CIRCLECI === 'true') {
-  // mongoUrl = `mongodb://${process.env.MONGO_INITDB_ROOT_USERNAME}:${process.env.MONGO_INITDB_ROOT_PASSWORD}.localhost:27017/${dbName}`;
-  mongoUrl = `mongodb://localhost:27017/${dbName}`;
-}
-
-export const MONGO_URL = mongoUrl;
+export const MONGO_URL = `${mongoPrefix}${dbUser}:${dbPass}@${dbHost}/${dbName}?retryWrites=true`;
 const mongoose = require('mongoose');
 
 debug(MONGO_URL);
+prodConsole(`Mongo URL: ${MONGO_URL}`);
 
-const name = 'Pear';
+const name = process.env.APP_NAME ? process.env.APP_NAME : 'Pear GraphQL Server';
 debug('Booting %s', name);
 
 function createApolloServer() {
@@ -146,9 +141,7 @@ function createApolloServer() {
     typeDefs: finalTypeDefs,
     resolvers: finalResolvers,
     // engine must be null if creating test DB
-    engine: (devMode && regenTestDBMode) ? null : {
-      apiKey: 'service:pear-matchmaking-8936:V43kf4Urhi-63wQycK_yoA',
-    },
+    engine: (process.env.ENGINE_API_KEY) ? process.env.ENGINE_API_KEY : null,
     tracing,
     playground: devMode,
     introspection: devMode,
