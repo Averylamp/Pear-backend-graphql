@@ -35,6 +35,10 @@ export const uploadImagesFromFolder = async (folder, uploadedByUser_id) => {
             json: {
               image: base64Image,
             },
+            headers: {
+              'x-api-key': '3gIpimRUcE54l1Vmq4DL56eJVGUDiymf92TH9YBJ',
+              'Content-Type': 'application/json',
+            },
           }, (error, res, body) => {
             if (error) {
               errorLog(error);
