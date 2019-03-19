@@ -1,4 +1,5 @@
 import { updateAllDiscovery } from './discovery/DiscoverProfile';
+import { TICK_LENGTH_MILLIS } from './constants';
 
 const debug = require('debug')('dev:DiscoveryGeneration');
 const prodConsole = require('debug')('prod:DiscoveryGeneration');
@@ -52,11 +53,11 @@ export const start = async () => {
       setInterval(() => {
         try {
           debug('updating all discoveries');
-          updateAllDiscovery(60);
+          updateAllDiscovery();
         } catch (e) {
           debug(`an error occurred in updating discoveries: ${e}`);
         }
-      }, 1000 * 60);
+      }, TICK_LENGTH_MILLIS);
     });
   } catch (e) {
     debug(e);
