@@ -85,7 +85,6 @@ export const runTests = async function runTests() {
         const detachedProfileFirstName = detachedProfileVars
           .detachedProfileInput.firstName.toLowerCase();
         const creatorID = detachedProfileVars.creatorUser_id;
-        debug(detachedProfileFirstName);
         uploadDetachedProfileImages.push(
           uploadImagesFromFolder(detachedProfileFirstName, creatorID),
         );
