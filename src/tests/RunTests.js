@@ -31,7 +31,9 @@ export const runTests = async function runTests() {
     mongoose.connect(MONGO_URL, { useNewUrlParser: true });
     debug(`Mongo URL: ${MONGO_URL}`);
     mongoose.Promise = global.Promise;
+    // Fix for Mongoose Errors: https://github.com/Automattic/mongoose/issues/6890
     mongoose.set('useCreateIndex', true);
+    // Fix for Mongoose Errors: https://github.com/Automattic/mongoose/issues/6880
     mongoose.set('useFindAndModify', false);
     const { connection } = mongoose;
     connection.on('error', async () => {
@@ -70,6 +72,15 @@ export const runTests = async function runTests() {
         }));
       }
       const createUserResults = await Promise.all(createUserPromises)
+        .then((results) => {
+          results.forEach((result) => {
+            if (!result.data.createUser.success) {
+              errorLog(`Error Creating User: ${result.data.createUser.message}`);
+              process.exit(1);
+            }
+          });
+          return results;
+        })
         .catch((err) => {
           errorLog(err);
           process.exit(1);
@@ -110,6 +121,15 @@ export const runTests = async function runTests() {
         }));
       }
       const createDetachedProfileResults = await Promise.all(createDetachedProfilePromises)
+        .then((results) => {
+          results.forEach((result) => {
+            if (!result.data.createDetachedProfile.success) {
+              errorLog(`Error Creating Detached Profile: ${result.data.createDetachedProfile.message}`);
+              process.exit(1);
+            }
+          });
+          return results;
+        })
         .catch((err) => {
           errorLog(err);
           process.exit(1);
@@ -127,6 +147,15 @@ export const runTests = async function runTests() {
         }));
       }
       const attachProfileResults = await Promise.all(attachProfilePromises)
+        .then((results) => {
+          results.forEach((result) => {
+            if (!result.data.approveNewDetachedProfile.success) {
+              errorLog(`Error Creating Detached Profile: ${result.data.approveNewDetachedProfile.message}`);
+              process.exit(1);
+            }
+          });
+          return results;
+        })
         .catch((err) => {
           errorLog(err);
           process.exit(1);
