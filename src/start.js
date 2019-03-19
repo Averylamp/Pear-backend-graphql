@@ -53,55 +53,114 @@ import {
 import {
   typeDef as MatchingSchemas,
 } from './models/MatchingSchemas';
-import createTestDB from './tests/CreateTestDB';
-import { updateDiscoveryForUserById } from './discovery/DiscoverProfile';
+import {
+  updateDiscoveryForUserById,
+} from './discovery/DiscoverProfile';
 
 const { ApolloServer } = require('apollo-server-express');
 
 const debug = require('debug')('dev:Start');
+const errorLog = require('debug')('dev:error:Start');
 const prodConsole = require('debug')('prod:Start');
 
-let tracing = false;
-if (process.env.PERF) {
-  tracing = true;
-  debug('Perf mode detected');
-}
 
-let devMode = false;
-let regenTestDBMode = false;
-if (process.env.DEV === 'true') {
-  debug('Dev Mode detected');
-  devMode = true;
-  if (process.env.REGENDB === 'true') {
-    debug('Regen DB mode detected');
-    regenTestDBMode = true;
+const devMode = process.env.DEV === 'true';
+const regenTestDBMode = (process.env.REGEN_DB === 'true' && devMode);
+if (devMode) debug('Dev Mode detected');
+if (regenTestDBMode) {
+  debug('RegenDB Mode detected');
+  if (!process.env.DB_NAME) {
+    errorLog('You must set the DB_NAME of the DB you wish to regenerate');
+    errorLog('Try again with:');
+    errorLog('DB_NAME=dev-test yarn regendb');
+    process.exit(1);
   }
 }
-
+const tracing = process.env.PERF ? process.env.PERF : false;
+if (tracing) debug('Perf mode detected');
 
 const URL = 'http://localhost';
 const PORT = 1234;
-let dbName = 'prod';
-if (devMode) {
-  dbName = 'dev-test';
-  debug(`Database: ${dbName}`);
-}
+const dbHost = process.env.DB_HOST ? process.env.DB_HOST : 'localhost';
+const mongoPrefix = dbHost.includes('localhost') ? 'mongodb://' : 'mongodb+srv://';
+const dbName = process.env.DB_NAME ? process.env.DB_NAME : 'dev';
+const dbUser = process.env.DB_USER ? process.env.DB_USER : '';
+const dbPass = process.env.DB_PASS ? process.env.DB_PASS : '';
+debug(`Database: ${dbName}`);
 prodConsole('Running in Prod');
 prodConsole(`Database: ${dbName}`);
 
-const MONGO_URL = `mongodb+srv://avery:0bz8M0eMEtyXlj2aZodIPpJpy@cluster0-w4ecv.mongodb.net/${dbName}?retryWrites=true`;
+export const MONGO_URL = `${mongoPrefix}${dbUser}${dbPass}${dbHost}/${dbName}?retryWrites=true`;
 const mongoose = require('mongoose');
 
 debug(MONGO_URL);
+prodConsole(`Mongo URL: ${MONGO_URL}`);
 
-const name = 'Pear';
+const name = process.env.APP_NAME ? process.env.APP_NAME : 'Pear GraphQL Server';
 debug('Booting %s', name);
+
+function createApolloServer() {
+  const Query = `
+  type Query {
+    noOp: String
+  }
+
+  type Mutation {
+    noOp: String
+  }
+
+  scalar Date
+
+  `;
+  const finalTypeDefs = [
+    Query,
+    User,
+    UserProfile,
+    DetachedProfile,
+    Match, UserMatches,
+    MatchRequest,
+    DiscoveryQueue,
+    TestObject,
+    ImageContainer,
+    MatchingSchemas];
+
+  const resolvers = {
+    Query: {},
+  };
+
+  const finalResolvers = merge(resolvers,
+    UserResolvers,
+    DetachedProfileResolvers,
+    MatchResolvers,
+    UserMatchesResolvers,
+    MatchRequestResolvers,
+    DiscoveryQueueResolvers,
+    TestObjectResolvers,
+    ImageResolvers,
+    UserProfileResolvers);
+
+
+  const server = new ApolloServer({
+    typeDefs: finalTypeDefs,
+    resolvers: finalResolvers,
+    // engine must be null if creating test DB
+    engine: (process.env.ENGINE_API_KEY) ? process.env.ENGINE_API_KEY : null,
+    tracing,
+    playground: devMode,
+    introspection: devMode,
+  });
+  return server;
+}
+
+export const apolloServer = createApolloServer();
 
 export const start = async () => {
   try {
     mongoose.connect(MONGO_URL, { useNewUrlParser: true });
     mongoose.Promise = global.Promise;
+    // Fix for Mongoose Errors: https://github.com/Automattic/mongoose/issues/6890
     mongoose.set('useCreateIndex', true);
+    // Fix for Mongoose Errors: https://github.com/Automattic/mongoose/issues/6880
     mongoose.set('useFindAndModify', false);
     const db = mongoose.connection;
     db.on('error', debug.bind(console, 'MongoDB connection error:'));
@@ -109,86 +168,12 @@ export const start = async () => {
       debug('Mongo connected');
       prodConsole('Mongo connected');
 
-      const UsersDB = db.collection('users');
-      const UserProfilesDB = db.collection('userprofiles');
-      const DetachedProfilesDB = db.collection('detachedprofiles');
-      const UserMatchesDB = db.collection('usermatches');
-      const MatchRequestsDB = db.collection('matchrequests');
-      const MatchesDB = db.collection('matches');
-      const DiscoveriesDB = db.collection('discoveries');
-      const DiscoveryQueuesDB = db.collection('discoveryqueues');
-      const TestObjectsDB = db.collection('testobjects');
 
-      const dataSourcesObject = {
-        usersDB: UsersDB,
-        userProfilesDB: UserProfilesDB,
-        detachedUserProfilesDB: DetachedProfilesDB,
-        userMatchesDB: UserMatchesDB,
-        matchRequestsDB: MatchRequestsDB,
-        matchesDB: MatchesDB,
-        discoveriesDB: DiscoveriesDB,
-        discoveryQueuesDB: DiscoveryQueuesDB,
-        testObjectsDB: TestObjectsDB,
-      };
-
-      const Query = `
-      type Query {
-        noOp: String
-      }
-
-      type Mutation {
-        noOp: String
-      }
-
-      scalar Date
-
-
-      `;
-      const finalTypeDefs = [
-        Query,
-        User,
-        UserProfile,
-        DetachedProfile,
-        Match, UserMatches,
-        MatchRequest,
-        DiscoveryQueue,
-        TestObject,
-        ImageContainer,
-        MatchingSchemas];
-
-      const resolvers = {
-        Query: {},
-      };
-
-      const finalResolvers = merge(resolvers,
-        UserResolvers,
-        DetachedProfileResolvers,
-        MatchResolvers,
-        UserMatchesResolvers,
-        MatchRequestResolvers,
-        DiscoveryQueueResolvers,
-        TestObjectResolvers,
-        ImageResolvers,
-        UserProfileResolvers);
-
-
-      const server = new ApolloServer({
-        typeDefs: finalTypeDefs,
-        resolvers: finalResolvers,
-        // engine must be null if creating test DB
-        engine: (devMode && regenTestDBMode) ? null : {
-          apiKey: 'service:pear-matchmaking-8936:V43kf4Urhi-63wQycK_yoA',
-        },
-        dataSources: () => dataSourcesObject,
-        tracing,
-        playground: devMode,
-        introspection: devMode,
-      });
       const app = express();
       app.use(bodyParser.json());
       app.use(bodyParser.urlencoded({ extended: true }));
       // app.use(cors())
-
+      const server = apolloServer;
 
       server.applyMiddleware({ app });
       app.post('/echo', (req, res) => {
@@ -210,31 +195,6 @@ export const start = async () => {
             res.send('success');
           } catch (e) {
             debug(e.toString());
-            res.send(`an error occurred ${e.toString()}`);
-          }
-        });
-      }
-
-      // only expose this route if in regenTestDBMode
-      if (devMode && regenTestDBMode) {
-        app.get('/test-client', async (req, res) => {
-          try {
-            debug('first, clearing all previous dev-test collections...');
-            const collectionDropPromises = [];
-            const collectionInfos = await db.db.listCollections()
-              .toArray();
-            collectionInfos.forEach((collectionInfo) => {
-              debug(`dropping collection ${collectionInfo.name}`);
-              collectionDropPromises.push(db.dropCollection(collectionInfo.name)
-                .then(() => {
-                  debug(`dropped collection ${collectionInfo.name}`);
-                }));
-            });
-            await Promise.all(collectionDropPromises);
-            await createTestDB(server);
-            res.send('success');
-          } catch (e) {
-            debug(e);
             res.send(`an error occurred ${e.toString()}`);
           }
         });
