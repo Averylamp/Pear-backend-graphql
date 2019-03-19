@@ -5,7 +5,7 @@ const path = require('path');
 const request = require('request');
 
 const imageUploadURL = 'https://u6qoh0vm77.execute-api.us-east-1.amazonaws.com/default/imageCompressorUploader';
-const testImageLoad = process.env.TEST_IMAGE_LOAD === 'true';
+
 // const imageUploadHost = "koala.mit.edu:1337"
 
 
@@ -19,7 +19,13 @@ export const uploadImagesFromFolder = async (folder, uploadedByUser_id) => {
         errorLog(err);
         fsReject(Error('Image folder not found'));
       }
-      const finalItems = testImageLoad ? items.concat(items, items, items, items) : items;
+      const finalItems = items;
+      if (process.env.TEST_IMAGE_LOAD && Number(process.env.TEST_IMAGE_LOAD)) {
+        const numCopies = Number(process.env.TEST_IMAGE_LOAD);
+        for (let i = 0; i < numCopies; i += 1) {
+          finalItems.concat(items);
+        }
+      }
       finalItems.forEach((item) => {
         debug(`Uploading image for ${folder}: ${item}`);
         const itemPath = path.join(__dirname, `testImages/${folder}/${item}`);
