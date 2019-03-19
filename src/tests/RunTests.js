@@ -20,7 +20,7 @@ import {
 
 const debug = require('debug')('dev:tests:RunTests');
 const verboseDebug = require('debug')('dev:tests:verbose:RunTests');
-const errorLog = require('debug')('dev:tests:error:RunTests');
+const errorLog = require('debug')('dev:error:RunTests');
 const mongoose = require('mongoose');
 
 let verbose = false;
@@ -31,6 +31,7 @@ if (process.env.VERBOSE === 'true') {
 export const runTests = async function runTests() {
   try {
     mongoose.connect(MONGO_URL, { useNewUrlParser: true });
+    debug(`Mongo URL: ${MONGO_URL}`);
     mongoose.Promise = global.Promise;
     mongoose.set('useCreateIndex', true);
     mongoose.set('useFindAndModify', false);
