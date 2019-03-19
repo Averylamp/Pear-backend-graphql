@@ -336,3 +336,11 @@ createUserObject(userInput) {
     });
   });
 };
+
+export const addNewEdge = (me, otherUser, match_id) => {
+  me.edgeSummaries.push({
+    otherUser_id: otherUser._id,
+    match_id,
+  });
+  return me.save();
+};

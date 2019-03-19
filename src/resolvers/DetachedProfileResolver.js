@@ -103,6 +103,7 @@ export const resolvers = {
           };
         });
     },
+    // TODO: create a chat document in firebase between creator and user if none exists already
     approveNewDetachedProfile: async (_source, { user_id, detachedProfile_id, creatorUser_id }) => {
       functionCallConsole('Approve Profile Called');
 
