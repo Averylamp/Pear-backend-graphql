@@ -7,8 +7,7 @@ jobs:
   build:
     docker:
       - image: circleci/node:11.10.1
-        environment:
-          CIRCLECI: "true"
+      - image: circleci/mongo:4.0.6
         # environment:
         #   MONGO_INITDB_ROOT_USERNAME: testuser
         #   MONGO_INITDB_ROOT_PASSWORD: password
