@@ -158,7 +158,9 @@ export const start = async () => {
   try {
     mongoose.connect(MONGO_URL, { useNewUrlParser: true });
     mongoose.Promise = global.Promise;
+    // Fix for Mongoose Errors: https://github.com/Automattic/mongoose/issues/6890
     mongoose.set('useCreateIndex', true);
+    // Fix for Mongoose Errors: https://github.com/Automattic/mongoose/issues/6880
     mongoose.set('useFindAndModify', false);
     const db = mongoose.connection;
     db.on('error', debug.bind(console, 'MongoDB connection error:'));
