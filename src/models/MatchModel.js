@@ -36,16 +36,8 @@ type Match{
 }
 `;
 
-export const typeDef = requestResponseEnum + matchType;
-
-export const resolvers = {
-  Query: {
-
-  },
-  Match: {
-
-  },
-};
+export const typeDef = requestResponseEnum
+  + matchType;
 
 const MatchSchema = new Schema({
   sentByUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
@@ -73,6 +65,18 @@ const MatchSchema = new Schema({
   unmatchedTimestamp: { type: Date, required: false },
 
   firebaseChatDocumentID: { type: String, required: true },
+}, { timestamps: true });
+
+export const EdgeSummarySchema = new Schema({
+  otherUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
+  edgeStatus: {
+    type: String,
+    required: true,
+    enum: ['open, rejected, match, unmatched'],
+    default: 'open',
+  },
+  lastStatusChange: { type: Date, required: true, default: Date },
+  match_id: { type: Schema.Types.ObjectId, required: true, index: true },
 }, { timestamps: true });
 
 export const Match = mongoose.model('Match', MatchSchema);
