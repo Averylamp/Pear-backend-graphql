@@ -321,6 +321,7 @@ UserSchema.virtual('fullName').get(function fullName() {
 // endorsedProfileObjs: { type: [, required: true,  UserProfile!]!
 export const User = mongoose.model('User', UserSchema);
 
+// TODO: replace all of this with `return (new User(userinput)).save()` and handle error
 export const createUserObject = function
 createUserObject(userInput) {
   const userModel = new User(userInput);
