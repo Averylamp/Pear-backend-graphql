@@ -13,7 +13,7 @@ const getRandomFrom = array => (array.length > 0
   ? array[Math.floor(Math.random() * array.length)] : null);
 
 // gets the age and gender fields from a user object or a detached profile
-const getDemographicsFromUserOrDetachedProfile = user => pick(user, ['age', 'gender']);
+const getDemographicsFromDetachedProfileOrUser = user => pick(user, ['age', 'gender']);
 
 // gets a user u such that:
 // u's demographics satisfies constraints
@@ -49,7 +49,7 @@ const getUserSatisfyingConstraints = async (constraints, demographics, blacklist
 // a summary object contains a set of constraints, demographics, and blacklist
 const getMatchingSummaryFromDetachedProfile = async detachedProfile => ({
   constraints: detachedProfile.matchingPreferences,
-  demographics: getDemographicsFromUserOrDetachedProfile(detachedProfile),
+  demographics: getDemographicsFromDetachedProfileOrUser(detachedProfile),
   blacklist: [],
 });
 
@@ -58,7 +58,7 @@ const getMatchingSummaryFromDetachedProfile = async detachedProfile => ({
 const getMatchingSummaryFromUser = async (user, generateBlacklist = false) => (user.isSeeking
   ? {
     constraints: user.matchingPreferences,
-    demographics: getDemographicsFromUserOrDetachedProfile(user),
+    demographics: getDemographicsFromDetachedProfileOrUser(user),
     // when generateBlacklist = true, pull in all blocked profiles + profiles already with an edge
     // generateBlacklist is true when this is an endorsed user
     // (see (5), (6) of blacklist logic comment)
@@ -69,7 +69,7 @@ const getMatchingSummaryFromUser = async (user, generateBlacklist = false) => (u
 // gets a summary object from a user profile ID
 // returns null if the underlying user either has isSeeking set to false,
 // or if we can't find the underlying user object
-const getMatchingSummaryFromProfileId = async profile_id => (UserProfile
+const getMatchingSummaryFromUserProfileId = async profile_id => (UserProfile
   .findById(profile_id)
   .exec()
   .then(endorsedUserProfile => User
@@ -114,9 +114,9 @@ export const nextDiscoveryItem = async (user) => {
   debug(`userBlacklist is ${userBlacklist}`);
 
   const ProfileTypeEnum = {
-    ME: 'me',
-    ENDORSED_PROFILE_ID: 'endorsed profile',
-    DETACHED_PROFILE_ID: 'detached profile',
+    ME: 'ME',
+    ENDORSED_PROFILE_ID: 'ENDORSED_PROFILE',
+    DETACHED_PROFILE_ID: 'DETACHED_PROFILE',
   };
   let searchOrder = [];
   searchOrder.push({
@@ -144,8 +144,8 @@ export const nextDiscoveryItem = async (user) => {
     if (searchOrder[i].profileType === ProfileTypeEnum.ME) {
       summary = await getMatchingSummaryFromUser(searchOrder[i].item);
     } else if (searchOrder[i].profileType === ProfileTypeEnum.ENDORSED_PROFILE_ID) {
-      summary = await getMatchingSummaryFromProfileId(searchOrder[i].item);
-    } else {
+      summary = await getMatchingSummaryFromUserProfileId(searchOrder[i].item);
+    } else if (searchOrder[i].profileType === ProfileTypeEnum.DETACHED_PROFILE_ID) {
       summary = await getMatchingSummaryFromDetachedProfileId(searchOrder[i].item);
     }
 
