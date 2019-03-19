@@ -2,31 +2,41 @@ const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
 
-export const typeDef = `
-
-type Match{
-  _id: ID!
-  matchRequest_id: ID!
-  matchRequestObj: MatchRequest
-  firstPersonUser_id: ID!
-  firstPersonUserObj: User!
-  firstPersonProfile_id: ID
-  firstPersonProfileObj: UserProfile
-  secondPersonUser_id: ID!
-  secondPersonUserObj: User!
-  secondPersonProfile_id: ID
-  secondPersonProfileObj: UserProfile
-  timestampCreated: Int
-  matchStats: MatchStats
-  firebaseConversationDocumentID: String!
-}
-
-type MatchStats{
-  conversationFirstMessageSent: Boolean!
-  conversationTenMessagesSent: Boolean!
-  conversationHundredMessagesSent: Boolean!
+const requestResponseEnum = `
+enum RequestResponse {
+  unseen
+  seen
+  rejected
+  accepted
 }
 `;
+
+const matchType = `
+type Match{
+  _id: ID!
+  
+  sentByUser_id: ID!
+  sentByUser: User
+  sentForUser_id: ID!
+  sentForUser: User
+  receivedByUser_id: ID!
+  receivedByUser: User
+  
+  sentForUserStatus: RequestResponse!
+  sentForUserStatusLastUpdated: String!
+  receivedByUserStatus: RequestResponse!
+  receivedByUserStatusLastUpdated: String!
+  
+  unmatched: Boolean!
+  unmatchedBy_id: ID
+  unmatchedReason: String
+  unmatchedTimestamp: String
+  
+  firebaseChatDocumentID: String!
+}
+`;
+
+export const typeDef = requestResponseEnum + matchType;
 
 export const resolvers = {
   Query: {
@@ -38,25 +48,31 @@ export const resolvers = {
 };
 
 const MatchSchema = new Schema({
-  _id: { type: Schema.Types.ObjectId, required: true },
-  matchRequest_id: { type: Schema.Types.ObjectId, required: true },
-  firstPersonUser_id: { type: Schema.Types.ObjectId, required: true },
-  firstPersonProfile_id: { type: Schema.Types.ObjectId, required: true },
-  secondPersonUser_id: { type: Schema.Types.ObjectId, required: true },
-  secondPersonProfile_id: { type: Schema.Types.ObjectId, required: true },
-  timestampCreated: { type: Number, required: true },
-  matchStats: {
-    conversationFirstMessageSent: { type: Boolean, required: true, default: false },
-    conversationTenMessagesSent: { type: Boolean, required: true, default: false },
-    conversationHundredMessagesSent: { type: Boolean, required: true, default: false },
+  sentByUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
+  sentForUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
+  receivedByUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
+
+  sentForUserStatus: {
+    type: String,
+    required: true,
+    enum: ['unseen, seen, rejected, accepted'],
+    default: 'unseen',
   },
-  firebaseConversationDocumentID: { type: String, required: true },
+  sentForUserStatusLastUpdated: { type: Date, required: true, default: Date },
+  receivedByUserStatus: {
+    type: String,
+    required: true,
+    enum: ['unseen, seen, rejected, accepted'],
+    default: 'unseen',
+  },
+  receivedByUserStatusLastUpdated: { type: Date, required: true, default: Date },
+
+  unmatched: { type: Boolean, required: true, default: false },
+  unmatchedBy_id: { type: Schema.Types.ObjectId, required: false },
+  unmatchedReason: { type: String, required: false },
+  unmatchedTimestamp: { type: Date, required: false },
+
+  firebaseChatDocumentID: { type: String, required: true },
 }, { timestamps: true });
 
-
-// matchRequestObj: MatchRequest
-// firstPersonUserObj: User!
-// firstPersonProfileObj: UserProfile!
-// secondPersonUserObj: User!
-// secondPersonProfileObj: UserProfile!
 export const Match = mongoose.model('Match', MatchSchema);
