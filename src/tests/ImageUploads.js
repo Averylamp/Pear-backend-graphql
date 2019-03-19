@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const request = require('request');
 
-const imageUploadHost = 'localhost:1337';
+const imageUploadURL = 'https://u6qoh0vm77.execute-api.us-east-1.amazonaws.com/default/imageCompressorUploader';
 const testImageLoad = process.env.TEST_IMAGE_LOAD === 'true';
 // const imageUploadHost = "koala.mit.edu:1337"
 
@@ -25,7 +25,7 @@ export const uploadImagesFromFolder = async (folder, uploadedByUser_id) => {
         const itemPath = path.join(__dirname, `testImages/${folder}/${item}`);
         const base64Image = fs.readFileSync(itemPath, { encoding: 'base64' });
         const newPromise = new Promise((resolve, reject) => {
-          request.post(`http://${imageUploadHost}/upload_image`, {
+          request.post(imageUploadURL, {
             json: {
               image: base64Image,
             },
