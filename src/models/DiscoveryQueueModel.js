@@ -54,7 +54,7 @@ const DiscoveryItemSchema = new Schema({
 
 const DiscoveryQueueSchema = new Schema({
   _id: { type: Schema.Types.ObjectId, required: true },
-  user_id: { type: Schema.Types.ObjectId, required: false, index: true },
+  user_id: { type: Schema.Types.ObjectId, required: true, index: true },
   previousDiscoveryItems: { type: [DiscoveryItemSchema], required: true, default: [] },
   currentDiscoveryItems: { type: [DiscoveryItemSchema], required: true, default: [] },
 }, { timestamps: true });
