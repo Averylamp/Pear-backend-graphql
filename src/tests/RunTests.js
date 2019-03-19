@@ -48,7 +48,9 @@ export const runTests = async function runTests() {
           .then(() => {
             debug(`dropped collection ${collectionInfo.name}`);
           }));
-      }); Promise.all(collectionDropPromises).catch((err) => {
+      });
+
+      await Promise.all(collectionDropPromises).catch((err) => {
         debug(`Failed to drop db ${err}`);
         process.exit(1);
       });
