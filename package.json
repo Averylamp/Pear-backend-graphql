@@ -4,11 +4,12 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "startdev": "DEBUG=dev:* DEV=true nodemon --exec babel-node src/index.js",
-    "startdevperf" : "DEBUG=dev:* DEV=true PERF=1 nodemon --exec babel-node src/index.js",
-    "start": "DEBUG=prod* DEV=false node dist/index.js",
+    "startdev": "nodemon --exec node -r dotenv/config -r babel-register src/index.js dotenv_config_path=.env.dev",
+    "regendb": "node -r dotenv/config -r babel-register src/index.js dotenv_config_path=.env.regendb",
+    "test": "circleci local execute --job build",
+    "localregendb": "node -r dotenv/config -r babel-register src/index.js dotenv_config_path=.env.test",
     "build": "babel -d dist/ src/",
-    "test": "test-db-creation"
+    "start": "node -r dotenv/config dist/index.js dotenv_config_path=.env.prod"
   },
   "author": "Avery Lamp <averylamp@gmail.com>",
   "license": "ISC",
@@ -33,6 +34,7 @@
     "body-parser": "^1.18.3",
     "cors": "^2.8.5",
     "debug": "^4.1.1",
+    "dotenv": "^7.0.0",
     "express": "^4.16.4",
     "firebase-admin": "^7.0.0",
     "graphql": "^14.1.1",
@@ -40,6 +42,7 @@
     "lodash": "^4.17.11",
     "mongo-dot-notation": "^1.2.0",
     "mongoose": "^5.4.13",
+    "request": "^2.88.0",
     "twilio": "^3.29.0"
   }
 }
