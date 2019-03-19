@@ -15,12 +15,14 @@ extend type Mutation {
 
 const createRequestMutationInputs = `
 input MatchmakerCreateRequestInput {
+  _id: ID # only for testing
   matchmakerUser_id: ID!
   sentForUser_id: ID!
   receivedByUser_id: ID!
 }
 
 input PersonalCreateRequestInput {
+  _id: ID # only for testing
   sentForUser_id: ID!
   receivedByUser_id: ID!
 }
@@ -75,6 +77,7 @@ export const typeDef = mutationRoutes
   + matchType;
 
 const MatchSchema = new Schema({
+  _id: { type: Schema.Types.ObjectId, required: true },
   sentByUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
   sentForUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
   receivedByUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
