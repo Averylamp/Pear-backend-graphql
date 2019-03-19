@@ -92,7 +92,7 @@ export const runTests = async function runTests() {
 
       // UPLOAD DETACHED PROFILE IMAGES
       testLog('TESTING: Uploading Images');
-      const timerStart = process.hrtime();
+
       const uploadDetachedProfileImages = [];
       for (const detachedProfileVars of createDetachedProfiles) {
         const detachedProfileFirstName = detachedProfileVars
@@ -103,6 +103,7 @@ export const runTests = async function runTests() {
         );
       }
 
+      const timerStart = process.hrtime();
       const uploadImagesResults = await Promise.all(uploadDetachedProfileImages)
         .catch((err) => {
           errorLog(err);
@@ -112,7 +113,7 @@ export const runTests = async function runTests() {
       testLog('***** Success Uploading Images *****\n');
       let imageCount = 0;
       uploadImagesResults.forEach((result) => { imageCount += result.length; });
-      debug(`Finished Uploading ${imageCount} Images in ${process.hrtime(timerStart)[1] / 1000000}ms`);
+      debug(`Finished Uploading ${imageCount} Images in ${process.hrtime(timerStart)[0]}s`);
 
 
       // CREATE DETACHED PROFILES
