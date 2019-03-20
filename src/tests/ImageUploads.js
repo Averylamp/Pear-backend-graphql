@@ -34,6 +34,7 @@ export const uploadImagesFromFolder = async (folder, uploadedByUser_id) => {
           request.post(imageUploadURL, {
             json: {
               image: base64Image,
+              dev: 'True',
             },
             headers: {
               'x-api-key': '3gIpimRUcE54l1Vmq4DL56eJVGUDiymf92TH9YBJ',

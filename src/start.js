@@ -78,7 +78,7 @@ if (regenTestDBMode) {
   if (process.env.DB_NAME === 'prod' && process.env.REGEN !== 'uwu') {
     errorLog('Are you really sure you want to regen the prod database?');
     errorLog('If you are try again with:');
-    errorLog('DB_NAME=prod REGEN=uwu  yarn regendb');
+    errorLog('DB_NAME=prod REGEN=uwu yarn regendb');
     process.exit(1);
   }
 }
