@@ -92,7 +92,7 @@ export const resolvers = {
             const feed = await DiscoveryQueue.findById(creator.discoveryQueue_id);
             if (feed.currentDiscoveryItems.length === 0) {
               for (let i = 0; i < INITIALIZED_FEED_LENGTH; i += 1) {
-                await updateDiscoveryWithNextItem(creator);
+                await updateDiscoveryWithNextItem(newUser);
               }
             }
           } catch (e) {
@@ -323,7 +323,7 @@ export const resolvers = {
             const feed = await DiscoveryQueue.findById(user.discoveryQueue_id);
             if (feed.currentDiscoveryItems.length === 0) {
               for (let i = 0; i < INITIALIZED_FEED_LENGTH; i += 1) {
-                await updateDiscoveryWithNextItem(user);
+                await updateDiscoveryWithNextItem(updateCreatorObjectResult);
               }
             }
           } catch (e) {
