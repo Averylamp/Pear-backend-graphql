@@ -337,7 +337,16 @@ createUserObject(userInput) {
   });
 };
 
-export const addNewEdge = (me, otherUser, match_id) => {
+export const receiveRequest = (me, otherUser, match_id) => {
+  me.edgeSummaries.push({
+    otherUser_id: otherUser._id,
+    match_id,
+  });
+  me.requestedMatch_ids.push(match_id);
+  return me.save();
+};
+
+export const sendRequest = (me, otherUser, match_id) => {
   me.edgeSummaries.push({
     otherUser_id: otherUser._id,
     match_id,
