@@ -23,7 +23,7 @@ export const resolvers = {
   },
   DiscoveryQueue: {
     user: async ({ user_id }) => User.findById(user_id),
-    currentDiscoveryItems: async () => {
+    CurrentDiscoveryItems: async () => {
       const users = await User.find({
         $where: 'this.profile_ids.length > 0',
       });
