@@ -9,7 +9,7 @@ extend type Mutation {
   viewRequest(user_id: ID!, match_id: ID!): MatchMutationResponse!
   acceptRequest(user_id: ID!, match_id: ID!): MatchMutationResponse!
   rejectRequest(user_id: ID!, match_id: ID!): MatchMutationResponse!
-  unmatch(user_id: ID!, match_id: ID!): MatchMutationResponse!
+  unmatch(user_id: ID!, match_id: ID!, reason: String): MatchMutationResponse!
 }
 `;
 

@@ -12,6 +12,7 @@ module.exports = {
     ecmaVersion: 2018,
   },
   rules: {
+    "prefer-constant": ["error", {"destructuring": "all"}],
     "no-await-in-loop": "off",
     "no-restricted-syntax": "off",
     "no-underscore-dangle": "off",
