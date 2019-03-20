@@ -72,10 +72,20 @@ const getMatchingSummaryFromUser = async (user, generateBlacklist = false) => (u
 const getMatchingSummaryFromProfileId = async profile_id => (UserProfile
   .findById(profile_id)
   .exec()
-  .then(endorsedUserProfile => User
-    .findById(endorsedUserProfile.user_id)
-    .exec())
-  .then(endorsedUser => getMatchingSummaryFromUser(endorsedUser, true))
+  .then((endorsedUserProfile) => {
+    if (!endorsedUserProfile) {
+      throw new Error(`no user profile with id ${profile_id}`);
+    }
+    return User
+      .findById(endorsedUserProfile.user_id)
+      .exec();
+  })
+  .then((endorsedUser) => {
+    if (!endorsedUser) {
+      throw new Error(`no endorsed user corresponding to profile with id ${profile_id}`);
+    }
+    return getMatchingSummaryFromUser(endorsedUser, true);
+  })
   .catch((err) => {
     debug(`error while retrieving profile with id ${profile_id}: ${err.toString()}`);
     return null;
@@ -86,7 +96,12 @@ const getMatchingSummaryFromProfileId = async profile_id => (UserProfile
 const getMatchingSummaryFromDetachedProfileId = async detachedProfile_id => (DetachedProfile
   .findById(detachedProfile_id)
   .exec()
-  .then(detachedProfile => getMatchingSummaryFromDetachedProfile(detachedProfile))
+  .then((detachedProfile) => {
+    if (!detachedProfile) {
+      throw new Error(`no detached profile with id ${detachedProfile_id}`);
+    }
+    return getMatchingSummaryFromDetachedProfile(detachedProfile);
+  })
   .catch((err) => {
     debug(`error while retrieving detached profile with id ${detachedProfile_id}:
     ${err.toString()}`);
@@ -163,9 +178,9 @@ export const nextDiscoveryItem = async (user) => {
         return discoveredUser;
       }
     } else {
-      debug(`couldn't generate constraints for ${searchOrder[i].profileType}: ${item_id},
-      or else the underlying object cannot have suggested discovery items`);
+      debug(`couldn't generate constraints for ${searchOrder[i].profileType}: ${item_id}`);
     }
+    debug(`no suggested discovery items for ${searchOrder[i].profileType}: ${item_id}`);
   }
   return null;
 };
