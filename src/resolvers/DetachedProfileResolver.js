@@ -8,6 +8,7 @@ import { DiscoveryQueue } from '../models/DiscoveryQueueModel';
 
 const mongoose = require('mongoose');
 const debug = require('debug')('dev:DetachedProfileResolvers');
+const errorLog = require('debug')('error:DetachedProfileResolvers');
 const functionCallConsole = require('debug')('dev:FunctionCalls');
 
 export const resolvers = {
@@ -134,11 +135,8 @@ export const resolvers = {
           message: `Could not find creator with id ${detachedProfile.creatorUser_id}`,
         };
       }
-      debug(detachedProfile);
-      debug(detachedProfile.creatorUser_id);
-      debug(creatorUser_id);
-      // check that creator made detached profile
 
+      // check that creator made detached profile
       if (creatorUser_id !== detachedProfile.creatorUser_id.toString()) {
         return {
           success: false,
@@ -196,7 +194,8 @@ export const resolvers = {
               $each: detachedProfile.images,
             },
             displayedImages: {
-              $each: detachedProfile.images.slice(0, 6 - user.displayedImages.length),
+              $each: detachedProfile.images,
+              $slice: 6,
             },
           },
         };
@@ -241,6 +240,7 @@ export const resolvers = {
             } else {
               createUserProfileObjectResult.remove((err) => {
                 if (err) {
+                  errorLog(`Failed to remove user profile object: ${err}`);
                   debug(`Failed to remove user profile object: ${err}`);
                 } else {
                   debug('Removed created user profile object successfully');
@@ -259,6 +259,7 @@ export const resolvers = {
                 },
               }, {}, (err) => {
                 if (err) {
+                  errorLog(`Failed to rollback user updates: ${err}`);
                   debug(`Failed to rollback user updates: ${err}`);
                 } else {
                   debug('Rolled back user updates successfully');
@@ -277,6 +278,7 @@ export const resolvers = {
                 },
               }, {}, (err) => {
                 if (err) {
+                  errorLog(`Failed to roll back creator object: ${err}`);
                   debug(`Failed to roll back creator object: ${err}`);
                 } else {
                   debug('Rolled back creator object successfully');
@@ -308,6 +310,7 @@ export const resolvers = {
                   debug('Recreated detached profile object successfully');
                 })
                 .catch((err) => {
+                  errorLog(`Failed to recreate detached profile ${err}`);
                   debug(`Failed to recreate detached profile ${err}`);
                 });
             }
@@ -325,6 +328,7 @@ export const resolvers = {
               }
             }
           } catch (e) {
+            errorLog(`error occurred when trying to populate discovery feed: ${e}`);
             debug(`error occurred when trying to populate discovery feed: ${e}`);
           }
           return {
