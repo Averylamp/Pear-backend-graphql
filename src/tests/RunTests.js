@@ -89,18 +89,21 @@ export const runTests = async function runTests() {
       if (verbose) createUserResults.forEach((result) => { verboseDebug(result); });
       testLog('***** Success Creating Users *****\n');
 
+
       // UPLOAD DETACHED PROFILE IMAGES
       testLog('TESTING: Uploading Images');
+
       const uploadDetachedProfileImages = [];
       for (const detachedProfileVars of createDetachedProfiles) {
         const detachedProfileFirstName = detachedProfileVars
           .detachedProfileInput.firstName.toLowerCase();
-        const creatorID = detachedProfileVars.creatorUser_id;
+        const creatorID = detachedProfileVars.detachedProfileInput.creatorUser_id;
         uploadDetachedProfileImages.push(
           uploadImagesFromFolder(detachedProfileFirstName, creatorID),
         );
       }
 
+      const timerStart = process.hrtime();
       const uploadImagesResults = await Promise.all(uploadDetachedProfileImages)
         .catch((err) => {
           errorLog(err);
@@ -108,13 +111,17 @@ export const runTests = async function runTests() {
         });
       if (verbose) uploadImagesResults.forEach((result) => { verboseDebug(result); });
       testLog('***** Success Uploading Images *****\n');
+      let imageCount = 0;
+      uploadImagesResults.forEach((result) => { imageCount += result.length; });
+      debug(`Finished Uploading ${imageCount} Images in ${process.hrtime(timerStart)[0]}s`);
+
 
       // CREATE DETACHED PROFILES
       testLog('TESTING: Creating Detached Profiles');
       const createDetachedProfilePromises = [];
       for (let i = 0; i < createDetachedProfiles.length; i += 1) {
         const detachedProfileVars = createDetachedProfiles[i];
-        detachedProfileVars.images = uploadImagesResults[i];
+        detachedProfileVars.detachedProfileInput.images = uploadImagesResults[i];
         createDetachedProfilePromises.push(mutate({
           mutation: CREATE_DETACHED_PROFILE,
           variables: detachedProfileVars,

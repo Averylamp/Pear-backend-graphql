@@ -69,6 +69,12 @@ if (regenTestDBMode) {
     errorLog('DB_NAME=dev-test yarn regendb');
     process.exit(1);
   }
+  if (process.env.DB_NAME === 'prod' && process.env.REGEN !== 'uwu') {
+    errorLog('Are you really sure you want to regen the prod database?');
+    errorLog('If you are try again with:');
+    errorLog('DB_NAME=prod REGEN=uwu yarn regendb');
+    process.exit(1);
+  }
 }
 const tracing = process.env.PERF ? process.env.PERF : false;
 if (tracing) debug('Perf mode detected');
