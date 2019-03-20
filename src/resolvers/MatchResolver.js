@@ -202,7 +202,7 @@ const createNewMatch = async (sentByUser_id, sentForUser_id, receivedByUser_id, 
 
 const decideOnMatch = async (user_id, match_id, decision) => {
   if (!['reject', 'accept'].contains(decision)) {
-    throw new Error(`Unknown match action ${decision}`);
+    throw new Error(`Unknown match action: ${decision}`);
   }
   const acceptedMatch = decision === 'accept';
   // verifies that user exists, match exists, user is part of match, user hasn't yet taken
