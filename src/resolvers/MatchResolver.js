@@ -16,7 +16,7 @@ const rollbackEdgeUpdates = (rollbackSummary) => {
       'edgeSummaries.$[element].edgeStatus': rollbackItem.rollbackEdgeStatus,
       'edgeSummaries.$[element].lastStatusChange': rollbackItem.rollbackEdgeLastUpdtaed,
     };
-    updateObj[rollbackItem.op] = {
+    updateObj[rollbackItem.matchesListOp] = {
       currentMatch_ids: rollbackItem.match_id,
     };
     User.findByIdAndUpdate(rollbackItem.user_id, updateObj, {
