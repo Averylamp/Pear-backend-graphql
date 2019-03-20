@@ -97,7 +97,7 @@ export const runTests = async function runTests() {
       for (const detachedProfileVars of createDetachedProfiles) {
         const detachedProfileFirstName = detachedProfileVars
           .detachedProfileInput.firstName.toLowerCase();
-        const creatorID = detachedProfileVars.creatorUser_id;
+        const creatorID = detachedProfileVars.detachedProfileInput.creatorUser_id;
         uploadDetachedProfileImages.push(
           uploadImagesFromFolder(detachedProfileFirstName, creatorID),
         );
@@ -121,7 +121,7 @@ export const runTests = async function runTests() {
       const createDetachedProfilePromises = [];
       for (let i = 0; i < createDetachedProfiles.length; i += 1) {
         const detachedProfileVars = createDetachedProfiles[i];
-        detachedProfileVars.images = uploadImagesResults[i];
+        detachedProfileVars.detachedProfileInput.images = uploadImagesResults[i];
         createDetachedProfilePromises.push(mutate({
           mutation: CREATE_DETACHED_PROFILE,
           variables: detachedProfileVars,
