@@ -21,7 +21,7 @@ import {
 const debug = require('debug')('dev:tests:RunTests');
 const testLog = require('debug')('dev:tests:Test');
 const verboseDebug = require('debug')('dev:tests:verbose:RunTests');
-const errorLog = require('debug')('dev:error:RunTests');
+const errorLog = require('debug')('error:RunTests');
 const mongoose = require('mongoose');
 
 const verbose = process.env.VERBOSE ? process.env.VERBOSE : false;
@@ -112,9 +112,22 @@ export const runTests = async function runTests() {
       if (verbose) uploadImagesResults.forEach((result) => { verboseDebug(result); });
       testLog('***** Success Uploading Images *****\n');
       let imageCount = 0;
-      uploadImagesResults.forEach((result) => { imageCount += result.length; });
+      let imageErrorCount = 0;
+      uploadImagesResults.forEach((result) => {
+        imageCount += result.length;
+        result.forEach((imageResult) => {
+          if (!imageResult.imageID) {
+            errorLog('Image not uploaded properly');
+            errorLog(imageResult);
+            imageErrorCount += 1;
+          }
+        });
+      });
       debug(`Finished Uploading ${imageCount} Images in ${process.hrtime(timerStart)[0]}s`);
-
+      if (imageErrorCount > 0) {
+        errorLog(`ERROR UPLOADING ${imageErrorCount} Images`);
+        process.exit(1);
+      }
 
       // CREATE DETACHED PROFILES
       testLog('TESTING: Creating Detached Profiles');
@@ -130,8 +143,15 @@ export const runTests = async function runTests() {
       const createDetachedProfileResults = await Promise.all(createDetachedProfilePromises)
         .then((results) => {
           results.forEach((result) => {
-            if (!result.data.createDetachedProfile.success) {
-              errorLog(`Error Creating Detached Profile: ${result.data.createDetachedProfile.message}`);
+            try {
+              if (!result.data.createDetachedProfile.success) {
+                errorLog(`Error Creating Detached Profile: ${result.data.createDetachedProfile.message}`);
+                process.exit(1);
+              }
+            } catch (e) {
+              errorLog('Error Printing out Results:');
+              errorLog(result);
+              errorLog(e);
               process.exit(1);
             }
           });
@@ -156,8 +176,14 @@ export const runTests = async function runTests() {
       const attachProfileResults = await Promise.all(attachProfilePromises)
         .then((results) => {
           results.forEach((result) => {
-            if (!result.data.approveNewDetachedProfile.success) {
-              errorLog(`Error Creating Detached Profile: ${result.data.approveNewDetachedProfile.message}`);
+            try {
+              if (!result.data.approveNewDetachedProfile.success) {
+                errorLog(`Error Creating Detached Profile: ${result.data.approveNewDetachedProfile.message}`);
+                process.exit(1);
+              }
+            } catch (e) {
+              errorLog('Error Printing out Results');
+              errorLog(e);
               process.exit(1);
             }
           });

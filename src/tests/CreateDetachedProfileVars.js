@@ -10,7 +10,7 @@ export const CREATE_AVERY1_DETACHED_PROFILE_VARIABLES = {
     interests: ['technology', 'coding'],
     vibes: ['Baddest Radish', 'Zesty'],
     bio: 'Want to meet the real forbidden fruit? Attracted to ~ mysterious ~ guys who have multiple ~ layers ~ to them? Well that\'s literally Avery. Avery is also one of the most kind, honest people I\'ve ever met and probably THE BEST cook I\'ve ever met too. If nothing else, it wouldn\'t be a bad idea to marry him just for his pesto...',
-    dos: ['ask him about his new dating app'],
+    dos: ['ask him about his new dating app', 'ask him to eat ramen with you'],
     donts: ['be too clingy - sometimes he needs his space!!', 'plan a date for before 1PM'],
   },
 };
