@@ -4,6 +4,11 @@ const fs = require('fs');
 const path = require('path');
 const request = require('request');
 
+const imageUploadURL = 'https://u6qoh0vm77.execute-api.us-east-1.amazonaws.com/default/imageCompressorUploader';
+
+// const imageUploadHost = "koala.mit.edu:1337"
+
+
 export const uploadImagesFromFolder = async (folder, uploadedByUser_id) => {
   const filePath = path.join(__dirname, `testImages/${folder}`);
   const imageMetadataPromises = [];
@@ -14,15 +19,26 @@ export const uploadImagesFromFolder = async (folder, uploadedByUser_id) => {
         errorLog(err);
         fsReject(Error('Image folder not found'));
       }
-      // items = [items[0]];
-      items.forEach((item) => {
+      let finalItems = items;
+      if (process.env.TEST_IMAGE_LOAD && Number(process.env.TEST_IMAGE_LOAD)) {
+        const numCopies = Number(process.env.TEST_IMAGE_LOAD);
+        for (let i = 0; i < numCopies - 1; i += 1) {
+          finalItems = finalItems.concat(items);
+        }
+      }
+      finalItems.forEach((item) => {
         debug(`Uploading image for ${folder}: ${item}`);
         const itemPath = path.join(__dirname, `testImages/${folder}/${item}`);
         const base64Image = fs.readFileSync(itemPath, { encoding: 'base64' });
         const newPromise = new Promise((resolve, reject) => {
-          request.post('http://koala.mit.edu:1337/upload_image', {
+          request.post(imageUploadURL, {
             json: {
               image: base64Image,
+              dev: 'True', // If key exists, uploads to dev-images bucket
+            },
+            headers: {
+              'x-api-key': '3gIpimRUcE54l1Vmq4DL56eJVGUDiymf92TH9YBJ',
+              'Content-Type': 'application/json',
             },
           }, (error, res, body) => {
             if (error) {
@@ -43,6 +59,7 @@ export const uploadImagesFromFolder = async (folder, uploadedByUser_id) => {
           finalImageResult.uploadedByUser_id = uploadedByUser_id;
           imageMetadata.push(finalImageResult);
         });
+
         fsResolve(imageResults);
       }).catch((allImagesError) => {
         errorLog(allImagesError);
