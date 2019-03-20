@@ -78,7 +78,10 @@ const getAndValidateUserAndMatchObjects = async (user_id, match_id, validationTy
 };
 
 const createNewMatch = async (sentByUser_id, sentForUser_id, receivedByUser_id, matchID) => {
+  // determine whether this is a matchmaker request or a personal request
   const matchmakerMade = (sentByUser_id !== sentForUser_id);
+
+  // fetch all relevant user objects and perform basic validation
   const sentByPromise = User.findById(sentByUser_id)
     .exec()
     .catch(() => null);
@@ -123,6 +126,8 @@ const createNewMatch = async (sentByUser_id, sentForUser_id, receivedByUser_id, 
           for ${sentForUser_id}`,
     };
   }
+
+  // create the match object
   const matchInput = {
     _id: matchID,
     sentByUser_id,
@@ -135,9 +140,10 @@ const createNewMatch = async (sentByUser_id, sentForUser_id, receivedByUser_id, 
   }
   const matchPromise = createMatchObject(matchInput)
     .catch(err => err);
+
+  // add edges and push to requestedMatch_ids via operations on the user model
   const sentForUserModelUpdateFn = matchmakerMade ? receiveRequest : sendRequest;
   const createSentForEdgePromise = sentForUserModelUpdateFn(sentFor, receivedBy, matchID);
-
   const createReceivedByEdgePromise = receiveRequest(receivedBy, sentFor, matchID);
 
   const [match, sentForEdgeResult, receivedByEdgeResult] = await Promise
@@ -356,13 +362,20 @@ export const resolvers = {
     },
     viewRequest: async (_source, { user_id, match_id }) => {
       try {
+        // get and validate user and match objects
         const promisesResult = await getAndValidateUserAndMatchObjects(user_id, match_id, 'view');
         let match = promisesResult[1];
+
+        // determine whether user is sentFor or receivedBy in the match object, and set key name
+        // variables (to be referenced shortly) appropriately
         const imSentFor = (user_id === match.sentForUser_id);
         const myStatusKeyName = imSentFor ? 'sentForUserStatus' : 'receivedByUserStatus';
         const myStatusLastUpdatedKeyName = imSentFor
           ? 'sentForUserStatusLastUpdated'
           : 'receivedByUserStatusLastUpdated';
+
+        // update the user's status (RequestResponse) in the match object
+        // no rollback-on-failure needed because this is just one db operation
         if (['unseen', 'seen'].contains(match[myStatusKeyName])) {
           const updateObj = {};
           updateObj[myStatusKeyName] = 'seen';
@@ -411,9 +424,12 @@ export const resolvers = {
     },
     unmatch: async (_source, { user_id, match_id, reason }) => {
       try {
+        // get and validate user and match objects
         const promisesResult = await getAndValidateUserAndMatchObjects(user_id, match_id, 'unmatch');
         const user = promisesResult[0];
         const otherUser = promisesResult[2];
+
+        // update the match object
         const matchUpdateObj = {
           unmatched: true,
           unmatchedBy_id: user_id,
@@ -426,6 +442,7 @@ export const resolvers = {
           .exec()
           .catch(err => err);
 
+        // update the user objects: currentMatch_ids list, and edges
         const myEdgeLastUpdated = user.edgeSummaries.find(
           edgeSummary => edgeSummary.match_id === match_id,
         ) || Date();
@@ -443,6 +460,7 @@ export const resolvers = {
         }.exec()
           .catch(err => err));
 
+        // if any errors, roll back
         if (matchUpdate instanceof Error || edgeUpdate instanceof Error) {
           let message = '';
           if (matchUpdate instanceof Error) {
