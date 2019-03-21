@@ -47,7 +47,13 @@ To start on a new feature use
 `git flow feature start featurename`
 
 To merge that feature into develop:
-`git flow feature finish featurename`
+** Do not run `git flow feature finish featurename`**
+First, publish the feature to github, using:
+- `git flow feature publish featurename`
+- Create a pull request on github into devlop
+- Get the pull request reviewed
+- Merge the pull request into develop
+- Delete the feature branch on remote and locally
 
 Writeups on gitflow
 ```
