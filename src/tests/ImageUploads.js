@@ -28,30 +28,28 @@ export const uploadImagesFromFolder = async (folder, uploadedByUser_id) => {
       }
       debug(`Uploading images for ${folder}: ${finalItems.length} found`);
       finalItems.forEach((item) => {
-        if (item === 'Josh5.jpg') {
-          const itemPath = path.join(__dirname, `testImages/${folder}/${item}`);
-          const base64Image = fs.readFileSync(itemPath, { encoding: 'base64' });
-          const newPromise = new Promise((resolve, reject) => {
-            request.post(imageUploadURL, {
-              json: {
-                image: base64Image,
-                dev: 'True', // If key exists, uploads to dev-images bucket
-              },
-              headers: {
-                'x-api-key': '3gIpimRUcE54l1Vmq4DL56eJVGUDiymf92TH9YBJ',
-                'Content-Type': 'application/json',
-              },
-            }, (error, res, body) => {
-              if (error) {
-                errorLog(error);
-                reject(error);
-              }
-              debug(`Finished uploading for ${folder}: ${item}`);
-              resolve(body);
-            });
+        const itemPath = path.join(__dirname, `testImages/${folder}/${item}`);
+        const base64Image = fs.readFileSync(itemPath, { encoding: 'base64' });
+        const newPromise = new Promise((resolve, reject) => {
+          request.post(imageUploadURL, {
+            json: {
+              image: base64Image,
+              dev: 'True', // If key exists, uploads to dev-images bucket
+            },
+            headers: {
+              'x-api-key': '3gIpimRUcE54l1Vmq4DL56eJVGUDiymf92TH9YBJ',
+              'Content-Type': 'application/json',
+            },
+          }, (error, res, body) => {
+            if (error) {
+              errorLog(error);
+              reject(error);
+            }
+            debug(`Finished uploading for ${folder}: ${item}`);
+            resolve(body);
           });
-          imageMetadataPromises.push(newPromise);
-        }
+        });
+        imageMetadataPromises.push(newPromise);
       });
 
       return Promise.all(imageMetadataPromises).then((imageResults) => {
