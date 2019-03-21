@@ -14,11 +14,12 @@ const rollbackEdgeUpdates = (rollbackSummary) => {
   for (const rollbackItem of rollbackSummary) {
     const updateObj = {
       'edgeSummaries.$[element].edgeStatus': rollbackItem.rollbackEdgeStatus,
-      'edgeSummaries.$[element].lastStatusChange': rollbackItem.rollbackEdgeLastUpdtaed,
+      'edgeSummaries.$[element].lastStatusChange': rollbackItem.rollbackEdgeLastUpdated,
     };
     updateObj[rollbackItem.matchesListOp] = {
       currentMatch_ids: rollbackItem.match_id,
     };
+    debug(`rollbackEdgeUpdate: ${updateObj}`);
     User.findByIdAndUpdate(rollbackItem.user_id, updateObj, {
       new: true,
       arrayFilters: [{ 'element.match_id': rollbackItem.match_id }],
@@ -47,9 +48,9 @@ const getAndValidateUserAndMatchObjects = async (user_id, match_id, validationTy
     throw new Error(`Couldn't find match with id ${match_id}`);
   }
   let otherUser_id = null;
-  if (user_id === match.sentForUser_id) {
+  if (user_id === match.sentForUser_id.toString()) {
     otherUser_id = match.receivedByUser_id;
-  } else if (user_id === match.receivedByUser_id) {
+  } else if (user_id === match.receivedByUser_id.toString()) {
     otherUser_id = match.sentForUser_id;
   } else {
     throw new Error(`User ${user_id} is not a part of match ${match_id}`);
@@ -58,13 +59,13 @@ const getAndValidateUserAndMatchObjects = async (user_id, match_id, validationTy
   if (!otherUser) {
     throw new Error(`Couldn't find user's match partner with id ${otherUser_id}`);
   }
-  if (['reject', 'accept'].contains(validationType)) {
-    if (user_id === match.sentForUser_id) {
-      if (['rejected', 'accepted'].contains(match.sentForUserStatus)) {
+  if (['reject', 'accept'].includes(validationType)) {
+    if (user_id === match.sentForUser_id.toString()) {
+      if (['rejected', 'accepted'].includes(match.sentForUserStatus)) {
         throw new Error(`User ${user_id} has already taken action on request ${match_id}`);
       }
-    } else if (user_id === match.receivedByUser_id) {
-      if (['rejected', 'accepted'].contains(match.receivedByUserStatus)) {
+    } else if (user_id === match.receivedByUser_id.toString()) {
+      if (['rejected', 'accepted'].includes(match.receivedByUserStatus)) {
         throw new Error(`User ${user_id} has already taken action on request ${match_id}`);
       }
     }
@@ -143,8 +144,10 @@ const createNewMatch = async (sentByUser_id, sentForUser_id, receivedByUser_id, 
 
   // add edges and push to requestedMatch_ids via operations on the user model
   const sentForUserModelUpdateFn = matchmakerMade ? receiveRequest : sendRequest;
-  const createSentForEdgePromise = sentForUserModelUpdateFn(sentFor, receivedBy, matchID);
-  const createReceivedByEdgePromise = receiveRequest(receivedBy, sentFor, matchID);
+  const createSentForEdgePromise = sentForUserModelUpdateFn(sentFor, receivedBy, matchID)
+    .catch(err => err);
+  const createReceivedByEdgePromise = receiveRequest(receivedBy, sentFor, matchID)
+    .catch(err => err);
 
   const [match, sentForEdgeResult, receivedByEdgeResult] = await Promise
     .all([matchPromise, createSentForEdgePromise, createReceivedByEdgePromise]);
@@ -154,8 +157,8 @@ const createNewMatch = async (sentByUser_id, sentForUser_id, receivedByUser_id, 
     || sentForEdgeResult instanceof Error
     || receivedByEdgeResult instanceof Error) {
     let message = '';
-    if (matchPromise instanceof Error) {
-      message += matchPromise.toString();
+    if (match instanceof Error) {
+      message += match.toString();
     } else {
       match.remove()
         .catch((err) => {
@@ -207,19 +210,19 @@ const createNewMatch = async (sentByUser_id, sentForUser_id, receivedByUser_id, 
 };
 
 const decideOnMatch = async (user_id, match_id, decision) => {
-  if (!['reject', 'accept'].contains(decision)) {
+  if (!['reject', 'accept'].includes(decision)) {
     throw new Error(`Unknown match action: ${decision}`);
   }
   const acceptedMatch = decision === 'accept';
   // verifies that user exists, match exists, user is part of match, user hasn't yet taken
-  // accept/reject action onmatch
+  // accept/reject action on match
   const promisesResult = await getAndValidateUserAndMatchObjects(user_id, match_id, decision);
   const user = promisesResult[0];
   const match = promisesResult[1];
   const otherUser = promisesResult[2];
 
   // set object field names depending on whether user_id is sentFor or receivedBy in match
-  const imSentFor = (user_id === match.sentForUser_id);
+  const imSentFor = (user_id === match.sentForUser_id.toString());
   const myStatusKeyName = imSentFor ? 'sentForUserStatus' : 'receivedByUserStatus';
   const theirStatusKeyName = imSentFor ? 'receivedByUserStatus' : 'sentForUserStatus';
   const myStatusLastUpdatedKeyName = imSentFor
@@ -230,8 +233,9 @@ const decideOnMatch = async (user_id, match_id, decision) => {
   const previousMyStatus = match[myStatusKeyName];
   const previousMyStatusLastUpdated = match[myStatusLastUpdatedKeyName];
   const matchUpdateObj = {};
-  matchUpdateObj[myStatusKeyName] = acceptedMatch ? 'accept' : 'reject';
+  matchUpdateObj[myStatusKeyName] = acceptedMatch ? 'accepted' : 'rejected';
   matchUpdateObj[myStatusLastUpdatedKeyName] = Date();
+  // throw if this errors, canceling the whole operation
   const matchUpdated = await Match.findByIdAndUpdate(match_id, matchUpdateObj,
     { new: true })
     .exec();
@@ -250,14 +254,16 @@ const decideOnMatch = async (user_id, match_id, decision) => {
   let edgeUpdate = null;
   const theirMatchStatus = matchUpdated[theirStatusKeyName];
   const myEdgeLastUpdated = user.edgeSummaries.find(
-    edgeSummary => edgeSummary.match_id === match_id,
-  ) || Date();
+    edgeSummary => edgeSummary.match_id.toString() === match_id,
+  ).lastStatusChange || Date();
   const theirEdgeLastUpdated = otherUser.edgeSummaries.find(
-    edgeSummary => edgeSummary.match_id === match_id,
-  ) || Date();
-  if (['accepted', 'rejected'].contains(theirMatchStatus)) {
+    edgeSummary => edgeSummary.match_id.toString() === match_id,
+  ).lastStatusChange || Date();
+  if (['accepted', 'rejected'].includes(theirMatchStatus)) {
     if (theirMatchStatus === 'accepted' && acceptedMatch) {
-      edgeUpdate = await User.updateMany({}, {
+      edgeUpdate = await User.updateMany({
+        _id: { $in: [user_id, otherUser._id.toString()] },
+      }, {
         $push: {
           currentMatch_ids: match_id,
         },
@@ -265,21 +271,26 @@ const decideOnMatch = async (user_id, match_id, decision) => {
         'edgeSummaries.$[element].lastStatusChange': Date(),
       }, {
         arrayFilters: [{ 'element.match_id': match_id }],
-      }.exec()
-        .catch(err => err));
+      })
+        .exec()
+        .catch(err => err);
     } else {
-      edgeUpdate = await User.updateMany({}, {
+      edgeUpdate = await User.updateMany({
+        _id: { $in: [user_id, otherUser._id.toString()] },
+      }, {
         'edgeSummaries.$[element].edgeStatus': 'rejected',
         'edgeSummaries.$[element].lastStatusChange': Date(),
       }, {
         arrayFilters: [{ 'element.match_id': match_id }],
-      }.exec()
-        .catch(err => err));
+      })
+        .exec()
+        .catch(err => err);
     }
   }
 
   // roll back if any update failed
   if (mePullRequestUpdate instanceof Error || edgeUpdate instanceof Error) {
+    debug('match decision failed, rolling back');
     let message = '';
     const rollbackMatchUpdateObj = {};
     rollbackMatchUpdateObj[myStatusKeyName] = previousMyStatus;
@@ -341,6 +352,12 @@ const decideOnMatch = async (user_id, match_id, decision) => {
 };
 
 export const resolvers = {
+  Query: {
+    match: async (_source, { id }) => {
+      debug(`Getting match by id: ${id}`);
+      return Match.findById(id);
+    },
+  },
   Mutation: {
     matchmakerCreateRequest: async (_source, { requestInput }) => {
       const matchID = '_id' in requestInput ? requestInput._id : mongoose.Types.ObjectId();
@@ -368,7 +385,7 @@ export const resolvers = {
 
         // determine whether user is sentFor or receivedBy in the match object, and set key name
         // variables (to be referenced shortly) appropriately
-        const imSentFor = (user_id === match.sentForUser_id);
+        const imSentFor = (user_id === match.sentForUser_id.toString());
         const myStatusKeyName = imSentFor ? 'sentForUserStatus' : 'receivedByUserStatus';
         const myStatusLastUpdatedKeyName = imSentFor
           ? 'sentForUserStatusLastUpdated'
@@ -376,7 +393,7 @@ export const resolvers = {
 
         // update the user's status (RequestResponse) in the match object
         // no rollback-on-failure needed because this is just one db operation
-        if (['unseen', 'seen'].contains(match[myStatusKeyName])) {
+        if (['unseen', 'seen'].includes(match[myStatusKeyName])) {
           const updateObj = {};
           updateObj[myStatusKeyName] = 'seen';
           updateObj[myStatusLastUpdatedKeyName] = Date();
@@ -425,7 +442,8 @@ export const resolvers = {
     unmatch: async (_source, { user_id, match_id, reason }) => {
       try {
         // get and validate user and match objects
-        const promisesResult = await getAndValidateUserAndMatchObjects(user_id, match_id, 'unmatch');
+        const promisesResult = await getAndValidateUserAndMatchObjects(user_id, match_id,
+          'unmatch');
         const user = promisesResult[0];
         const otherUser = promisesResult[2];
 
@@ -444,12 +462,14 @@ export const resolvers = {
 
         // update the user objects: currentMatch_ids list, and edges
         const myEdgeLastUpdated = user.edgeSummaries.find(
-          edgeSummary => edgeSummary.match_id === match_id,
-        ) || Date();
+          edgeSummary => edgeSummary.match_id.toString() === match_id,
+        ).lastStatusChange || Date();
         const theirEdgeLastUpdated = otherUser.edgeSummaries.find(
-          edgeSummary => edgeSummary.match_id === match_id,
-        ) || Date();
-        const edgeUpdate = await User.updateMany({}, {
+          edgeSummary => edgeSummary.match_id.toString() === match_id,
+        ).lastStatusChange || Date();
+        const edgeUpdate = await User.updateMany({
+          _id: { $in: [user_id, otherUser._id.toString()] },
+        }, {
           $pull: {
             currentMatch_ids: match_id,
           },
@@ -457,11 +477,12 @@ export const resolvers = {
           'edgeSummaries.$[element].lastStatusChange': Date(),
         }, {
           arrayFilters: [{ 'element.match_id': match_id }],
-        }.exec()
-          .catch(err => err));
+        }).exec()
+          .catch(err => err);
 
         // if any errors, roll back
         if (matchUpdate instanceof Error || edgeUpdate instanceof Error) {
+          debug('error unmatching; rolling back');
           let message = '';
           if (matchUpdate instanceof Error) {
             message += matchUpdate.toString();
