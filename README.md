@@ -41,6 +41,23 @@ To install Docker it is recommended to go to their website and install Docker De
 https://docs.docker.com/docker-for-mac/install/
 
 
+We will also be using git flow to track release versioning
+To start on a new feature use 
+
+`git flow feature start featurename`
+
+To merge that feature into develop:
+`git flow feature finish featurename`
+
+Writeups on gitflow
+```
+https://nvie.com/posts/a-successful-git-branching-model/
+https://jeffkreeftmeijer.com/git-flow/
+https://github.com/nvie/gitflow
+
+```
+
+
 
 
 To set up linting scripts run from root project folder: 
