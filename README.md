@@ -55,6 +55,7 @@ First, publish the feature to github, using:
 - Merge the pull request into develop
 - Delete the feature branch on remote and locally
 
+
 Writeups on gitflow
 ```
 https://nvie.com/posts/a-successful-git-branching-model/
