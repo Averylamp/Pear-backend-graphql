@@ -2,6 +2,13 @@ const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
 
+const queryRoutes = `
+extend type Query {
+  # Get a user by ID
+  match(id: ID!): Match
+}
+`;
+
 const mutationRoutes = `
 extend type Mutation {
   matchmakerCreateRequest(requestInput: MatchmakerCreateRequestInput!): MatchMutationResponse!
@@ -70,7 +77,8 @@ type Match{
 }
 `;
 
-export const typeDef = mutationRoutes
+export const typeDef = queryRoutes
+  + mutationRoutes
   + createRequestMutationInputs
   + mutationResponse
   + requestResponseEnum
@@ -85,14 +93,14 @@ const MatchSchema = new Schema({
   sentForUserStatus: {
     type: String,
     required: true,
-    enum: ['unseen, seen, rejected, accepted'],
+    enum: ['unseen', 'seen', 'rejected', 'accepted'],
     default: 'unseen',
   },
   sentForUserStatusLastUpdated: { type: Date, required: true, default: Date },
   receivedByUserStatus: {
     type: String,
     required: true,
-    enum: ['unseen, seen, rejected, accepted'],
+    enum: ['unseen', 'seen', 'rejected', 'accepted'],
     default: 'unseen',
   },
   receivedByUserStatusLastUpdated: { type: Date, required: true, default: Date },
@@ -110,7 +118,7 @@ export const EdgeSummarySchema = new Schema({
   edgeStatus: {
     type: String,
     required: true,
-    enum: ['open, rejected, match, unmatched'],
+    enum: ['open', 'rejected', 'match', 'unmatched'],
     default: 'open',
   },
   lastStatusChange: { type: Date, required: true, default: Date },

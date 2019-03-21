@@ -118,6 +118,7 @@ export const nextDiscoveryItem = async (user) => {
   // 1. users already in user's discovery feed
   // 2. TODO: users who have an edge with this user
   // 3. TODO: users in user's blocked list
+  // 3.5, TODO: users this user has endorsed
   // 4. TODO: (for a specific profile) users who already have an edge with this profile
   // 5. TODO: (for a specific profile) users in the specific profile's blocked list
   let userBlacklist = [];

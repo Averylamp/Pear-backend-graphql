@@ -206,6 +206,17 @@ type User {
   # This field is not stored in MongoDB. Rather, the resolver pulls this information from
   # the EdgeSummaries field.
   edgeUser_ids: [ID!]!
+  
+  # FOR TESTING ONLY:
+  # edgeSummaries: [EdgeSummary!]!
+}
+
+type EdgeSummary {
+  _id: ID!
+  otherUser_id: ID!
+  edgeStatus: String!
+  lastStatusChange: String!
+  match_id: ID!
 }
 `;
 
@@ -337,6 +348,7 @@ createUserObject(userInput) {
   });
 };
 
+// TODO: Check if an edge with otherUser already exists, error if it does
 export const receiveRequest = (me, otherUser, match_id) => {
   me.edgeSummaries.push({
     otherUser_id: otherUser._id,
@@ -346,6 +358,7 @@ export const receiveRequest = (me, otherUser, match_id) => {
   return me.save();
 };
 
+// TODO: Check if an edge with otherUser already exists, error if it does
 export const sendRequest = (me, otherUser, match_id) => {
   me.edgeSummaries.push({
     otherUser_id: otherUser._id,
