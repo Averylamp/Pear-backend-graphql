@@ -236,69 +236,160 @@ enum Gender{
 }
 `;
 export const typeDef = queryRoutes
-+ mutationRoutes
-+ getUserInputs
-+ createUserInputs
-+ updateUserInputs
-+ updateUserPhotosInput
-+ userType
-+ mutationResponse
-+ genderEnum;
+  + mutationRoutes
+  + getUserInputs
+  + createUserInputs
+  + updateUserInputs
+  + updateUserPhotosInput
+  + userType
+  + mutationResponse
+  + genderEnum;
 
 const UserSchema = new Schema({
-  deactivated: { type: Boolean, required: true, default: false },
+  deactivated: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
   firebaseToken: {
-    type: String, required: true,
+    type: String,
+    required: true,
   },
   firebaseAuthID: {
-    type: String, required: true, index: true, unique: true,
+    type: String,
+    required: true,
+    index: true,
+    unique: true,
   },
   facebookId: {
-    type: String, required: false, unique: true, index: true, sparse: true,
+    type: String,
+    required: false,
+    unique: true,
+    index: true,
+    sparse: true,
   },
   facebookAccessToken: {
-    type: String, required: false, unique: true, index: true, sparse: true,
+    type: String,
+    required: false,
+    unique: true,
+    index: true,
+    sparse: true,
   },
-  email: { type: String, required: false },
-  emailVerified: { type: Boolean, required: true, default: false },
+  email: {
+    type: String,
+    required: false,
+  },
+  emailVerified: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
   phoneNumber: {
     type: String,
     required: true,
     validate: { validator(v) { return /\d{10}$/.test(v) && v.length === 10; } },
     index: true,
   },
-  phoneNumberVerified: { type: Boolean, required: true, default: false },
-  firstName: { type: String, required: true },
-  lastName: { type: String, required: true },
-  thumbnailURL: { type: String, required: false },
-  gender: { type: String, required: true, enum: ['male', 'female', 'nonbinary'] },
-  age: {
-    type: Number, required: true, min: 18, max: 100, index: true,
+  phoneNumberVerified: {
+    type: Boolean,
+    required: true,
+    default: false,
   },
-  birthdate: { type: Date, required: true },
-  locationName: { type: String, required: false },
-  locationCoordinates: { type: GeoJSONSchema, required: false },
-  school: { type: String, required: false },
-  schoolEmail: { type: String, required: false },
-  schoolEmailVerified: { type: Boolean, required: false, default: false },
-  isSeeking: { type: Boolean, required: true, default: false },
+  firstName: {
+    type: String,
+    required: true,
+  },
+  lastName: {
+    type: String,
+    required: true,
+  },
+  thumbnailURL: {
+    type: String,
+    required: false,
+  },
+  gender: {
+    type: String,
+    required: true,
+    enum: ['male', 'female', 'nonbinary'],
+  },
+  age: {
+    type: Number,
+    required: true,
+    min: 18,
+    max: 100,
+    index: true,
+  },
+  birthdate: {
+    type: Date,
+    required: true,
+  },
+  locationName: {
+    type: String,
+    required: false,
+  },
+  locationCoordinates: {
+    type: GeoJSONSchema,
+    required: false,
+  },
+  school: {
+    type: String,
+    required: false,
+  },
+  schoolEmail: {
+    type: String,
+    required: false,
+  },
+  schoolEmailVerified: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
+  isSeeking: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
 
-  pearPoints: { type: Number, required: true, default: 0 },
+  pearPoints: {
+    type: Number,
+    required: true,
+    default: 0,
+  },
 
-  displayedImages: { type: [ImageContainerSchema], required: true, default: [] },
-  bankImages: { type: [ImageContainerSchema], required: true, default: [] },
+  displayedImages: {
+    type: [ImageContainerSchema],
+    required: true,
+    default: [],
+  },
+  bankImages: {
+    type: [ImageContainerSchema],
+    required: true,
+    default: [],
+  },
 
   profile_ids: {
-    type: [Schema.Types.ObjectId], required: true, index: true, default: [],
+    type: [Schema.Types.ObjectId],
+    required: true,
+    index: true,
+    default: [],
   },
   endorsedProfile_ids: {
-    type: [Schema.Types.ObjectId], required: true, index: true, default: [],
+    type: [Schema.Types.ObjectId],
+    required: true,
+    index: true,
+    default: [],
   },
   detachedProfile_ids: {
-    type: [Schema.Types.ObjectId], required: true, index: true, default: [],
+    type: [Schema.Types.ObjectId],
+    required: true,
+    index: true,
+    default: [],
   },
 
-  discoveryQueue_id: { type: Schema.Types.ObjectId, required: true },
+  discoveryQueue_id: {
+    type: Schema.Types.ObjectId,
+    required: true,
+  },
 
   matchingDemographics: {
     type: MatchingDemographicsSchema,
@@ -312,20 +403,34 @@ const UserSchema = new Schema({
   },
 
   blockedUser_ids: {
-    type: [Schema.Types.ObjectId], required: true, index: true, default: [],
+    type: [Schema.Types.ObjectId],
+    required: true,
+    index: true,
+    default: [],
   },
   requestedMatch_ids: {
-    type: [Schema.Types.ObjectId], required: true, index: true, default: [],
+    type: [Schema.Types.ObjectId],
+    required: true,
+    index: true,
+    default: [],
   },
   currentMatch_ids: {
-    type: [Schema.Types.ObjectId], required: true, index: true, default: [],
+    type: [Schema.Types.ObjectId],
+    required: true,
+    index: true,
+    default: [],
   },
-  edgeSummaries: { type: [EdgeSummarySchema], required: true, default: [] },
+  edgeSummaries: {
+    type: [EdgeSummarySchema],
+    required: true,
+    default: [],
+  },
 }, { timestamps: true });
 
-UserSchema.virtual('fullName').get(function fullName() {
-  return `${this.firstName} ${this.lastName}`;
-});
+UserSchema.virtual('fullName')
+  .get(function fullName() {
+    return `${this.firstName} ${this.lastName}`;
+  });
 
 
 // profileObjs: { type: [, required: true,  UserProfile!]!
@@ -333,23 +438,18 @@ UserSchema.virtual('fullName').get(function fullName() {
 export const User = mongoose.model('User', UserSchema);
 
 // TODO: replace all of this with `return (new User(userinput)).save()` and handle error
-export const createUserObject = function
-createUserObject(userInput) {
+export const createUserObject = (userInput) => {
   const userModel = new User(userInput);
-
-
-  return new Promise((resolve, reject) => {
-    userModel.save((err) => {
-      if (err) {
-        reject(err);
-      }
-      resolve(userModel);
-    });
-  });
+  return userModel.save();
 };
 
-// TODO: Check if an edge with otherUser already exists, error if it does
 export const receiveRequest = (me, otherUser, match_id) => {
+  const alreadyExists = me.edgeSummaries.find(
+    edgeSummary => (edgeSummary.otherUser_id.toString() === otherUser._id.toString()),
+  );
+  if (alreadyExists !== undefined) {
+    throw new Error(`edge between ${me._id} and ${otherUser._id} already exists`);
+  }
   me.edgeSummaries.push({
     otherUser_id: otherUser._id,
     match_id,
@@ -358,8 +458,13 @@ export const receiveRequest = (me, otherUser, match_id) => {
   return me.save();
 };
 
-// TODO: Check if an edge with otherUser already exists, error if it does
 export const sendRequest = (me, otherUser, match_id) => {
+  const alreadyExists = me.edgeSummaries.find(
+    edgeSummary => (edgeSummary.otherUser_id.toString() === otherUser._id.toString()),
+  );
+  if (alreadyExists !== undefined) {
+    throw new Error(`edge between ${me._id} and ${otherUser._id} already exists`);
+  }
   me.edgeSummaries.push({
     otherUser_id: otherUser._id,
     match_id,
