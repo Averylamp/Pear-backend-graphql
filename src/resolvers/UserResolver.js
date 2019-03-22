@@ -2,8 +2,8 @@ import { authenticateUser } from './Authentication';
 import { DetachedProfile } from '../models/DetachedProfile';
 import { DiscoveryQueue, createDiscoveryQueueObject } from '../models/DiscoveryQueueModel';
 import { User, createUserObject } from '../models/UserModel';
-import { UserMatches, createUserMatchesObject } from '../models/UserMatchesModel';
 import { UserProfile } from '../models/UserProfileModel';
+import { Match } from '../models/MatchModel';
 
 const mongoose = require('mongoose');
 const $ = require('mongo-dot-notation');
@@ -49,29 +49,26 @@ export const resolvers = {
       .find({ _id: { $in: endorsedProfile_ids } }),
     detachedProfileObjs: async ({ detachedProfile_ids }) => DetachedProfile
       .find({ _id: { $in: detachedProfile_ids } }),
-    userMatchesObj: async ({ userMatches_id }) => UserMatches.findById(userMatches_id),
     discoveryQueueObj: async ({ discoveryQueue_id }) => DiscoveryQueue.findById(discoveryQueue_id),
+    blockedUsers: async ({ blockedUser_ids }) => User.find({ _id: { $in: blockedUser_ids } }),
+    requestedMatches: async ({ requestedMatch_ids }) => Match
+      .find({ _id: { $in: requestedMatch_ids } }),
+    currentMatches: async ({ currentMatch_ids }) => Match
+      .find({ _id: { $in: currentMatch_ids } }),
+    edgeUser_ids: async ({ edgeSummaries }) => [
+      ...new Set(edgeSummaries.map(summary => summary.otherUser_id)),
+    ],
   },
   Mutation: {
     createUser: async (_source, { userInput }) => {
       functionCallConsole('Create User');
       const userObjectID = '_id' in userInput ? userInput._id : mongoose.Types.ObjectId();
-      const userMatchesObjectID = mongoose.Types.ObjectId();
       const disoveryQueueObjectID = mongoose.Types.ObjectId();
 
       const finalUserInput = userInput;
       finalUserInput._id = userObjectID;
-      finalUserInput.userMatches_id = userMatchesObjectID;
       finalUserInput.discoveryQueue_id = disoveryQueueObjectID;
       const createUserObj = createUserObject(finalUserInput)
-        .catch(err => err);
-
-      const createUserMatchesObj = createUserMatchesObject(
-        {
-          user_id: userObjectID,
-          _id: userMatchesObjectID,
-        },
-      )
         .catch(err => err);
 
       const createDiscoveryQueueObj = createDiscoveryQueueObject(
@@ -82,10 +79,9 @@ export const resolvers = {
       )
         .catch(err => err);
 
-      return Promise.all([createUserObj, createUserMatchesObj, createDiscoveryQueueObj])
-        .then(([userObject, userMatchesObject, discoveryQueueObject]) => {
+      return Promise.all([createUserObj, createDiscoveryQueueObj])
+        .then(([userObject, discoveryQueueObject]) => {
           if (userObject instanceof Error
-            || userMatchesObject instanceof Error
             || discoveryQueueObject instanceof Error) {
             let message = '';
             if (userObject instanceof Error) {
@@ -96,17 +92,6 @@ export const resolvers = {
                   debug(`Failed to remove user object${err}`);
                 } else {
                   debug('Removed created user object successfully');
-                }
-              });
-            }
-            if (userMatchesObject instanceof Error) {
-              message += userMatchesObject.toString();
-            } else {
-              userMatchesObject.remove((err) => {
-                if (err) {
-                  debug(`Failed to remove user matches object${err}`);
-                } else {
-                  debug('Removed created user matches object successfully');
                 }
               });
             }

@@ -42,6 +42,7 @@
     "lodash": "^4.17.11",
     "mongo-dot-notation": "^1.2.0",
     "mongoose": "^5.4.13",
+    "nanoid": "^2.0.1",
     "request": "^2.88.0",
     "twilio": "^3.29.0"
   }
