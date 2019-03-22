@@ -105,3 +105,194 @@ export const UPDATE_DISPLAYED_PHOTOS = gql`
     }
   }
 `;
+
+export const PERSONAL_SEND_REQUEST = gql`
+  mutation PersonalCreateRequest($requestInput: PersonalCreateRequestInput!) {
+    personalCreateRequest(requestInput: $requestInput) {
+      success
+      message
+      match {
+        _id
+        sentByUser {
+          _id
+          fullName
+        }
+        sentForUser {
+          _id
+          fullName
+          requestedMatch_ids
+          currentMatch_ids
+          edgeUser_ids
+        }
+        receivedByUser {
+          _id
+          fullName
+          requestedMatch_ids
+          currentMatch_ids
+          edgeUser_ids
+        }
+        sentForUserStatus
+        receivedByUserStatus
+      }
+    }
+  }
+`;
+
+export const MATCHMAKER_SEND_REQUEST = gql`
+  mutation MatchmakerCreateRequest($requestInput: MatchmakerCreateRequestInput!) {
+    matchmakerCreateRequest(requestInput: $requestInput) {
+      success
+      message
+      match {
+        sentByUser {
+          _id
+          fullName
+          
+        }
+        sentForUser {
+          _id
+          fullName
+          requestedMatch_ids
+          currentMatch_ids
+          edgeUser_ids
+        }
+        receivedByUser {
+          _id
+          fullName
+          requestedMatch_ids
+          currentMatch_ids
+          edgeUser_ids
+        }
+        sentForUserStatus
+        receivedByUserStatus
+      }
+    }
+  }
+`;
+
+export const VIEW_REQUEST = gql`
+  mutation ViewRequest($user_id: ID!, $match_id: ID!) {
+    viewRequest(user_id: $user_id, match_id: $match_id) {
+      success
+      message
+      match {
+        sentByUser {
+          _id
+          fullName
+        }
+        sentForUser {
+          _id
+          fullName
+          requestedMatch_ids
+          currentMatch_ids
+          edgeUser_ids
+        }
+        receivedByUser {
+          _id
+          fullName
+          requestedMatch_ids
+          currentMatch_ids
+          edgeUser_ids
+        }
+        sentForUserStatus
+        receivedByUserStatus
+      }
+    }
+  }
+`;
+
+export const ACCEPT_REQUEST = gql`
+  mutation AcceptRequest($user_id: ID!, $match_id: ID!) {
+    acceptRequest(user_id: $user_id, match_id: $match_id) {
+      success
+      message
+      match {
+        sentByUser {
+          _id
+          fullName
+        }
+        sentForUser {
+          _id
+          fullName
+          requestedMatch_ids
+          currentMatch_ids
+          edgeUser_ids
+        }
+        receivedByUser {
+          _id
+          fullName
+          requestedMatch_ids
+          currentMatch_ids
+          edgeUser_ids
+        }
+        sentForUserStatus
+        receivedByUserStatus
+      }
+    }
+  }
+`;
+
+export const REJECT_REQUEST = gql`
+  mutation RejectRequest($user_id: ID!, $match_id: ID!) {
+    rejectRequest(user_id: $user_id, match_id: $match_id) {
+      success
+      message
+      match {
+        sentByUser {
+          _id
+          fullName
+        }
+        sentForUser {
+          _id
+          fullName
+          requestedMatch_ids
+          currentMatch_ids
+          edgeUser_ids
+        }
+        receivedByUser {
+          _id
+          fullName
+          requestedMatch_ids
+          currentMatch_ids
+          edgeUser_ids
+        }
+        sentForUserStatus
+        receivedByUserStatus
+      }
+    }
+  }
+`;
+
+export const UNMATCH = gql`
+  mutation Unmatch($user_id: ID!, $match_id: ID!, $reason: String) {
+    unmatch(user_id: $user_id, match_id: $match_id, reason: $reason) {
+      success
+      message
+      match {
+        sentByUser {
+          _id
+          fullName
+        }
+        sentForUser {
+          _id
+          fullName
+          requestedMatch_ids
+          currentMatch_ids
+          edgeUser_ids
+        }
+        receivedByUser {
+          _id
+          fullName
+          requestedMatch_ids
+          currentMatch_ids
+          edgeUser_ids
+        }
+        sentForUserStatus
+        receivedByUserStatus
+        unmatched
+        unmatchedBy_id
+        unmatchedReason
+      }
+    }
+  }
+`;

@@ -1,7 +1,14 @@
+import {
+  AVERY_PROFILE_MADE, BRIAN,
+  BRIAN_PROFILE_SAMMI, JOSH,
+  JOSH_PROFILE_SOPHIA, MADE, MADE_PROFILE_JOSH, SAMMI, SAMMI_PROFILE_BRIAN,
+  SAMMI_PROFILE_JOSH, SOPHIA, SOPHIA_PROFILE_SAMMI, SOPHIA_PROFILE_UMA, UMA, UMA_PROFILE_BRIAN,
+} from './TestsContants';
+
 export const CREATE_AVERY1_DETACHED_PROFILE_VARIABLES = {
   detachedProfileInput: {
-    _id: '5c82162afec46c84e9241112',
-    creatorUser_id: '5c82162afec46c84e924a336',
+    _id: AVERY_PROFILE_MADE,
+    creatorUser_id: MADE,
     creatorFirstName: 'Made',
     firstName: 'Avery',
     phoneNumber: '9738738225',
@@ -17,8 +24,8 @@ export const CREATE_AVERY1_DETACHED_PROFILE_VARIABLES = {
 
 export const CREATE_BRIAN1_DETACHED_PROFILE_VARIABLES = {
   detachedProfileInput: {
-    _id: '5c82162afec46c84e9241113',
-    creatorUser_id: '5c82162afec46c84e924a335',
+    _id: BRIAN_PROFILE_SAMMI,
+    creatorUser_id: SAMMI,
     creatorFirstName: 'Sammi',
     firstName: 'Brian',
     phoneNumber: '2067789236',
@@ -34,8 +41,8 @@ export const CREATE_BRIAN1_DETACHED_PROFILE_VARIABLES = {
 
 export const CREATE_JOSH1_DETACHED_PROFILE_VARIABLES = {
   detachedProfileInput: {
-    _id: '5c82162afec46c84e9241114',
-    creatorUser_id: '5c82162afec46c84e924a338',
+    _id: JOSH_PROFILE_SOPHIA,
+    creatorUser_id: SOPHIA,
     creatorFirstName: 'Sophia',
     firstName: 'Josh',
     phoneNumber: '6196160848',
@@ -51,8 +58,8 @@ export const CREATE_JOSH1_DETACHED_PROFILE_VARIABLES = {
 
 export const CREATE_SAMMI1_DETACHED_PROFILE_VARIABLES = {
   detachedProfileInput: {
-    _id: '5c82162afec46c84e9241115',
-    creatorUser_id: '5c82162afec46c84e924a334',
+    _id: SAMMI_PROFILE_JOSH,
+    creatorUser_id: JOSH,
     creatorFirstName: 'Josh',
     firstName: 'Sammi',
     phoneNumber: '9788733737',
@@ -68,8 +75,8 @@ export const CREATE_SAMMI1_DETACHED_PROFILE_VARIABLES = {
 
 export const CREATE_SAMMI2_DETACHED_PROFILE_VARIABLES = {
   detachedProfileInput: {
-    _id: '5c82162afec46c84e9241116',
-    creatorUser_id: '5c82162afec46c84e924a333',
+    _id: SAMMI_PROFILE_BRIAN,
+    creatorUser_id: BRIAN,
     creatorFirstName: 'Brian',
     firstName: 'Sammi',
     phoneNumber: '9788733737',
@@ -85,8 +92,8 @@ export const CREATE_SAMMI2_DETACHED_PROFILE_VARIABLES = {
 
 export const CREATE_MADE1_DETACHED_PROFILE_VARIABLES = {
   detachedProfileInput: {
-    _id: '5c82162afec46c84e9241117',
-    creatorUser_id: '5c82162afec46c84e924a334',
+    _id: MADE_PROFILE_JOSH,
+    creatorUser_id: JOSH,
     creatorFirstName: 'Josh',
     firstName: 'Made',
     phoneNumber: '6092402839',
@@ -102,8 +109,8 @@ export const CREATE_MADE1_DETACHED_PROFILE_VARIABLES = {
 
 export const CREATE_UMA1_DETACHED_PROFILE_VARIABLES = {
   detachedProfileInput: {
-    _id: '5c82162afec46c84e9241118',
-    creatorUser_id: '5c82162afec46c84e924a333',
+    _id: UMA_PROFILE_BRIAN,
+    creatorUser_id: BRIAN,
     creatorFirstName: 'Brian',
     firstName: 'Uma',
     phoneNumber: '9784296615',
@@ -119,8 +126,8 @@ export const CREATE_UMA1_DETACHED_PROFILE_VARIABLES = {
 
 export const CREATE_SOPHIA1_DETACHED_PROFILE_VARIABLES = {
   detachedProfileInput: {
-    _id: '5c82162afec46c84e9241119',
-    creatorUser_id: '5c82162afec46c84e924a335',
+    _id: SOPHIA_PROFILE_SAMMI,
+    creatorUser_id: SAMMI,
     creatorFirstName: 'Sammi',
     firstName: 'Sophia',
     phoneNumber: '7777777777',
@@ -136,8 +143,8 @@ export const CREATE_SOPHIA1_DETACHED_PROFILE_VARIABLES = {
 
 export const CREATE_SOPHIA2_DETACHED_PROFILE_VARIABLES = {
   detachedProfileInput: {
-    _id: '5c82162afec46c84e9241120',
-    creatorUser_id: '5c82162afec46c84e924a337',
+    _id: SOPHIA_PROFILE_UMA,
+    creatorUser_id: UMA,
     creatorFirstName: 'Uma',
     firstName: 'Sophia',
     phoneNumber: '7777777777',
