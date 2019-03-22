@@ -6,6 +6,7 @@ import { DiscoveryItem, DiscoveryQueue } from '../models/DiscoveryQueueModel';
 import { EXPECTED_TICKS_PER_NEW_PROFILE, MAX_FEED_LENGTH } from '../constants';
 
 const debug = require('debug')('dev:DiscoverProfile');
+const errorLog = require('debug')('error:DiscoverProfile');
 
 // gets a random element from an array
 // returns null if array is empty
@@ -173,7 +174,7 @@ export const nextDiscoveryItem = async (user) => {
         summary = await getMatchingSummaryFromDetachedProfileId(searchOrder[i].item);
       }
     } catch (e) {
-      debug(`error occurred while trying to get matching summary: ${e.toString}`);
+      errorLog(`error occurred while trying to get matching summary: ${e.toString()}`);
       continue;
     }
 
@@ -189,7 +190,7 @@ export const nextDiscoveryItem = async (user) => {
       summary.demographics,
       summary.blacklist);
     if (discoveredUser === null) {
-      debug(`couldn't find profile in constraints for ${searchOrder[i].profileType}: ${item_id}`);
+      errorLog(`couldn't find profile in constraints for ${searchOrder[i].profileType}: ${item_id}`);
     } else {
       return discoveredUser;
     }
@@ -209,7 +210,7 @@ export const updateDiscoveryWithNextItem = async (user) => {
   }
   const nextUser = await nextDiscoveryItem(user);
   if (nextUser === null) {
-    throw Error('Could not retrieve next discoveryitem for user');
+    throw Error(`Could not retrieve next discoveryitem for user: ${user._id}`);
   }
   debug(`adding user with id: ${nextUser._id}`);
   return DiscoveryQueue
@@ -247,7 +248,7 @@ export const updateAllDiscovery = async () => {
       if (Math.random() < (1 / EXPECTED_TICKS_PER_NEW_PROFILE)) {
         updateDiscoveryWithNextItem(user)
           .catch((err) => {
-            debug(`An error occurred: ${err.toString()}`);
+            errorLog(`An error occurred: ${err.toString()}`);
           });
       }
     }
