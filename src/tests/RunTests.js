@@ -1,4 +1,3 @@
-
 import { createTestClient } from 'apollo-server-testing';
 import {
   uploadImagesFromFolder,
@@ -7,11 +6,22 @@ import {
   createUsers,
   createDetachedProfiles,
   attachProfiles,
+  sendPersonalRequests,
+  sendMatchmakerRequests,
+  viewRequests,
+  acceptRequests,
+  rejectRequests, unmatches,
 } from './CreateTestDB';
 import {
+  ACCEPT_REQUEST,
   ATTACH_DETACHED_PROFILE,
   CREATE_DETACHED_PROFILE,
   CREATE_USER,
+  MATCHMAKER_SEND_REQUEST,
+  PERSONAL_SEND_REQUEST,
+  REJECT_REQUEST,
+  UNMATCH,
+  VIEW_REQUEST,
 } from './Mutations';
 import {
   MONGO_URL,
@@ -25,6 +35,17 @@ const errorLog = require('debug')('error:RunTests');
 const mongoose = require('mongoose');
 
 const verbose = process.env.VERBOSE ? process.env.VERBOSE : false;
+
+const checkForAndLogErrors = (result, keyName) => {
+  if (result.data && result.data[keyName]
+    && !result.data[keyName].success) {
+    errorLog(
+      `Error sending matchmaker match request: ${result.data[keyName].message}`,
+    );
+  } else if (result.errors) {
+    errorLog(`Error: ${result.errors}`);
+  }
+};
 
 export const runTests = async function runTests() {
   try {
@@ -55,10 +76,11 @@ export const runTests = async function runTests() {
           }));
       });
 
-      await Promise.all(collectionDropPromises).catch((err) => {
-        debug(`Failed to drop db ${err}`);
-        process.exit(1);
-      });
+      await Promise.all(collectionDropPromises)
+        .catch((err) => {
+          debug(`Failed to drop db ${err}`);
+          process.exit(1);
+        });
 
       const { mutate } = createTestClient(apolloServer);
 
@@ -145,7 +167,9 @@ export const runTests = async function runTests() {
           results.forEach((result) => {
             try {
               if (!result.data.createDetachedProfile.success) {
-                errorLog(`Error Creating Detached Profile: ${result.data.createDetachedProfile.message}`);
+                errorLog(
+                  `Error Creating Detached Profile: ${result.data.createDetachedProfile.message}`,
+                );
                 process.exit(1);
               }
             } catch (e) {
@@ -178,7 +202,9 @@ export const runTests = async function runTests() {
           results.forEach((result) => {
             try {
               if (!result.data.approveNewDetachedProfile.success) {
-                errorLog(`Error Creating Detached Profile: ${result.data.approveNewDetachedProfile.message}`);
+                errorLog(
+                  `Error Creating Detached Profile: ${result.data.approveNewDetachedProfile.message}`,
+                );
                 process.exit(1);
               }
             } catch (e) {
@@ -206,7 +232,88 @@ export const runTests = async function runTests() {
       // }
       // const updatePhotoResults = await Promise.all(updatePhotoPromises);
       // updatePhotoResults.forEach((result) => { debug(result); });
-      process.exit(0);
+
+      testLog('TESTING: Sending Match Requests');
+      for (const sendPersonalRequestVars of sendPersonalRequests) {
+        try {
+          const result = await mutate(({
+            mutation: PERSONAL_SEND_REQUEST,
+            variables: sendPersonalRequestVars,
+          }));
+          checkForAndLogErrors(result, 'personalCreateRequest');
+        } catch (e) {
+          errorLog(`Error: ${e.toString()}`);
+        }
+      }
+      for (const sendMatchmakerRequestVars of sendMatchmakerRequests) {
+        try {
+          const result = await mutate(({
+            mutation: MATCHMAKER_SEND_REQUEST,
+            variables: sendMatchmakerRequestVars,
+          }));
+          checkForAndLogErrors(result, 'matchmakerCreateRequest');
+        } catch (e) {
+          errorLog(`Error: ${e.toString()}`);
+        }
+      }
+
+      testLog('TESTING: Viewing Match Requests');
+      for (const viewRequestVars of viewRequests) {
+        try {
+          const result = await mutate(({
+            mutation: VIEW_REQUEST,
+            variables: viewRequestVars,
+          }));
+          checkForAndLogErrors(result, 'viewRequest');
+        } catch (e) {
+          errorLog(`Error: ${e.toString()}`);
+        }
+      }
+
+      testLog('TESTING: Accepting Match Requests');
+      for (const acceptRequestVars of acceptRequests) {
+        try {
+          const result = await mutate(({
+            mutation: ACCEPT_REQUEST,
+            variables: acceptRequestVars,
+          }));
+          checkForAndLogErrors(result, 'acceptRequest');
+        } catch (e) {
+          errorLog(`Error: ${e.toString()}`);
+        }
+      }
+
+      testLog('TESTING: Rejecting Match Requests');
+      for (const rejectRequestVars of rejectRequests) {
+        try {
+          const result = await mutate(({
+            mutation: REJECT_REQUEST,
+            variables: rejectRequestVars,
+          }));
+          checkForAndLogErrors(result, 'rejectRequest');
+        } catch (e) {
+          errorLog(`Error: ${e.toString()}`);
+        }
+      }
+
+      testLog('TESTING: Unmatching');
+      for (const unmatchVars of unmatches) {
+        try {
+          const result = await mutate(({
+            mutation: UNMATCH,
+            variables: unmatchVars,
+          }));
+          checkForAndLogErrors(result, 'unmatch');
+        } catch (e) {
+          errorLog(`Error: ${e.toString()}`);
+        }
+      }
+      testLog('***** Success Performing Match Operations *****\n');
+
+      // wait for any async db calls to finish
+      setTimeout(() => {
+        process.exit(0);
+      }, 2000);
     });
   } catch (e) {
     debug(e);

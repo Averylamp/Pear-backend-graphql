@@ -2,61 +2,149 @@ const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
 
-export const typeDef = `
-
-type Match{
-  _id: ID!
-  matchRequest_id: ID!
-  matchRequestObj: MatchRequest
-  firstPersonUser_id: ID!
-  firstPersonUserObj: User!
-  firstPersonProfile_id: ID
-  firstPersonProfileObj: UserProfile
-  secondPersonUser_id: ID!
-  secondPersonUserObj: User!
-  secondPersonProfile_id: ID
-  secondPersonProfileObj: UserProfile
-  timestampCreated: Int
-  matchStats: MatchStats
-  firebaseConversationDocumentID: String!
-}
-
-type MatchStats{
-  conversationFirstMessageSent: Boolean!
-  conversationTenMessagesSent: Boolean!
-  conversationHundredMessagesSent: Boolean!
+const queryRoutes = `
+extend type Query {
+  # Get a user by ID
+  match(id: ID!): Match
 }
 `;
 
-export const resolvers = {
-  Query: {
+const mutationRoutes = `
+extend type Mutation {
+  matchmakerCreateRequest(requestInput: MatchmakerCreateRequestInput!): MatchMutationResponse!
+  personalCreateRequest(requestInput: PersonalCreateRequestInput!): MatchMutationResponse!
+  viewRequest(user_id: ID!, match_id: ID!): MatchMutationResponse!
+  acceptRequest(user_id: ID!, match_id: ID!): MatchMutationResponse!
+  rejectRequest(user_id: ID!, match_id: ID!): MatchMutationResponse!
+  unmatch(user_id: ID!, match_id: ID!, reason: String): MatchMutationResponse!
+}
+`;
 
-  },
-  Match: {
+const createRequestMutationInputs = `
+input MatchmakerCreateRequestInput {
+  _id: ID # only for testing
+  matchmakerUser_id: ID!
+  sentForUser_id: ID!
+  receivedByUser_id: ID!
+}
 
-  },
-};
+input PersonalCreateRequestInput {
+  _id: ID # only for testing
+  sentForUser_id: ID!
+  receivedByUser_id: ID!
+}
+`;
+
+const mutationResponse = `
+type MatchMutationResponse {
+  success: Boolean!
+  message: String
+  match: Match
+}
+`;
+
+const requestResponseEnum = `
+enum RequestResponse {
+  unseen
+  seen
+  rejected
+  accepted
+}
+`;
+
+const matchType = `
+type Match{
+  _id: ID!
+
+  sentByUser_id: ID!
+  sentByUser: User
+  sentForUser_id: ID!
+  sentForUser: User
+  receivedByUser_id: ID!
+  receivedByUser: User
+
+  sentForUserStatus: RequestResponse!
+  sentForUserStatusLastUpdated: String!
+  receivedByUserStatus: RequestResponse!
+  receivedByUserStatusLastUpdated: String!
+
+  unmatched: Boolean!
+  unmatchedBy_id: ID
+  unmatchedReason: String
+  unmatchedTimestamp: String
+
+  firebaseChatDocumentID: String!
+}
+`;
+
+const edgeSummaryType = `
+type EdgeSummary {
+  _id: ID!
+  otherUser_id: ID!
+  edgeStatus: EdgeStatus!
+  lastStatusChange: String!
+  match_id: ID!
+}
+
+enum EdgeStatus{
+  open
+  rejected
+  match
+  unmatched
+}
+
+`;
+
+
+export const typeDef = queryRoutes
+  + mutationRoutes
+  + createRequestMutationInputs
+  + mutationResponse
+  + requestResponseEnum
+  + matchType
+  + edgeSummaryType;
 
 const MatchSchema = new Schema({
   _id: { type: Schema.Types.ObjectId, required: true },
-  matchRequest_id: { type: Schema.Types.ObjectId, required: true },
-  firstPersonUser_id: { type: Schema.Types.ObjectId, required: true },
-  firstPersonProfile_id: { type: Schema.Types.ObjectId, required: true },
-  secondPersonUser_id: { type: Schema.Types.ObjectId, required: true },
-  secondPersonProfile_id: { type: Schema.Types.ObjectId, required: true },
-  timestampCreated: { type: Number, required: true },
-  matchStats: {
-    conversationFirstMessageSent: { type: Boolean, required: true, default: false },
-    conversationTenMessagesSent: { type: Boolean, required: true, default: false },
-    conversationHundredMessagesSent: { type: Boolean, required: true, default: false },
+  sentByUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
+  sentForUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
+  receivedByUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
+
+  sentForUserStatus: {
+    type: String,
+    required: true,
+    enum: ['unseen', 'seen', 'rejected', 'accepted'],
+    default: 'unseen',
   },
-  firebaseConversationDocumentID: { type: String, required: true },
+  sentForUserStatusLastUpdated: { type: Date, required: true, default: Date },
+  receivedByUserStatus: {
+    type: String,
+    required: true,
+    enum: ['unseen', 'seen', 'rejected', 'accepted'],
+    default: 'unseen',
+  },
+  receivedByUserStatusLastUpdated: { type: Date, required: true, default: Date },
+
+  unmatched: { type: Boolean, required: true, default: false },
+  unmatchedBy_id: { type: Schema.Types.ObjectId, required: false },
+  unmatchedReason: { type: String, required: false },
+  unmatchedTimestamp: { type: Date, required: false },
+
+  firebaseChatDocumentID: { type: String, required: true },
 }, { timestamps: true });
 
+export const EdgeSummarySchema = new Schema({
+  otherUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
+  edgeStatus: {
+    type: String,
+    required: true,
+    enum: ['open', 'rejected', 'match', 'unmatched'],
+    default: 'open',
+  },
+  lastStatusChange: { type: Date, required: true, default: Date },
+  match_id: { type: Schema.Types.ObjectId, required: true, index: true },
+}, { timestamps: true });
 
-// matchRequestObj: MatchRequest
-// firstPersonUserObj: User!
-// firstPersonProfileObj: UserProfile!
-// secondPersonUserObj: User!
-// secondPersonProfileObj: UserProfile!
 export const Match = mongoose.model('Match', MatchSchema);
+
+export const createMatchObject = matchInput => (new Match(matchInput)).save();
