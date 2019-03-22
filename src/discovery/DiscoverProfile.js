@@ -139,6 +139,9 @@ export const nextDiscoveryItem = async (user) => {
     DETACHED_PROFILE_ID: 'detached profile',
   };
   let searchOrder = [];
+  //  Objects with:
+  //  item: [UserObject | DetachedProfile_id | UserProfile_id]
+  //  profileType: Enum of type [UserObject | Document_ID]
   searchOrder.push({
     item: user,
     profileType: ProfileTypeEnum.ME,

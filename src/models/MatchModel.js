@@ -55,34 +55,54 @@ enum RequestResponse {
 const matchType = `
 type Match{
   _id: ID!
-  
+
   sentByUser_id: ID!
   sentByUser: User
   sentForUser_id: ID!
   sentForUser: User
   receivedByUser_id: ID!
   receivedByUser: User
-  
+
   sentForUserStatus: RequestResponse!
   sentForUserStatusLastUpdated: String!
   receivedByUserStatus: RequestResponse!
   receivedByUserStatusLastUpdated: String!
-  
+
   unmatched: Boolean!
   unmatchedBy_id: ID
   unmatchedReason: String
   unmatchedTimestamp: String
-  
+
   firebaseChatDocumentID: String!
 }
 `;
+
+const edgeSummaryType = `
+type EdgeSummary {
+  _id: ID!
+  otherUser_id: ID!
+  edgeStatus: EdgeStatus!
+  lastStatusChange: String!
+  match_id: ID!
+}
+
+enum EdgeStatus{
+  open
+  rejected
+  match
+  unmatched
+}
+
+`;
+
 
 export const typeDef = queryRoutes
   + mutationRoutes
   + createRequestMutationInputs
   + mutationResponse
   + requestResponseEnum
-  + matchType;
+  + matchType
+  + edgeSummaryType;
 
 const MatchSchema = new Schema({
   _id: { type: Schema.Types.ObjectId, required: true },
