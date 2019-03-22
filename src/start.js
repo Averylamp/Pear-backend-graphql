@@ -28,16 +28,10 @@ import {
 } from './resolvers/DetachedProfileResolver';
 import {
   typeDef as Match,
-  resolvers as MatchResolvers,
 } from './models/MatchModel';
 import {
-  typeDef as UserMatches,
-  resolvers as UserMatchesResolvers,
-} from './models/UserMatchesModel';
-import {
-  typeDef as MatchRequest,
-  resolvers as MatchRequestResolvers,
-} from './models/MatchRequestModel';
+  resolvers as MatchResolvers,
+} from './resolvers/MatchResolver';
 import {
   typeDef as DiscoveryQueue,
 } from './models/DiscoveryQueueModel';
@@ -82,7 +76,7 @@ if (regenTestDBMode) {
     process.exit(1);
   }
 }
-const tracing = process.env.PERF === 'true' ? true : false;
+const tracing = process.env.PERF === 'true';
 if (tracing) debug('Perf mode detected');
 
 const URL = 'http://localhost';
@@ -123,8 +117,7 @@ function createApolloServer() {
     User,
     UserProfile,
     DetachedProfile,
-    Match, UserMatches,
-    MatchRequest,
+    Match,
     DiscoveryQueue,
     TestObject,
     ImageContainer,
@@ -138,8 +131,6 @@ function createApolloServer() {
     UserResolvers,
     DetachedProfileResolvers,
     MatchResolvers,
-    UserMatchesResolvers,
-    MatchRequestResolvers,
     DiscoveryQueueResolvers,
     TestObjectResolvers,
     ImageResolvers,

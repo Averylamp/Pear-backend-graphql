@@ -23,6 +23,7 @@ const getDemographicsFromUserOrDetachedProfile = user => pick(user, ['age', 'gen
 const getUserSatisfyingConstraints = async (constraints, demographics, blacklist) => {
   debug(`blacklist is: ${blacklist}`);
   const users = await User.find({
+    isSeeking: true,
     gender: {
       $in: constraints.seekingGender,
     },
@@ -40,35 +41,42 @@ const getUserSatisfyingConstraints = async (constraints, demographics, blacklist
     'matchingPreferences.maxAgeRange': {
       $gte: demographics.age,
     },
+    $where: 'this.profile_ids.length > 0',
   });
   debug(`number of users satisfying constraints: ${users.length}`);
   return getRandomFrom(users);
 };
 
 // gets a summary object from a detached profile object
-// a summary object contains a set of constraints, demographics, and blacklist
+// a summary object contains a set of constraints, demographics, blacklist, isSeeking
 const getMatchingSummaryFromDetachedProfile = async detachedProfile => ({
   constraints: detachedProfile.matchingPreferences,
   demographics: getDemographicsFromUserOrDetachedProfile(detachedProfile),
   blacklist: [],
+  isSeeking: true,
 });
 
 // gets a summary object from a user object
-// returns null if user.isSeeking is false
-const getMatchingSummaryFromUser = async (user, generateBlacklist = false) => (user.isSeeking
-  ? {
+// a summary object contains a set of constraints, demographics, blacklist, isSeeking
+const getMatchingSummaryFromUser = async (user, generateBlacklist = false) => {
+  let blacklist = [];
+  if (generateBlacklist) {
+    blacklist = [...new Set(user.edgeSummaries.map(summary => summary.otherUser_id))];
+    blacklist = blacklist.concat(user.blockedUser_ids);
+  }
+  return {
     constraints: user.matchingPreferences,
     demographics: getDemographicsFromUserOrDetachedProfile(user),
     // when generateBlacklist = true, pull in all blocked profiles + profiles already with an edge
     // generateBlacklist is true when this is an endorsed user
     // (see (5), (6) of blacklist logic comment)
-    blacklist: generateBlacklist ? [] : [],
-  }
-  : null);
+    blacklist,
+    isSeeking: user.isSeeking,
+  };
+};
 
 // gets a summary object from a user profile ID
-// returns null if the underlying user either has isSeeking set to false,
-// or if we can't find the underlying user object
+// throws if can't find user profile or underlying user
 const getMatchingSummaryFromProfileId = async profile_id => (UserProfile
   .findById(profile_id)
   .exec()
@@ -85,14 +93,10 @@ const getMatchingSummaryFromProfileId = async profile_id => (UserProfile
       throw new Error(`no endorsed user corresponding to profile with id ${profile_id}`);
     }
     return getMatchingSummaryFromUser(endorsedUser, true);
-  })
-  .catch((err) => {
-    debug(`error while retrieving profile with id ${profile_id}: ${err.toString()}`);
-    return null;
   }));
 
 // gets a summary object from a detached profile ID
-// returns null if we can't find the detached profile object
+// throws if we can't find the detached profile object
 const getMatchingSummaryFromDetachedProfileId = async detachedProfile_id => (DetachedProfile
   .findById(detachedProfile_id)
   .exec()
@@ -101,32 +105,33 @@ const getMatchingSummaryFromDetachedProfileId = async detachedProfile_id => (Det
       throw new Error(`no detached profile with id ${detachedProfile_id}`);
     }
     return getMatchingSummaryFromDetachedProfile(detachedProfile);
-  })
-  .catch((err) => {
-    debug(`error while retrieving detached profile with id ${detachedProfile_id}:
-    ${err.toString()}`);
-    return null;
   }));
 
 // gets a user to put in user's discovery feed
 // returns null if we can't find a next user to put in the discovery feed
-// TODO: this should really be optimized to not make like 3 db calls per endorsed profile
 export const nextDiscoveryItem = async (user) => {
-  // TODO: full blacklist logic
   // blacklist includes several types of blocked users:
   // 0. the user themselves
   // 1. users already in user's discovery feed
-  // 2. TODO: users who have an edge with this user
-  // 3. TODO: users in user's blocked list
-  // 4. TODO: (for a specific profile) users who already have an edge with this profile
-  // 5. TODO: (for a specific profile) users in the specific profile's blocked list
+  // 2. users who have an edge with this user
+  // 3. users in user's blocked list
+  // 3.5. users this user has endorsed
+  // 4. (for a specific profile) users who already have an edge with this profile
+  // 5. (for a specific profile) users in the specific profile's blocked list
   let userBlacklist = [];
   userBlacklist.push(user._id);
   const alreadyInFeed = (await DiscoveryQueue.findOne({ user_id: user._id }))
     .currentDiscoveryItems
     .map(item => item.user_id);
   userBlacklist = userBlacklist.concat(alreadyInFeed);
-  debug(`userBlacklist is ${userBlacklist}`);
+  userBlacklist = userBlacklist.concat(user.blockedUser_ids);
+  userBlacklist = userBlacklist.concat(
+    [...new Set(user.edgeSummaries.map(summary => summary.otherUser_id))],
+  );
+  const endorsedProfiles = await UserProfile.find(
+    { _id: { $in: user.endorsedProfile_ids } },
+  );
+  userBlacklist = userBlacklist.concat(endorsedProfiles.map(pf => pf.user_id));
 
   const ProfileTypeEnum = {
     ME: 'me',
@@ -134,6 +139,9 @@ export const nextDiscoveryItem = async (user) => {
     DETACHED_PROFILE_ID: 'detached profile',
   };
   let searchOrder = [];
+  //  Objects with:
+  //  item: [UserObject | DetachedProfile_id | UserProfile_id]
+  //  profileType: Enum of type [UserObject | Document_ID]
   searchOrder.push({
     item: user,
     profileType: ProfileTypeEnum.ME,
@@ -156,29 +164,34 @@ export const nextDiscoveryItem = async (user) => {
   for (let i = 0; i < searchOrder.length; i += 1) {
     // this loop only executes once unless a suitable discovery item can't be found for the
     // corresponding user/profile. so awaits inside the loop are fine
-    if (searchOrder[i].profileType === ProfileTypeEnum.ME) {
-      summary = await getMatchingSummaryFromUser(searchOrder[i].item);
-    } else if (searchOrder[i].profileType === ProfileTypeEnum.ENDORSED_PROFILE_ID) {
-      summary = await getMatchingSummaryFromProfileId(searchOrder[i].item);
-    } else {
-      summary = await getMatchingSummaryFromDetachedProfileId(searchOrder[i].item);
+    try {
+      if (searchOrder[i].profileType === ProfileTypeEnum.ME) {
+        summary = await getMatchingSummaryFromUser(searchOrder[i].item);
+      } else if (searchOrder[i].profileType === ProfileTypeEnum.ENDORSED_PROFILE_ID) {
+        summary = await getMatchingSummaryFromProfileId(searchOrder[i].item);
+      } else {
+        summary = await getMatchingSummaryFromDetachedProfileId(searchOrder[i].item);
+      }
+    } catch (e) {
+      debug(`error occurred while trying to get matching summary: ${e.toString}`);
+      continue;
+    }
+
+    if (!summary || !summary.isSeeking) {
+      continue;
     }
 
     const item_id = searchOrder[i].profileType === ProfileTypeEnum.ME
       ? searchOrder[i].item._id : searchOrder[i].item;
-    if (summary !== null) {
-      debug(`suggesting item for ${searchOrder[i].profileType}: ${item_id}`);
-      summary.blacklist = summary.blacklist.concat(userBlacklist);
-      const discoveredUser = await getUserSatisfyingConstraints(summary.constraints,
-        summary.demographics,
-        summary.blacklist);
-      if (discoveredUser === null) {
-        debug(`couldn't find profile in constraints for ${searchOrder[i].profileType}: ${item_id}`);
-      } else {
-        return discoveredUser;
-      }
+    debug(`suggesting item for ${searchOrder[i].profileType}: ${item_id}`);
+    summary.blacklist = summary.blacklist.concat(userBlacklist);
+    const discoveredUser = await getUserSatisfyingConstraints(summary.constraints,
+      summary.demographics,
+      summary.blacklist);
+    if (discoveredUser === null) {
+      debug(`couldn't find profile in constraints for ${searchOrder[i].profileType}: ${item_id}`);
     } else {
-      debug(`couldn't generate constraints for ${searchOrder[i].profileType}: ${item_id}`);
+      return discoveredUser;
     }
     debug(`no suggested discovery items for ${searchOrder[i].profileType}: ${item_id}`);
   }
@@ -205,6 +218,9 @@ export const updateDiscoveryWithNextItem = async (user) => {
         currentDiscoveryItems: {
           $each: [new DiscoveryItem({ user_id: nextUser._id })],
           $slice: -1 * MAX_FEED_LENGTH,
+        },
+        historyDiscoveryItems: {
+          $each: [new DiscoveryItem({ user_id: nextUser._id })],
         },
       },
     })
