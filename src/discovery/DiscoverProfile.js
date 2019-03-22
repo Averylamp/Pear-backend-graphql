@@ -216,6 +216,9 @@ export const updateDiscoveryWithNextItem = async (user) => {
           $each: [new DiscoveryItem({ user_id: nextUser._id })],
           $slice: -1 * MAX_FEED_LENGTH,
         },
+        historyDiscoveryItems: {
+          $each: [new DiscoveryItem({ user_id: nextUser._id })],
+        },
       },
     })
     .exec();
