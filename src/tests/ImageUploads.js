@@ -26,6 +26,9 @@ export const uploadImagesFromFolder = async (folder, uploadedByUser_id) => {
           finalItems = finalItems.concat(items);
         }
       }
+      if (process.env.SKIP_IMAGES) {
+        finalItems = [items[0]];
+      }
       debug(`Uploading images for ${folder}: ${finalItems.length} found`);
       finalItems.forEach((item) => {
         const itemPath = path.join(__dirname, `testImages/${folder}/${item}`);
