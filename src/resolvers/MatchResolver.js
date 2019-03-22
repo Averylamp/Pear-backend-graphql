@@ -360,22 +360,36 @@ export const resolvers = {
   },
   Mutation: {
     matchmakerCreateRequest: async (_source, { requestInput }) => {
-      const matchID = '_id' in requestInput ? requestInput._id : mongoose.Types.ObjectId();
-      return createNewMatch(
-        requestInput.matchmakerUser_id,
-        requestInput.sentForUser_id,
-        requestInput.receivedByUser_id,
-        matchID,
-      );
+      try {
+        const matchID = '_id' in requestInput ? requestInput._id : mongoose.Types.ObjectId();
+        return createNewMatch(
+          requestInput.matchmakerUser_id,
+          requestInput.sentForUser_id,
+          requestInput.receivedByUser_id,
+          matchID,
+        );
+      } catch (e) {
+        return {
+          success: false,
+          message: e.toString(),
+        };
+      }
     },
     personalCreateRequest: async (_source, { requestInput }) => {
-      const matchID = '_id' in requestInput ? requestInput._id : mongoose.Types.ObjectId();
-      return createNewMatch(
-        requestInput.sentForUser_id,
-        requestInput.sentForUser_id,
-        requestInput.receivedByUser_id,
-        matchID,
-      );
+      try {
+        const matchID = '_id' in requestInput ? requestInput._id : mongoose.Types.ObjectId();
+        return createNewMatch(
+          requestInput.sentForUser_id,
+          requestInput.sentForUser_id,
+          requestInput.receivedByUser_id,
+          matchID,
+        );
+      } catch (e) {
+        return {
+          success: false,
+          message: e.toString(),
+        };
+      }
     },
     viewRequest: async (_source, { user_id, match_id }) => {
       try {
