@@ -76,7 +76,7 @@ if (regenTestDBMode) {
     process.exit(1);
   }
 }
-const tracing = process.env.PERF === 'true' ? true : false;
+const tracing = process.env.PERF === 'true';
 if (tracing) debug('Perf mode detected');
 
 const URL = 'http://localhost';
