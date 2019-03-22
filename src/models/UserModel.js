@@ -1,6 +1,7 @@
 import { MatchingDemographicsSchema, MatchingPreferencesSchema } from './MatchingSchemas';
 import { GeoJSONSchema } from './TypeSchemas';
 import { ImageContainerSchema } from './ImageSchemas';
+import { EdgeSummarySchema } from './MatchModel';
 
 const mongoose = require('mongoose');
 
@@ -100,17 +101,6 @@ input UserDemographicsInput{
   height: Int
 }
 
-input UserStatsInput{
-  totalNumberOfMatchRequests: Int
-  totalNumberOfMatches: Int
-  totalNumberOfProfilesCreated: Int
-  totalNumberOfEndorsementsCreated: Int
-  conversationTotalNumber: Int
-  conversationTotalNumberFirstMessage: Int
-  conversationTotalNumberTenMessages: Int
-  conversationTotalNumberHundredMessages: Int
-}
-
 input UpdateUserInput {
   deactivated: Boolean
   firebaseToken: String
@@ -132,7 +122,6 @@ input UpdateUserInput {
   birthdate: String
   age: Int
   userPreferences: UserPreferencesInput
-  userStats: UserStatsInput
   userDemographics: UserDemographicsInput
   pearPoints: Int
 }
@@ -196,29 +185,34 @@ type User {
   # All Detached Profiles for a user
   detachedProfileObjs: [DetachedProfile!]!
 
-  userMatches_id: ID!
-  userMatchesObj: UserMatches!
-
   discoveryQueue_id: ID!
   discoveryQueueObj: DiscoveryQueue!
 
-  userStats: UserStats!
-
   matchingPreferences: MatchingPreferences!
   matchingDemographics: MatchingDemographics!
+
+  blockedUser_ids: [ID!]!
+  blockedUsers: [User]!
+
+  # Open match requests which this user has not yet made a decision on
+  requestedMatch_ids: [ID!]!
+  requestedMatches: [Match!]!
+
+  # Matches this user is a part of which both parties have accepted
+  currentMatch_ids: [ID!]!
+  currentMatches: [Match!]!
+
+  # All users this user has ever been part of a match with (whether request, accepted, unmatched)
+  # This field is not stored in MongoDB. Rather, the resolver pulls this information from
+  # the EdgeSummaries field.
+  edgeUser_ids: [ID!]!
+
+  # FOR TESTING ONLY:
+  # edgeSummaries: [EdgeSummary!]!
 }
 
-type UserStats{
-  totalNumberOfMatchRequests: Int!
-  totalNumberOfMatches: Int!
-  totalNumberOfProfilesCreated: Int!
-  totalNumberOfEndorsementsCreated: Int!
-  conversationTotalNumber: Int!
-  conversationTotalNumberFirstMessage: Int!
-  conversationTotalNumberTenMessages: Int!
-  conversationTotalNumberHundredMessages: Int!
-}
 `;
+
 
 const mutationResponse = `
 type UserMutationResponse{
@@ -236,32 +230,18 @@ enum Gender{
 }
 `;
 export const typeDef = queryRoutes
-+ mutationRoutes
-+ getUserInputs
-+ createUserInputs
-+ updateUserInputs
-+ updateUserPhotosInput
-+ userType
-+ mutationResponse
-+ genderEnum;
-
-const UserStatsSchema = new Schema({
-  totalNumberOfMatchRequests: { type: Number, required: true, default: 0 },
-  totalNumberOfMatches: { type: Number, required: true, default: 0 },
-  totalNumberOfProfilesCreated: { type: Number, required: true, default: 0 },
-  totalNumberOfEndorsementsCreated: { type: Number, required: true, default: 0 },
-  conversationTotalNumber: { type: Number, required: true, default: 0 },
-  conversationTotalNumberFirstMessage: { type: Number, required: true, default: 0 },
-  conversationTotalNumberTenMessages: { type: Number, required: true, default: 0 },
-  conversationTotalNumberTwentyMessages: { type: Number, required: true, default: 0 },
-  conversationTotalNumberHundredMessages: { type: Number, required: true, default: 0 },
-});
+  + mutationRoutes
+  + getUserInputs
+  + createUserInputs
+  + updateUserInputs
+  + updateUserPhotosInput
+  + userType
+  + mutationResponse
+  + genderEnum;
 
 const UserSchema = new Schema({
   deactivated: { type: Boolean, required: true, default: false },
-  firebaseToken: {
-    type: String, required: true,
-  },
+  firebaseToken: { type: String, required: true },
   firebaseAuthID: {
     type: String, required: true, index: true, unique: true,
   },
@@ -310,10 +290,7 @@ const UserSchema = new Schema({
     type: [Schema.Types.ObjectId], required: true, index: true, default: [],
   },
 
-  userMatches_id: { type: Schema.Types.ObjectId, required: true },
   discoveryQueue_id: { type: Schema.Types.ObjectId, required: true },
-
-  userStats: { type: UserStatsSchema, required: true, default: UserStatsSchema },
 
   matchingDemographics: {
     type: MatchingDemographicsSchema,
@@ -326,28 +303,56 @@ const UserSchema = new Schema({
     default: MatchingPreferencesSchema,
   },
 
+  blockedUser_ids: {
+    type: [Schema.Types.ObjectId], required: true, index: true, default: [],
+  },
+  requestedMatch_ids: {
+    type: [Schema.Types.ObjectId], required: true, index: true, default: [],
+  },
+  currentMatch_ids: {
+    type: [Schema.Types.ObjectId], required: true, index: true, default: [],
+  },
+  edgeSummaries: { type: [EdgeSummarySchema], required: true, default: [] },
 }, { timestamps: true });
 
-UserSchema.virtual('fullName').get(function fullName() {
-  return `${this.firstName} ${this.lastName}`;
-});
+UserSchema.virtual('fullName')
+  .get(function fullName() {
+    return `${this.firstName} ${this.lastName}`;
+  });
 
-
-// profileObjs: { type: [, required: true,  UserProfile!]!
-// endorsedProfileObjs: { type: [, required: true,  UserProfile!]!
 export const User = mongoose.model('User', UserSchema);
 
-export const createUserObject = function
-createUserObject(userInput) {
+// TODO: replace all of this with `return (new User(userinput)).save()` and handle error
+export const createUserObject = (userInput) => {
   const userModel = new User(userInput);
+  return userModel.save();
+};
 
-
-  return new Promise((resolve, reject) => {
-    userModel.save((err) => {
-      if (err) {
-        reject(err);
-      }
-      resolve(userModel);
-    });
+export const receiveRequest = (me, otherUser, match_id) => {
+  const alreadyExists = me.edgeSummaries.find(
+    edgeSummary => (edgeSummary.otherUser_id.toString() === otherUser._id.toString()),
+  );
+  if (alreadyExists !== undefined) {
+    throw new Error(`edge between ${me._id} and ${otherUser._id} already exists`);
+  }
+  me.edgeSummaries.push({
+    otherUser_id: otherUser._id,
+    match_id,
   });
+  me.requestedMatch_ids.push(match_id);
+  return me.save();
+};
+
+export const sendRequest = (me, otherUser, match_id) => {
+  const alreadyExists = me.edgeSummaries.find(
+    edgeSummary => (edgeSummary.otherUser_id.toString() === otherUser._id.toString()),
+  );
+  if (alreadyExists !== undefined) {
+    throw new Error(`edge between ${me._id} and ${otherUser._id} already exists`);
+  }
+  me.edgeSummaries.push({
+    otherUser_id: otherUser._id,
+    match_id,
+  });
+  return me.save();
 };
