@@ -8,10 +8,6 @@ import { EXPECTED_TICKS_PER_NEW_PROFILE, MAX_FEED_LENGTH } from '../constants';
 const debug = require('debug')('dev:DiscoverProfile');
 const errorLog = require('debug')('error:DiscoverProfile');
 
-// gets a random element from an array
-// returns null if array is empty
-const getRandomFrom = array => (array.length > 0
-  ? array[Math.floor(Math.random() * array.length)] : null);
 
 // gets the age and gender fields from a user object or a detached profile
 const getDemographicsFromUserOrDetachedProfile = user => pick(user, ['age', 'gender']);
@@ -23,35 +19,44 @@ const getDemographicsFromUserOrDetachedProfile = user => pick(user, ['age', 'gen
 // throws error if can't find a user satisfying the above
 const getUserSatisfyingConstraints = async ({ constraints, demographics, blacklist }) => {
   debug(`Blacklist contains: ${blacklist}`);
-
-  const users = await User.find({
-    isSeeking: true,
-    gender: {
-      $in: constraints.seekingGender,
+  const users = await User.aggregate([{
+    $match: {
+      isSeeking: true,
+      gender: {
+        $in: constraints.seekingGender,
+      },
+      age: {
+        $lte: constraints.maxAgeRange,
+        $gte: constraints.minAgeRange,
+      },
+      _id: {
+        $nin: blacklist,
+      },
+      'matchingPreferences.seekingGender': demographics.gender,
+      'matchingPreferences.minAgeRange': {
+        $lte: demographics.age,
+      },
+      'matchingPreferences.maxAgeRange': {
+        $gte: demographics.age,
+      },
+      profileCount: {
+        $gte: 0,
+      },
     },
-    age: {
-      $lte: constraints.maxAgeRange,
-      $gte: constraints.minAgeRange,
+  },
+  {
+    $sample: {
+      size: 1,
     },
-    _id: {
-      $nin: blacklist,
-    },
-    'matchingPreferences.seekingGender': demographics.gender,
-    'matchingPreferences.minAgeRange': {
-      $lte: demographics.age,
-    },
-    'matchingPreferences.maxAgeRange': {
-      $gte: demographics.age,
-    },
-    $where: 'this.profile_ids.length > 0',
+  },
+  ]).catch((err) => {
+    errorLog(err);
+    throw err;
   });
-  debug(`Number of users satisfying constraints: ${users.length}`);
-  debug(users.map(user => user._id));
-  const ret = getRandomFrom(users);
-  if (!ret) {
-    throw new Error('no users found in constraints');
+  if (users.length === 1) {
+    return users[0];
   }
-  return ret;
+  throw new Error('no users found in constraints');
 };
 
 // gets a summary object from a detached profile object
@@ -151,8 +156,6 @@ export const nextDiscoveryItem = async ({ userObj }) => {
   // 4. (for a specific profile) users who already have an edge with this profile
   // 5. (for a specific profile) users in the specific profile's blocked list
   const userBlacklist = await getUserBlacklist({ userObj });
-  debug('User Blacklist:');
-  debug(userBlacklist);
   const ProfileTypeEnum = {
     ME: 'me',
     ENDORSED_PROFILE_ID: 'endorsed profile',
