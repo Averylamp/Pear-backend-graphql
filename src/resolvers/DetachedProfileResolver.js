@@ -179,6 +179,7 @@ export const resolvers = {
 
       let userObjectUpdate = {
         isSeeking: true,
+        $inc: { profileCount: 1 },
         $push: {
           profile_ids: profileId,
           bankImages: {
@@ -190,6 +191,7 @@ export const resolvers = {
       if (user.displayedImages.length < 6) {
         userObjectUpdate = {
           isSeeking: true,
+          $inc: { profileCount: 1 },
           $push: {
             profile_ids: profileId,
             bankImages: {
@@ -253,6 +255,7 @@ export const resolvers = {
               message += updateUserObjectResult.toString();
             } else {
               User.findByIdAndUpdate(user_id, {
+                $inc: { profileCount: -1 },
                 $pull: {
                   profile_ids: profileId,
                   bankImages: {
