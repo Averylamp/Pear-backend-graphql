@@ -237,7 +237,7 @@ export const resolvers = {
       }
 
       // create new user profile
-      const createUserProfileObjectePromise = createUserProfileObject(userProfileInput)
+      const createUserProfileObjectPromise = createUserProfileObject(userProfileInput)
         .catch(err => err);
 
       // link to first party, add photos to photobank
@@ -261,7 +261,7 @@ export const resolvers = {
         .catch(err => err);
 
       return Promise.all([
-        createUserProfileObjectePromise, updateUserObjectPromise,
+        createUserProfileObjectPromise, updateUserObjectPromise,
         updateCreatorObjectPromise, deleteDetachedProfilePromise])
         .then(async ([
           createUserProfileObjectResult, updateUserObjectResult,
@@ -288,7 +288,8 @@ export const resolvers = {
             if (updateUserObjectResult instanceof Error) {
               message += updateUserObjectResult.toString();
             } else {
-              User.findByIdAndUpdate(user_id, {
+              let arrayFilters = [];
+              const userUpdateRollback = {
                 $inc: { profileCount: -1 },
                 $pull: {
                   profile_ids: profileId,
@@ -296,7 +297,21 @@ export const resolvers = {
                     uploadedByUser_id: creator._id,
                   },
                 },
-              }, {}, (err) => {
+              };
+              if (!edgeExists) {
+                // remove the edge
+                userUpdateRollback.$pull.endorsementEdges = {
+                  otherUser_id: creator._id,
+                };
+              } else {
+                // remove the reference to user's profile
+                userUpdateRollback['endorsementEdges.$[element].myProfile_id'] = undefined;
+                arrayFilters = [{ 'element.otherUser_id': creator._id.toString() }];
+              }
+              User.findByIdAndUpdate(user_id, userUpdateRollback, {
+                new: true,
+                arrayFilters,
+              }, (err) => {
                 if (err) {
                   errorLog(`Failed to rollback user updates: ${err}`);
                   debug(`Failed to rollback user updates: ${err}`);
@@ -308,14 +323,29 @@ export const resolvers = {
             if (updateCreatorObjectResult instanceof Error) {
               message += updateCreatorObjectResult.toString();
             } else {
-              User.findByIdAndUpdate(user_id, {
+              let arrayFilters = [];
+              const creatorUpdateRollback = {
                 $push: {
                   detachedProfile_ids: detachedProfile_id,
                 },
                 $pull: {
                   endorsedProfile_ids: profileId,
                 },
-              }, {}, (err) => {
+              };
+              if (!edgeExists) {
+                // remove the edge
+                creatorUpdateRollback.$pull.endorsementEdges = {
+                  otherUser_id: user._id,
+                };
+              } else {
+                // remove the reference to the user's profile
+                creatorUpdateRollback['endorsementEdges.$[element].theirProfile_id'] = undefined;
+                arrayFilters = [{ 'element.otherUser_id': user._id.toString() }];
+              }
+              User.findByIdAndUpdate(creator._id.toString(), creatorUpdateRollback, {
+                new: true,
+                arrayFilters,
+              }, (err) => {
                 if (err) {
                   errorLog(`Failed to roll back creator object: ${err}`);
                   debug(`Failed to roll back creator object: ${err}`);
