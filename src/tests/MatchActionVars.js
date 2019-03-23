@@ -5,6 +5,7 @@ import {
 export const SEND_PERSONAL_REQUEST_1_VARIABLES = {
   requestInput: {
     _id: MATCH1,
+    sentByUser_id: JOSH,
     sentForUser_id: JOSH,
     receivedByUser_id: SAMMI,
   },
@@ -13,6 +14,7 @@ export const SEND_PERSONAL_REQUEST_1_VARIABLES = {
 export const SEND_PERSONAL_REQUEST_2_VARIABLES = {
   requestInput: {
     _id: MATCH2,
+    sentByUser_id: SOPHIA,
     sentForUser_id: SOPHIA,
     receivedByUser_id: AVERY,
   },
@@ -21,7 +23,7 @@ export const SEND_PERSONAL_REQUEST_2_VARIABLES = {
 export const SEND_MATCHMAKER_REQUEST_3_VARIABLES = {
   requestInput: {
     _id: MATCH3,
-    matchmakerUser_id: BRIAN,
+    sentByUser_id: BRIAN,
     sentForUser_id: SAMMI,
     receivedByUser_id: UMA,
   },
@@ -30,7 +32,7 @@ export const SEND_MATCHMAKER_REQUEST_3_VARIABLES = {
 export const SEND_MATCHMAKER_REQUEST_4_VARIABLES = {
   requestInput: {
     _id: MATCH4,
-    matchmakerUser_id: BRIAN,
+    sentByUser_id: BRIAN,
     sentForUser_id: UMA,
     receivedByUser_id: AVERY,
   },
@@ -39,7 +41,7 @@ export const SEND_MATCHMAKER_REQUEST_4_VARIABLES = {
 export const SEND_MATCHMAKER_REQUEST_5_VARIABLES = {
   requestInput: {
     _id: MATCH5,
-    matchmakerUser_id: MADE,
+    sentByUser_id: MADE,
     sentForUser_id: AVERY,
     receivedByUser_id: SAMMI,
   },
@@ -48,7 +50,7 @@ export const SEND_MATCHMAKER_REQUEST_5_VARIABLES = {
 export const SEND_MATCHMAKER_REQUEST_6_VARIABLES = {
   requestInput: {
     _id: MATCH6,
-    matchmakerUser_id: JOSH,
+    sentByUser_id: JOSH,
     sentForUser_id: SAMMI,
     receivedByUser_id: BRIAN,
   },
