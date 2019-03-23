@@ -223,17 +223,21 @@ export const runTests = async function runTests() {
             updateDiscoveryForUserById({ user_id: user.data.createUser.user._id }),
           );
         }
-        const discoveryResults = await Promise.all(generateDiscoveryPromises)
-          .then((results) => {
-            results.forEach((result) => {
-              if (!result._id) {
-                errorLog((`Error Updating Discovery: ${result}`));
-                process.exit(1);
-              }
+        try {
+          const discoveryResults = await Promise.all(generateDiscoveryPromises)
+            .then((results) => {
+              results.forEach((result) => {
+                if (!result._id) {
+                  errorLog((`Error Updating Discovery: ${result}`));
+                  process.exit(1);
+                }
+              });
             });
-          });
-        if (verbose) discoveryResults.forEach(result => verboseDebug(result));
-        successLog(`* Successful Discovery Round ${i + 1} *\n`);
+          if (verbose) discoveryResults.forEach(result => verboseDebug(result));
+          successLog(`* Successful Discovery Round ${i + 1} *\n`);
+        } catch (e) {
+          errorLog((`Error: ${e.toString()}`));
+        }
       }
       successLog('***** Success Generating Discovery Items *****\n');
 
