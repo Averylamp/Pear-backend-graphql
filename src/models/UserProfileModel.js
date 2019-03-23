@@ -66,8 +66,8 @@ const UserProfileSchema = new Schema({
 export const EndorsementEdgeSchema = new Schema({
   active: { type: Schema.Types.Boolean, required: true, default: true },
   otherUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
-  myProfile_id: { type: Schema.Types.ObjectId, required: true, index: true },
-  theirProfile_id: { type: Schema.Types.ObjectId, required: true, index: true },
+  myProfile_id: { type: Schema.Types.ObjectId, required: false, index: true },
+  theirProfile_id: { type: Schema.Types.ObjectId, required: false, index: true },
 });
 
 
