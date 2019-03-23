@@ -234,7 +234,7 @@ export const nextDiscoveryItem = async ({ userObj }) => {
       errorLog(`Couldn't find profile in constraints for ${searchOrder[i].profileType}: ${item_id}`);
     }
   }
-  errorLog(`No suggested discovery items for User: ${userObj._is}`);
+  errorLog(`No suggested discovery items for User: ${userObj._id}`);
   throw Error(`Could not retrieve next discoveryitem for user: ${userObj._id}`);
 };
 
