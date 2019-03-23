@@ -343,19 +343,22 @@ export const runTests = async function runTests() {
       }
       successLog('***** Success Rejecting Match Requests *****\n');
 
-      testLog('TESTING: Unmatching');
-      for (const unmatchVars of unmatches) {
-        try {
-          const result = await mutate(({
-            mutation: UNMATCH,
-            variables: unmatchVars,
-          }));
-          checkForAndLogErrors(result, 'unmatch');
-        } catch (e) {
-          errorLog((`Error: ${e.toString()}`));
+
+      if (!process.env.SKIP_UNMATCHING) {
+        testLog('TESTING: Unmatching');
+        for (const unmatchVars of unmatches) {
+          try {
+            const result = await mutate(({
+              mutation: UNMATCH,
+              variables: unmatchVars,
+            }));
+            checkForAndLogErrors(result, 'unmatch');
+          } catch (e) {
+            errorLog((`Error: ${e.toString()}`));
+          }
         }
+        successLog('***** Success Unmatching *****\n');
       }
-      successLog('***** Success Unmatching *****\n');
 
 
       const line = '****************************************\n';
