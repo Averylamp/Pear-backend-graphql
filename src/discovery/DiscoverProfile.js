@@ -21,7 +21,7 @@ const getDemographicsFromUserOrDetachedProfile = user => pick(user, ['age', 'gen
 // demographics satisfies u's constraints
 // u is not in the blacklist
 // throws error if can't find a user satisfying the above
-const getUserSatisfyingConstraints = async (constraints, demographics, blacklist) => {
+const getUserSatisfyingConstraints = async ({ constraints, demographics, blacklist }) => {
   debug(`Blacklist contains: ${blacklist}`);
 
   const users = await User.find({
@@ -223,9 +223,11 @@ export const nextDiscoveryItem = async ({ userObj }) => {
     debug(`Suggesting item for ${searchOrder[i].profileType}: ${item_id}`);
     summary.blacklist = [...new Set([...summary.blacklist, ...userBlacklist])];
     try {
-      const discoveredUser = await getUserSatisfyingConstraints(summary.constraints,
-        summary.demographics,
-        summary.blacklist);
+      const discoveredUser = await getUserSatisfyingConstraints({
+        constraints: summary.constraints,
+        demographics: summary.demographics,
+        blacklist: summary.blacklist,
+      });
       return discoveredUser;
     } catch (err) {
       errorLog(err);
