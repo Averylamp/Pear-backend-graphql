@@ -20,7 +20,7 @@ const getDemographicsFromUserOrDetachedProfile = user => pick(user, ['age', 'gen
 // u's demographics satisfies constraints
 // demographics satisfies u's constraints
 // u is not in the blacklist
-// returns null if can't find a user satisfying the above
+// throws error if can't find a user satisfying the above
 const getUserSatisfyingConstraints = async (constraints, demographics, blacklist) => {
   debug(`Blacklist contains: ${blacklist}`);
 
@@ -47,7 +47,11 @@ const getUserSatisfyingConstraints = async (constraints, demographics, blacklist
   });
   debug(`Number of users satisfying constraints: ${users.length}`);
   debug(users.map(user => user._id));
-  return getRandomFrom(users);
+  const ret = getRandomFrom(users);
+  if (!ret) {
+    throw new Error('no users found in constraints');
+  }
+  return ret;
 };
 
 // gets a summary object from a detached profile object
@@ -218,16 +222,17 @@ export const nextDiscoveryItem = async ({ userObj }) => {
       ? searchOrder[i].item._id : searchOrder[i].item;
     debug(`Suggesting item for ${searchOrder[i].profileType}: ${item_id}`);
     summary.blacklist = [...new Set([...summary.blacklist, ...userBlacklist])];
-    const discoveredUser = await getUserSatisfyingConstraints(summary.constraints,
-      summary.demographics,
-      summary.blacklist);
-    if (discoveredUser === null) {
-      errorLog(`Couldn't find profile in constraints for ${searchOrder[i].profileType}: ${item_id}`);
-    } else {
+    try {
+      const discoveredUser = await getUserSatisfyingConstraints(summary.constraints,
+        summary.demographics,
+        summary.blacklist);
       return discoveredUser;
+    } catch (err) {
+      errorLog(err);
+      errorLog(`Couldn't find profile in constraints for ${searchOrder[i].profileType}: ${item_id}`);
     }
-    debug(`No suggested discovery items for ${searchOrder[i].profileType}: ${item_id}`);
   }
+  errorLog(`No suggested discovery items for User: ${userObj._is}`);
   throw Error(`Could not retrieve next discoveryitem for user: ${userObj._id}`);
 };
 
