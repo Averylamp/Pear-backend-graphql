@@ -27,6 +27,10 @@ import {
   MONGO_URL,
   apolloServer,
 } from '../start';
+import {
+  updateDiscoveryForUserById,
+} from '../discovery/DiscoverProfile';
+
 
 const debug = require('debug')('dev:tests:RunTests');
 const testLog = require('debug')('dev:tests:Test');
@@ -38,7 +42,7 @@ const verbose = process.env.VERBOSE ? process.env.VERBOSE : false;
 const chalk = require('chalk');
 
 const testCaseStyling = chalk.yellow.bold;
-const successStyling = chalk.rgb(0, 255, 0).bold;
+const successStyling = chalk.rgb(75, 255, 67).bold;
 const errorStyling = chalk.red.bold;
 
 const checkForAndLogErrors = (result, keyName) => {
@@ -157,7 +161,7 @@ export const runTests = async function runTests() {
       }
 
       // CREATE DETACHED PROFILES
-      testLog(testCaseStyling(`${'TESTING:'.orange} Creating Detached Profiles`));
+      testLog(testCaseStyling('TESTING: Creating Detached Profiles'));
       const createDetachedProfilePromises = [];
       for (let i = 0; i < createDetachedProfiles.length; i += 1) {
         const detachedProfileVars = createDetachedProfiles[i];
@@ -237,6 +241,31 @@ export const runTests = async function runTests() {
       // }
       // const updatePhotoResults = await Promise.all(updatePhotoPromises);
       // updatePhotoResults.forEach((result) => { debug(result); });
+
+      testLog(testCaseStyling('TESTING: Generating Discovery Items'));
+      const discoveryIterations = 4;
+      testLog(testCaseStyling(`ROUNDS: ${discoveryIterations}`));
+      for (let i = 0; i < discoveryIterations; i += 1) {
+        const generateDiscoveryPromises = [];
+        for (const user of createUserResults) {
+          generateDiscoveryPromises.push(
+            updateDiscoveryForUserById({ user_id: user.data.createUser.user._id }),
+          );
+        }
+        const discoveryResults = await Promise.all(generateDiscoveryPromises)
+          .then((results) => {
+            results.forEach((result) => {
+              if (!result._id) {
+                errorLog(errorStyling(`Error Updating Discovery: ${result}`));
+                process.exit(1);
+              }
+            });
+          });
+        if (verbose) discoveryResults.forEach(result => verboseDebug(result));
+        testLog(successStyling(`* Successful Discovery Round ${i + 1} *\n`));
+      }
+      testLog(successStyling('***** Success Generating Discovery Items *****\n'));
+
 
       testLog(testCaseStyling('TESTING: Sending Match Requests'));
       for (const sendPersonalRequestVars of sendPersonalRequests) {
@@ -319,6 +348,7 @@ export const runTests = async function runTests() {
         }
       }
       testLog(successStyling('***** Success Unmatching *****\n'));
+
 
       const line = '****************************************\n';
       const passed = '*********** All Tests Passed ***********\n';
