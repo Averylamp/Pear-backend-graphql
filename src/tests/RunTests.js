@@ -17,8 +17,7 @@ import {
   ATTACH_DETACHED_PROFILE,
   CREATE_DETACHED_PROFILE,
   CREATE_USER,
-  MATCHMAKER_SEND_REQUEST,
-  PERSONAL_SEND_REQUEST,
+  CREATE_MATCH_REQUEST,
   REJECT_REQUEST,
   UNMATCH,
   VIEW_REQUEST,
@@ -27,14 +26,27 @@ import {
   MONGO_URL,
   apolloServer,
 } from '../start';
+import {
+  updateDiscoveryForUserById,
+} from '../discovery/DiscoverProfile';
+
 
 const debug = require('debug')('dev:tests:RunTests');
-const testLog = require('debug')('dev:tests:Test');
+const testLogger = require('debug')('dev:tests:Test');
 const verboseDebug = require('debug')('dev:tests:verbose:RunTests');
-const errorLog = require('debug')('error:RunTests');
+const errorLogger = require('debug')('error:RunTests');
 const mongoose = require('mongoose');
 
 const verbose = process.env.VERBOSE ? process.env.VERBOSE : false;
+const chalk = require('chalk');
+
+const testCaseStyling = chalk.yellow.bold;
+const successStyling = chalk.rgb(75, 255, 67).bold;
+const errorStyling = chalk.red.bold;
+
+const errorLog = log => errorLogger(errorStyling(log));
+const testLog = log => testLogger(testCaseStyling(log));
+const successLog = log => testLogger(successStyling(log));
 
 const checkForAndLogErrors = (result, keyName) => {
   if (result.data && result.data[keyName]
@@ -43,7 +55,7 @@ const checkForAndLogErrors = (result, keyName) => {
       `Error performing action ${keyName}: ${result.data[keyName].message}`,
     );
   } else if (result.errors) {
-    errorLog(`Error: ${result.errors}`);
+    errorLog(`Error with request ${keyName}: ${result.toString()}`);
   }
 };
 
@@ -78,13 +90,14 @@ export const runTests = async function runTests() {
 
       await Promise.all(collectionDropPromises)
         .catch((err) => {
-          debug(`Failed to drop db ${err}`);
+          errorLog(`Failed to drop db ${err}`);
           process.exit(1);
         });
 
       const { mutate } = createTestClient(apolloServer);
 
       // CREATE USERS
+      const createUserResults = [];
       testLog('TESTING: Create Users');
       for (const userVars of createUsers) {
         try {
@@ -96,11 +109,13 @@ export const runTests = async function runTests() {
             verboseDebug(result);
           }
           checkForAndLogErrors(result, 'createUser');
+          createUserResults.push(result);
         } catch (e) {
-          errorLog(`Error: ${e.toString()}`);
+          errorLog(`${e}`);
+          process.exit(1);
         }
       }
-      testLog('***** Success Creating Users *****\n');
+      successLog('***** Success Creating Users *****\n');
 
 
       // UPLOAD DETACHED PROFILE IMAGES
@@ -119,26 +134,26 @@ export const runTests = async function runTests() {
       const timerStart = process.hrtime();
       const uploadImagesResults = await Promise.all(uploadDetachedProfileImages)
         .catch((err) => {
-          errorLog(err);
+          errorLog(`${err}`);
           process.exit(1);
         });
       if (verbose) uploadImagesResults.forEach((result) => { verboseDebug(result); });
-      testLog('***** Success Uploading Images *****\n');
+      successLog('***** Success Uploading Images *****\n');
       let imageCount = 0;
       let imageErrorCount = 0;
       uploadImagesResults.forEach((result) => {
         imageCount += result.length;
         result.forEach((imageResult) => {
           if (!imageResult.imageID) {
-            errorLog('Image not uploaded properly');
-            errorLog(imageResult);
+            errorLog(('Image not uploaded properly'));
+            errorLog((`${imageResult}`));
             imageErrorCount += 1;
           }
         });
       });
       debug(`Finished Uploading ${imageCount} Images in ${process.hrtime(timerStart)[0]}s`);
       if (imageErrorCount > 0) {
-        errorLog(`ERROR UPLOADING ${imageErrorCount} Images`);
+        errorLog((`ERROR UPLOADING ${imageErrorCount} Images`));
         process.exit(1);
       }
 
@@ -157,10 +172,11 @@ export const runTests = async function runTests() {
           }
           checkForAndLogErrors(result, 'createDetachedProfile');
         } catch (e) {
-          errorLog(`Error: ${e.toString()}`);
+          errorLog((`${e}`));
+          process.exit(1);
         }
       }
-      testLog('***** Success Creating Detached Profiles *****\n');
+      successLog('***** Success Creating Detached Profiles *****\n');
 
       // ATTACH DETACHED PROFILES
       testLog('TESTING: Attaching Detached Profiles');
@@ -175,10 +191,11 @@ export const runTests = async function runTests() {
           }
           checkForAndLogErrors(result, 'approveNewDetachedProfile');
         } catch (e) {
-          errorLog(`Error: ${e.toString()}`);
+          errorLog((`${e}`));
+          process.exit(1);
         }
       }
-      testLog('***** Success Attaching Detached Profiles *****\n');
+      successLog('***** Success Attaching Detached Profiles *****\n');
 
       // UPDATE PHOTO ENDPOINT TESTING
       // const updatePhotoPromises = [];
@@ -191,29 +208,61 @@ export const runTests = async function runTests() {
       // const updatePhotoResults = await Promise.all(updatePhotoPromises);
       // updatePhotoResults.forEach((result) => { debug(result); });
 
+      testLog('TESTING: Generating Discovery Items');
+      let discoveryIterations = 4;
+      if (process.env.DISCOVERY_GENERATION_ROUNDS
+        && Number(process.env.DISCOVERY_GENERATION_ROUNDS)) {
+        const rounds = Number(process.env.DISCOVERY_GENERATION_ROUNDS);
+        discoveryIterations = rounds;
+      }
+      testLog(`ROUNDS: ${discoveryIterations}`);
+      for (let i = 0; i < discoveryIterations; i += 1) {
+        const generateDiscoveryPromises = [];
+        for (const user of createUserResults) {
+          generateDiscoveryPromises.push(
+            updateDiscoveryForUserById({ user_id: user.data.createUser.user._id }),
+          );
+        }
+        const discoveryResults = await Promise.all(generateDiscoveryPromises)
+          .then((results) => {
+            results.forEach((result) => {
+              if (!result._id) {
+                errorLog((`Error Updating Discovery: ${result}`));
+                process.exit(1);
+              }
+            });
+          });
+        if (verbose) discoveryResults.forEach(result => verboseDebug(result));
+        successLog(`* Successful Discovery Round ${i + 1} *\n`);
+      }
+      successLog('***** Success Generating Discovery Items *****\n');
+
+
       testLog('TESTING: Sending Match Requests');
       for (const sendPersonalRequestVars of sendPersonalRequests) {
         try {
           const result = await mutate(({
-            mutation: PERSONAL_SEND_REQUEST,
+            mutation: CREATE_MATCH_REQUEST,
             variables: sendPersonalRequestVars,
           }));
           checkForAndLogErrors(result, 'personalCreateRequest');
         } catch (e) {
-          errorLog(`Error: ${e.toString()}`);
+          errorLog((`Error: ${e.toString()}`));
         }
       }
       for (const sendMatchmakerRequestVars of sendMatchmakerRequests) {
         try {
           const result = await mutate(({
-            mutation: MATCHMAKER_SEND_REQUEST,
+            mutation: CREATE_MATCH_REQUEST,
             variables: sendMatchmakerRequestVars,
           }));
           checkForAndLogErrors(result, 'matchmakerCreateRequest');
         } catch (e) {
-          errorLog(`Error: ${e.toString()}`);
+          errorLog((`Error: ${e.toString()}`));
         }
       }
+      successLog('***** Success Sending Match Requests *****\n');
+
 
       testLog('TESTING: Viewing Match Requests');
       for (const viewRequestVars of viewRequests) {
@@ -224,9 +273,10 @@ export const runTests = async function runTests() {
           }));
           checkForAndLogErrors(result, 'viewRequest');
         } catch (e) {
-          errorLog(`Error: ${e.toString()}`);
+          errorLog((`Error: ${e.toString()}`));
         }
       }
+      successLog('***** Success Viewing Match Requests *****\n');
 
       testLog('TESTING: Accepting Match Requests');
       for (const acceptRequestVars of acceptRequests) {
@@ -237,9 +287,10 @@ export const runTests = async function runTests() {
           }));
           checkForAndLogErrors(result, 'acceptRequest');
         } catch (e) {
-          errorLog(`Error: ${e.toString()}`);
+          errorLog((`Error: ${e.toString()}`));
         }
       }
+      successLog('***** Success Accepting Match Requests *****\n');
 
       testLog('TESTING: Rejecting Match Requests');
       for (const rejectRequestVars of rejectRequests) {
@@ -250,23 +301,32 @@ export const runTests = async function runTests() {
           }));
           checkForAndLogErrors(result, 'rejectRequest');
         } catch (e) {
-          errorLog(`Error: ${e.toString()}`);
+          errorLog((`Error: ${e.toString()}`));
         }
+      }
+      successLog('***** Success Rejecting Match Requests *****\n');
+
+
+      if (!process.env.SKIP_UNMATCHING) {
+        testLog('TESTING: Unmatching');
+        for (const unmatchVars of unmatches) {
+          try {
+            const result = await mutate(({
+              mutation: UNMATCH,
+              variables: unmatchVars,
+            }));
+            checkForAndLogErrors(result, 'unmatch');
+          } catch (e) {
+            errorLog((`Error: ${e.toString()}`));
+          }
+        }
+        successLog('***** Success Unmatching *****\n');
       }
 
-      testLog('TESTING: Unmatching');
-      for (const unmatchVars of unmatches) {
-        try {
-          const result = await mutate(({
-            mutation: UNMATCH,
-            variables: unmatchVars,
-          }));
-          checkForAndLogErrors(result, 'unmatch');
-        } catch (e) {
-          errorLog(`Error: ${e.toString()}`);
-        }
-      }
-      testLog('***** Success Performing Match Operations *****\n');
+
+      const line = '****************************************\n';
+      const passed = '*********** All Tests Passed ***********\n';
+      successLog(line + passed + line);
 
       // wait for any async db calls to finish
       setTimeout(() => {

@@ -175,6 +175,8 @@ type User {
   profile_ids: [ID!]!
   # All Attached Profiles for a user
   profileObjs: [UserProfile!]!
+  # Number of profiles associated with the user
+  profileCount: Int!
 
   # All Created and Attached Profile IDs for a user
   endorsedProfile_ids: [ID!]!
@@ -286,6 +288,9 @@ const UserSchema = new Schema({
 
   profile_ids: {
     type: [Schema.Types.ObjectId], required: true, index: true, default: [],
+  },
+  profileCount: {
+    type: Number, required: true, index: true, default: 0,
   },
   endorsedProfile_ids: {
     type: [Schema.Types.ObjectId], required: true, index: true, default: [],

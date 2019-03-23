@@ -6,9 +6,6 @@ const request = require('request');
 
 const imageUploadURL = 'https://u6qoh0vm77.execute-api.us-east-1.amazonaws.com/default/imageCompressorUploader';
 
-// const imageUploadHost = "koala.mit.edu:1337"
-
-
 export const uploadImagesFromFolder = async (folder, uploadedByUser_id) => {
   const filePath = path.join(__dirname, `testImages/${folder}`);
   const imageMetadataPromises = [];
@@ -26,8 +23,8 @@ export const uploadImagesFromFolder = async (folder, uploadedByUser_id) => {
           finalItems = finalItems.concat(items);
         }
       }
-      if (process.env.SKIP_IMAGES) {
-        finalItems = [items[0]];
+      if (process.env.SKIP_IMAGES === 'true') {
+        finalItems = [];
       }
       debug(`Uploading images for ${folder}: ${finalItems.length} found`);
       finalItems.forEach((item) => {
