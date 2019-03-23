@@ -19,7 +19,7 @@ const getDemographicsFromUserOrDetachedProfile = user => pick(user, ['age', 'gen
 // u's demographics satisfies constraints
 // demographics satisfies u's constraints
 // u is not in the blacklist
-// returns null if can't find a user satisfying the above
+// throws error if can't find a user satisfying the above
 const getUserSatisfyingConstraints = async (constraints, demographics, blacklist) => {
   debug(`blacklist is: ${blacklist}`);
   const users = await User.find({
@@ -44,7 +44,11 @@ const getUserSatisfyingConstraints = async (constraints, demographics, blacklist
     $where: 'this.profile_ids.length > 0',
   });
   debug(`number of users satisfying constraints: ${users.length}`);
-  return getRandomFrom(users);
+  const ret = getRandomFrom(users);
+  if (!ret) {
+    throw new Error('no users found in constraints');
+  }
+  return ret;
 };
 
 // gets a summary object from a detached profile object
@@ -185,15 +189,9 @@ export const nextDiscoveryItem = async (user) => {
       ? searchOrder[i].item._id : searchOrder[i].item;
     debug(`suggesting item for ${searchOrder[i].profileType}: ${item_id}`);
     summary.blacklist = summary.blacklist.concat(userBlacklist);
-    const discoveredUser = await getUserSatisfyingConstraints(summary.constraints,
+    return getUserSatisfyingConstraints(summary.constraints,
       summary.demographics,
       summary.blacklist);
-    if (discoveredUser === null) {
-      debug(`couldn't find profile in constraints for ${searchOrder[i].profileType}: ${item_id}`);
-    } else {
-      return discoveredUser;
-    }
-    debug(`no suggested discovery items for ${searchOrder[i].profileType}: ${item_id}`);
   }
   return null;
 };
@@ -208,9 +206,6 @@ export const updateDiscoveryWithNextItem = async (user) => {
     throw Error('User doesn\'t exist or is deactivated');
   }
   const nextUser = await nextDiscoveryItem(user);
-  if (nextUser === null) {
-    throw Error('Could not retrieve next discoveryitem for user');
-  }
   debug(`adding user with id: ${nextUser._id}`);
   return DiscoveryQueue
     .findOneAndUpdate({ user_id: user._id }, {
