@@ -177,7 +177,7 @@ export const nextDiscoveryItem = async (user) => {
         summary = await getMatchingSummaryFromDetachedProfileId(searchOrder[i].item);
       }
     } catch (e) {
-      debug(`error occurred while trying to get matching summary: ${e.toString}`);
+      debug(`error occurred while trying to get matching summary: ${e.toString()}`);
       continue;
     }
 

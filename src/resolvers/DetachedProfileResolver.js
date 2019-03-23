@@ -44,7 +44,9 @@ export const resolvers = {
         $push: {
           detachedProfile_ids: detachedProfileID,
         },
-      }, { new: true }).exec().catch(err => err);
+      }, { new: true })
+        .exec()
+        .catch(err => err);
 
       const createDetachedProfileObj = createDetachedProfileObject(finalDetachedProfileInput)
         .catch(err => err);
@@ -109,13 +111,17 @@ export const resolvers = {
       functionCallConsole('Approve Profile Called');
 
       // check that user, detached profile, creator exist
-      const userPromise = User.findById(user_id).exec()
+      const userPromise = User.findById(user_id)
+        .exec()
         .catch(() => null);
-      const detachedProfilePromise = DetachedProfile.findById(detachedProfile_id).exec()
+      const detachedProfilePromise = DetachedProfile.findById(detachedProfile_id)
+        .exec()
         .catch(() => null);
-      const creatorPromise = User.findById(creatorUser_id).exec()
+      const creatorPromise = User.findById(creatorUser_id)
+        .exec()
         .catch(() => null);
-      const [user, detachedProfile, creator] = await Promise.all([userPromise,
+      const [user, detachedProfile, creator] = await Promise.all([
+        userPromise,
         detachedProfilePromise, creatorPromise]);
       if (!user) {
         return {
@@ -171,10 +177,6 @@ export const resolvers = {
         donts: detachedProfile.donts,
       };
 
-      // create new user profile
-      const createUserProfileObjectePromise = createUserProfileObject(userProfileInput)
-        .catch(err => err);
-
       let userObjectUpdate = {
         isSeeking: true,
         $push: {
@@ -184,7 +186,6 @@ export const resolvers = {
           },
         },
       };
-
       if (user.displayedImages.length < 6) {
         userObjectUpdate = {
           isSeeking: true,
@@ -200,22 +201,55 @@ export const resolvers = {
           },
         };
       }
+      let userUpdateArrayFilters = [];
+
+      const creatorObjectUpdate = {
+        $pull: {
+          detachedProfile_ids: detachedProfile_id,
+        },
+        $push: {
+          endorsedProfile_ids: profileId,
+        },
+      };
+      let creatorUpdateArrayFilters = [];
+
+      const edgeExists = user.endorsementEdges.find(
+        edge => (edge.otherUser_id.toString() === creator._id.toString()),
+      ) !== undefined;
+      if (!edgeExists) {
+        userObjectUpdate.$push.endorsementEdges = {
+          otherUser_id: creator._id,
+          myProfile_id: profileId,
+        };
+        creatorObjectUpdate.$push.endorsementEdges = {
+          otherUser_id: user._id,
+          theirProfile_id: profileId,
+        };
+      } else {
+        userObjectUpdate['endorsementEdges.$[element].myProfile_id'] = profileId;
+        creatorObjectUpdate['endorsementEdges.$[element].theirProfile_id'] = profileId;
+        userUpdateArrayFilters = [{ 'element.otherUser_id': creator._id.toString() }];
+        creatorUpdateArrayFilters = [{ 'element.otherUser_id': user._id.toString() }];
+      }
+
+      // create new user profile
+      const createUserProfileObjectePromise = createUserProfileObject(userProfileInput)
+        .catch(err => err);
 
       // link to first party, add photos to photobank
       const updateUserObjectPromise = User
-        .findByIdAndUpdate(user_id, userObjectUpdate, { new: true })
+        .findByIdAndUpdate(user_id, userObjectUpdate, {
+          new: true,
+          arrayFilters: userUpdateArrayFilters,
+        })
         .catch(err => err);
 
       // unlink detached profile from creator, link new endorsed profile
       const updateCreatorObjectPromise = User
-        .findByIdAndUpdate(creator._id, {
-          $pull: {
-            detachedProfile_ids: detachedProfile_id,
-          },
-          $push: {
-            endorsedProfile_ids: profileId,
-          },
-        }, { new: true })
+        .findByIdAndUpdate(creator._id, creatorObjectUpdate, {
+          new: true,
+          arrayFilters: creatorUpdateArrayFilters,
+        })
         .catch(err => err);
 
       // delete detached profile
