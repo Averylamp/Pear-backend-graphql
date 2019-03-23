@@ -246,7 +246,12 @@ export const runTests = async function runTests() {
       // updatePhotoResults.forEach((result) => { debug(result); });
 
       testLog('TESTING: Generating Discovery Items');
-      const discoveryIterations = 1;
+      let discoveryIterations = 4;
+      if (process.env.DISCOVERY_GENERATION_ROUNDS
+        && Number(process.env.DISCOVERY_GENERATION_ROUNDS)) {
+        const rounds = Number(process.env.DISCOVERY_GENERATION_ROUNDS);
+        discoveryIterations = rounds;
+      }
       testLog(`ROUNDS: ${discoveryIterations}`);
       for (let i = 0; i < discoveryIterations; i += 1) {
         const generateDiscoveryPromises = [];
@@ -338,19 +343,22 @@ export const runTests = async function runTests() {
       }
       successLog('***** Success Rejecting Match Requests *****\n');
 
-      testLog('TESTING: Unmatching');
-      for (const unmatchVars of unmatches) {
-        try {
-          const result = await mutate(({
-            mutation: UNMATCH,
-            variables: unmatchVars,
-          }));
-          checkForAndLogErrors(result, 'unmatch');
-        } catch (e) {
-          errorLog((`Error: ${e.toString()}`));
+
+      if (!process.env.SKIP_UNMATCHING) {
+        testLog('TESTING: Unmatching');
+        for (const unmatchVars of unmatches) {
+          try {
+            const result = await mutate(({
+              mutation: UNMATCH,
+              variables: unmatchVars,
+            }));
+            checkForAndLogErrors(result, 'unmatch');
+          } catch (e) {
+            errorLog((`Error: ${e.toString()}`));
+          }
         }
+        successLog('***** Success Unmatching *****\n');
       }
-      successLog('***** Success Unmatching *****\n');
 
 
       const line = '****************************************\n';
