@@ -106,9 +106,9 @@ export const UPDATE_DISPLAYED_PHOTOS = gql`
   }
 `;
 
-export const PERSONAL_SEND_REQUEST = gql`
-  mutation PersonalCreateRequest($requestInput: PersonalCreateRequestInput!) {
-    personalCreateRequest(requestInput: $requestInput) {
+export const CREATE_MATCH_REQUEST = gql`
+  mutation CreateMatchRequest($requestInput: CreateMatchRequestInput!) {
+    createMatchRequest(requestInput: $requestInput) {
       success
       message
       match {
@@ -138,37 +138,6 @@ export const PERSONAL_SEND_REQUEST = gql`
   }
 `;
 
-export const MATCHMAKER_SEND_REQUEST = gql`
-  mutation MatchmakerCreateRequest($requestInput: MatchmakerCreateRequestInput!) {
-    matchmakerCreateRequest(requestInput: $requestInput) {
-      success
-      message
-      match {
-        sentByUser {
-          _id
-          fullName
-          
-        }
-        sentForUser {
-          _id
-          fullName
-          requestedMatch_ids
-          currentMatch_ids
-          edgeUser_ids
-        }
-        receivedByUser {
-          _id
-          fullName
-          requestedMatch_ids
-          currentMatch_ids
-          edgeUser_ids
-        }
-        sentForUserStatus
-        receivedByUserStatus
-      }
-    }
-  }
-`;
 
 export const VIEW_REQUEST = gql`
   mutation ViewRequest($user_id: ID!, $match_id: ID!) {
