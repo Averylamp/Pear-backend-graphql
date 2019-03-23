@@ -24,7 +24,7 @@ export const uploadImagesFromFolder = async (folder, uploadedByUser_id) => {
         }
       }
       if (process.env.SKIP_IMAGES === 'true') {
-        finalItems = [items[0]];
+        finalItems = [];
       }
       debug(`Uploading images for ${folder}: ${finalItems.length} found`);
       finalItems.forEach((item) => {
