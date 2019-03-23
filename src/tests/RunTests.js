@@ -27,6 +27,10 @@ import {
   MONGO_URL,
   apolloServer,
 } from '../start';
+import {
+  updateDiscoveryForUserById,
+} from '../discovery/DiscoverProfile';
+
 
 const debug = require('debug')('dev:tests:RunTests');
 const testLog = require('debug')('dev:tests:Test');
@@ -35,15 +39,20 @@ const errorLog = require('debug')('error:RunTests');
 const mongoose = require('mongoose');
 
 const verbose = process.env.VERBOSE ? process.env.VERBOSE : false;
+const chalk = require('chalk');
+
+const testCaseStyling = chalk.yellow.bold;
+const successStyling = chalk.rgb(75, 255, 67).bold;
+const errorStyling = chalk.red.bold;
 
 const checkForAndLogErrors = (result, keyName) => {
   if (result.data && result.data[keyName]
     && !result.data[keyName].success) {
-    errorLog(
+    errorLog(errorStyling(
       `Error sending matchmaker match request: ${result.data[keyName].message}`,
-    );
+    ));
   } else if (result.errors) {
-    errorLog(`Error: ${result.errors}`);
+    errorLog(errorStyling(`Error: ${result}`));
   }
 };
 
@@ -59,7 +68,7 @@ export const runTests = async function runTests() {
     const { connection } = mongoose;
     connection.on('error', async () => {
       debug.bind(console, 'MongoDB connection error:');
-      errorLog('Failed to connect to mongo');
+      errorLog(errorStyling('Failed to connect to mongo'));
       process.exit(1);
     });
     connection.once('open', async () => {
@@ -78,14 +87,14 @@ export const runTests = async function runTests() {
 
       await Promise.all(collectionDropPromises)
         .catch((err) => {
-          debug(`Failed to drop db ${err}`);
+          errorLog(errorStyling(`Failed to drop db ${err}`));
           process.exit(1);
         });
 
       const { mutate } = createTestClient(apolloServer);
 
       // CREATE USERS
-      testLog('TESTING: Create Users');
+      testLog(testCaseStyling('TESTING: Create Users'));
       const createUserPromises = [];
       for (const userVars of createUsers) {
         createUserPromises.push(mutate({
@@ -97,23 +106,23 @@ export const runTests = async function runTests() {
         .then((results) => {
           results.forEach((result) => {
             if (!result.data.createUser.success) {
-              errorLog(`Error Creating User: ${result.data.createUser.message}`);
+              errorLog(errorStyling(`Error Creating User: ${result.data.createUser.message}`));
               process.exit(1);
             }
           });
           return results;
         })
         .catch((err) => {
-          errorLog(err);
+          errorLog(errorStyling(`${err}`));
           process.exit(1);
         });
 
       if (verbose) createUserResults.forEach((result) => { verboseDebug(result); });
-      testLog('***** Success Creating Users *****\n');
+      testLog(successStyling('***** Success Creating Users *****\n'));
 
 
       // UPLOAD DETACHED PROFILE IMAGES
-      testLog('TESTING: Uploading Images');
+      testLog(testCaseStyling('TESTING: Uploading Images'));
 
       const uploadDetachedProfileImages = [];
       for (const detachedProfileVars of createDetachedProfiles) {
@@ -128,31 +137,31 @@ export const runTests = async function runTests() {
       const timerStart = process.hrtime();
       const uploadImagesResults = await Promise.all(uploadDetachedProfileImages)
         .catch((err) => {
-          errorLog(err);
+          errorLog(errorStyling(`${err}`));
           process.exit(1);
         });
       if (verbose) uploadImagesResults.forEach((result) => { verboseDebug(result); });
-      testLog('***** Success Uploading Images *****\n');
+      testLog(successStyling('***** Success Uploading Images *****\n'));
       let imageCount = 0;
       let imageErrorCount = 0;
       uploadImagesResults.forEach((result) => {
         imageCount += result.length;
         result.forEach((imageResult) => {
           if (!imageResult.imageID) {
-            errorLog('Image not uploaded properly');
-            errorLog(imageResult);
+            errorLog(errorStyling('Image not uploaded properly'));
+            errorLog(errorStyling(`${imageResult}`));
             imageErrorCount += 1;
           }
         });
       });
       debug(`Finished Uploading ${imageCount} Images in ${process.hrtime(timerStart)[0]}s`);
       if (imageErrorCount > 0) {
-        errorLog(`ERROR UPLOADING ${imageErrorCount} Images`);
+        errorLog(errorStyling(`ERROR UPLOADING ${imageErrorCount} Images`));
         process.exit(1);
       }
 
       // CREATE DETACHED PROFILES
-      testLog('TESTING: Creating Detached Profiles');
+      testLog(testCaseStyling('TESTING: Creating Detached Profiles'));
       const createDetachedProfilePromises = [];
       for (let i = 0; i < createDetachedProfiles.length; i += 1) {
         const detachedProfileVars = createDetachedProfiles[i];
@@ -167,29 +176,29 @@ export const runTests = async function runTests() {
           results.forEach((result) => {
             try {
               if (!result.data.createDetachedProfile.success) {
-                errorLog(
+                errorLog(errorStyling(
                   `Error Creating Detached Profile: ${result.data.createDetachedProfile.message}`,
-                );
+                ));
                 process.exit(1);
               }
             } catch (e) {
-              errorLog('Error Printing out Results:');
-              errorLog(result);
-              errorLog(e);
+              errorLog(errorStyling('Error Printing out Results:'));
+              errorLog(errorStyling(`${result}`));
+              errorLog(errorStyling(`${e}`));
               process.exit(1);
             }
           });
           return results;
         })
         .catch((err) => {
-          errorLog(err);
+          errorLog(errorStyling(`${err}`));
           process.exit(1);
         });
       if (verbose) createDetachedProfileResults.forEach((result) => { verboseDebug(result); });
-      testLog('***** Success Creating Detached Profiles *****\n');
+      testLog(successStyling('***** Success Creating Detached Profiles *****\n'));
 
       // ATTACH DETACHED PROFILES
-      testLog('TESTING: Attaching Detached Profiles');
+      testLog(testCaseStyling('TESTING: Attaching Detached Profiles'));
       const attachProfilePromises = [];
       for (const attachProfileVars of attachProfiles) {
         attachProfilePromises.push(mutate({
@@ -202,25 +211,25 @@ export const runTests = async function runTests() {
           results.forEach((result) => {
             try {
               if (!result.data.approveNewDetachedProfile.success) {
-                errorLog(
+                errorLog(errorStyling(
                   `Error Creating Detached Profile: ${result.data.approveNewDetachedProfile.message}`,
-                );
+                ));
                 process.exit(1);
               }
             } catch (e) {
-              errorLog('Error Printing out Results');
-              errorLog(e);
+              errorLog(errorStyling('Error Printing out Results'));
+              errorLog(errorStyling(`${e}`));
               process.exit(1);
             }
           });
           return results;
         })
         .catch((err) => {
-          errorLog(err);
+          errorLog(errorStyling(`${err}`));
           process.exit(1);
         });
       if (verbose) attachProfileResults.forEach((result) => { verboseDebug(result); });
-      testLog('***** Success Attaching Detached Profiles *****\n');
+      testLog(successStyling('***** Success Attaching Detached Profiles *****\n'));
 
       // UPDATE PHOTO ENDPOINT TESTING
       // const updatePhotoPromises = [];
@@ -233,7 +242,32 @@ export const runTests = async function runTests() {
       // const updatePhotoResults = await Promise.all(updatePhotoPromises);
       // updatePhotoResults.forEach((result) => { debug(result); });
 
-      testLog('TESTING: Sending Match Requests');
+      testLog(testCaseStyling('TESTING: Generating Discovery Items'));
+      const discoveryIterations = 4;
+      testLog(testCaseStyling(`ROUNDS: ${discoveryIterations}`));
+      for (let i = 0; i < discoveryIterations; i += 1) {
+        const generateDiscoveryPromises = [];
+        for (const user of createUserResults) {
+          generateDiscoveryPromises.push(
+            updateDiscoveryForUserById({ user_id: user.data.createUser.user._id }),
+          );
+        }
+        const discoveryResults = await Promise.all(generateDiscoveryPromises)
+          .then((results) => {
+            results.forEach((result) => {
+              if (!result._id) {
+                errorLog(errorStyling(`Error Updating Discovery: ${result}`));
+                process.exit(1);
+              }
+            });
+          });
+        if (verbose) discoveryResults.forEach(result => verboseDebug(result));
+        testLog(successStyling(`* Successful Discovery Round ${i + 1} *\n`));
+      }
+      testLog(successStyling('***** Success Generating Discovery Items *****\n'));
+
+
+      testLog(testCaseStyling('TESTING: Sending Match Requests'));
       for (const sendPersonalRequestVars of sendPersonalRequests) {
         try {
           const result = await mutate(({
@@ -242,7 +276,7 @@ export const runTests = async function runTests() {
           }));
           checkForAndLogErrors(result, 'personalCreateRequest');
         } catch (e) {
-          errorLog(`Error: ${e.toString()}`);
+          errorLog(errorStyling(`Error: ${e.toString()}`));
         }
       }
       for (const sendMatchmakerRequestVars of sendMatchmakerRequests) {
@@ -253,11 +287,13 @@ export const runTests = async function runTests() {
           }));
           checkForAndLogErrors(result, 'matchmakerCreateRequest');
         } catch (e) {
-          errorLog(`Error: ${e.toString()}`);
+          errorLog(errorStyling(`Error: ${e.toString()}`));
         }
       }
+      testLog(successStyling('***** Success Sending Match Requests *****\n'));
 
-      testLog('TESTING: Viewing Match Requests');
+
+      testLog(testCaseStyling('TESTING: Viewing Match Requests'));
       for (const viewRequestVars of viewRequests) {
         try {
           const result = await mutate(({
@@ -266,11 +302,12 @@ export const runTests = async function runTests() {
           }));
           checkForAndLogErrors(result, 'viewRequest');
         } catch (e) {
-          errorLog(`Error: ${e.toString()}`);
+          errorLog(errorStyling(`Error: ${e.toString()}`));
         }
       }
+      testLog(successStyling('***** Success Viewing Match Requests *****\n'));
 
-      testLog('TESTING: Accepting Match Requests');
+      testLog(testCaseStyling('TESTING: Accepting Match Requests'));
       for (const acceptRequestVars of acceptRequests) {
         try {
           const result = await mutate(({
@@ -279,11 +316,12 @@ export const runTests = async function runTests() {
           }));
           checkForAndLogErrors(result, 'acceptRequest');
         } catch (e) {
-          errorLog(`Error: ${e.toString()}`);
+          errorLog(errorStyling(`Error: ${e.toString()}`));
         }
       }
+      testLog(successStyling('***** Success Accepting Match Requests *****\n'));
 
-      testLog('TESTING: Rejecting Match Requests');
+      testLog(testCaseStyling('TESTING: Rejecting Match Requests'));
       for (const rejectRequestVars of rejectRequests) {
         try {
           const result = await mutate(({
@@ -292,11 +330,12 @@ export const runTests = async function runTests() {
           }));
           checkForAndLogErrors(result, 'rejectRequest');
         } catch (e) {
-          errorLog(`Error: ${e.toString()}`);
+          errorLog(errorStyling(`Error: ${e.toString()}`));
         }
       }
+      testLog(successStyling('***** Success Rejecting Match Requests *****\n'));
 
-      testLog('TESTING: Unmatching');
+      testLog(testCaseStyling('TESTING: Unmatching'));
       for (const unmatchVars of unmatches) {
         try {
           const result = await mutate(({
@@ -305,10 +344,15 @@ export const runTests = async function runTests() {
           }));
           checkForAndLogErrors(result, 'unmatch');
         } catch (e) {
-          errorLog(`Error: ${e.toString()}`);
+          errorLog(errorStyling(`Error: ${e.toString()}`));
         }
       }
-      testLog('***** Success Performing Match Operations *****\n');
+      testLog(successStyling('***** Success Unmatching *****\n'));
+
+
+      const line = '****************************************\n';
+      const passed = '*********** All Tests Passed ***********\n';
+      testLog(successStyling(line + passed + line));
 
       // wait for any async db calls to finish
       setTimeout(() => {
