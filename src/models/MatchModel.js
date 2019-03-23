@@ -11,26 +11,34 @@ extend type Query {
 
 const mutationRoutes = `
 extend type Mutation {
-  matchmakerCreateRequest(requestInput: MatchmakerCreateRequestInput!): MatchMutationResponse!
-  personalCreateRequest(requestInput: PersonalCreateRequestInput!): MatchMutationResponse!
+  # Creates Match Request between Users
+  createMatchRequest(requestInput: CreateMatchRequestInput!): MatchMutationResponse!
+
+  # TODO: Document
   viewRequest(user_id: ID!, match_id: ID!): MatchMutationResponse!
+
+  # TODO: Document
   acceptRequest(user_id: ID!, match_id: ID!): MatchMutationResponse!
+
+  # TODO: Document
   rejectRequest(user_id: ID!, match_id: ID!): MatchMutationResponse!
+
+  # TODO: Document
   unmatch(user_id: ID!, match_id: ID!, reason: String): MatchMutationResponse!
 }
 `;
 
 const createRequestMutationInputs = `
-input MatchmakerCreateRequestInput {
+input CreateMatchRequestInput {
   _id: ID # only for testing
-  matchmakerUser_id: ID!
-  sentForUser_id: ID!
-  receivedByUser_id: ID!
-}
 
-input PersonalCreateRequestInput {
-  _id: ID # only for testing
+  # Either Matchmaker ID or User ID if personal request
+  sentByUser_id: ID!
+
+  # Always primary user
   sentForUser_id: ID!
+
+  # Discovered user receiving the request
   receivedByUser_id: ID!
 }
 `;
