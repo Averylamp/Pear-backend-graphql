@@ -90,9 +90,11 @@ export const resolvers = {
           // populate creator's feed if feed is empty (i.e. this is the first profile they've made)
           try {
             const feed = await DiscoveryQueue.findById(creator.discoveryQueue_id);
-            if (feed.currentDiscoveryItems.length === 0) {
+            const devMode = process.env.DEV === 'true';
+            const regenTestDBMode = (process.env.REGEN_DB === 'true' && devMode);
+            if (feed.currentDiscoveryItems.length === 0 && !regenTestDBMode) {
               for (let i = 0; i < INITIALIZED_FEED_LENGTH; i += 1) {
-                await updateDiscoveryWithNextItem(newUser);
+                await updateDiscoveryWithNextItem({ userObj: newUser });
               }
             }
           } catch (e) {
@@ -322,9 +324,11 @@ export const resolvers = {
           // all operations succeeded; populate discovery feeds if this the endorsee's first profile
           try {
             const feed = await DiscoveryQueue.findById(user.discoveryQueue_id);
-            if (feed.currentDiscoveryItems.length === 0) {
+            const devMode = process.env.DEV === 'true';
+            const regenTestDBMode = (process.env.REGEN_DB === 'true' && devMode);
+            if (feed.currentDiscoveryItems.length === 0 && !regenTestDBMode) {
               for (let i = 0; i < INITIALIZED_FEED_LENGTH; i += 1) {
-                await updateDiscoveryWithNextItem(updateCreatorObjectResult);
+                await updateDiscoveryWithNextItem({ userObj: updateCreatorObjectResult });
               }
             }
           } catch (e) {
