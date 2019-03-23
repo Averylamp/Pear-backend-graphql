@@ -115,6 +115,7 @@ const getMatchingSummaryFromDetachedProfileId = async ({ detachedProfile_id }) =
     return getMatchingSummaryFromDetachedProfile({ detachedProfileObj: detachedProfile });
   }));
 
+// generate the blacklist for a user who's feed we're generating, NOT a user we're suggesting for
 const getUserBlacklist = async ({ userObj }) => {
   const userBlacklist = new Set();
   userBlacklist.add(userObj._id);
@@ -163,7 +164,8 @@ export const nextDiscoveryItem = async ({ userObj }) => {
   //  item: [UserObject | DetachedProfile_id | UserProfile_id]
   //  profileType: Enum of type [UserObject | Document_ID]
 
-  // If you don't have any profiles, discovery shouldn't be generated on your behalf
+  // If you don't have any profiles, discovery shouldn't suggest a profile for your personal user
+  // obj
   if (userObj.profile_ids.length) {
     searchOrder.push({
       item: userObj,
