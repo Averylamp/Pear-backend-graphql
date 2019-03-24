@@ -1,3 +1,4 @@
+import nanoid from 'nanoid';
 import { pick } from 'lodash';
 import { DetachedProfile, createDetachedProfileObject } from '../models/DetachedProfile';
 import { User } from '../models/UserModel';
@@ -255,25 +256,30 @@ export const resolvers = {
       };
       let creatorUpdateArrayFilters = [];
 
-      const edgeExists = user.endorsementEdges.find(
+      let firebaseId = nanoid(20);
+      const endorsementEdge = user.endorsementEdges.find(
         edge => (edge.otherUser_id.toString() === creator._id.toString()),
-      ) !== undefined;
-      if (!edgeExists) {
+      );
+      if (!endorsementEdge) {
         userObjectUpdate.$push.endorsementEdges = {
           otherUser_id: creator._id,
           myProfile_id: profileId,
+          firebaseChatDocumentID: firebaseId,
         };
         creatorObjectUpdate.$push.endorsementEdges = {
           otherUser_id: user._id,
           theirProfile_id: profileId,
+          firebaseChatDocumentID: firebaseId,
         };
       } else {
         userObjectUpdate['endorsementEdges.$[element].myProfile_id'] = profileId;
         creatorObjectUpdate['endorsementEdges.$[element].theirProfile_id'] = profileId;
         userUpdateArrayFilters = [{ 'element.otherUser_id': creator._id.toString() }];
         creatorUpdateArrayFilters = [{ 'element.otherUser_id': user._id.toString() }];
+        firebaseId = endorsementEdge.firebaseChatDocumentID;
       }
 
+      userProfileInput.firebaseChatDocumentID = firebaseId;
       // create new user profile
       const createUserProfileObjectPromise = createUserProfileObject(userProfileInput)
         .catch(err => err);
@@ -336,8 +342,8 @@ export const resolvers = {
                   },
                 },
               };
-              if (!edgeExists) {
-                // remove the edge
+              if (!endorsementEdge) {
+                // we created an edge, so remove the edge
                 userUpdateRollback.$pull.endorsementEdges = {
                   otherUser_id: creator._id,
                 };
@@ -370,8 +376,8 @@ export const resolvers = {
                   endorsedProfile_ids: profileId,
                 },
               };
-              if (!edgeExists) {
-                // remove the edge
+              if (!endorsementEdge) {
+                // we created an edge, so remove the edge
                 creatorUpdateRollback.$pull.endorsementEdges = {
                   otherUser_id: user._id,
                 };
