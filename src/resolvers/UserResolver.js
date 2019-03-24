@@ -21,26 +21,28 @@ export const resolvers = {
       functionCallConsole('Get User Called');
       const token = userInput.firebaseToken;
       const uid = userInput.firebaseAuthID;
-      return new Promise(resolve => authenticateUser(uid, token).then((authenticatedUID) => {
-        const user = User.findOne({ firebaseAuthID: authenticatedUID });
-        if (user) {
-          resolve({
-            success: true,
-            message: 'Successfully fetched',
-            user,
-          });
-        } else {
+      return new Promise(resolve => authenticateUser(uid, token)
+        .then((authenticatedUID) => {
+          const user = User.findOne({ firebaseAuthID: authenticatedUID });
+          if (user) {
+            resolve({
+              success: true,
+              message: 'Successfully fetched',
+              user,
+            });
+          } else {
+            resolve({
+              success: false,
+              message: 'Failed to fetch user',
+            });
+          }
+        })
+        .catch((err) => {
           resolve({
             success: false,
-            message: 'Failed to fetch user',
+            message: err.toString(),
           });
-        }
-      }).catch((err) => {
-        resolve({
-          success: false,
-          message: err.toString(),
-        });
-      }));
+        }));
     },
   },
   User: {
@@ -58,6 +60,12 @@ export const resolvers = {
     edgeUser_ids: async ({ edgeSummaries }) => [
       ...new Set(edgeSummaries.map(summary => summary.otherUser_id)),
     ],
+    location: async ({ location }) => location.coordinates,
+    locationLastUpdated: async ({ location }) => location.updatedAt,
+    locationName: async ({ locationName }) => (locationName ? locationName.name : null),
+    locationNameLastUpdated: async ({ locationName }) => (locationName
+      ? locationName.updatedAt
+      : null),
   },
   Mutation: {
     createUser: async (_source, { userInput }) => {
@@ -68,6 +76,15 @@ export const resolvers = {
       const finalUserInput = userInput;
       finalUserInput._id = userObjectID;
       finalUserInput.discoveryQueue_id = disoveryQueueObjectID;
+      finalUserInput.location = {
+        type: 'Point',
+        coordinates: userInput.location,
+      };
+      if (userInput.locationName) {
+        finalUserInput.locationName = {
+          name: userInput.locationName,
+        };
+      }
       const createUserObj = createUserObject(finalUserInput)
         .catch(err => err);
 
@@ -83,6 +100,7 @@ export const resolvers = {
         .then(([userObject, discoveryQueueObject]) => {
           if (userObject instanceof Error
             || discoveryQueueObject instanceof Error) {
+            debug('error occurred while creating user');
             let message = '';
             if (userObject instanceof Error) {
               message += userObject.toString();
