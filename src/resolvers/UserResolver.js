@@ -1,3 +1,4 @@
+import { pick } from 'lodash';
 import { authenticateUser } from './Authentication';
 import { DetachedProfile } from '../models/DetachedProfile';
 import { DiscoveryQueue, createDiscoveryQueueObject } from '../models/DiscoveryQueueModel';
@@ -6,7 +7,6 @@ import { UserProfile } from '../models/UserProfileModel';
 import { Match } from '../models/MatchModel';
 
 const mongoose = require('mongoose');
-const $ = require('mongo-dot-notation');
 const debug = require('debug')('dev:UserResolvers');
 const functionCallConsole = require('debug')('dev:FunctionCalls');
 
@@ -60,12 +60,6 @@ export const resolvers = {
     edgeUser_ids: async ({ edgeSummaries }) => [
       ...new Set(edgeSummaries.map(summary => summary.otherUser_id)),
     ],
-    location: async ({ location }) => location.coordinates,
-    locationLastUpdated: async ({ location }) => location.updatedAt,
-    locationName: async ({ locationName }) => (locationName ? locationName.name : null),
-    locationNameLastUpdated: async ({ locationName }) => (locationName
-      ? locationName.updatedAt
-      : null),
   },
   Mutation: {
     createUser: async (_source, { userInput }) => {
@@ -73,17 +67,37 @@ export const resolvers = {
       const userObjectID = '_id' in userInput ? userInput._id : mongoose.Types.ObjectId();
       const disoveryQueueObjectID = mongoose.Types.ObjectId();
 
-      const finalUserInput = userInput;
+      const finalUserInput = pick(userInput, [
+        'age',
+        'birthdate',
+        'email',
+        'emailVerified',
+        'phoneNumber',
+        'phoneNumberVerified',
+        'firstName',
+        'lastName',
+        'gender',
+        'firebaseToken',
+        'firebaseAuthID',
+        'facebookId',
+        'facebookAccessToken',
+        'thumbnailURL']);
       finalUserInput._id = userObjectID;
       finalUserInput.discoveryQueue_id = disoveryQueueObjectID;
-      finalUserInput.location = {
-        type: 'Point',
-        coordinates: userInput.location,
+      const locationObj = {
+        point: {
+          coordinates: userInput.location,
+        },
       };
+      finalUserInput.matchingDemographics = {
+        location: locationObj,
+        gender: userInput.gender,
+        age: userInput.age,
+      };
+      finalUserInput.matchingPreferences = { location: locationObj };
       if (userInput.locationName) {
-        finalUserInput.locationName = {
-          name: userInput.locationName,
-        };
+        finalUserInput.matchingDemographics.locationName = { name: userInput.locationName };
+        finalUserInput.matchingPreferences.locationName = { name: userInput.locationName };
       }
       const createUserObj = createUserObject(finalUserInput)
         .catch(err => err);
@@ -135,30 +149,7 @@ export const resolvers = {
           };
         });
     },
-    updateUser: async (_source, { id, updateUserInput }) => {
-      functionCallConsole('Update User Called');
-      const finalUpdateUserInput = $.flatten(updateUserInput);
-      return new Promise(resolve => User.findByIdAndUpdate(
-        id, finalUpdateUserInput, {
-          new: true,
-          runValidators: true,
-        },
-        (err, user) => {
-          if (err) {
-            resolve({
-              success: false,
-              message: err.toString(),
-            });
-          } else {
-            resolve({
-              success: true,
-              user,
-              message: 'Successfully updated',
-            });
-          }
-        },
-      ));
-    },
+    updateUser: async () => null,
     updateUserPhotos: async (_source, { updateUserPhotosInput }) => {
       functionCallConsole('Update Photos Called');
       debug(`input object is ${updateUserPhotosInput}`);

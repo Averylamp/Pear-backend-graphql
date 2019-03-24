@@ -17,8 +17,6 @@ export const CREATE_USER = gql`
         phoneNumberVerified
         fullName
         thumbnailURL
-        locationName
-        location
         school
         schoolEmail
         schoolEmailVerified
