@@ -19,6 +19,7 @@ export const CREATE_AVERY_USER_VARIABLES = {
     // facebookId: '1',
     // facebookAccessToken: '2',
     thumbnailURL: '',
+    location: [-71.101366, 42.362580],
   },
 };
 
@@ -39,6 +40,7 @@ export const CREATE_BRIAN_USER_VARIABLES = {
     // facebookId: '3',
     // facebookAccessToken: '4',
     thumbnailURL: '',
+    location: [-71.101366, 42.362580],
   },
 };
 
@@ -59,6 +61,7 @@ export const CREATE_JOEL_USER_VARIABLES = {
     // facebookId: '3',
     // facebookAccessToken: '4',
     thumbnailURL: '',
+    location: [-122.422484, 37.751370],
   },
 };
 
@@ -79,6 +82,7 @@ export const CREATE_JOSH_USER_VARIABLES = {
     // facebookId: '3',
     // facebookAccessToken: '4',
     thumbnailURL: '',
+    location: [-71.101366, 42.362580],
   },
 };
 
@@ -99,6 +103,7 @@ export const CREATE_SAMMI_USER_VARIABLES = {
     // facebookId: '3',
     // facebookAccessToken: '4',
     thumbnailURL: '',
+    location: [-71.098088, 42.355988],
   },
 };
 
@@ -119,6 +124,7 @@ export const CREATE_MADE_USER_VARIABLES = {
     // facebookId: '3',
     // facebookAccessToken: '4',
     thumbnailURL: '',
+    location: [-71.116492, 42.373999],
   },
 };
 
@@ -139,6 +145,7 @@ export const CREATE_UMA_USER_VARIABLES = {
     // facebookId: '3',
     // facebookAccessToken: '4',
     thumbnailURL: '',
+    location: [-71.226725, 42.444342],
   },
 };
 
@@ -159,5 +166,6 @@ export const CREATE_SOPHIA_USER_VARIABLES = {
     // facebookId: '3',
     // facebookAccessToken: '4',
     thumbnailURL: '',
+    location: [-71.116492, 42.373999],
   },
 };

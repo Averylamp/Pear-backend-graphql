@@ -58,6 +58,7 @@ export const resolvers = {
     edgeUser_ids: async ({ edgeSummaries }) => [
       ...new Set(edgeSummaries.map(summary => summary.otherUser_id)),
     ],
+    location: async ({ location }) => location.coordinates,
   },
   Mutation: {
     createUser: async (_source, { userInput }) => {
@@ -68,6 +69,13 @@ export const resolvers = {
       const finalUserInput = userInput;
       finalUserInput._id = userObjectID;
       finalUserInput.discoveryQueue_id = disoveryQueueObjectID;
+      finalUserInput.location = {
+        type: 'Point',
+        coordinates: userInput.location,
+      };
+      if (userInput.locationName) {
+        finalUserInput.locationNameLastUpdated = new Date();
+      }
       const createUserObj = createUserObject(finalUserInput)
         .catch(err => err);
 
@@ -83,6 +91,7 @@ export const resolvers = {
         .then(([userObject, discoveryQueueObject]) => {
           if (userObject instanceof Error
             || discoveryQueueObject instanceof Error) {
+            debug('error occurred while creating user');
             let message = '';
             if (userObject instanceof Error) {
               message += userObject.toString();
