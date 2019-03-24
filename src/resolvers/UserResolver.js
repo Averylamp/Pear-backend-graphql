@@ -21,26 +21,28 @@ export const resolvers = {
       functionCallConsole('Get User Called');
       const token = userInput.firebaseToken;
       const uid = userInput.firebaseAuthID;
-      return new Promise(resolve => authenticateUser(uid, token).then((authenticatedUID) => {
-        const user = User.findOne({ firebaseAuthID: authenticatedUID });
-        if (user) {
-          resolve({
-            success: true,
-            message: 'Successfully fetched',
-            user,
-          });
-        } else {
+      return new Promise(resolve => authenticateUser(uid, token)
+        .then((authenticatedUID) => {
+          const user = User.findOne({ firebaseAuthID: authenticatedUID });
+          if (user) {
+            resolve({
+              success: true,
+              message: 'Successfully fetched',
+              user,
+            });
+          } else {
+            resolve({
+              success: false,
+              message: 'Failed to fetch user',
+            });
+          }
+        })
+        .catch((err) => {
           resolve({
             success: false,
-            message: 'Failed to fetch user',
+            message: err.toString(),
           });
-        }
-      }).catch((err) => {
-        resolve({
-          success: false,
-          message: err.toString(),
-        });
-      }));
+        }));
     },
   },
   User: {
@@ -59,6 +61,11 @@ export const resolvers = {
       ...new Set(edgeSummaries.map(summary => summary.otherUser_id)),
     ],
     location: async ({ location }) => location.coordinates,
+    locationLastUpdated: async ({ location }) => location.updatedAt,
+    locationName: async ({ locationName }) => locationName ? locationName.name : null,
+    locationNameLastUpdated: async ({ locationName }) => locationName
+      ? locationName.updatedAt
+      : null,
   },
   Mutation: {
     createUser: async (_source, { userInput }) => {
@@ -74,7 +81,9 @@ export const resolvers = {
         coordinates: userInput.location,
       };
       if (userInput.locationName) {
-        finalUserInput.locationNameLastUpdated = new Date();
+        finalUserInput.locationName = {
+          name: userInput.locationName,
+        };
       }
       const createUserObj = createUserObject(finalUserInput)
         .catch(err => err);
