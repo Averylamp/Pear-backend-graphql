@@ -63,7 +63,8 @@ export const MatchingPreferencesSchema = new Schema({
     type: Number, required: true, min: 0, max: 1, default: 0,
   },
   maxDistance: {
-    type: Number, required: true, min: 1, max: 100, default: 25,
+    // in miles
+    type: Number, required: true, min: 5, max: 200, default: 25,
   },
   distanceDealbreaker: {
     type: Number, required: true, min: 0, max: 1, default: 0,
