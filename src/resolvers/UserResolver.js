@@ -62,10 +62,10 @@ export const resolvers = {
     ],
     location: async ({ location }) => location.coordinates,
     locationLastUpdated: async ({ location }) => location.updatedAt,
-    locationName: async ({ locationName }) => locationName ? locationName.name : null,
-    locationNameLastUpdated: async ({ locationName }) => locationName
+    locationName: async ({ locationName }) => (locationName ? locationName.name : null),
+    locationNameLastUpdated: async ({ locationName }) => (locationName
       ? locationName.updatedAt
-      : null,
+      : null),
   },
   Mutation: {
     createUser: async (_source, { userInput }) => {
