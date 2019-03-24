@@ -52,7 +52,7 @@ const checkForAndLogErrors = (result, keyName) => {
   if (result.data && result.data[keyName]
     && !result.data[keyName].success) {
     errorLog(
-      `Error Sending Request ${keyName}: ${result.data[keyName].message}`,
+      `Error performing action ${keyName}: ${result.data[keyName].message}`,
     );
   } else if (result.errors) {
     errorLog(`Error with request ${keyName}: ${result.toString()}`);
@@ -97,30 +97,24 @@ export const runTests = async function runTests() {
       const { mutate } = createTestClient(apolloServer);
 
       // CREATE USERS
+      const createUserResults = [];
       testLog('TESTING: Create Users');
-      const createUserPromises = [];
       for (const userVars of createUsers) {
-        createUserPromises.push(mutate({
-          mutation: CREATE_USER,
-          variables: userVars,
-        }));
-      }
-      const createUserResults = await Promise.all(createUserPromises)
-        .then((results) => {
-          results.forEach((result) => {
-            if (!result.data.createUser.success) {
-              errorLog(`Error Creating User: ${result.data.createUser.message}`);
-              process.exit(1);
-            }
+        try {
+          const result = await mutate({
+            mutation: CREATE_USER,
+            variables: userVars,
           });
-          return results;
-        })
-        .catch((err) => {
-          errorLog(`${err}`);
+          if (verbose) {
+            verboseDebug(result);
+          }
+          checkForAndLogErrors(result, 'createUser');
+          createUserResults.push(result);
+        } catch (e) {
+          errorLog(`${e}`);
           process.exit(1);
-        });
-
-      if (verbose) createUserResults.forEach((result) => { verboseDebug(result); });
+        }
+      }
       successLog('***** Success Creating Users *****\n');
 
 
@@ -165,73 +159,42 @@ export const runTests = async function runTests() {
 
       // CREATE DETACHED PROFILES
       testLog('TESTING: Creating Detached Profiles');
-      const createDetachedProfilePromises = [];
       for (let i = 0; i < createDetachedProfiles.length; i += 1) {
         const detachedProfileVars = createDetachedProfiles[i];
         detachedProfileVars.detachedProfileInput.images = uploadImagesResults[i];
-        createDetachedProfilePromises.push(mutate({
-          mutation: CREATE_DETACHED_PROFILE,
-          variables: detachedProfileVars,
-        }));
-      }
-      const createDetachedProfileResults = await Promise.all(createDetachedProfilePromises)
-        .then((results) => {
-          results.forEach((result) => {
-            try {
-              if (!result.data.createDetachedProfile.success) {
-                errorLog(
-                  `Error Creating Detached Profile: ${result.data.createDetachedProfile.message}`,
-                );
-                process.exit(1);
-              }
-            } catch (e) {
-              errorLog(('Error Printing out Results:'));
-              errorLog((`${result}`));
-              errorLog((`${e}`));
-              process.exit(1);
-            }
+        try {
+          const result = await mutate({
+            mutation: CREATE_DETACHED_PROFILE,
+            variables: detachedProfileVars,
           });
-          return results;
-        })
-        .catch((err) => {
-          errorLog((`${err}`));
+          if (verbose) {
+            verboseDebug(result);
+          }
+          checkForAndLogErrors(result, 'createDetachedProfile');
+        } catch (e) {
+          errorLog((`${e}`));
           process.exit(1);
-        });
-      if (verbose) createDetachedProfileResults.forEach((result) => { verboseDebug(result); });
+        }
+      }
       successLog('***** Success Creating Detached Profiles *****\n');
 
       // ATTACH DETACHED PROFILES
       testLog('TESTING: Attaching Detached Profiles');
-      const attachProfilePromises = [];
       for (const attachProfileVars of attachProfiles) {
-        attachProfilePromises.push(mutate({
-          mutation: ATTACH_DETACHED_PROFILE,
-          variables: attachProfileVars,
-        }));
-      }
-      const attachProfileResults = await Promise.all(attachProfilePromises)
-        .then((results) => {
-          results.forEach((result) => {
-            try {
-              if (!result.data.approveNewDetachedProfile.success) {
-                errorLog(
-                  `Error Creating Detached Profile: ${result.data.approveNewDetachedProfile.message}`,
-                );
-                process.exit(1);
-              }
-            } catch (e) {
-              errorLog(('Error Printing out Results'));
-              errorLog((`${e}`));
-              process.exit(1);
-            }
+        try {
+          const result = await mutate({
+            mutation: ATTACH_DETACHED_PROFILE,
+            variables: attachProfileVars,
           });
-          return results;
-        })
-        .catch((err) => {
-          errorLog((`${err}`));
+          if (verbose) {
+            verboseDebug(result);
+          }
+          checkForAndLogErrors(result, 'approveNewDetachedProfile');
+        } catch (e) {
+          errorLog((`${e}`));
           process.exit(1);
-        });
-      if (verbose) attachProfileResults.forEach((result) => { verboseDebug(result); });
+        }
+      }
       successLog('***** Success Attaching Detached Profiles *****\n');
 
       // UPDATE PHOTO ENDPOINT TESTING
@@ -260,17 +223,21 @@ export const runTests = async function runTests() {
             updateDiscoveryForUserById({ user_id: user.data.createUser.user._id }),
           );
         }
-        const discoveryResults = await Promise.all(generateDiscoveryPromises)
-          .then((results) => {
-            results.forEach((result) => {
-              if (!result._id) {
-                errorLog((`Error Updating Discovery: ${result}`));
-                process.exit(1);
-              }
+        try {
+          const discoveryResults = await Promise.all(generateDiscoveryPromises)
+            .then((results) => {
+              results.forEach((result) => {
+                if (!result._id) {
+                  errorLog((`Error Updating Discovery: ${result}`));
+                  process.exit(1);
+                }
+              });
             });
-          });
-        if (verbose) discoveryResults.forEach(result => verboseDebug(result));
-        successLog(`* Successful Discovery Round ${i + 1} *\n`);
+          if (verbose) discoveryResults.forEach(result => verboseDebug(result));
+          successLog(`* Successful Discovery Round ${i + 1} *\n`);
+        } catch (e) {
+          errorLog((`Error: ${e.toString()}`));
+        }
       }
       successLog('***** Success Generating Discovery Items *****\n');
 
