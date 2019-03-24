@@ -47,6 +47,12 @@ import {
 import {
   typeDef as MatchingSchemas,
 } from './models/MatchingSchemas';
+import {
+  typeDef as LocationSchemas,
+} from './models/LocationModels';
+import {
+  resolvers as LocationResolvers,
+} from './resolvers/LocationResolver';
 
 const { ApolloServer } = require('apollo-server-express');
 
@@ -118,7 +124,8 @@ function createApolloServer() {
     DiscoveryQueue,
     TestObject,
     ImageContainer,
-    MatchingSchemas];
+    MatchingSchemas,
+    LocationSchemas];
 
   const resolvers = {
     Query: {},
@@ -131,7 +138,8 @@ function createApolloServer() {
     DiscoveryQueueResolvers,
     TestObjectResolvers,
     ImageResolvers,
-    UserProfileResolvers);
+    UserProfileResolvers,
+    LocationResolvers);
 
 
   const server = new ApolloServer({

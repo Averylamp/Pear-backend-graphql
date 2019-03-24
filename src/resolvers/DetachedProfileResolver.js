@@ -28,8 +28,46 @@ export const resolvers = {
 
       const detachedProfileID = '_id' in detachedProfileInput
         ? detachedProfileInput._id : mongoose.Types.ObjectId();
-      const finalDetachedProfileInput = detachedProfileInput;
+      const finalDetachedProfileInput = pick(detachedProfileInput, [
+        'creatorUser_id',
+        'creatorFirstName',
+        'firstName',
+        'phoneNumber',
+        'age',
+        'gender',
+        'interests',
+        'vibes',
+        'bio',
+        'dos',
+        'donts',
+        'images',
+        'matchingDemographics',
+        'matchingPreferences',
+      ]);
       finalDetachedProfileInput._id = detachedProfileID;
+      const locationObj = {
+        point: {
+          coordinates: detachedProfileInput.location,
+        },
+      };
+      finalDetachedProfileInput.matchingDemographics = {
+        location: locationObj,
+        gender: detachedProfileInput.gender,
+        age: detachedProfileInput.age,
+      };
+      finalDetachedProfileInput.matchingPreferences = {
+        location: locationObj,
+        minAgeRange: Math.max(detachedProfileInput.age - 3, 18),
+        maxAgeRange: Math.min(detachedProfileInput.age + 3, 100),
+      };
+      if (detachedProfileInput.locationName) {
+        finalDetachedProfileInput.matchingDemographics.locationName = {
+          name: detachedProfileInput.locationName,
+        };
+        finalDetachedProfileInput.matchingPreferences.locationName = {
+          name: detachedProfileInput.locationName,
+        };
+      }
 
       const { creatorUser_id } = detachedProfileInput;
       const creator = await User.findById(creatorUser_id);
