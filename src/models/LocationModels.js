@@ -38,4 +38,4 @@ export const LocationSchema = new Schema({
   // TODO: i'm not sure if this indexing actually does anything?? removing it seems to be fine...
   point: { type: PointSchema, required: true, index: '2dsphere' },
   locationName: { type: LocationNameSchema, required: false },
-});
+}, { timestamps: true });
