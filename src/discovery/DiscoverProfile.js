@@ -9,8 +9,14 @@ const debug = require('debug')('dev:DiscoverProfile');
 const errorLog = require('debug')('error:DiscoverProfile');
 
 
+const getDemographicsFromDetachedProfile = (profile, location) => ({
+  age: profile.age,
+  gender: profile.gender,
+  location,
+});
+
 // gets the age and gender fields from a user object or a detached profile
-const getDemographicsFromUserOrDetachedProfile = user => pick(user, ['age', 'gender']);
+const getDemographicsFromUser = user => pick(user, ['age', 'gender', 'location']);
 
 // gets a user u such that:
 // u's demographics satisfies constraints
@@ -19,40 +25,47 @@ const getDemographicsFromUserOrDetachedProfile = user => pick(user, ['age', 'gen
 // throws error if can't find a user satisfying the above
 const getUserSatisfyingConstraints = async ({ constraints, demographics, blacklist }) => {
   debug(`Blacklist contains: ${blacklist}`);
-  const users = await User.aggregate([{
-    $match: {
-      isSeeking: true,
-      gender: {
-        $in: constraints.seekingGender,
-      },
-      age: {
-        $lte: constraints.maxAgeRange,
-        $gte: constraints.minAgeRange,
-      },
-      _id: {
-        $nin: blacklist,
-      },
-      'matchingPreferences.seekingGender': demographics.gender,
-      'matchingPreferences.minAgeRange': {
-        $lte: demographics.age,
-      },
-      'matchingPreferences.maxAgeRange': {
-        $gte: demographics.age,
-      },
-      profileCount: {
-        $gte: 0,
+  const users = await User.aggregate([
+    {
+      $match: {
+        isSeeking: true,
+        gender: {
+          $in: constraints.seekingGender,
+        },
+        age: {
+          $lte: constraints.maxAgeRange,
+          $gte: constraints.minAgeRange,
+        },
+        _id: {
+          $nin: blacklist,
+        },
+        location: {
+          $geoWithin: {
+            $centerSphere: [demographics.location.coordinates, constraints.maxDistance / 3963.2],
+          },
+        },
+        'matchingPreferences.seekingGender': demographics.gender,
+        'matchingPreferences.minAgeRange': {
+          $lte: demographics.age,
+        },
+        'matchingPreferences.maxAgeRange': {
+          $gte: demographics.age,
+        },
+        profileCount: {
+          $gte: 0,
+        },
       },
     },
-  },
-  {
-    $sample: {
-      size: 1,
+    {
+      $sample: {
+        size: 1,
+      },
     },
-  },
-  ]).catch((err) => {
-    errorLog(err);
-    throw err;
-  });
+  ])
+    .catch((err) => {
+      errorLog(err);
+      throw err;
+    });
   if (users.length === 1) {
     return users[0];
   }
@@ -61,9 +74,9 @@ const getUserSatisfyingConstraints = async ({ constraints, demographics, blackli
 
 // gets a summary object from a detached profile object
 // a summary object contains a set of constraints, demographics, blacklist, isSeeking
-const getMatchingSummaryFromDetachedProfile = async ({ detachedProfileObj }) => ({
+const getMatchingSummaryFromDetachedProfile = async ({ detachedProfileObj, location }) => ({
   constraints: detachedProfileObj.matchingPreferences,
-  demographics: getDemographicsFromUserOrDetachedProfile(detachedProfileObj),
+  demographics: getDemographicsFromDetachedProfile(detachedProfileObj, location),
   blacklist: new Set(),
   isSeeking: true,
 });
@@ -79,7 +92,7 @@ const getMatchingSummaryFromUser = async ({ userObj }) => {
 
   return {
     constraints: userObj.matchingPreferences,
-    demographics: getDemographicsFromUserOrDetachedProfile(userObj),
+    demographics: getDemographicsFromUser(userObj),
     // when generateBlacklist = true, pull in all blocked profiles + profiles already with an edge
     // generateBlacklist is true when this is an endorsed user
     // (see (5), (6) of blacklist logic comment)
@@ -110,15 +123,19 @@ const getMatchingSummaryFromProfileId = async ({ profile_id }) => (UserProfile
 
 // gets a summary object from a detached profile ID
 // throws if we can't find the detached profile object
-const getMatchingSummaryFromDetachedProfileId = async ({ detachedProfile_id }) => (DetachedProfile
-  .findById(detachedProfile_id)
-  .exec()
-  .then((detachedProfile) => {
-    if (!detachedProfile) {
-      throw new Error(`no detached profile with id ${detachedProfile_id}`);
-    }
-    return getMatchingSummaryFromDetachedProfile({ detachedProfileObj: detachedProfile });
-  }));
+const getMatchingSummaryFromDetachedProfileId = async ({ detachedProfile_id, location }) => (
+  DetachedProfile
+    .findById(detachedProfile_id)
+    .exec()
+    .then((detachedProfile) => {
+      if (!detachedProfile) {
+        throw new Error(`no detached profile with id ${detachedProfile_id}`);
+      }
+      return getMatchingSummaryFromDetachedProfile({
+        detachedProfileObj: detachedProfile,
+        location,
+      });
+    }));
 
 // generate the blacklist for a user who's feed we're generating, NOT a user we're suggesting for
 const getUserBlacklist = async ({ userObj }) => {
@@ -133,15 +150,17 @@ const getUserBlacklist = async ({ userObj }) => {
   userObj.blockedUser_ids.forEach((blockedUser_id) => {
     userBlacklist.add(blockedUser_id);
   });
-  userObj.edgeSummaries.map(summary => summary.otherUser_id).forEach((edgeUser_id) => {
-    userBlacklist.add(edgeUser_id);
-  });
+  userObj.edgeSummaries.map(summary => summary.otherUser_id)
+    .forEach((edgeUser_id) => {
+      userBlacklist.add(edgeUser_id);
+    });
   const endorsedProfiles = await UserProfile.find(
     { _id: { $in: userObj.endorsedProfile_ids } },
   );
-  endorsedProfiles.map(pf => pf.user_id).forEach((endorsedUser_id) => {
-    userBlacklist.add(endorsedUser_id);
-  });
+  endorsedProfiles.map(pf => pf.user_id)
+    .forEach((endorsedUser_id) => {
+      userBlacklist.add(endorsedUser_id);
+    });
   return userBlacklist;
 };
 
@@ -211,8 +230,11 @@ export const nextDiscoveryItem = async ({ userObj }) => {
       } else if (searchOrder[i].profileType === ProfileTypeEnum.ENDORSED_PROFILE_ID) {
         summary = await getMatchingSummaryFromProfileId({ profile_id: searchOrder[i].item });
       } else {
-        summary = await
-        getMatchingSummaryFromDetachedProfileId({ detachedProfile_id: searchOrder[i].item });
+        // TODO: location should come from the detached profile, not from the user
+        summary = await getMatchingSummaryFromDetachedProfileId({
+          detachedProfile_id: searchOrder[i].item,
+          location: userObj.location,
+        });
       }
     } catch (e) {
       errorLog(`Error occurred while trying to get matching summary: ${e.toString()}`);
@@ -236,7 +258,9 @@ export const nextDiscoveryItem = async ({ userObj }) => {
       return discoveredUser;
     } catch (err) {
       errorLog(err);
-      errorLog(`Couldn't find profile in constraints for ${searchOrder[i].profileType}: ${item_id}`);
+      errorLog(
+        `Couldn't find profile in constraints for ${searchOrder[i].profileType}: ${item_id}`,
+      );
     }
   }
   errorLog(`No suggested discovery items for User: ${userObj._id}`);
@@ -285,7 +309,8 @@ export const updateDiscoveryForUserById = async ({ user_id }) => {
 // should only throw an error if the query to the Users collection fails
 export const updateAllDiscovery = async () => {
   // https://mongoosejs.com/docs/api.html#query_Query-cursor
-  User.find({}).cursor()
+  User.find({})
+    .cursor()
     .on('data', (user) => {
       if (user.isSeeking || user.endorsedProfile_ids.length + user.detachedProfile_ids.length > 0) {
         if (Math.random() < (1 / EXPECTED_TICKS_PER_NEW_PROFILE)) {
