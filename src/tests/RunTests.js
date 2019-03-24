@@ -217,27 +217,22 @@ export const runTests = async function runTests() {
       }
       testLog(`ROUNDS: ${discoveryIterations}`);
       for (let i = 0; i < discoveryIterations; i += 1) {
-        const generateDiscoveryPromises = [];
         for (const user of createUserResults) {
-          generateDiscoveryPromises.push(
-            updateDiscoveryForUserById({ user_id: user.data.createUser.user._id }),
-          );
+          try {
+            const result = await updateDiscoveryForUserById(
+              { user_id: user.data.createUser.user._id },
+            );
+            if (!result._id) {
+              errorLog(`Error updating discovery: ${result}`);
+            }
+            if (verbose) {
+              verboseDebug(result);
+            }
+          } catch (e) {
+            errorLog(`Error: ${e.toString()}`);
+          }
         }
-        try {
-          const discoveryResults = await Promise.all(generateDiscoveryPromises)
-            .then((results) => {
-              results.forEach((result) => {
-                if (!result._id) {
-                  errorLog((`Error Updating Discovery: ${result}`));
-                  process.exit(1);
-                }
-              });
-            });
-          if (verbose) discoveryResults.forEach(result => verboseDebug(result));
-          successLog(`* Successful Discovery Round ${i + 1} *\n`);
-        } catch (e) {
-          errorLog((`Error: ${e.toString()}`));
-        }
+        successLog(`* Successful Discovery Round ${i + 1} *\n`);
       }
       successLog('***** Success Generating Discovery Items *****\n');
 
