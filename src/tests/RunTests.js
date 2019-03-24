@@ -55,7 +55,7 @@ const checkForAndLogErrors = (result, keyName) => {
       `Error performing action ${keyName}: ${result.data[keyName].message}`,
     );
   } else if (result.errors) {
-    errorLog(`Error with request ${keyName}: ${result.toString()}`);
+    errorLog(`Error with request ${keyName}: ${result.errors}`);
   }
 };
 
