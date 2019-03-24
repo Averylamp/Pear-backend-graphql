@@ -1,4 +1,4 @@
-import { pick, shuffle } from 'lodash';
+import { shuffle } from 'lodash';
 import { User } from '../models/UserModel';
 import { UserProfile } from '../models/UserProfileModel';
 import { DetachedProfile } from '../models/DetachedProfile';
@@ -8,11 +8,6 @@ import { EXPECTED_TICKS_PER_NEW_PROFILE, MAX_FEED_LENGTH } from '../constants';
 const debug = require('debug')('dev:DiscoverProfile');
 const errorLog = require('debug')('error:DiscoverProfile');
 
-
-const getDemographicsFromDetachedProfile = profile => pick(profile, ['age', 'gender', 'location']);
-
-// gets the age and gender fields from a user object or a detached profile
-const getDemographicsFromUser = user => pick(user, ['age', 'gender', 'location']);
 
 // gets a user u such that:
 // u's demographics satisfies constraints
@@ -74,7 +69,7 @@ const getUserSatisfyingConstraints = async ({ constraints, demographics, blackli
 // a summary object contains a set of constraints, demographics, blacklist, isSeeking
 const getMatchingSummaryFromDetachedProfile = async ({ detachedProfileObj }) => ({
   constraints: detachedProfileObj.matchingPreferences,
-  demographics: getDemographicsFromDetachedProfile(detachedProfileObj),
+  demographics: detachedProfileObj.matchingDemographics,
   blacklist: new Set(),
   isSeeking: true,
 });
@@ -90,7 +85,7 @@ const getMatchingSummaryFromUser = async ({ userObj }) => {
 
   return {
     constraints: userObj.matchingPreferences,
-    demographics: getDemographicsFromUser(userObj),
+    demographics: userObj.matchingDemographics,
     // when generateBlacklist = true, pull in all blocked profiles + profiles already with an edge
     // generateBlacklist is true when this is an endorsed user
     // (see (5), (6) of blacklist logic comment)
