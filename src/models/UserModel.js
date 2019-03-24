@@ -1,5 +1,4 @@
 import { MatchingDemographicsSchema, MatchingPreferencesSchema } from './MatchingSchemas';
-import { LocationNameSchema, PointSchema } from './TypeSchemas';
 import { ImageContainerSchema } from './ImageSchemas';
 import { EdgeSummarySchema } from './MatchModel';
 import { EndorsementEdgeSchema } from './UserProfileModel';
@@ -161,11 +160,6 @@ type User {
   age: Int!
   birthdate: String!
   
-  # [longitude, latitude]
-  location: [Float!]! 
-  locationLastUpdated: String!
-  locationName: String
-  locationNameLastUpdated: String
   school: String
   schoolEmail: String
   schoolEmailVerified: Boolean
@@ -241,6 +235,7 @@ enum Gender{
   nonbinary
 }
 `;
+
 export const typeDef = queryRoutes
   + mutationRoutes
   + getUserInputs
@@ -280,9 +275,6 @@ const UserSchema = new Schema({
     type: Number, required: true, min: 18, max: 100, index: true,
   },
   birthdate: { type: Date, required: true },
-  // TODO: i'm not sure if this indexing actually does anything?? removing it seems to be fine...
-  location: { type: PointSchema, required: true, index: '2dsphere' },
-  locationName: { type: LocationNameSchema, required: false },
   school: { type: String, required: false },
   schoolEmail: { type: String, required: false },
   schoolEmailVerified: { type: Boolean, required: false, default: false },

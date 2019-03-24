@@ -40,15 +40,14 @@ input CreationDetachedProfileInput {
   dos: [String!]!
   donts: [String!]!
   images: [CreateImageContainer!]!
-
+  location: [Float!]!
+  locationName: String
 }
 `;
 
 const detachedProfileType = `
 type DetachedProfile {
   _id: ID!
-  # The current status of this profile
-  status: DetachedProfileStatus!
   creatorUser_id: ID!
   creatorUser: User
   creatorFirstName: String!
@@ -66,13 +65,6 @@ type DetachedProfile {
   matchingDemographics: MatchingDemographics!
   matchingPreferences: MatchingPreferences!
 }
-
-enum DetachedProfileStatus {
-waitingUnseen
-waitingSeen
-declined
-}
-
 `;
 
 const detachedProfileMutationResponse = `
