@@ -1,4 +1,4 @@
-import { pick, shuffle } from 'lodash';
+import { shuffle } from 'lodash';
 import { User } from '../models/UserModel';
 import { UserProfile } from '../models/UserProfileModel';
 import { DetachedProfile } from '../models/DetachedProfile';
@@ -8,15 +8,6 @@ import { EXPECTED_TICKS_PER_NEW_PROFILE, MAX_FEED_LENGTH } from '../constants';
 const debug = require('debug')('dev:DiscoverProfile');
 const errorLog = require('debug')('error:DiscoverProfile');
 
-
-const getDemographicsFromDetachedProfile = (profile, location) => ({
-  age: profile.age,
-  gender: profile.gender,
-  location,
-});
-
-// gets the age and gender fields from a user object or a detached profile
-const getDemographicsFromUser = user => pick(user, ['age', 'gender', 'location']);
 
 // gets a user u such that:
 // u's demographics satisfies constraints
@@ -29,19 +20,18 @@ const getUserSatisfyingConstraints = async ({ constraints, demographics, blackli
     {
       $match: {
         isSeeking: true,
-        gender: {
+        'matchingDemographics.gender': {
           $in: constraints.seekingGender,
         },
-        age: {
+        'matchingDemographics.age': {
           $lte: constraints.maxAgeRange,
           $gte: constraints.minAgeRange,
         },
-        _id: {
-          $nin: blacklist,
-        },
-        location: {
+        'matchingDemographics.location.point': {
           $geoWithin: {
-            $centerSphere: [demographics.location.coordinates, constraints.maxDistance / 3963.2],
+            $centerSphere: [
+              constraints.location.point.coordinates,
+              constraints.maxDistance / 3963.2],
           },
         },
         'matchingPreferences.seekingGender': demographics.gender,
@@ -50,6 +40,9 @@ const getUserSatisfyingConstraints = async ({ constraints, demographics, blackli
         },
         'matchingPreferences.maxAgeRange': {
           $gte: demographics.age,
+        },
+        _id: {
+          $nin: blacklist,
         },
         profileCount: {
           $gte: 0,
@@ -74,9 +67,9 @@ const getUserSatisfyingConstraints = async ({ constraints, demographics, blackli
 
 // gets a summary object from a detached profile object
 // a summary object contains a set of constraints, demographics, blacklist, isSeeking
-const getMatchingSummaryFromDetachedProfile = async ({ detachedProfileObj, location }) => ({
+const getMatchingSummaryFromDetachedProfile = async ({ detachedProfileObj }) => ({
   constraints: detachedProfileObj.matchingPreferences,
-  demographics: getDemographicsFromDetachedProfile(detachedProfileObj, location),
+  demographics: detachedProfileObj.matchingDemographics,
   blacklist: new Set(),
   isSeeking: true,
 });
@@ -92,7 +85,7 @@ const getMatchingSummaryFromUser = async ({ userObj }) => {
 
   return {
     constraints: userObj.matchingPreferences,
-    demographics: getDemographicsFromUser(userObj),
+    demographics: userObj.matchingDemographics,
     // when generateBlacklist = true, pull in all blocked profiles + profiles already with an edge
     // generateBlacklist is true when this is an endorsed user
     // (see (5), (6) of blacklist logic comment)
@@ -123,7 +116,7 @@ const getMatchingSummaryFromProfileId = async ({ profile_id }) => (UserProfile
 
 // gets a summary object from a detached profile ID
 // throws if we can't find the detached profile object
-const getMatchingSummaryFromDetachedProfileId = async ({ detachedProfile_id, location }) => (
+const getMatchingSummaryFromDetachedProfileId = async ({ detachedProfile_id }) => (
   DetachedProfile
     .findById(detachedProfile_id)
     .exec()
@@ -131,10 +124,7 @@ const getMatchingSummaryFromDetachedProfileId = async ({ detachedProfile_id, loc
       if (!detachedProfile) {
         throw new Error(`no detached profile with id ${detachedProfile_id}`);
       }
-      return getMatchingSummaryFromDetachedProfile({
-        detachedProfileObj: detachedProfile,
-        location,
-      });
+      return getMatchingSummaryFromDetachedProfile({ detachedProfileObj: detachedProfile });
     }));
 
 // generate the blacklist for a user who's feed we're generating, NOT a user we're suggesting for
@@ -233,7 +223,6 @@ export const nextDiscoveryItem = async ({ userObj }) => {
         // TODO: location should come from the detached profile, not from the user
         summary = await getMatchingSummaryFromDetachedProfileId({
           detachedProfile_id: searchOrder[i].item,
-          location: userObj.location,
         });
       }
     } catch (e) {
