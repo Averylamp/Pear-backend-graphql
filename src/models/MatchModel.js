@@ -92,6 +92,7 @@ type EdgeSummary {
   edgeStatus: EdgeStatus!
   lastStatusChange: String!
   match_id: ID!
+  match: Match
 }
 
 enum EdgeStatus{
