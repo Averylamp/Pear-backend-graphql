@@ -62,6 +62,7 @@ export const CREATE_JOEL_USER_VARIABLES = {
     // facebookAccessToken: '4',
     thumbnailURL: '',
     location: [-122.422484, 37.751370],
+    locationName: 'San Francisco, CA',
   },
 };
 
@@ -82,7 +83,7 @@ export const CREATE_JOSH_USER_VARIABLES = {
     // facebookId: '3',
     // facebookAccessToken: '4',
     thumbnailURL: '',
-    location: [-71.101366, 42.362580],
+    location: [-71.332174, 42.299819],
   },
 };
 
