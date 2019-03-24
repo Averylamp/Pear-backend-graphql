@@ -2,6 +2,7 @@ import { MatchingDemographicsSchema, MatchingPreferencesSchema } from './Matchin
 import { GeoJSONSchema } from './TypeSchemas';
 import { ImageContainerSchema } from './ImageSchemas';
 import { EdgeSummarySchema } from './MatchModel';
+import { EndorsementEdgeSchema } from './UserProfileModel';
 
 const mongoose = require('mongoose');
 
@@ -186,6 +187,9 @@ type User {
   detachedProfile_ids: [ID!]!
   # All Detached Profiles for a user
   detachedProfileObjs: [DetachedProfile!]!
+  
+  # metainfo about matchmaker chats
+  endorsementEdges: [EndorsementEdge!]!
 
   discoveryQueue_id: ID!
   discoveryQueueObj: DiscoveryQueue!
@@ -293,6 +297,10 @@ const UserSchema = new Schema({
   },
   detachedProfile_ids: {
     type: [Schema.Types.ObjectId], required: true, index: true, default: [],
+  },
+
+  endorsementEdges: {
+    type: [EndorsementEdgeSchema], required: true, default: [],
   },
 
   discoveryQueue_id: { type: Schema.Types.ObjectId, required: true },

@@ -44,7 +44,9 @@ export const resolvers = {
         $push: {
           detachedProfile_ids: detachedProfileID,
         },
-      }, { new: true }).exec().catch(err => err);
+      }, { new: true })
+        .exec()
+        .catch(err => err);
 
       const createDetachedProfileObj = createDetachedProfileObject(finalDetachedProfileInput)
         .catch(err => err);
@@ -111,13 +113,17 @@ export const resolvers = {
       functionCallConsole('Approve Profile Called');
 
       // check that user, detached profile, creator exist
-      const userPromise = User.findById(user_id).exec()
+      const userPromise = User.findById(user_id)
+        .exec()
         .catch(() => null);
-      const detachedProfilePromise = DetachedProfile.findById(detachedProfile_id).exec()
+      const detachedProfilePromise = DetachedProfile.findById(detachedProfile_id)
+        .exec()
         .catch(() => null);
-      const creatorPromise = User.findById(creatorUser_id).exec()
+      const creatorPromise = User.findById(creatorUser_id)
+        .exec()
         .catch(() => null);
-      const [user, detachedProfile, creator] = await Promise.all([userPromise,
+      const [user, detachedProfile, creator] = await Promise.all([
+        userPromise,
         detachedProfilePromise, creatorPromise]);
       if (!user) {
         return {
@@ -173,10 +179,6 @@ export const resolvers = {
         donts: detachedProfile.donts,
       };
 
-      // create new user profile
-      const createUserProfileObjectePromise = createUserProfileObject(userProfileInput)
-        .catch(err => err);
-
       let userObjectUpdate = {
         isSeeking: true,
         $inc: { profileCount: 1 },
@@ -187,7 +189,6 @@ export const resolvers = {
           },
         },
       };
-
       if (user.displayedImages.length < 6) {
         userObjectUpdate = {
           isSeeking: true,
@@ -204,22 +205,55 @@ export const resolvers = {
           },
         };
       }
+      let userUpdateArrayFilters = [];
+
+      const creatorObjectUpdate = {
+        $pull: {
+          detachedProfile_ids: detachedProfile_id,
+        },
+        $push: {
+          endorsedProfile_ids: profileId,
+        },
+      };
+      let creatorUpdateArrayFilters = [];
+
+      const edgeExists = user.endorsementEdges.find(
+        edge => (edge.otherUser_id.toString() === creator._id.toString()),
+      ) !== undefined;
+      if (!edgeExists) {
+        userObjectUpdate.$push.endorsementEdges = {
+          otherUser_id: creator._id,
+          myProfile_id: profileId,
+        };
+        creatorObjectUpdate.$push.endorsementEdges = {
+          otherUser_id: user._id,
+          theirProfile_id: profileId,
+        };
+      } else {
+        userObjectUpdate['endorsementEdges.$[element].myProfile_id'] = profileId;
+        creatorObjectUpdate['endorsementEdges.$[element].theirProfile_id'] = profileId;
+        userUpdateArrayFilters = [{ 'element.otherUser_id': creator._id.toString() }];
+        creatorUpdateArrayFilters = [{ 'element.otherUser_id': user._id.toString() }];
+      }
+
+      // create new user profile
+      const createUserProfileObjectPromise = createUserProfileObject(userProfileInput)
+        .catch(err => err);
 
       // link to first party, add photos to photobank
       const updateUserObjectPromise = User
-        .findByIdAndUpdate(user_id, userObjectUpdate, { new: true })
+        .findByIdAndUpdate(user_id, userObjectUpdate, {
+          new: true,
+          arrayFilters: userUpdateArrayFilters,
+        })
         .catch(err => err);
 
       // unlink detached profile from creator, link new endorsed profile
       const updateCreatorObjectPromise = User
-        .findByIdAndUpdate(creator._id, {
-          $pull: {
-            detachedProfile_ids: detachedProfile_id,
-          },
-          $push: {
-            endorsedProfile_ids: profileId,
-          },
-        }, { new: true })
+        .findByIdAndUpdate(creator._id, creatorObjectUpdate, {
+          new: true,
+          arrayFilters: creatorUpdateArrayFilters,
+        })
         .catch(err => err);
 
       // delete detached profile
@@ -227,7 +261,7 @@ export const resolvers = {
         .catch(err => err);
 
       return Promise.all([
-        createUserProfileObjectePromise, updateUserObjectPromise,
+        createUserProfileObjectPromise, updateUserObjectPromise,
         updateCreatorObjectPromise, deleteDetachedProfilePromise])
         .then(async ([
           createUserProfileObjectResult, updateUserObjectResult,
@@ -254,7 +288,8 @@ export const resolvers = {
             if (updateUserObjectResult instanceof Error) {
               message += updateUserObjectResult.toString();
             } else {
-              User.findByIdAndUpdate(user_id, {
+              let arrayFilters = [];
+              const userUpdateRollback = {
                 $inc: { profileCount: -1 },
                 $pull: {
                   profile_ids: profileId,
@@ -262,7 +297,21 @@ export const resolvers = {
                     uploadedByUser_id: creator._id,
                   },
                 },
-              }, {}, (err) => {
+              };
+              if (!edgeExists) {
+                // remove the edge
+                userUpdateRollback.$pull.endorsementEdges = {
+                  otherUser_id: creator._id,
+                };
+              } else {
+                // remove the reference to user's profile
+                userUpdateRollback['endorsementEdges.$[element].myProfile_id'] = undefined;
+                arrayFilters = [{ 'element.otherUser_id': creator._id.toString() }];
+              }
+              User.findByIdAndUpdate(user_id, userUpdateRollback, {
+                new: true,
+                arrayFilters,
+              }, (err) => {
                 if (err) {
                   errorLog(`Failed to rollback user updates: ${err}`);
                   debug(`Failed to rollback user updates: ${err}`);
@@ -274,14 +323,29 @@ export const resolvers = {
             if (updateCreatorObjectResult instanceof Error) {
               message += updateCreatorObjectResult.toString();
             } else {
-              User.findByIdAndUpdate(user_id, {
+              let arrayFilters = [];
+              const creatorUpdateRollback = {
                 $push: {
                   detachedProfile_ids: detachedProfile_id,
                 },
                 $pull: {
                   endorsedProfile_ids: profileId,
                 },
-              }, {}, (err) => {
+              };
+              if (!edgeExists) {
+                // remove the edge
+                creatorUpdateRollback.$pull.endorsementEdges = {
+                  otherUser_id: user._id,
+                };
+              } else {
+                // remove the reference to the user's profile
+                creatorUpdateRollback['endorsementEdges.$[element].theirProfile_id'] = undefined;
+                arrayFilters = [{ 'element.otherUser_id': user._id.toString() }];
+              }
+              User.findByIdAndUpdate(creator._id.toString(), creatorUpdateRollback, {
+                new: true,
+                arrayFilters,
+              }, (err) => {
                 if (err) {
                   errorLog(`Failed to roll back creator object: ${err}`);
                   debug(`Failed to roll back creator object: ${err}`);
