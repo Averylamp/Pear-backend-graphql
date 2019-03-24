@@ -12,4 +12,11 @@ export const PointSchema = new Schema({
     type: [Number], // [<longitude>, <latitude>]
     required: true,
   },
-});
+}, { timestamps: true });
+
+export const LocationNameSchema = new Schema({
+  name: {
+    type: String,
+    required: true,
+  },
+}, { timestamps: true });

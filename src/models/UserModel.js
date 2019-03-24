@@ -1,5 +1,5 @@
 import { MatchingDemographicsSchema, MatchingPreferencesSchema } from './MatchingSchemas';
-import { PointSchema } from './TypeSchemas';
+import { LocationNameSchema, PointSchema } from './TypeSchemas';
 import { ImageContainerSchema } from './ImageSchemas';
 import { EdgeSummarySchema } from './MatchModel';
 import { EndorsementEdgeSchema } from './UserProfileModel';
@@ -280,10 +280,9 @@ const UserSchema = new Schema({
     type: Number, required: true, min: 18, max: 100, index: true,
   },
   birthdate: { type: Date, required: true },
+  // TODO: i'm not sure if this indexing actually does anything?? removing it seems to be fine...
   location: { type: PointSchema, required: true, index: '2dsphere' },
-  locationLastUpdated: { type: Date, required: true, default: Date },
-  locationName: { type: String, required: false },
-  locationNameLastUpdated: { type: Date, required: false },
+  locationName: { type: LocationNameSchema, required: false },
   school: { type: String, required: false },
   schoolEmail: { type: String, required: false },
   schoolEmailVerified: { type: Boolean, required: false, default: false },
