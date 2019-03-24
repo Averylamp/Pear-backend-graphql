@@ -57,9 +57,9 @@ input CreationUserInput{
   firstName: String!
   lastName: String!
   gender: Gender!
-  
+
   # [longitude, latitude]
-  location: [Float!]! 
+  location: [Float!]!
   locationName: String
 
   # The Firebase generated token
@@ -156,10 +156,10 @@ type User {
   lastName: String!
   fullName: String!
   thumbnailURL: String
-  gender: Gender
+  gender: Gender!
   age: Int!
   birthdate: String!
-  
+
   school: String
   schoolEmail: String
   schoolEmailVerified: Boolean
@@ -170,7 +170,7 @@ type User {
   # All images uploaded for a user
   bankImages: [ImageContainer!]!
 
-  pearPoints: Int
+  pearPoints: Int!
 
   # All Attached Profile IDs for a user
   profile_ids: [ID!]!
@@ -188,7 +188,7 @@ type User {
   detachedProfile_ids: [ID!]!
   # All Detached Profiles for a user
   detachedProfileObjs: [DetachedProfile!]!
-  
+
   # metainfo about matchmaker chats
   endorsementEdges: [EndorsementEdge!]!
 

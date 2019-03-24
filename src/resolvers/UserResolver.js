@@ -12,6 +12,22 @@ const functionCallConsole = require('debug')('dev:FunctionCalls');
 
 
 export const resolvers = {
+  User: {
+    profileObjs: async ({ profile_ids }) => UserProfile.find({ _id: { $in: profile_ids } }),
+    endorsedProfileObjs: async ({ endorsedProfile_ids }) => UserProfile
+      .find({ _id: { $in: endorsedProfile_ids } }),
+    detachedProfileObjs: async ({ detachedProfile_ids }) => DetachedProfile
+      .find({ _id: { $in: detachedProfile_ids } }),
+    discoveryQueueObj: async ({ discoveryQueue_id }) => DiscoveryQueue.findById(discoveryQueue_id),
+    blockedUsers: async ({ blockedUser_ids }) => User.find({ _id: { $in: blockedUser_ids } }),
+    requestedMatches: async ({ requestedMatch_ids }) => Match
+      .find({ _id: { $in: requestedMatch_ids } }),
+    currentMatches: async ({ currentMatch_ids }) => Match
+      .find({ _id: { $in: currentMatch_ids } }),
+    edgeUser_ids: async ({ edgeSummaries }) => [
+      ...new Set(edgeSummaries.map(summary => summary.otherUser_id)),
+    ],
+  },
   Query: {
     user: async (_source, { id }) => {
       debug(`Getting user by id: ${id}`);
@@ -44,22 +60,6 @@ export const resolvers = {
           });
         }));
     },
-  },
-  User: {
-    profileObjs: async ({ profile_ids }) => UserProfile.find({ _id: { $in: profile_ids } }),
-    endorsedProfileObjs: async ({ endorsedProfile_ids }) => UserProfile
-      .find({ _id: { $in: endorsedProfile_ids } }),
-    detachedProfileObjs: async ({ detachedProfile_ids }) => DetachedProfile
-      .find({ _id: { $in: detachedProfile_ids } }),
-    discoveryQueueObj: async ({ discoveryQueue_id }) => DiscoveryQueue.findById(discoveryQueue_id),
-    blockedUsers: async ({ blockedUser_ids }) => User.find({ _id: { $in: blockedUser_ids } }),
-    requestedMatches: async ({ requestedMatch_ids }) => Match
-      .find({ _id: { $in: requestedMatch_ids } }),
-    currentMatches: async ({ currentMatch_ids }) => Match
-      .find({ _id: { $in: currentMatch_ids } }),
-    edgeUser_ids: async ({ edgeSummaries }) => [
-      ...new Set(edgeSummaries.map(summary => summary.otherUser_id)),
-    ],
   },
   Mutation: {
     createUser: async (_source, { userInput }) => {
