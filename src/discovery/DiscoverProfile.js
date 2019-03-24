@@ -230,6 +230,7 @@ export const nextDiscoveryItem = async ({ userObj }) => {
       } else if (searchOrder[i].profileType === ProfileTypeEnum.ENDORSED_PROFILE_ID) {
         summary = await getMatchingSummaryFromProfileId({ profile_id: searchOrder[i].item });
       } else {
+        // TODO: location should come from the detached profile, not from the user
         summary = await getMatchingSummaryFromDetachedProfileId({
           detachedProfile_id: searchOrder[i].item,
           location: userObj.location,
