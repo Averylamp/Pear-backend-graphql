@@ -19,6 +19,12 @@ const debug = require('debug')('dev:DetachedProfileResolvers');
 const errorLog = require('debug')('error:DetachedProfileResolvers');
 const functionCallConsole = require('debug')('dev:FunctionCalls');
 
+const canMakeProfileForSelf = [
+  '9738738225',
+  '2067789236',
+  '6196160848',
+];
+
 const getAndValidateUsersAndDetachedProfileObjects = async ({
   user_id, detachedProfile_id, creator_id,
 }) => {
@@ -68,9 +74,14 @@ const getAndValidateUsersAndDetachedProfileObjects = async ({
       );
     }
     // check creator != user
-    if (creator_id === user_id && detachedProfile.phoneNumber !== '9738738225') {
-      errorLog(`Endorsed user with id ${user_id} is same as profile creator`);
-      throw new Error(`Endorsed user with id ${user_id} is same as profile creator`);
+    if (creator_id === user_id) {
+      if (process.env.DEV === 'true'
+        && canMakeProfileForSelf.includes(detachedProfile.phoneNumber)) {
+        // we ignore this check if devmode is true AND phoneNumber is whitelisted
+      } else {
+        errorLog(`Endorsed user with id ${user_id} is same as profile creator`);
+        throw new Error(`Endorsed user with id ${user_id} is same as profile creator`);
+      }
     }
     // check creator has not already made a profile for user
     const endorserIDs = await UserProfile.find({ user_id });
@@ -167,10 +178,15 @@ export const resolvers = {
         const dpPhoneNumbers = creatorDetachedProfiles.map(dp => dp.phoneNumber);
         const apPhoneNumbers = creatorAttachedProfiles.map(ap => ap.phoneNumber);
         if (detachedProfileInput.phoneNumber === creator.phoneNumber) {
-          return {
-            success: false,
-            message: CANT_ENDORSE_YOURSELF,
-          };
+          if (process.env.DEV === 'true'
+            && canMakeProfileForSelf.includes(creator.phoneNumber)) {
+            // we ignore this check if devmode is true AND phoneNumber is whitelisted
+          } else {
+            return {
+              success: false,
+              message: CANT_ENDORSE_YOURSELF,
+            };
+          }
         }
         if (dpPhoneNumbers.includes(detachedProfileInput.phoneNumber)) {
           return {
