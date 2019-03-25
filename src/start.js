@@ -57,7 +57,7 @@ import {
 const { ApolloServer } = require('apollo-server-express');
 
 const debug = require('debug')('dev:Start');
-const errorLog = require('debug')('dev:error:Start');
+const errorLog = require('debug')('error:Start');
 const prodConsole = require('debug')('prod:Start');
 
 

@@ -1,5 +1,5 @@
 const debug = require('debug')('dev:tests:ImageUpload');
-const errorLog = require('debug')('dev:error:ImageUpload');
+const errorLog = require('debug')('error:ImageUpload');
 const fs = require('fs');
 const path = require('path');
 const request = require('request');
