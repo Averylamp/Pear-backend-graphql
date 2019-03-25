@@ -1,8 +1,10 @@
 import { User } from '../models/UserModel';
 import { DiscoveryQueue, DiscoveryItem } from '../models/DiscoveryQueueModel';
 import { updateDiscoveryForUserById } from '../discovery/DiscoverProfile';
+import { FORCE_FEED_UPDATE_ERROR, FORCE_FEED_UPDATE_SUCCESS } from './ResolverErrorStrings';
 
 const debug = require('debug')('dev:DiscoveryQueueResolver');
+const errorLog = require('debug')('error:DiscoveryQueueResolver');
 
 
 export const resolvers = {
@@ -26,15 +28,16 @@ export const resolvers = {
         try {
           await updateDiscoveryForUserById({ user_id });
         } catch (e) {
+          errorLog(`An error occurred: ${e}`);
           return {
             success: false,
-            message: `An error occurred: ${e}`,
+            message: FORCE_FEED_UPDATE_ERROR,
           };
         }
       }
       return {
         success: true,
-        message: 'Successfully forced update to feed.',
+        message: FORCE_FEED_UPDATE_SUCCESS,
       };
     },
   },
