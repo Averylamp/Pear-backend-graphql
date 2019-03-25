@@ -7,6 +7,11 @@ import {
   notifyEndorsementChatNewRequest, sendMatchAcceptedServerMessage,
   sendMatchRequestServerMessage,
 } from '../FirebaseManager';
+import {
+  GET_USER_ERROR,
+  SEND_MATCH_REQUEST_ERROR,
+  WRONG_CREATOR_ERROR,
+} from '../resolvers/ResolverErrorStrings';
 
 const debug = require('debug')('dev:Matching');
 const errorLogger = require('debug')('error:Matching');
@@ -127,21 +132,21 @@ export const createNewMatch = async ({
     errorLog(`Couldn't find sentBy with id ${sentByUser_id}`);
     return {
       success: false,
-      message: `Couldn't find sentBy with id ${sentByUser_id}`,
+      message: GET_USER_ERROR,
     };
   }
   if (!sentFor) {
     errorLog(`Couldn't find sentFor user with id ${sentForUser_id}`);
     return {
       success: false,
-      message: `Couldn't find sentFor user with id ${sentForUser_id}`,
+      message: GET_USER_ERROR,
     };
   }
   if (!receivedBy) {
     errorLog(`Couldn't find receivedBy user with id ${receivedByUser_id}`);
     return {
       success: false,
-      message: `Couldn't find receivedBy user with id ${receivedByUser_id}`,
+      message: GET_USER_ERROR,
     };
   }
   if (matchmakerMade && !profile) {
@@ -149,8 +154,7 @@ export const createNewMatch = async ({
         for ${sentForUser_id}`);
     return {
       success: false,
-      message: `Matchmaker ${sentByUser_id} has not made a profile
-          for ${sentForUser_id}`,
+      message: WRONG_CREATOR_ERROR,
     };
   }
 
@@ -194,10 +198,10 @@ export const createNewMatch = async ({
     || sentForEdgeResult instanceof Error
     || receivedByEdgeResult instanceof Error
     || createChatResult instanceof Error) {
-    let message = '';
+    let errorMessage = '';
     if (match instanceof Error) {
       errorLog(`Failed to create match Object: ${match.toString()}`);
-      message += match.toString();
+      errorMessage += match.toString();
     } else {
       match.remove()
         .catch((err) => {
@@ -206,7 +210,7 @@ export const createNewMatch = async ({
     }
     if (sentForEdgeResult instanceof Error) {
       errorLog(`Sent For Edge Failure:${sentForEdgeResult.toString()}`);
-      message += sentForEdgeResult.toString();
+      errorMessage += sentForEdgeResult.toString();
     } else {
       const update = {
         $pop: matchmakerMade ? {
@@ -224,7 +228,7 @@ export const createNewMatch = async ({
     }
     if (receivedByEdgeResult instanceof Error) {
       errorLog(`Received By Edge Failure:${receivedByEdgeResult.toString()}`);
-      message += receivedByEdgeResult.toString();
+      errorMessage += receivedByEdgeResult.toString();
     } else {
       User.findByIdAndUpdate(receivedBy._id, {
         $pop: {
@@ -238,13 +242,14 @@ export const createNewMatch = async ({
         });
     }
     if (createChatResult instanceof Error) {
-      message += createChatResult.toString();
+      errorMessage += createChatResult.toString();
     } else {
       // we don't delete the chat; we just leave it, and no mongo edges/matches reference it
     }
+    errorLog(errorMessage);
     return {
       success: false,
-      message,
+      message: SEND_MATCH_REQUEST_ERROR,
     };
   }
   // send server message to the new match object

@@ -3,9 +3,15 @@ import { Match } from '../models/MatchModel';
 import {
   createNewMatch, getAndValidateUserAndMatchObjects, decideOnMatch, rollbackEdgeUpdates,
 } from '../matching/matching';
+import {
+  ACCEPT_MATCH_REQUEST_ERROR,
+  MATCH_ALREADY_DECIDED, REJECT_MATCH_REQUEST_ERROR,
+  SEND_MATCH_REQUEST_ERROR, UNMATCH_ERROR,
+  VIEW_MATCH_REQUEST_ERROR,
+} from './ResolverErrorStrings';
 
 const debug = require('debug')('dev:MatchResolver');
-// const errorLogger = require('debug')('error:MatchResolver');
+const errorLogger = require('debug')('error:MatchResolver');
 //
 // const chalk = require('chalk');
 //
@@ -25,9 +31,10 @@ export const resolvers = {
       try {
         return createNewMatch(requestInput);
       } catch (e) {
+        errorLogger(`Error while creating match: ${e}`);
         return {
           success: false,
-          message: e.toString(),
+          message: SEND_MATCH_REQUEST_ERROR,
         };
       }
     },
@@ -58,17 +65,22 @@ export const resolvers = {
           match = await Match.findByIdAndUpdate(match_id, updateObj, { new: true })
             .exec()
             .catch(err => err);
-          return (match instanceof Error) ? {
-            success: false,
-            message: match.toString(),
-          } : {
+          if (match instanceof Error) {
+            errorLogger(`Error occurred in viewing request: ${match}`);
+            return {
+              success: false,
+              message: VIEW_MATCH_REQUEST_ERROR,
+            };
+          }
+          return {
             success: true,
             match,
           };
         }
+        errorLogger(`Error: ${user_id} tried to view an already decided match ${match_id}`);
         return {
           success: false,
-          message: 'This request has already been accepted or rejected',
+          message: MATCH_ALREADY_DECIDED,
         };
       } catch (e) {
         return {
@@ -81,9 +93,10 @@ export const resolvers = {
       try {
         return decideOnMatch({ user_id, match_id, decision: 'accept' });
       } catch (e) {
+        errorLogger(`Error occurred in accepting request: ${e}`);
         return {
           success: false,
-          message: e.toString(),
+          message: ACCEPT_MATCH_REQUEST_ERROR,
         };
       }
     },
@@ -91,9 +104,10 @@ export const resolvers = {
       try {
         return decideOnMatch({ user_id, match_id, decision: 'reject' });
       } catch (e) {
+        errorLogger(`Error occurred in rejecting request: ${e}`);
         return {
           success: false,
-          message: e.toString(),
+          message: REJECT_MATCH_REQUEST_ERROR,
         };
       }
     },
@@ -144,9 +158,9 @@ export const resolvers = {
         // if any errors, roll back
         if (matchUpdate instanceof Error || edgeUpdate instanceof Error) {
           debug('error unmatching; rolling back');
-          let message = '';
+          let errorMessage = '';
           if (matchUpdate instanceof Error) {
-            message += matchUpdate.toString();
+            errorMessage += matchUpdate.toString();
           } else {
             Match.findByIdAndUpdate(match_id, {
               unmatched: false,
@@ -164,7 +178,7 @@ export const resolvers = {
             });
           }
           if (edgeUpdate instanceof Error) {
-            message += edgeUpdate.toString();
+            errorMessage += edgeUpdate.toString();
           } else {
             // if we made the edge and currentMatch_ids updates, roll those back: re-add the match
             // to currentMatch_ids, and revert edge statuses from unmatched to match
@@ -188,9 +202,10 @@ export const resolvers = {
               debug(`Failed to rollback edge updates: ${e.toString()}`);
             }
           }
+          errorLogger(`Error occurred unmatching: ${errorMessage}`);
           return {
             success: false,
-            message,
+            message: UNMATCH_ERROR,
           };
         }
         return {
@@ -198,9 +213,10 @@ export const resolvers = {
           match: matchUpdate,
         };
       } catch (e) {
+        errorLogger(`Error occurred unmatching: ${e}`);
         return {
           success: false,
-          message: e.toString(),
+          message: UNMATCH_ERROR,
         };
       }
     },
