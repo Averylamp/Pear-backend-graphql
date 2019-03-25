@@ -6,6 +6,7 @@ import { createUserProfileObject, UserProfile } from '../models/UserProfileModel
 import { updateDiscoveryWithNextItem } from '../discovery/DiscoverProfile';
 import { INITIALIZED_FEED_LENGTH } from '../constants';
 import { DiscoveryQueue } from '../models/DiscoveryQueueModel';
+import { createEndorsementChat, sendNewEndorsementMessage } from '../FirebaseManager';
 
 const mongoose = require('mongoose');
 const debug = require('debug')('dev:DetachedProfileResolvers');
@@ -304,17 +305,25 @@ export const resolvers = {
       const deleteDetachedProfilePromise = DetachedProfile.deleteOne({ _id: detachedProfile_id })
         .catch(err => err);
 
+      // create chat object
+      const createChatPromise = endorsementEdge ? null : createEndorsementChat({
+        documentID: firebaseId,
+        firstPerson_id: user._id,
+        secondPerson_id: creator._id,
+      }).catch(err => err);
+
       return Promise.all([
         createUserProfileObjectPromise, updateUserObjectPromise,
-        updateCreatorObjectPromise, deleteDetachedProfilePromise])
+        updateCreatorObjectPromise, deleteDetachedProfilePromise, createChatPromise])
         .then(async ([
           createUserProfileObjectResult, updateUserObjectResult,
-          updateCreatorObjectResult, deleteDetachedProfileResult]) => {
+          updateCreatorObjectResult, deleteDetachedProfileResult, createChatResult]) => {
           // if at least one of the above four operations failed, roll back the others
           if (createUserProfileObjectResult instanceof Error
             || updateUserObjectResult instanceof Error
             || updateCreatorObjectResult instanceof Error
-            || deleteDetachedProfileResult instanceof Error) {
+            || deleteDetachedProfileResult instanceof Error
+            || createChatResult instanceof Error) {
             debug('error attaching profile, rolling back');
             let message = '';
             if (createUserProfileObjectResult instanceof Error) {
@@ -427,6 +436,12 @@ export const resolvers = {
                   debug(`Failed to recreate detached profile ${err}`);
                 });
             }
+            if (createChatResult instanceof Error) {
+              message += createChatResult.toString();
+            } else if (!endorsementEdge) {
+              // TODO: decide if we want to actually delete the chat, or just de-reference
+              // i.e. at this point, mongo contains no references to the chat anymore
+            }
             return {
               success: false,
               message,
@@ -446,6 +461,13 @@ export const resolvers = {
             errorLog(`error occurred when trying to populate discovery feed: ${e}`);
             debug(`error occurred when trying to populate discovery feed: ${e}`);
           }
+          // send the server message to the endorsement chat. it's mostly ok if this silent fails
+          // so we don't do the whole rollback thing
+          sendNewEndorsementMessage({
+            chatID: firebaseId,
+            endorser: creator,
+            endorsee: user,
+          });
           return {
             success: true,
             user: updateUserObjectResult,
