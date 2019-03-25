@@ -104,6 +104,15 @@ export const UPDATE_DISPLAYED_PHOTOS = gql`
   }
 `;
 
+export const FORCE_FEED_UPDATE = gql`
+  mutation ForceUpdateFeed($user_id: ID!, $numberOfItems: Int) {
+    forceUpdateFeed(user_id: $user_id, numberOfItems: $numberOfItems) {
+      success
+      message
+    }
+  }
+`;
+
 export const CREATE_MATCH_REQUEST = gql`
   mutation CreateMatchRequest($requestInput: CreateMatchRequestInput!) {
     createMatchRequest(requestInput: $requestInput) {

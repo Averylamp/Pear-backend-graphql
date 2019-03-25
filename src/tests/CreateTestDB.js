@@ -59,6 +59,12 @@ import {
   VIEW_REQUEST_5_2_VARIABLES,
   VIEW_REQUEST_6_1_VARIABLES,
 } from './MatchActionVars';
+import {
+  AVERY_UPDATE_FEED,
+  BRIAN_UPDATE_FEED,
+  JOSH_UPDATE_FEED, MADE_UPDATE_FEED,
+  SAMMI_UPDATE_FEED, SOPHIA_UPDATE_FEED, UMA_UPDATE_FEED,
+} from './UpdateFeedVars';
 
 export const createUsers = [
   CREATE_AVERY_USER_VARIABLES,
@@ -103,6 +109,16 @@ export const updatePhotos = [
   ADD_MADE_PHOTOS_VARIABLES,
   ADD_UMA_PHOTOS_VARIABLES,
   ADD_SOPHIA_PHOTOS_VARIABLES,
+];
+
+export const updateFeeds = [
+  AVERY_UPDATE_FEED,
+  BRIAN_UPDATE_FEED,
+  JOSH_UPDATE_FEED,
+  SAMMI_UPDATE_FEED,
+  MADE_UPDATE_FEED,
+  UMA_UPDATE_FEED,
+  SOPHIA_UPDATE_FEED,
 ];
 
 export const sendPersonalRequests = [

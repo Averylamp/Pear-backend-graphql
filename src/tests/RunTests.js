@@ -10,7 +10,7 @@ import {
   sendMatchmakerRequests,
   viewRequests,
   acceptRequests,
-  rejectRequests, unmatches,
+  rejectRequests, unmatches, updateFeeds,
 } from './CreateTestDB';
 import {
   ACCEPT_REQUEST,
@@ -20,15 +20,12 @@ import {
   CREATE_MATCH_REQUEST,
   REJECT_REQUEST,
   UNMATCH,
-  VIEW_REQUEST,
+  VIEW_REQUEST, FORCE_FEED_UPDATE,
 } from './Mutations';
 import {
   MONGO_URL,
   apolloServer,
 } from '../start';
-import {
-  updateDiscoveryForUserById,
-} from '../discovery/DiscoverProfile';
 import { deleteChatsCollection } from '../FirebaseManager';
 
 
@@ -222,19 +219,15 @@ export const runTests = async function runTests() {
       }
       testLog(`ROUNDS: ${discoveryIterations}`);
       for (let i = 0; i < discoveryIterations; i += 1) {
-        for (const user of createUserResults) {
+        for (const updateFeedVars of updateFeeds) {
           try {
-            const result = await updateDiscoveryForUserById(
-              { user_id: user.data.createUser.user._id },
-            );
-            if (!result._id) {
-              errorLog(`Error updating discovery: ${result}`);
-            }
-            if (verbose) {
-              verboseDebug(result);
-            }
+            const result = await mutate(({
+              mutation: FORCE_FEED_UPDATE,
+              variables: updateFeedVars,
+            }));
+            checkForAndLogErrors(result, 'forceUpdateFeed');
           } catch (e) {
-            errorLog(`Error: ${e.toString()}`);
+            errorLog((`Error: ${e.toString()}`));
           }
         }
         successLog(`* Successful Discovery Round ${i + 1} *\n`);
@@ -249,7 +242,7 @@ export const runTests = async function runTests() {
             mutation: CREATE_MATCH_REQUEST,
             variables: sendPersonalRequestVars,
           }));
-          checkForAndLogErrors(result, 'personalCreateRequest');
+          checkForAndLogErrors(result, 'createMatchRequest');
         } catch (e) {
           errorLog((`Error: ${e.toString()}`));
         }
@@ -260,7 +253,7 @@ export const runTests = async function runTests() {
             mutation: CREATE_MATCH_REQUEST,
             variables: sendMatchmakerRequestVars,
           }));
-          checkForAndLogErrors(result, 'matchmakerCreateRequest');
+          checkForAndLogErrors(result, 'createMatchRequest');
         } catch (e) {
           errorLog((`Error: ${e.toString()}`));
         }
