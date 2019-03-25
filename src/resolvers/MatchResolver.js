@@ -4,10 +4,8 @@ import {
   createNewMatch, getAndValidateUserAndMatchObjects, decideOnMatch, rollbackEdgeUpdates,
 } from '../matching/matching';
 import {
-  ACCEPT_MATCH_REQUEST_ERROR,
-  MATCH_ALREADY_DECIDED, REJECT_MATCH_REQUEST_ERROR,
+  ACCEPT_MATCH_REQUEST_ERROR, REJECT_MATCH_REQUEST_ERROR,
   SEND_MATCH_REQUEST_ERROR, UNMATCH_ERROR,
-  VIEW_MATCH_REQUEST_ERROR,
 } from './ResolverErrorStrings';
 
 const debug = require('debug')('dev:MatchResolver');
@@ -35,57 +33,6 @@ export const resolvers = {
         return {
           success: false,
           message: SEND_MATCH_REQUEST_ERROR,
-        };
-      }
-    },
-    viewRequest: async (_source, { user_id, match_id }) => {
-      try {
-        // get and validate user and match objects
-        const promisesResult = await getAndValidateUserAndMatchObjects({
-          user_id,
-          match_id,
-          validationType: 'view',
-        });
-        let match = promisesResult[1];
-
-        // determine whether user is sentFor or receivedBy in the match object, and set key name
-        // variables (to be referenced shortly) appropriately
-        const imSentFor = (user_id === match.sentForUser_id.toString());
-        const myStatusKeyName = imSentFor ? 'sentForUserStatus' : 'receivedByUserStatus';
-        const myStatusLastUpdatedKeyName = imSentFor
-          ? 'sentForUserStatusLastUpdated'
-          : 'receivedByUserStatusLastUpdated';
-
-        // update the user's status (RequestResponse) in the match object
-        // no rollback-on-failure needed because this is just one db operation
-        if (['unseen', 'seen'].includes(match[myStatusKeyName])) {
-          const updateObj = {};
-          updateObj[myStatusKeyName] = 'seen';
-          updateObj[myStatusLastUpdatedKeyName] = Date();
-          match = await Match.findByIdAndUpdate(match_id, updateObj, { new: true })
-            .exec()
-            .catch(err => err);
-          if (match instanceof Error) {
-            errorLogger(`Error occurred in viewing request: ${match}`);
-            return {
-              success: false,
-              message: VIEW_MATCH_REQUEST_ERROR,
-            };
-          }
-          return {
-            success: true,
-            match,
-          };
-        }
-        errorLogger(`Error: ${user_id} tried to view an already decided match ${match_id}`);
-        return {
-          success: false,
-          message: MATCH_ALREADY_DECIDED,
-        };
-      } catch (e) {
-        return {
-          success: false,
-          message: `Error: ${e.toString()}`,
         };
       }
     },

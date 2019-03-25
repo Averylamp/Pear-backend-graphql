@@ -145,38 +145,6 @@ export const CREATE_MATCH_REQUEST = gql`
   }
 `;
 
-
-export const VIEW_REQUEST = gql`
-  mutation ViewRequest($user_id: ID!, $match_id: ID!) {
-    viewRequest(user_id: $user_id, match_id: $match_id) {
-      success
-      message
-      match {
-        sentByUser {
-          _id
-          fullName
-        }
-        sentForUser {
-          _id
-          fullName
-          requestedMatch_ids
-          currentMatch_ids
-          edgeUser_ids
-        }
-        receivedByUser {
-          _id
-          fullName
-          requestedMatch_ids
-          currentMatch_ids
-          edgeUser_ids
-        }
-        sentForUserStatus
-        receivedByUserStatus
-      }
-    }
-  }
-`;
-
 export const ACCEPT_REQUEST = gql`
   mutation AcceptRequest($user_id: ID!, $match_id: ID!) {
     acceptRequest(user_id: $user_id, match_id: $match_id) {
