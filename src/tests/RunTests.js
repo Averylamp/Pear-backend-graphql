@@ -28,9 +28,9 @@ import {
 import { deleteChatsCollection } from '../FirebaseManager';
 
 
-const debug = require('debug')('dev:tests:RunTests');
-const testLogger = require('debug')('dev:tests:Test');
-const verboseDebug = require('debug')('dev:tests:verbose:RunTests');
+const debug = require('debug')('tests:RunTests');
+const testLogger = require('debug')('tests:Test');
+const verboseDebug = require('debug')('tests:verbose:RunTests');
 const errorLogger = require('debug')('error:RunTests');
 const mongoose = require('mongoose');
 
