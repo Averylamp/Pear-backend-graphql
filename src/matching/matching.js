@@ -2,6 +2,11 @@ import nanoid from 'nanoid';
 import { receiveRequest, sendRequest, User } from '../models/UserModel';
 import { createMatchObject, Match } from '../models/MatchModel';
 import { UserProfile } from '../models/UserProfileModel';
+import {
+  createMatchChat, notifyEndorsementChatAcceptedRequest,
+  notifyEndorsementChatNewRequest, sendMatchAcceptedServerMessage,
+  sendMatchRequestServerMessage,
+} from '../FirebaseManager';
 
 const debug = require('debug')('dev:Matching');
 const errorLogger = require('debug')('error:Matching');
@@ -13,8 +18,6 @@ const errorStyling = chalk.red.bold;
 const errorLog = log => errorLogger(errorStyling(log));
 
 const mongoose = require('mongoose');
-
-const makeFirebaseDocumentID = (length = 20) => nanoid(length);
 
 // utility function for rolling back a specific db operation on unsuccessful unmatches and
 // accept/reject ops
@@ -111,7 +114,7 @@ export const createNewMatch = async ({
     .exec()
     .catch(() => null);
   let profilePromise = null;
-  if (sentByUser_id !== sentForUser_id) {
+  if (matchmakerMade) {
     profilePromise = UserProfile.findOne({
       user_id: sentForUser_id,
       creatorUser_id: sentByUser_id,
@@ -151,13 +154,15 @@ export const createNewMatch = async ({
     };
   }
 
+  const firebaseId = nanoid(20);
+
   // create the match object
   const matchInput = {
     _id: matchID,
     sentByUser_id,
     sentForUser_id,
     receivedByUser_id,
-    firebaseChatDocumentID: makeFirebaseDocumentID(),
+    firebaseChatDocumentID: firebaseId,
   };
   if (!matchmakerMade) {
     matchInput.sentForUserStatus = 'accepted';
@@ -172,14 +177,22 @@ export const createNewMatch = async ({
   const createReceivedByEdgePromise = receiveRequest(receivedBy, sentFor, matchID)
     .catch(err => err);
 
-  const [match, sentForEdgeResult, receivedByEdgeResult] = await Promise
-    .all([matchPromise, createSentForEdgePromise, createReceivedByEdgePromise]);
+  // create the firebase chat object
+  const createChatPromise = createMatchChat({
+    documentID: firebaseId,
+    firstPerson: sentFor,
+    secondPerson: receivedBy,
+  })
+    .catch(err => err);
 
+  const [match, sentForEdgeResult, receivedByEdgeResult, createChatResult] = await Promise
+    .all([matchPromise, createSentForEdgePromise, createReceivedByEdgePromise, createChatPromise]);
 
   // rollbacks if any updates failed
   if (match instanceof Error
     || sentForEdgeResult instanceof Error
-    || receivedByEdgeResult instanceof Error) {
+    || receivedByEdgeResult instanceof Error
+    || createChatResult instanceof Error) {
     let message = '';
     if (match instanceof Error) {
       errorLog(`Failed to create match Object: ${match.toString()}`);
@@ -223,11 +236,30 @@ export const createNewMatch = async ({
           debug(`Failed to pop user edge: ${err.toString()}`);
         });
     }
-
+    if (createChatResult instanceof Error) {
+      message += createChatResult.toString();
+    } else {
+      // we don't delete the chat; we just leave it, and no mongo edges/matches reference it
+    }
     return {
       success: false,
       message,
     };
+  }
+  // send server message to the new match object
+  sendMatchRequestServerMessage({
+    chatID: firebaseId,
+    initiator: sentBy,
+    hasMatchmaker: matchmakerMade,
+  });
+  if (matchmakerMade) {
+    const endorsementChatId = profile.firebaseChatDocumentID;
+    notifyEndorsementChatNewRequest({
+      chatID: endorsementChatId,
+      sentBy,
+      sentFor,
+      receivedBy,
+    });
   }
   return {
     success: true,
@@ -267,7 +299,7 @@ export const decideOnMatch = async ({ user_id, match_id, decision }) => {
   const matchUpdateObj = {};
   matchUpdateObj[myStatusKeyName] = acceptedMatch ? 'accepted' : 'rejected';
   matchUpdateObj[myStatusLastUpdatedKeyName] = Date();
-  // throw if this errors, canceling the whole operation
+  // this throws if it errors, canceling the whole operation
   const matchUpdated = await Match.findByIdAndUpdate(match_id, matchUpdateObj,
     { new: true })
     .exec();
@@ -284,6 +316,7 @@ export const decideOnMatch = async ({ user_id, match_id, decision }) => {
   // update the edge objects and push the match_id ref to the currentMatch_ids of both users
   // if the other user has also already made a decision
   let edgeUpdate = null;
+  let isAMatch = false;
   const theirMatchStatus = matchUpdated[theirStatusKeyName];
   const myEdgeLastUpdated = user.edgeSummaries.find(
     edgeSummary => edgeSummary.match_id.toString() === match_id,
@@ -293,6 +326,7 @@ export const decideOnMatch = async ({ user_id, match_id, decision }) => {
   ).lastStatusChange || Date();
   if (['accepted', 'rejected'].includes(theirMatchStatus)) {
     if (theirMatchStatus === 'accepted' && acceptedMatch) {
+      isAMatch = true;
       edgeUpdate = await User.updateMany({
         _id: { $in: [user_id, otherUser._id.toString()] },
       }, {
@@ -376,6 +410,32 @@ export const decideOnMatch = async ({ user_id, match_id, decision }) => {
       }
     }
     throw new Error(message);
+  }
+  if (isAMatch) {
+    sendMatchAcceptedServerMessage({ chatID: match.firebaseChatDocumentID });
+    const matchmakerMade = match.sentForUser_id.toString() !== match.sentByUser_id.toString();
+    if (matchmakerMade) {
+      const sentBy = await User.findById(match.sentByUser_id);
+      let sentFor;
+      let receivedBy;
+      if (imSentFor) {
+        sentFor = user;
+        receivedBy = otherUser;
+      } else {
+        sentFor = otherUser;
+        receivedBy = user;
+      }
+      const profile = await UserProfile.findOne({
+        user_id: match.sentForUser_id,
+        creatorUser_id: match.sentByUser_id,
+      });
+      notifyEndorsementChatAcceptedRequest({
+        chatID: profile.firebaseChatDocumentID,
+        sentBy,
+        sentFor,
+        receivedBy,
+      });
+    }
   }
   return {
     success: true,

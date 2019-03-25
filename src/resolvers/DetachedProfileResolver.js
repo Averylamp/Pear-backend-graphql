@@ -257,6 +257,8 @@ export const resolvers = {
       };
       let creatorUpdateArrayFilters = [];
 
+      // generate a tentative firebase ID, to update the edges and userProfile with if one doesn't
+      // already exist
       let firebaseId = nanoid(20);
       const endorsementEdge = user.endorsementEdges.find(
         edge => (edge.otherUser_id.toString() === creator._id.toString()),
