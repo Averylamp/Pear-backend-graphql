@@ -15,9 +15,6 @@ extend type Mutation {
   createMatchRequest(requestInput: CreateMatchRequestInput!): MatchMutationResponse!
 
   # TODO: Document
-  viewRequest(user_id: ID!, match_id: ID!): MatchMutationResponse!
-
-  # TODO: Document
   acceptRequest(user_id: ID!, match_id: ID!): MatchMutationResponse!
 
   # TODO: Document
@@ -53,8 +50,7 @@ type MatchMutationResponse {
 
 const requestResponseEnum = `
 enum RequestResponse {
-  unseen
-  seen
+  undecided
   rejected
   accepted
 }
@@ -122,15 +118,15 @@ const MatchSchema = new Schema({
   sentForUserStatus: {
     type: String,
     required: true,
-    enum: ['unseen', 'seen', 'rejected', 'accepted'],
-    default: 'unseen',
+    enum: ['undecided', 'rejected', 'accepted'],
+    default: 'undecided',
   },
   sentForUserStatusLastUpdated: { type: Date, required: true, default: Date },
   receivedByUserStatus: {
     type: String,
     required: true,
-    enum: ['unseen', 'seen', 'rejected', 'accepted'],
-    default: 'unseen',
+    enum: ['undecided', 'rejected', 'accepted'],
+    default: 'undecided',
   },
   receivedByUserStatusLastUpdated: { type: Date, required: true, default: Date },
 
