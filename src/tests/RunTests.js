@@ -8,7 +8,6 @@ import {
   attachProfiles,
   sendPersonalRequests,
   sendMatchmakerRequests,
-  viewRequests,
   acceptRequests,
   rejectRequests, unmatches, updateFeeds,
 } from './CreateTestDB';
@@ -20,7 +19,7 @@ import {
   CREATE_MATCH_REQUEST,
   REJECT_REQUEST,
   UNMATCH,
-  VIEW_REQUEST, FORCE_FEED_UPDATE,
+  FORCE_FEED_UPDATE,
 } from './Mutations';
 import {
   MONGO_URL,
@@ -29,9 +28,9 @@ import {
 import { deleteChatsCollection } from '../FirebaseManager';
 
 
-const debug = require('debug')('dev:tests:RunTests');
-const testLogger = require('debug')('dev:tests:Test');
-const verboseDebug = require('debug')('dev:tests:verbose:RunTests');
+const debug = require('debug')('tests:RunTests');
+const testLogger = require('debug')('tests:Test');
+const verboseDebug = require('debug')('tests:verbose:RunTests');
 const errorLogger = require('debug')('error:RunTests');
 const mongoose = require('mongoose');
 
@@ -234,7 +233,6 @@ export const runTests = async function runTests() {
       }
       successLog('***** Success Generating Discovery Items *****\n');
 
-
       testLog('TESTING: Sending Match Requests');
       for (const sendPersonalRequestVars of sendPersonalRequests) {
         try {
@@ -259,21 +257,6 @@ export const runTests = async function runTests() {
         }
       }
       successLog('***** Success Sending Match Requests *****\n');
-
-
-      testLog('TESTING: Viewing Match Requests');
-      for (const viewRequestVars of viewRequests) {
-        try {
-          const result = await mutate(({
-            mutation: VIEW_REQUEST,
-            variables: viewRequestVars,
-          }));
-          checkForAndLogErrors(result, 'viewRequest');
-        } catch (e) {
-          errorLog((`Error: ${e.toString()}`));
-        }
-      }
-      successLog('***** Success Viewing Match Requests *****\n');
 
       testLog('TESTING: Accepting Match Requests');
       for (const acceptRequestVars of acceptRequests) {
