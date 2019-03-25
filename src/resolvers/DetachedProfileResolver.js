@@ -8,17 +8,94 @@ import { INITIALIZED_FEED_LENGTH } from '../constants';
 import { DiscoveryQueue } from '../models/DiscoveryQueueModel';
 import { createEndorsementChat, sendNewEndorsementMessage } from '../FirebaseManager';
 import {
-  ALREADY_MADE_PROFILE, APPROVE_PROFILE_ERROR,
-  CANT_ENDORSE_YOURSELF,
+  ALREADY_MADE_PROFILE,
+  APPROVE_PROFILE_ERROR, CANT_ENDORSE_YOURSELF,
   CREATE_DETACHED_PROFILE_ERROR,
-  GET_DETACHED_PROFILE_ERROR,
-  GET_USER_ERROR, WRONG_CREATOR_ERROR,
+  GET_USER_ERROR, VIEW_DETACHED_PROFILE_ERROR,
 } from './ResolverErrorStrings';
 
 const mongoose = require('mongoose');
 const debug = require('debug')('dev:DetachedProfileResolvers');
 const errorLog = require('debug')('error:DetachedProfileResolvers');
 const functionCallConsole = require('debug')('dev:FunctionCalls');
+
+const canMakeProfileForSelf = [
+  '9738738225',
+  '2067789236',
+  '6196160848',
+];
+
+const getAndValidateUsersAndDetachedProfileObjects = async ({
+  user_id, detachedProfile_id, creator_id,
+}) => {
+  const userPromise = User.findById(user_id)
+    .exec()
+    .catch(() => null);
+  const detachedProfilePromise = DetachedProfile.findById(detachedProfile_id)
+    .exec()
+    .catch(() => null);
+  const [user, detachedProfile] = await Promise.all([
+    userPromise,
+    detachedProfilePromise]);
+  if (!user) {
+    errorLog(`Couldn't find user with id ${user_id}`);
+    throw new Error(`Couldn't find user with id ${user_id}`);
+  }
+  if (!detachedProfile) {
+    errorLog(`Couldn't find detached profile with id ${detachedProfile_id}`);
+    throw new Error(`Couldn't find detached profile with id ${detachedProfile_id}`);
+  }
+  // check that this user is indeed the user referenced by the detached profile
+  if (user.phoneNumber !== detachedProfile.phoneNumber) {
+    errorLog(`user phone number is ${user.phoneNumber}`);
+    errorLog(`detached profile phone number is ${detachedProfile.phoneNumber}`);
+    errorLog(
+      `Detached profile with phone number ${detachedProfile.phoneNumber} can't be viewed by this user`,
+    );
+    throw new Error(
+      `Detached profile with phone number ${detachedProfile.phoneNumber} can't be viewed by this user`,
+    );
+  }
+  let creator = null;
+  if (creator_id) {
+    creator = await User.findById(creator_id)
+      .exec()
+      .catch(() => null);
+    if (!creator) {
+      errorLog(`Couldn't find creator with id ${creator_id}`);
+      throw new Error(`Couldn't find creator with id ${creator_id}`);
+    }
+
+    // check that creator made detached profile
+    if (creator_id !== detachedProfile.creatorUser_id.toString()) {
+      errorLog(`Creator with id ${creator_id} did not make detached profile ${detachedProfile_id}`);
+      throw new Error(
+        `Creator with id ${creator_id} did not make detached profile ${detachedProfile_id}`,
+      );
+    }
+    // check creator != user
+    if (creator_id === user_id) {
+      if (process.env.DEV === 'true'
+        && canMakeProfileForSelf.includes(detachedProfile.phoneNumber)) {
+        // we ignore this check if devmode is true AND phoneNumber is whitelisted
+      } else {
+        errorLog(`Endorsed user with id ${user_id} is same as profile creator`);
+        throw new Error(`Endorsed user with id ${user_id} is same as profile creator`);
+      }
+    }
+    // check creator has not already made a profile for user
+    const endorserIDs = await UserProfile.find({ user_id });
+    if (detachedProfile.creatorUser_id in endorserIDs) {
+      errorLog(`creator ${creator_id} has already made a profile for user ${user_id}`);
+      throw new Error(`creator ${creator_id} has already made a profile for user ${user_id}`);
+    }
+  }
+  return {
+    user,
+    detachedProfile,
+    creator,
+  };
+};
 
 export const resolvers = {
   Query: {
@@ -35,6 +112,7 @@ export const resolvers = {
     createDetachedProfile: async (_, { detachedProfileInput }) => {
       functionCallConsole('Create Detached Profile Called');
 
+      // create input object
       const detachedProfileID = '_id' in detachedProfileInput
         ? detachedProfileInput._id : mongoose.Types.ObjectId();
       const finalDetachedProfileInput = pick(detachedProfileInput, [
@@ -78,15 +156,58 @@ export const resolvers = {
         };
       }
 
+      // perform validation
       const { creatorUser_id } = detachedProfileInput;
-      const creator = await User.findById(creatorUser_id);
+      const creator = await User.findById(creatorUser_id)
+        .exec()
+        .catch(err => err);
       if (!creator) {
         return {
           success: false,
           message: GET_USER_ERROR,
         };
       }
+      try {
+        const creatorDetachedProfilesPromise = DetachedProfile.find({ creatorUser_id })
+          .exec();
+        const creatorAttachedProfilesPromise = UserProfile.find({ creatorUser_id })
+          .exec();
+        const [creatorDetachedProfiles, creatorAttachedProfiles] = await Promise.all(
+          [creatorDetachedProfilesPromise, creatorAttachedProfilesPromise],
+        );
+        const dpPhoneNumbers = creatorDetachedProfiles.map(dp => dp.phoneNumber);
+        const apPhoneNumbers = creatorAttachedProfiles.map(ap => ap.phoneNumber);
+        if (detachedProfileInput.phoneNumber === creator.phoneNumber) {
+          if (process.env.DEV === 'true'
+            && canMakeProfileForSelf.includes(creator.phoneNumber)) {
+            // we ignore this check if devmode is true AND phoneNumber is whitelisted
+          } else {
+            return {
+              success: false,
+              message: CANT_ENDORSE_YOURSELF,
+            };
+          }
+        }
+        if (dpPhoneNumbers.includes(detachedProfileInput.phoneNumber)) {
+          return {
+            success: false,
+            message: ALREADY_MADE_PROFILE,
+          };
+        }
+        if (apPhoneNumbers.includes(detachedProfileInput.phoneNumber)) {
+          return {
+            success: false,
+            message: ALREADY_MADE_PROFILE,
+          };
+        }
+      } catch (e) {
+        return {
+          success: false,
+          message: CREATE_DETACHED_PROFILE_ERROR,
+        };
+      }
 
+      // update creator's user object
       const updateCreatorUserObject = User.findByIdAndUpdate(creatorUser_id, {
         $push: {
           detachedProfile_ids: detachedProfileID,
@@ -95,6 +216,7 @@ export const resolvers = {
         .exec()
         .catch(err => err);
 
+      // create new detached profile
       const createDetachedProfileObj = createDetachedProfileObject(finalDetachedProfileInput)
         .catch(err => err);
 
@@ -156,64 +278,42 @@ export const resolvers = {
           };
         });
     },
-    // TODO: create a chat document in firebase between creator and user if none exists already
+    viewDetachedProfile: async (_source, { user_id, detachedProfile_id }) => {
+      functionCallConsole('View Detached Profile Called');
+
+      try {
+        await getAndValidateUsersAndDetachedProfileObjects({
+          user_id,
+          detachedProfile_id,
+        });
+
+        const updatedDetachedProfile = await DetachedProfile
+          .findByIdAndUpdate(detachedProfile_id, {
+            status: 'waitingSeen',
+          }, { new: true })
+          .exec();
+        return {
+          success: true,
+          detachedProfile: updatedDetachedProfile,
+        };
+      } catch (e) {
+        errorLog(`An error occurred viewing detached profile: ${e}`);
+        return {
+          success: false,
+          message: VIEW_DETACHED_PROFILE_ERROR,
+        };
+      }
+    },
     approveNewDetachedProfile: async (_source, { user_id, detachedProfile_id, creatorUser_id }) => {
       functionCallConsole('Approve Profile Called');
 
-      // check that user, detached profile, creator exist
-      const userPromise = User.findById(user_id)
-        .exec()
-        .catch(() => null);
-      const detachedProfilePromise = DetachedProfile.findById(detachedProfile_id)
-        .exec()
-        .catch(() => null);
-      const creatorPromise = User.findById(creatorUser_id)
-        .exec()
-        .catch(() => null);
-      const [user, detachedProfile, creator] = await Promise.all([
-        userPromise,
-        detachedProfilePromise, creatorPromise]);
-      if (!user) {
-        return {
-          success: false,
-          message: GET_USER_ERROR,
-        };
-      }
-      if (!detachedProfile) {
-        return {
-          success: false,
-          message: GET_DETACHED_PROFILE_ERROR,
-        };
-      }
-      if (!creator) {
-        return {
-          success: false,
-          message: GET_USER_ERROR,
-        };
-      }
-
-      // check that creator made detached profile
-      if (creatorUser_id !== detachedProfile.creatorUser_id.toString()) {
-        return {
-          success: false,
-          message: WRONG_CREATOR_ERROR,
-        };
-      }
-      // check creator != user
-      if (creatorUser_id === user_id && detachedProfile.phoneNumber !== '9738738225') {
-        return {
-          success: false,
-          message: CANT_ENDORSE_YOURSELF,
-        };
-      }
-      // check creator has not already made a profile for user
-      const endorserIDs = await UserProfile.find({ user_id });
-      if (detachedProfile.creatorUser_id in endorserIDs) {
-        return {
-          success: false,
-          message: ALREADY_MADE_PROFILE,
-        };
-      }
+      const { user, detachedProfile, creator } = await getAndValidateUsersAndDetachedProfileObjects(
+        {
+          user_id,
+          detachedProfile_id,
+          creator_id: creatorUser_id,
+        },
+      );
       const profileId = mongoose.Types.ObjectId();
       const userProfileInput = {
         _id: profileId,
@@ -301,6 +401,7 @@ export const resolvers = {
           new: true,
           arrayFilters: userUpdateArrayFilters,
         })
+        .exec()
         .catch(err => err);
 
       // unlink detached profile from creator, link new endorsed profile
@@ -309,10 +410,12 @@ export const resolvers = {
           new: true,
           arrayFilters: creatorUpdateArrayFilters,
         })
+        .exec()
         .catch(err => err);
 
       // delete detached profile
       const deleteDetachedProfilePromise = DetachedProfile.deleteOne({ _id: detachedProfile_id })
+        .exec()
         .catch(err => err);
 
       // create chat object
@@ -320,7 +423,8 @@ export const resolvers = {
         documentID: firebaseId,
         firstPerson: user,
         secondPerson: creator,
-      }).catch(err => err);
+      })
+        .catch(err => err);
 
       return Promise.all([
         createUserProfileObjectPromise, updateUserObjectPromise,
