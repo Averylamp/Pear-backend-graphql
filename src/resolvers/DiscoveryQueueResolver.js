@@ -21,12 +21,8 @@ export const resolvers = {
       })
       .then(() => ({ success: true, message: 'Successfully added to queue.' }))
       .catch(err => ({ success: false, message: err.toString() })),
-    forceUpdateFeed: async (_, { user_id, numberOfItems }) => {
-      let rounds = 1;
-      if (numberOfItems !== null && numberOfItems !== undefined) {
-        rounds = numberOfItems;
-      }
-      for (let i = 0; i < rounds; i += 1) {
+    forceUpdateFeed: async (_, { user_id, numberOfItems = 1 }) => {
+      for (let i = 0; i < numberOfItems; i += 1) {
         try {
           await updateDiscoveryForUserById({ user_id });
         } catch (e) {
@@ -44,13 +40,14 @@ export const resolvers = {
   },
   DiscoveryQueue: {
     user: async ({ user_id }) => User.findById(user_id),
+    /*
     currentDiscoveryItems: async () => {
       const users = await User.find({
         $where: 'this.profile_ids.length > 0',
       });
       debug(users);
       return users.map(({ _id }) => new DiscoveryItem({ user_id: _id }));
-    },
+    },*/
   },
   DiscoveryItem: {
     user: async ({ user_id }) => User.findById(user_id),
