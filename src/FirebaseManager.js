@@ -123,7 +123,9 @@ export const sendMatchRequestServerMessage = ({ chatID, initiator, hasMatchmaker
     });
 };
 
-export const notifyEndorsementChatNewRequest = ({ chatID, sentBy, sentFor, receivedBy }) => {
+export const notifyEndorsementChatNewRequest = ({
+  chatID, sentBy, sentFor, receivedBy,
+}) => {
   const now = new Date();
   const db = getFirebaseDb();
   const chatDocRef = db.collection('chats-brian').doc(chatID);
@@ -161,7 +163,9 @@ export const sendMatchAcceptedServerMessage = ({ chatID }) => {
     });
 };
 
-export const notifyEndorsementChatAcceptedRequest = ({ chatID, sentBy, sentFor, receivedBy }) => {
+export const notifyEndorsementChatAcceptedRequest = ({
+  chatID, sentBy, sentFor, receivedBy,
+}) => {
   const now = new Date();
   const db = getFirebaseDb();
   const chatDocRef = db.collection('chats-brian').doc(chatID);
