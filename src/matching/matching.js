@@ -182,6 +182,7 @@ export const createNewMatch = async ({
     documentID: firebaseId,
     firstPerson: sentFor,
     secondPerson: receivedBy,
+    mongoID: matchID,
   })
     .catch(err => err);
 
