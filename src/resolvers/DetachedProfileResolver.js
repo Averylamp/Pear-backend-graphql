@@ -7,6 +7,13 @@ import { updateDiscoveryWithNextItem } from '../discovery/DiscoverProfile';
 import { INITIALIZED_FEED_LENGTH } from '../constants';
 import { DiscoveryQueue } from '../models/DiscoveryQueueModel';
 import { createEndorsementChat, sendNewEndorsementMessage } from '../FirebaseManager';
+import {
+  ALREADY_MADE_PROFILE, APPROVE_PROFILE_ERROR,
+  CANT_ENDORSE_YOURSELF,
+  CREATE_DETACHED_PROFILE_ERROR,
+  GET_DETACHED_PROFILE_ERROR,
+  GET_USER_ERROR, WRONG_CREATOR_ERROR,
+} from './ResolverErrorStrings';
 
 const mongoose = require('mongoose');
 const debug = require('debug')('dev:DetachedProfileResolvers');
@@ -76,7 +83,7 @@ export const resolvers = {
       if (!creator) {
         return {
           success: false,
-          message: `Could not find creator with id ${creatorUser_id}`,
+          message: GET_USER_ERROR,
         };
       }
 
@@ -94,12 +101,12 @@ export const resolvers = {
       return Promise.all([updateCreatorUserObject, createDetachedProfileObj])
         .then(async ([newUser, detachedProfileObject]) => {
           if (newUser == null || detachedProfileObject instanceof Error) {
-            let message = '';
+            let errorMessage = '';
             if (newUser == null) {
-              message += 'Was unable to add Detached Profile to User\n';
+              errorMessage += 'Was unable to add Detached Profile to User\n';
             }
             if (detachedProfileObject instanceof Error) {
-              message += 'Was unable to create Detached Profile Object';
+              errorMessage += 'Was unable to create Detached Profile Object';
               if (newUser) {
                 User.findByIdAndUpdate(creatorUser_id, {
                   $pull: {
@@ -123,9 +130,10 @@ export const resolvers = {
               });
             }
             debug('Completed unsuccessfully');
+            errorLog(errorMessage);
             return {
               success: false,
-              message,
+              message: CREATE_DETACHED_PROFILE_ERROR,
             };
           }
           debug('Completed successfully');
@@ -168,19 +176,19 @@ export const resolvers = {
       if (!user) {
         return {
           success: false,
-          message: `Could not find user with id ${user_id}`,
+          message: GET_USER_ERROR,
         };
       }
       if (!detachedProfile) {
         return {
           success: false,
-          message: `Could not find detached profile with id ${detachedProfile_id}`,
+          message: GET_DETACHED_PROFILE_ERROR,
         };
       }
       if (!creator) {
         return {
           success: false,
-          message: `Could not find creator with id ${detachedProfile.creatorUser_id}`,
+          message: GET_USER_ERROR,
         };
       }
 
@@ -188,14 +196,14 @@ export const resolvers = {
       if (creatorUser_id !== detachedProfile.creatorUser_id.toString()) {
         return {
           success: false,
-          message: `${creatorUser_id} is not creator of detached profile ${detachedProfile_id}`,
+          message: WRONG_CREATOR_ERROR,
         };
       }
       // check creator != user
       if (creatorUser_id === user_id && detachedProfile.phoneNumber !== '9738738225') {
         return {
           success: false,
-          message: 'Can\'t create profile for yourself',
+          message: CANT_ENDORSE_YOURSELF,
         };
       }
       // check creator has not already made a profile for user
@@ -203,7 +211,7 @@ export const resolvers = {
       if (detachedProfile.creatorUser_id in endorserIDs) {
         return {
           success: false,
-          message: `User already has a profile created by ${detachedProfile.creatorUser_id}`,
+          message: ALREADY_MADE_PROFILE,
         };
       }
       const profileId = mongoose.Types.ObjectId();
@@ -327,9 +335,9 @@ export const resolvers = {
             || deleteDetachedProfileResult instanceof Error
             || createChatResult instanceof Error) {
             debug('error attaching profile, rolling back');
-            let message = '';
+            let errorMessage = '';
             if (createUserProfileObjectResult instanceof Error) {
-              message += createUserProfileObjectResult.toString();
+              errorMessage += createUserProfileObjectResult.toString();
             } else {
               createUserProfileObjectResult.remove((err) => {
                 if (err) {
@@ -341,7 +349,7 @@ export const resolvers = {
               });
             }
             if (updateUserObjectResult instanceof Error) {
-              message += updateUserObjectResult.toString();
+              errorMessage += updateUserObjectResult.toString();
             } else {
               let arrayFilters = [];
               const userUpdateRollback = {
@@ -376,7 +384,7 @@ export const resolvers = {
               });
             }
             if (updateCreatorObjectResult instanceof Error) {
-              message += updateCreatorObjectResult.toString();
+              errorMessage += updateCreatorObjectResult.toString();
             } else {
               let arrayFilters = [];
               const creatorUpdateRollback = {
@@ -410,7 +418,7 @@ export const resolvers = {
               });
             }
             if (deleteDetachedProfileResult instanceof Error) {
-              message += deleteDetachedProfileResult.toString();
+              errorMessage += deleteDetachedProfileResult.toString();
             } else {
               const detachedProfileInput = pick(detachedProfile, [
                 '_id',
@@ -439,14 +447,15 @@ export const resolvers = {
                 });
             }
             if (createChatResult instanceof Error) {
-              message += createChatResult.toString();
+              errorMessage += createChatResult.toString();
             } else if (!endorsementEdge) {
               // TODO: decide if we want to actually delete the chat, or just de-reference
               // i.e. at this point, mongo contains no references to the chat anymore
             }
+            errorLog(errorMessage);
             return {
               success: false,
-              message,
+              message: APPROVE_PROFILE_ERROR,
             };
           }
           // all operations succeeded; populate discovery feeds if this the endorsee's first profile
