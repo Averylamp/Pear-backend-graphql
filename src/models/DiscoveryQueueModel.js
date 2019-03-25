@@ -14,6 +14,8 @@ extend type Query {
 const mutationRoutes = `
 extend type Mutation {
   addToQueue(user_id: ID!, addedUser_id: ID!): DiscoveryMutationResponse!
+  # numberOfItems defaults to 1
+  forceUpdateFeed(user_id: ID!, numberOfItems: Int): DiscoveryMutationResponse!
 }
 
 `;
