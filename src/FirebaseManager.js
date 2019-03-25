@@ -111,7 +111,9 @@ export const createEndorsementChat = ({ documentID, firstPerson, secondPerson })
   })
 );
 
-export const createMatchChat = ({ documentID, firstPerson, secondPerson, mongoID }) => (
+export const createMatchChat = ({
+  documentID, firstPerson, secondPerson, mongoID,
+}) => (
   createChat({
     documentID,
     firstPerson,
