@@ -12,11 +12,11 @@ const devMode = process.env.DEV === 'true';
 const regenTestDBMode = (process.env.REGEN_DB === 'true' && devMode);
 
 if (devMode && regenTestDBMode) {
-  testsLog('Prepared to run tests in 2 second');
+  testsLog('Prepared to run tests in 3 second');
   setTimeout(async () => {
     testsLog('Running Tests');
     await runTests();
-  }, 2000);
+  }, 3000);
 }
 
 start();
