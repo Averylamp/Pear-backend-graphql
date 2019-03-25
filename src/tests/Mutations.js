@@ -46,6 +46,23 @@ export const CREATE_DETACHED_PROFILE = gql`
         bio
         dos
         donts
+        status
+      }
+    }
+  }
+`;
+
+export const VIEW_DETACHED_PROFILE = gql`
+  mutation ViewDetachedProfile($user_id: ID!, $detachedProfile_id: ID!) {
+    viewDetachedProfile(user_id: $user_id, detachedProfile_id: $detachedProfile_id) {
+      success
+      message
+      detachedProfile {
+        _id
+        creatorUser_id
+        creatorFirstName
+        firstName
+        status
       }
     }
   }
