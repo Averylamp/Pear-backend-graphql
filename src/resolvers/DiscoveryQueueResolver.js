@@ -1,5 +1,6 @@
 import { User } from '../models/UserModel';
 import { DiscoveryQueue, DiscoveryItem } from '../models/DiscoveryQueueModel';
+import { updateDiscoveryForUserById } from '../discovery/DiscoverProfile';
 
 const debug = require('debug')('dev:DiscoveryQueueResolver');
 
@@ -20,6 +21,26 @@ export const resolvers = {
       })
       .then(() => ({ success: true, message: 'Successfully added to queue.' }))
       .catch(err => ({ success: false, message: err.toString() })),
+    forceUpdateFeed: async (_, { user_id, numberOfItems }) => {
+      let rounds = 1;
+      if (numberOfItems !== null && numberOfItems !== undefined) {
+        rounds = numberOfItems;
+      }
+      for (let i = 0; i < rounds; i += 1) {
+        try {
+          await updateDiscoveryForUserById({ user_id });
+        } catch (e) {
+          return {
+            success: false,
+            message: `An error occurred: ${e}`,
+          };
+        }
+      }
+      return {
+        success: true,
+        message: 'Successfully forced update to feed.',
+      };
+    },
   },
   DiscoveryQueue: {
     user: async ({ user_id }) => User.findById(user_id),
