@@ -56,68 +56,52 @@ export const SEND_MATCHMAKER_REQUEST_6_VARIABLES = {
   },
 };
 
-export const VIEW_REQUEST_1_VARIABLES = {
+export const ACCEPT_REQUEST_1_VARIABLES = {
   user_id: SAMMI,
   match_id: MATCH1,
 };
 
-export const VIEW_REQUEST_2_VARIABLES = {
+export const REJECT_REQUEST_2_VARIABLES = {
   user_id: AVERY,
   match_id: MATCH2,
 };
 
-export const VIEW_REQUEST_3_1_VARIABLES = {
+export const ACCEPT_REQUEST_3_1_VARIABLES = {
   user_id: SAMMI,
   match_id: MATCH3,
 };
 
-export const VIEW_REQUEST_3_2_VARIABLES = {
+export const ACCEPT_REQUEST_3_2_VARIABLES = {
   user_id: UMA,
   match_id: MATCH3,
 };
 
-export const VIEW_REQUEST_4_1_VARIABLES = {
+export const ACCEPT_REQUEST_4_1_VARIABLES = {
   user_id: UMA,
   match_id: MATCH4,
 };
 
-export const VIEW_REQUEST_4_2_VARIABLES = {
+export const REJECT_REQUEST_4_2_VARIABLES = {
   user_id: AVERY,
   match_id: MATCH4,
 };
 
-export const VIEW_REQUEST_5_1_VARIABLES = {
+export const REJECT_REQUEST_5_1_VARIABLES = {
   user_id: AVERY,
   match_id: MATCH5,
 };
 
-export const VIEW_REQUEST_5_2_VARIABLES = {
+export const REJECT_REQUEST_5_2_VARIABLES = {
   user_id: SAMMI,
   match_id: MATCH5,
 };
 
-export const VIEW_REQUEST_6_1_VARIABLES = {
+export const REJECT_REQUEST_6_1_VARIABLES = {
   user_id: SAMMI,
   match_id: MATCH6,
 };
 
-export const ACCEPT_REQUEST_1_VARIABLES = VIEW_REQUEST_1_VARIABLES;
-
-export const REJECT_REQUEST_2_VARIABLES = VIEW_REQUEST_2_VARIABLES;
-
-export const ACCEPT_REQUEST_3_1_VARIABLES = VIEW_REQUEST_3_1_VARIABLES;
-
-export const ACCEPT_REQUEST_3_2_VARIABLES = VIEW_REQUEST_3_2_VARIABLES;
-
-export const ACCEPT_REQUEST_4_1_VARIABLES = VIEW_REQUEST_4_1_VARIABLES;
-
-export const REJECT_REQUEST_4_2_VARIABLES = VIEW_REQUEST_4_2_VARIABLES;
-
-export const REJECT_REQUEST_5_1_VARIABLES = VIEW_REQUEST_5_1_VARIABLES;
-
-export const REJECT_REQUEST_5_2_VARIABLES = VIEW_REQUEST_5_2_VARIABLES;
-
-export const REJECT_REQUEST_6_1_VARIABLES = VIEW_REQUEST_6_1_VARIABLES;
+// request 6 is not acted on by the second person
 
 export const UNMATCH_1_VARIABLES = {
   user_id: JOSH,
