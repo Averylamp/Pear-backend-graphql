@@ -308,8 +308,8 @@ export const resolvers = {
       // create chat object
       const createChatPromise = endorsementEdge ? null : createEndorsementChat({
         documentID: firebaseId,
-        firstPerson_id: user,
-        secondPerson_id: creator,
+        firstPerson: user,
+        secondPerson: creator,
       }).catch(err => err);
 
       return Promise.all([
