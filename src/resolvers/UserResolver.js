@@ -5,9 +5,15 @@ import { User, createUserObject } from '../models/UserModel';
 import { UserProfile } from '../models/UserProfileModel';
 import { Match } from '../models/MatchModel';
 import { authenticateUser } from '../FirebaseManager';
+import {
+  CREATE_USER_ERROR,
+  GET_USER_ERROR,
+  UPDATE_USER_PHOTOS_ERROR,
+} from './ResolverErrorStrings';
 
 const mongoose = require('mongoose');
 const debug = require('debug')('dev:UserResolvers');
+const errorLog = require('debug')('error:UserResolver');
 const functionCallConsole = require('debug')('dev:FunctionCalls');
 
 
@@ -43,20 +49,19 @@ export const resolvers = {
           if (user) {
             resolve({
               success: true,
-              message: 'Successfully fetched',
               user,
             });
           } else {
             resolve({
               success: false,
-              message: 'Failed to fetch user',
+              message: GET_USER_ERROR,
             });
           }
         })
-        .catch((err) => {
+        .catch(() => {
           resolve({
             success: false,
-            message: err.toString(),
+            message: GET_USER_ERROR,
           });
         }));
     },
@@ -115,9 +120,9 @@ export const resolvers = {
           if (userObject instanceof Error
             || discoveryQueueObject instanceof Error) {
             debug('error occurred while creating user');
-            let message = '';
+            let errorMessage = '';
             if (userObject instanceof Error) {
-              message += userObject.toString();
+              errorMessage += userObject.toString();
             } else {
               userObject.remove((err) => {
                 if (err) {
@@ -128,7 +133,7 @@ export const resolvers = {
               });
             }
             if (discoveryQueueObject instanceof Error) {
-              message += discoveryQueueObject.toString();
+              errorMessage += discoveryQueueObject.toString();
             } else {
               discoveryQueueObject.remove((err) => {
                 if (err) {
@@ -138,9 +143,10 @@ export const resolvers = {
                 }
               });
             }
+            errorLog(errorMessage);
             return {
               success: false,
-              message,
+              message: CREATE_USER_ERROR,
             };
           }
           return {
@@ -158,7 +164,7 @@ export const resolvers = {
       if (!user) {
         return {
           success: false,
-          message: `User with id ${user_id} does not exist`,
+          message: GET_USER_ERROR,
         };
       }
       const toAddToImageBank = [];
@@ -200,9 +206,9 @@ export const resolvers = {
           success: true,
           user: res,
         }))
-        .catch(err => ({
+        .catch(() => ({
           success: false,
-          message: `Failed to update user with new photos: ${err}`,
+          message: UPDATE_USER_PHOTOS_ERROR,
         }));
     },
   }
