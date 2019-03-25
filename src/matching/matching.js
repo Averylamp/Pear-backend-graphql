@@ -436,6 +436,14 @@ export const decideOnMatch = async ({ user_id, match_id, decision }) => {
         sentFor,
         receivedBy,
       });
+      // increment pear points
+      // call .exec() to make sure this query/update actually runs, since the result isn't used
+      // anywhere
+      User.findByIdAndUpdate(match.sentByUser_id, {
+        $inc: {
+          pearPoints: 1,
+        },
+      }).exec();
     }
   }
   return {
