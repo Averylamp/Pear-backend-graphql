@@ -9,7 +9,7 @@ import {
   sendPersonalRequests,
   sendMatchmakerRequests,
   acceptRequests,
-  rejectRequests, unmatches, updateFeeds,
+  rejectRequests, unmatches, updateFeeds, viewDetachedProfiles,
 } from './CreateTestDB';
 import {
   ACCEPT_REQUEST,
@@ -19,7 +19,7 @@ import {
   CREATE_MATCH_REQUEST,
   REJECT_REQUEST,
   UNMATCH,
-  FORCE_FEED_UPDATE,
+  FORCE_FEED_UPDATE, VIEW_DETACHED_PROFILE,
 } from './Mutations';
 import {
   MONGO_URL,
@@ -178,6 +178,25 @@ export const runTests = async function runTests() {
         }
       }
       successLog('***** Success Creating Detached Profiles *****\n');
+
+      // VIEW DETACHED PROFILES
+      testLog('TESTING: Viewing Detached Profiles');
+      for (const viewProfileVars of viewDetachedProfiles) {
+        try {
+          const result = await mutate({
+            mutation: VIEW_DETACHED_PROFILE,
+            variables: viewProfileVars,
+          });
+          if (verbose) {
+            verboseDebug(result);
+          }
+          checkForAndLogErrors(result, 'viewDetachedProfile');
+        } catch (e) {
+          errorLog((`${e}`));
+          process.exit(1);
+        }
+      }
+      successLog('***** Success Viewing Detached Profiles *****\n');
 
       // ATTACH DETACHED PROFILES
       testLog('TESTING: Attaching Detached Profiles');
