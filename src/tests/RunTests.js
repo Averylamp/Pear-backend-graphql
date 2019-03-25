@@ -29,6 +29,7 @@ import {
 import {
   updateDiscoveryForUserById,
 } from '../discovery/DiscoverProfile';
+import { deleteChatsCollection } from '../FirebaseManager';
 
 
 const debug = require('debug')('dev:tests:RunTests');
@@ -93,6 +94,10 @@ export const runTests = async function runTests() {
           errorLog(`Failed to drop db ${err}`);
           process.exit(1);
         });
+
+      testLog('Clearing all previous firebase chat objects');
+      await deleteChatsCollection();
+      testLog('Cleared all previous firebase chat objects');
 
       const { mutate } = createTestClient(apolloServer);
 
