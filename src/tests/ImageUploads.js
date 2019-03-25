@@ -1,4 +1,4 @@
-const debug = require('debug')('dev:tests:ImageUpload');
+const debug = require('debug')('tests:ImageUpload');
 const errorLog = require('debug')('error:ImageUpload');
 const fs = require('fs');
 const path = require('path');

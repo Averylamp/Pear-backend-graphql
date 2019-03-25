@@ -1,6 +1,6 @@
 const debug = require('debug')('dev:FirebaseManager');
 const errorLog = require('debug')('error:FirebaseManager');
-const testLog = require('debug')('dev:tests:FirebaseManager');
+const testLog = require('debug')('tests:FirebaseManager');
 const firebaseAdmin = require('firebase-admin');
 const serviceAccount = require('../pear-firebase-adminsdk.json');
 

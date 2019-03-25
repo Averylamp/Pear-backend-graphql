@@ -4,7 +4,7 @@ import { start } from './start';
 import { runTests } from './tests/RunTests';
 
 const debug = require('debug')('dev:Index');
-const testsLog = require('debug')('dev:tests:Index');
+const testsLog = require('debug')('tests:Index');
 
 debug('Starting...');
 testsLog('Starting...');
