@@ -1,9 +1,18 @@
 const debug = require('debug')('dev:FirebaseManager');
 const errorLog = require('debug')('error:FirebaseManager');
+const testLog = require('debug')('dev:tests:FirebaseManager');
 const firebaseAdmin = require('firebase-admin');
 const serviceAccount = require('../pear-firebase-adminsdk.json');
 
-const CHAT_COLLECTION_NAME = 'chats-brian';
+// if DB_NAME specified, hit chats-$DB_NAME
+// if CHAT_COLLECTION env variable specified, override and use that collection
+const dbName = process.env.DB_NAME ? process.env.DB_NAME : 'dev';
+let chatCollection = `chats-${dbName}`;
+chatCollection = process.env.CHAT_COLLECTION
+  ? process.env.CHAT_COLLECTION
+  : chatCollection;
+export const CHAT_COLLECTION_NAME = chatCollection;
+
 let initialized = false;
 
 const initialize = () => {
@@ -43,23 +52,50 @@ export const authenticateUser = function authenticateUser(uid, token) {
     }));
 };
 
+export const deleteChatsCollection = async () => {
+  if (chatCollection === 'chats' || chatCollection === 'chats-prod') {
+    errorLog('CAN\'T DELETE PROD CHATS PROGRAMMATICALLY');
+    throw new Error('CAN\'T DELETE PROD CHATS PROGRAMMATICALLY');
+  }
+  const db = getFirebaseDb();
+  const allChatsSnapshot = await db.collection(CHAT_COLLECTION_NAME)
+    .get();
+  const deleteChatsPromises = [];
+  for (const doc of allChatsSnapshot.docs) {
+    testLog('deleting chat');
+    const docRef = doc.ref;
+    const snapshot = await docRef.collection('messages').get();
+    const deleteMsgsPromises = [];
+    for (const msg of snapshot.docs) {
+      deleteMsgsPromises.push(msg.ref.delete());
+    }
+    await Promise.all(deleteMsgsPromises);
+    deleteChatsPromises.push(docRef.delete());
+  }
+  await Promise.all(deleteChatsPromises);
+};
+
 const createChat = ({
-  documentID, firstPerson, secondPerson, type,
+  documentID, firstPerson, secondPerson, type, mongoID,
 }) => {
   const db = getFirebaseDb();
   const now = new Date();
+  const setObj = {
+    documentID,
+    type,
+    firstPerson_id: firstPerson._id.toString(),
+    secondPerson_id: secondPerson._id.toString(),
+    lastActivity: now,
+    firstPersonLastOpened: new Date(0), // default to 0 millis past epoch
+    secondPersonLastOpened: new Date(0),
+    access: [firstPerson.firebaseAuthID, secondPerson.firebaseAuthID],
+  };
+  if (mongoID) {
+    setObj.mongoDocument_id = mongoID.toString();
+  }
   return db.collection(CHAT_COLLECTION_NAME)
     .doc(documentID)
-    .set({
-      documentID,
-      type,
-      firstPerson_id: firstPerson._id.toString(),
-      secondPerson_id: secondPerson._id.toString(),
-      lastActivity: now,
-      firstPersonLastOpened: new Date(0), // default to 0 millis past epoch
-      secondPersonLastOpened: new Date(0),
-      access: [firstPerson.firebaseAuthID, secondPerson.firebaseAuthID],
-    })
+    .set(setObj)
     .catch((err) => {
       errorLog(`error creating chat document: ${err}`);
       throw err;
@@ -75,12 +111,13 @@ export const createEndorsementChat = ({ documentID, firstPerson, secondPerson })
   })
 );
 
-export const createMatchChat = ({ documentID, firstPerson, secondPerson }) => (
+export const createMatchChat = ({ documentID, firstPerson, secondPerson, mongoID }) => (
   createChat({
     documentID,
     firstPerson,
     secondPerson,
     type: 'MATCH',
+    mongoID,
   })
 );
 
