@@ -210,4 +210,7 @@ export const resolvers = {
     sentForUser: async ({ sentForUser_id }) => User.findById(sentForUser_id),
     receivedByUser: async ({ receivedByUser_id }) => User.findById(receivedByUser_id),
   },
+  EdgeSummary: {
+    match: async ({ match_id }) => Match.findById(match_id),
+  },
 };

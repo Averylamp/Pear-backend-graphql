@@ -1,10 +1,10 @@
 import { pick } from 'lodash';
-import { authenticateUser } from './Authentication';
 import { DetachedProfile } from '../models/DetachedProfile';
 import { DiscoveryQueue, createDiscoveryQueueObject } from '../models/DiscoveryQueueModel';
 import { User, createUserObject } from '../models/UserModel';
 import { UserProfile } from '../models/UserProfileModel';
 import { Match } from '../models/MatchModel';
+import { authenticateUser } from '../FirebaseManager';
 
 const mongoose = require('mongoose');
 const debug = require('debug')('dev:UserResolvers');

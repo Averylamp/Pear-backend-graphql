@@ -1,3 +1,4 @@
+import nanoid from 'nanoid';
 import { pick } from 'lodash';
 import { DetachedProfile, createDetachedProfileObject } from '../models/DetachedProfile';
 import { User } from '../models/UserModel';
@@ -5,6 +6,7 @@ import { createUserProfileObject, UserProfile } from '../models/UserProfileModel
 import { updateDiscoveryWithNextItem } from '../discovery/DiscoverProfile';
 import { INITIALIZED_FEED_LENGTH } from '../constants';
 import { DiscoveryQueue } from '../models/DiscoveryQueueModel';
+import { createEndorsementChat, sendNewEndorsementMessage } from '../FirebaseManager';
 
 const mongoose = require('mongoose');
 const debug = require('debug')('dev:DetachedProfileResolvers');
@@ -255,25 +257,32 @@ export const resolvers = {
       };
       let creatorUpdateArrayFilters = [];
 
-      const edgeExists = user.endorsementEdges.find(
+      // generate a tentative firebase ID, to update the edges and userProfile with if one doesn't
+      // already exist
+      let firebaseId = nanoid(20);
+      const endorsementEdge = user.endorsementEdges.find(
         edge => (edge.otherUser_id.toString() === creator._id.toString()),
-      ) !== undefined;
-      if (!edgeExists) {
+      );
+      if (!endorsementEdge) {
         userObjectUpdate.$push.endorsementEdges = {
           otherUser_id: creator._id,
           myProfile_id: profileId,
+          firebaseChatDocumentID: firebaseId,
         };
         creatorObjectUpdate.$push.endorsementEdges = {
           otherUser_id: user._id,
           theirProfile_id: profileId,
+          firebaseChatDocumentID: firebaseId,
         };
       } else {
         userObjectUpdate['endorsementEdges.$[element].myProfile_id'] = profileId;
         creatorObjectUpdate['endorsementEdges.$[element].theirProfile_id'] = profileId;
         userUpdateArrayFilters = [{ 'element.otherUser_id': creator._id.toString() }];
         creatorUpdateArrayFilters = [{ 'element.otherUser_id': user._id.toString() }];
+        firebaseId = endorsementEdge.firebaseChatDocumentID;
       }
 
+      userProfileInput.firebaseChatDocumentID = firebaseId;
       // create new user profile
       const createUserProfileObjectPromise = createUserProfileObject(userProfileInput)
         .catch(err => err);
@@ -298,17 +307,25 @@ export const resolvers = {
       const deleteDetachedProfilePromise = DetachedProfile.deleteOne({ _id: detachedProfile_id })
         .catch(err => err);
 
+      // create chat object
+      const createChatPromise = endorsementEdge ? null : createEndorsementChat({
+        documentID: firebaseId,
+        firstPerson: user,
+        secondPerson: creator,
+      }).catch(err => err);
+
       return Promise.all([
         createUserProfileObjectPromise, updateUserObjectPromise,
-        updateCreatorObjectPromise, deleteDetachedProfilePromise])
+        updateCreatorObjectPromise, deleteDetachedProfilePromise, createChatPromise])
         .then(async ([
           createUserProfileObjectResult, updateUserObjectResult,
-          updateCreatorObjectResult, deleteDetachedProfileResult]) => {
+          updateCreatorObjectResult, deleteDetachedProfileResult, createChatResult]) => {
           // if at least one of the above four operations failed, roll back the others
           if (createUserProfileObjectResult instanceof Error
             || updateUserObjectResult instanceof Error
             || updateCreatorObjectResult instanceof Error
-            || deleteDetachedProfileResult instanceof Error) {
+            || deleteDetachedProfileResult instanceof Error
+            || createChatResult instanceof Error) {
             debug('error attaching profile, rolling back');
             let message = '';
             if (createUserProfileObjectResult instanceof Error) {
@@ -336,8 +353,8 @@ export const resolvers = {
                   },
                 },
               };
-              if (!edgeExists) {
-                // remove the edge
+              if (!endorsementEdge) {
+                // we created an edge, so remove the edge
                 userUpdateRollback.$pull.endorsementEdges = {
                   otherUser_id: creator._id,
                 };
@@ -370,8 +387,8 @@ export const resolvers = {
                   endorsedProfile_ids: profileId,
                 },
               };
-              if (!edgeExists) {
-                // remove the edge
+              if (!endorsementEdge) {
+                // we created an edge, so remove the edge
                 creatorUpdateRollback.$pull.endorsementEdges = {
                   otherUser_id: user._id,
                 };
@@ -421,6 +438,12 @@ export const resolvers = {
                   debug(`Failed to recreate detached profile ${err}`);
                 });
             }
+            if (createChatResult instanceof Error) {
+              message += createChatResult.toString();
+            } else if (!endorsementEdge) {
+              // TODO: decide if we want to actually delete the chat, or just de-reference
+              // i.e. at this point, mongo contains no references to the chat anymore
+            }
             return {
               success: false,
               message,
@@ -440,6 +463,13 @@ export const resolvers = {
             errorLog(`error occurred when trying to populate discovery feed: ${e}`);
             debug(`error occurred when trying to populate discovery feed: ${e}`);
           }
+          // send the server message to the endorsement chat. it's mostly ok if this silent fails
+          // so we don't do the whole rollback thing
+          sendNewEndorsementMessage({
+            chatID: firebaseId,
+            endorser: creator,
+            endorsee: user,
+          });
           return {
             success: true,
             user: updateUserObjectResult,
