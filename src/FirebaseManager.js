@@ -42,18 +42,19 @@ export const authenticateUser = function authenticateUser(uid, token) {
     }));
 };
 
-export const createEndorsementChat = ({ documentID, firstPerson_id, secondPerson_id }) => {
+export const createEndorsementChat = ({ documentID, firstPerson, secondPerson }) => {
   const db = getFirebaseDb();
   return db.collection('chats-brian')
     .doc(documentID)
     .set({
       documentID,
       type: 'ENDORSEMENT',
-      firstPerson_id: firstPerson_id.toString(),
-      secondPerson_id: secondPerson_id.toString(),
+      firstPerson_id: firstPerson._id.toString(),
+      secondPerson_id: secondPerson._id.toString(),
       lastActivity: new Date(),
       firstPersonLastOpened: new Date(0), // default to 0 millis past epoch
       secondPersonLastOpened: new Date(0),
+      access: [firstPerson.firebaseAuthID, secondPerson.firebaseAuthID],
     })
     .then((docRef) => {
       debug(`created document ${docRef}`);
