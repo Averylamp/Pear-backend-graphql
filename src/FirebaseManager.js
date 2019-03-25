@@ -43,7 +43,9 @@ export const authenticateUser = function authenticateUser(uid, token) {
     }));
 };
 
-const createChat = ({ documentID, firstPerson, secondPerson, type }) => {
+const createChat = ({
+  documentID, firstPerson, secondPerson, type,
+}) => {
   const db = getFirebaseDb();
   const now = new Date();
   return db.collection(CHAT_COLLECTION_NAME)
