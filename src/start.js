@@ -83,7 +83,7 @@ const tracing = process.env.PERF === 'true';
 if (tracing) debug('Perf mode detected');
 
 const URL = 'http://localhost';
-const PORT = 1234;
+const PORT = process.env.PORT ? process.env.PORT : 1234;
 const dbHost = process.env.DB_HOST ? process.env.DB_HOST : 'localhost';
 const mongoPrefix = dbHost.includes('localhost') ? 'mongodb://' : 'mongodb+srv://';
 const dbName = process.env.DB_NAME ? process.env.DB_NAME : 'dev';
