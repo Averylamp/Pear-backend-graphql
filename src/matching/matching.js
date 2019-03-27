@@ -3,7 +3,7 @@ import { receiveRequest, sendRequest, User } from '../models/UserModel';
 import { createMatchObject, Match } from '../models/MatchModel';
 import { UserProfile } from '../models/UserProfileModel';
 import {
-  createMatchChat, notifyEndorsementChatAcceptedRequest,
+  createMatchChat, getChatDocPathFromId, notifyEndorsementChatAcceptedRequest,
   notifyEndorsementChatNewRequest, sendMatchAcceptedServerMessage,
   sendMatchRequestServerMessage,
 } from '../FirebaseManager';
@@ -167,6 +167,7 @@ export const createNewMatch = async ({
     sentForUser_id,
     receivedByUser_id,
     firebaseChatDocumentID: firebaseId,
+    firebaseChatDocumentPath: getChatDocPathFromId(firebaseId),
   };
   if (!matchmakerMade) {
     matchInput.sentForUserStatus = 'accepted';

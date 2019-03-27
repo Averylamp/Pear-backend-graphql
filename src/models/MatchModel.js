@@ -78,6 +78,7 @@ type Match{
   unmatchedTimestamp: String
 
   firebaseChatDocumentID: String!
+  firebaseChatDocumentPath: String!
 }
 `;
 
@@ -136,6 +137,7 @@ const MatchSchema = new Schema({
   unmatchedTimestamp: { type: Date, required: false },
 
   firebaseChatDocumentID: { type: String, required: true },
+  firebaseChatDocumentPath: { type: String, required: true },
 }, { timestamps: true });
 
 export const EdgeSummarySchema = new Schema({
