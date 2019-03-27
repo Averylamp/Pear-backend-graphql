@@ -46,7 +46,7 @@ export const resolvers = {
     currentDiscoveryItems: async () => {
       const users = await User.find({
         $where: 'this.profile_ids.length > 0',
-      });
+      }).sort({ createdAt: -1 }).exec();
       debug(users);
       return users.map(({ _id }) => new DiscoveryItem({ user_id: _id }));
     },
