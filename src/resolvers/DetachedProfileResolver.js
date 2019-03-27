@@ -6,7 +6,11 @@ import { createUserProfileObject, UserProfile } from '../models/UserProfileModel
 import { updateDiscoveryWithNextItem } from '../discovery/DiscoverProfile';
 import { INITIALIZED_FEED_LENGTH } from '../constants';
 import { DiscoveryQueue } from '../models/DiscoveryQueueModel';
-import { createEndorsementChat, sendNewEndorsementMessage } from '../FirebaseManager';
+import {
+  createEndorsementChat,
+  getChatDocPathFromId,
+  sendNewEndorsementMessage,
+} from '../FirebaseManager';
 import {
   ALREADY_MADE_PROFILE,
   APPROVE_PROFILE_ERROR, CANT_ENDORSE_YOURSELF,
@@ -376,11 +380,13 @@ export const resolvers = {
           otherUser_id: creator._id,
           myProfile_id: profileId,
           firebaseChatDocumentID: firebaseId,
+          firebaseChatDocumentPath: getChatDocPathFromId(firebaseId),
         };
         creatorObjectUpdate.$push.endorsementEdges = {
           otherUser_id: user._id,
           theirProfile_id: profileId,
           firebaseChatDocumentID: firebaseId,
+          firebaseChatDocumentPath: getChatDocPathFromId(firebaseId),
         };
       } else {
         userObjectUpdate['endorsementEdges.$[element].myProfile_id'] = profileId;
@@ -391,6 +397,7 @@ export const resolvers = {
       }
 
       userProfileInput.firebaseChatDocumentID = firebaseId;
+      userProfileInput.firebaseChatDocumentPath = getChatDocPathFromId(firebaseId);
       // create new user profile
       const createUserProfileObjectPromise = createUserProfileObject(userProfileInput)
         .catch(err => err);
