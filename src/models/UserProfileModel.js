@@ -21,6 +21,7 @@ type UserProfile {
   donts: [String!]!
 
   firebaseChatDocumentID: String!
+  firebaseChatDocumentPath: String!
 }
 
 `;
@@ -46,6 +47,7 @@ type EndorsementEdge {
   theirProfile: UserProfile
   
   firebaseChatDocumentID: String!
+  firebaseChatDocumentPath: String!
 }
 `;
 
@@ -65,6 +67,7 @@ const UserProfileSchema = new Schema({
   dos: { type: [String], required: true },
   donts: { type: [String], required: true },
   firebaseChatDocumentID: { type: String, required: true },
+  firebaseChatDocumentPath: { type: String, required: true },
 }, { timestamps: true });
 
 export const EndorsementEdgeSchema = new Schema({
@@ -73,6 +76,7 @@ export const EndorsementEdgeSchema = new Schema({
   myProfile_id: { type: Schema.Types.ObjectId, required: false, index: true },
   theirProfile_id: { type: Schema.Types.ObjectId, required: false, index: true },
   firebaseChatDocumentID: { type: String, required: true },
+  firebaseChatDocumentPath: { type: String, required: true },
 });
 
 
