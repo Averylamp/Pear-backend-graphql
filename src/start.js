@@ -1,7 +1,6 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import { merge } from 'lodash';
-import sendMessage from './SMSHelper';
 import {
   typeDef as User,
 } from './models/UserModel';
@@ -178,14 +177,7 @@ export const start = async () => {
       const server = apolloServer;
 
       server.applyMiddleware({ app });
-      app.post('/echo', (req, res) => {
-        res.json(req.body);
-      });
 
-      app.post('/sms-test', (req, res) => {
-        sendMessage('+12067789236', 'hello!');
-        res.json(req.body);
-      });
 
       app.listen({
         port: PORT,
