@@ -38,6 +38,8 @@ const getFirebaseAuth = () => {
   return firebaseAdmin.auth();
 };
 
+export const getChatDocPathFromId = firebaseId => `${CHAT_COLLECTION_NAME}/${firebaseId}`;
+
 export const authenticateUser = function authenticateUser(uid, token) {
   return new Promise((resolve, reject) => getFirebaseAuth()
     .verifyIdToken(token)
