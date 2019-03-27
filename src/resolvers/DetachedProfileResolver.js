@@ -329,7 +329,7 @@ export const resolvers = {
         donts: detachedProfile.donts,
       };
 
-      let userObjectUpdate = {
+      const userObjectUpdate = {
         isSeeking: true,
         $inc: { profileCount: 1 },
         $push: {
@@ -339,22 +339,7 @@ export const resolvers = {
           },
         },
       };
-      if (user.displayedImages.length < 6) {
-        userObjectUpdate = {
-          isSeeking: true,
-          $inc: { profileCount: 1 },
-          $push: {
-            profile_ids: profileId,
-            bankImages: {
-              $each: detachedProfile.images,
-            },
-            displayedImages: {
-              $each: detachedProfile.images,
-              $slice: 6,
-            },
-          },
-        };
-      }
+
       let userUpdateArrayFilters = [];
 
       const creatorObjectUpdate = {
