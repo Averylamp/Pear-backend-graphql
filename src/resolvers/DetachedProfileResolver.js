@@ -79,9 +79,8 @@ const getAndValidateUsersAndDetachedProfileObjects = async ({
     }
     // check creator != user
     if (creator_id === user_id) {
-      if (process.env.DEV === 'true'
-        && canMakeProfileForSelf.includes(detachedProfile.phoneNumber)) {
-        // we ignore this check if devmode is true AND phoneNumber is whitelisted
+      if (canMakeProfileForSelf.includes(detachedProfile.phoneNumber)) {
+        // we ignore this check if phoneNumber is whitelisted
       } else {
         errorLog(`Endorsed user with id ${user_id} is same as profile creator`);
         throw new Error(`Endorsed user with id ${user_id} is same as profile creator`);
