@@ -181,8 +181,7 @@ export const resolvers = {
         const dpPhoneNumbers = creatorDetachedProfiles.map(dp => dp.phoneNumber);
         const apPhoneNumbers = creatorAttachedProfiles.map(ap => ap.phoneNumber);
         if (detachedProfileInput.phoneNumber === creator.phoneNumber) {
-          if (process.env.DEV === 'true'
-            && canMakeProfileForSelf.includes(creator.phoneNumber)) {
+          if (canMakeProfileForSelf.includes(creator.phoneNumber)) {
             // we ignore this check if devmode is true AND phoneNumber is whitelisted
           } else {
             return {
