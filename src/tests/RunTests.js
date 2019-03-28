@@ -327,6 +327,10 @@ export const runTests = async function runTests() {
       const passed = '*********** All Tests Passed ***********\n';
       successLog(line + passed + line);
 
+      // testLog('TESTING: Deleting a user');
+      // await deleteUser(SAMMI);
+      // testLog('Deleted successfully');
+
       // wait for any async db calls to finish
       setTimeout(() => {
         process.exit(0);
