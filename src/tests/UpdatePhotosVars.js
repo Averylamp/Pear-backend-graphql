@@ -1,4 +1,5 @@
 
+
 export const ADD_AVERY_PHOTOS_VARIABLES = {
   updateUserPhotosInput: {
     user_id: '5c82162afec46c84e924a332',
