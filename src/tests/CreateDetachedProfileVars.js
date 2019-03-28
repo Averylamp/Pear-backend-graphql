@@ -1,14 +1,16 @@
 import {
-  AVERY_PROFILE_MADE, BRIAN,
-  BRIAN_PROFILE_SAMMI, JOSH,
-  JOSH_PROFILE_SOPHIA, MADE, MADE_PROFILE_JOSH, SAMMI, SAMMI_PROFILE_BRIAN,
-  SAMMI_PROFILE_JOSH, SOPHIA, SOPHIA_PROFILE_SAMMI, SOPHIA_PROFILE_UMA, UMA, UMA_PROFILE_BRIAN,
+  AVERY_PROFILE_MADE_D_ID, BRIAN_ID,
+  BRIAN_PROFILE_SAMMI_D_ID, JOSH_ID,
+  JOSH_PROFILE_SOPHIA_D_ID, MADE_ID,
+  MADE_PROFILE_JOSH_D_ID, SAMMI_ID, SAMMI_PROFILE_BRIAN_D_ID,
+  SAMMI_PROFILE_JOSH_D_ID, SOPHIA_ID,
+  SOPHIA_PROFILE_SAMMI_D_ID, SOPHIA_PROFILE_UMA_D_ID, UMA_ID, UMA_PROFILE_BRIAN_D_ID,
 } from './TestsContants';
 
 export const CREATE_AVERY1_DETACHED_PROFILE_VARIABLES = {
   detachedProfileInput: {
-    _id: AVERY_PROFILE_MADE,
-    creatorUser_id: MADE,
+    _id: AVERY_PROFILE_MADE_D_ID,
+    creatorUser_id: MADE_ID,
     creatorFirstName: 'Made',
     firstName: 'Avery',
     phoneNumber: '9738735555',
@@ -25,8 +27,8 @@ export const CREATE_AVERY1_DETACHED_PROFILE_VARIABLES = {
 
 export const CREATE_BRIAN1_DETACHED_PROFILE_VARIABLES = {
   detachedProfileInput: {
-    _id: BRIAN_PROFILE_SAMMI,
-    creatorUser_id: SAMMI,
+    _id: BRIAN_PROFILE_SAMMI_D_ID,
+    creatorUser_id: SAMMI_ID,
     creatorFirstName: 'Sammi',
     firstName: 'Brian',
     phoneNumber: '2067789237',
@@ -43,8 +45,8 @@ export const CREATE_BRIAN1_DETACHED_PROFILE_VARIABLES = {
 
 export const CREATE_JOSH1_DETACHED_PROFILE_VARIABLES = {
   detachedProfileInput: {
-    _id: JOSH_PROFILE_SOPHIA,
-    creatorUser_id: SOPHIA,
+    _id: JOSH_PROFILE_SOPHIA_D_ID,
+    creatorUser_id: SOPHIA_ID,
     creatorFirstName: 'Sophia',
     firstName: 'Josh',
     phoneNumber: '6196160849',
@@ -61,8 +63,8 @@ export const CREATE_JOSH1_DETACHED_PROFILE_VARIABLES = {
 
 export const CREATE_SAMMI1_DETACHED_PROFILE_VARIABLES = {
   detachedProfileInput: {
-    _id: SAMMI_PROFILE_JOSH,
-    creatorUser_id: JOSH,
+    _id: SAMMI_PROFILE_JOSH_D_ID,
+    creatorUser_id: JOSH_ID,
     creatorFirstName: 'Josh',
     firstName: 'Sammi',
     phoneNumber: '9788733736',
@@ -79,8 +81,8 @@ export const CREATE_SAMMI1_DETACHED_PROFILE_VARIABLES = {
 
 export const CREATE_SAMMI2_DETACHED_PROFILE_VARIABLES = {
   detachedProfileInput: {
-    _id: SAMMI_PROFILE_BRIAN,
-    creatorUser_id: BRIAN,
+    _id: SAMMI_PROFILE_BRIAN_D_ID,
+    creatorUser_id: BRIAN_ID,
     creatorFirstName: 'Brian',
     firstName: 'Sammi',
     phoneNumber: '9788733736',
@@ -97,8 +99,8 @@ export const CREATE_SAMMI2_DETACHED_PROFILE_VARIABLES = {
 
 export const CREATE_MADE1_DETACHED_PROFILE_VARIABLES = {
   detachedProfileInput: {
-    _id: MADE_PROFILE_JOSH,
-    creatorUser_id: JOSH,
+    _id: MADE_PROFILE_JOSH_D_ID,
+    creatorUser_id: JOSH_ID,
     creatorFirstName: 'Josh',
     firstName: 'Made',
     phoneNumber: '6092402838',
@@ -115,8 +117,8 @@ export const CREATE_MADE1_DETACHED_PROFILE_VARIABLES = {
 
 export const CREATE_UMA1_DETACHED_PROFILE_VARIABLES = {
   detachedProfileInput: {
-    _id: UMA_PROFILE_BRIAN,
-    creatorUser_id: BRIAN,
+    _id: UMA_PROFILE_BRIAN_D_ID,
+    creatorUser_id: BRIAN_ID,
     creatorFirstName: 'Brian',
     firstName: 'Uma',
     phoneNumber: '9784296614',
@@ -133,8 +135,8 @@ export const CREATE_UMA1_DETACHED_PROFILE_VARIABLES = {
 
 export const CREATE_SOPHIA1_DETACHED_PROFILE_VARIABLES = {
   detachedProfileInput: {
-    _id: SOPHIA_PROFILE_SAMMI,
-    creatorUser_id: SAMMI,
+    _id: SOPHIA_PROFILE_SAMMI_D_ID,
+    creatorUser_id: SAMMI_ID,
     creatorFirstName: 'Sammi',
     firstName: 'Sophia',
     phoneNumber: '7777777777',
@@ -151,8 +153,8 @@ export const CREATE_SOPHIA1_DETACHED_PROFILE_VARIABLES = {
 
 export const CREATE_SOPHIA2_DETACHED_PROFILE_VARIABLES = {
   detachedProfileInput: {
-    _id: SOPHIA_PROFILE_UMA,
-    creatorUser_id: UMA,
+    _id: SOPHIA_PROFILE_UMA_D_ID,
+    creatorUser_id: UMA_ID,
     creatorFirstName: 'Uma',
     firstName: 'Sophia',
     phoneNumber: '7777777777',
@@ -162,7 +164,7 @@ export const CREATE_SOPHIA2_DETACHED_PROFILE_VARIABLES = {
     vibes: ['Zesty', 'BANANAS', 'Spicy'],
     bio: 'Like bad girls? Sophia\'s bad at everything.\n\nExcept watching movies and drinking copious amounts of boba. If you like either of those things, she\'s the one!',
     dos: ['Take her to the movies! she\'s a bit of a movie junkie and loves a good horror flick too, so you won\'t have to give those up.'],
-    donts: ['bBe late to a date! Sophia is the most punctual person I know'],
+    donts: ['be late to a date! Sophia is the most punctual person I know'],
     location: [-71.101366, 42.362580],
   },
 };
