@@ -70,7 +70,7 @@ export const resolvers = {
     createUser: async (_source, { userInput }) => {
       functionCallConsole('Create User');
       const userObjectID = '_id' in userInput ? userInput._id : mongoose.Types.ObjectId();
-      const disoveryQueueObjectID = mongoose.Types.ObjectId();
+      const discoveryQueueObjectID = mongoose.Types.ObjectId();
 
       const finalUserInput = pick(userInput, [
         'age',
@@ -88,7 +88,7 @@ export const resolvers = {
         'facebookAccessToken',
         'thumbnailURL']);
       finalUserInput._id = userObjectID;
-      finalUserInput.discoveryQueue_id = disoveryQueueObjectID;
+      finalUserInput.discoveryQueue_id = discoveryQueueObjectID;
       const locationObj = {
         point: {
           coordinates: userInput.location,
@@ -110,7 +110,7 @@ export const resolvers = {
       const createDiscoveryQueueObj = createDiscoveryQueueObject(
         {
           user_id: userObjectID,
-          _id: disoveryQueueObjectID,
+          _id: discoveryQueueObjectID,
         },
       )
         .catch(err => err);
@@ -158,7 +158,6 @@ export const resolvers = {
     updateUser: async () => null,
     updateUserPhotos: async (_source, { updateUserPhotosInput }) => {
       functionCallConsole('Update Photos Called');
-      debug(`input object is ${updateUserPhotosInput}`);
       const { user_id, displayedImages, additionalImages } = updateUserPhotosInput;
       const user = await User.findById(user_id);
       if (!user) {

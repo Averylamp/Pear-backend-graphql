@@ -19,7 +19,7 @@ import {
   CREATE_MATCH_REQUEST,
   REJECT_REQUEST,
   UNMATCH,
-  FORCE_FEED_UPDATE, VIEW_DETACHED_PROFILE,
+  FORCE_FEED_UPDATE, VIEW_DETACHED_PROFILE, UPDATE_DISPLAYED_PHOTOS,
 } from './Mutations';
 import {
   MONGO_URL,
@@ -160,14 +160,17 @@ export const runTests = async function runTests() {
 
       // CREATE DETACHED PROFILES
       testLog('TESTING: Creating Detached Profiles');
+      const detachedProfiles = [];
       for (let i = 0; i < createDetachedProfiles.length; i += 1) {
         const detachedProfileVars = createDetachedProfiles[i];
         detachedProfileVars.detachedProfileInput.images = uploadImagesResults[i];
+        detachedProfiles.push(detachedProfileVars.detachedProfileInput);
         try {
           const result = await mutate({
             mutation: CREATE_DETACHED_PROFILE,
             variables: detachedProfileVars,
           });
+
           if (verbose) {
             verboseDebug(result);
           }
@@ -198,6 +201,37 @@ export const runTests = async function runTests() {
       }
       successLog('***** Success Viewing Detached Profiles *****\n');
 
+
+      // UPDATING USER PROFILES
+      testLog('TESTING: Updating User Images');
+      for (let i = 0; i < createDetachedProfiles.length; i += 1) {
+        const viewProfileVars = viewDetachedProfiles[i];
+        // this looping works since createDetachedProfiles, uploadImageResults, and
+        // viewDetachedProfiles are parallel arrays
+        try {
+          const addPhotosVariables = {
+            updateUserPhotosInput: {
+              user_id: viewProfileVars.user_id,
+              displayedImages: uploadImagesResults[i],
+              additionalImages: uploadImagesResults[i],
+            },
+          };
+          const result = await mutate({
+            mutation: UPDATE_DISPLAYED_PHOTOS,
+            variables: addPhotosVariables,
+          });
+          if (verbose) {
+            verboseDebug(result);
+          }
+          checkForAndLogErrors(result, 'updateUserPhotos');
+        } catch (e) {
+          errorLog((`${e}`));
+          process.exit(1);
+        }
+      }
+
+      successLog('***** Success Updating User Images *****\n');
+
       // ATTACH DETACHED PROFILES
       testLog('TESTING: Attaching Detached Profiles');
       for (const attachProfileVars of attachProfiles) {
@@ -217,16 +251,6 @@ export const runTests = async function runTests() {
       }
       successLog('***** Success Attaching Detached Profiles *****\n');
 
-      // UPDATE PHOTO ENDPOINT TESTING
-      // const updatePhotoPromises = [];
-      // for (const updatePhotoVars of updatePhotos) {
-      //   updatePhotoPromises.push(mutate({
-      //     mutation: UPDATE_DISPLAYED_PHOTOS,
-      //     variables: updatePhotoVars,
-      //   }));
-      // }
-      // const updatePhotoResults = await Promise.all(updatePhotoPromises);
-      // updatePhotoResults.forEach((result) => { debug(result); });
 
       testLog('TESTING: Generating Discovery Items');
       let discoveryIterations = 4;
