@@ -33,7 +33,7 @@ type DiscoveryQueue{
 type DiscoveryItem {
   _id: ID!
   user_id: ID!
-  user: User!
+  user: User
   timestamp: String
 }
 
