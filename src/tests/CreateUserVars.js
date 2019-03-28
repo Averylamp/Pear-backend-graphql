@@ -1,10 +1,10 @@
 import {
-  AVERY, BRIAN, JOEL, JOSH, MADE, SAMMI, SOPHIA, UMA,
+  AVERY_ID, BRIAN_ID, JOEL_ID, JOSH_ID, MADE_ID, SAMMI_ID, SOPHIA_ID, UMA_ID,
 } from './TestsContants';
 
 export const CREATE_AVERY_USER_VARIABLES = {
   userInput: {
-    _id: AVERY,
+    _id: AVERY_ID,
     age: 21,
     birthdate: '1/11/1998',
     email: 'avery+test@getpear.com',
@@ -25,7 +25,7 @@ export const CREATE_AVERY_USER_VARIABLES = {
 
 export const CREATE_BRIAN_USER_VARIABLES = {
   userInput: {
-    _id: BRIAN,
+    _id: BRIAN_ID,
     age: 20,
     birthdate: '3/15/1998',
     email: 'brian+test@getpear.com',
@@ -46,7 +46,7 @@ export const CREATE_BRIAN_USER_VARIABLES = {
 
 export const CREATE_JOEL_USER_VARIABLES = {
   userInput: {
-    _id: JOEL,
+    _id: JOEL_ID,
     age: 27,
     birthdate: '1/1/1992',
     email: 'joel+test@getpear.com',
@@ -68,7 +68,7 @@ export const CREATE_JOEL_USER_VARIABLES = {
 
 export const CREATE_JOSH_USER_VARIABLES = {
   userInput: {
-    _id: JOSH,
+    _id: JOSH_ID,
     age: 20,
     birthdate: '7/14/1998',
     email: 'joshua+test@getpear.com',
@@ -89,7 +89,7 @@ export const CREATE_JOSH_USER_VARIABLES = {
 
 export const CREATE_SAMMI_USER_VARIABLES = {
   userInput: {
-    _id: SAMMI,
+    _id: SAMMI_ID,
     age: 19,
     birthdate: '1/1/2000',
     email: 'sammi+test@getpear.com',
@@ -110,7 +110,7 @@ export const CREATE_SAMMI_USER_VARIABLES = {
 
 export const CREATE_MADE_USER_VARIABLES = {
   userInput: {
-    _id: MADE,
+    _id: MADE_ID,
     age: 20,
     birthdate: '1/1/1999',
     email: 'made+test@getpear.com',
@@ -131,7 +131,7 @@ export const CREATE_MADE_USER_VARIABLES = {
 
 export const CREATE_UMA_USER_VARIABLES = {
   userInput: {
-    _id: UMA,
+    _id: UMA_ID,
     age: 21,
     birthdate: '1/1/1998',
     email: 'uma+test@getpear.com',
@@ -152,7 +152,7 @@ export const CREATE_UMA_USER_VARIABLES = {
 
 export const CREATE_SOPHIA_USER_VARIABLES = {
   userInput: {
-    _id: SOPHIA,
+    _id: SOPHIA_ID,
     age: 20,
     birthdate: '1/1/1999',
     email: 'sophia+test@getpear.com',
