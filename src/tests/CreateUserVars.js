@@ -15,7 +15,7 @@ export const CREATE_AVERY_USER_VARIABLES = {
     lastName: 'Lamp',
     gender: 'male',
     firebaseToken: 'FakeFirebaseTokenAvery',
-    firebaseAuthID: 'FakeFirebaseAuthIdAvery',
+    firebaseAuthID: '1cSO718vkCMzOufAfnZalMhQ00O2',
     // facebookId: '1',
     // facebookAccessToken: '2',
     thumbnailURL: '',
