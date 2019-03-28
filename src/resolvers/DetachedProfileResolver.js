@@ -79,8 +79,9 @@ const getAndValidateUsersAndDetachedProfileObjects = async ({
     }
     // check creator != user
     if (creator_id === user_id) {
-      if (canMakeProfileForSelf.includes(detachedProfile.phoneNumber)) {
-        // we ignore this check if phoneNumber is whitelisted
+      if (process.env.DB_NAME !== 'prod'
+        && canMakeProfileForSelf.includes(detachedProfile.phoneNumber)) {
+        // we ignore this check if phoneNumber is whitelisted and we aren't touching prod db
       } else {
         errorLog(`Endorsed user with id ${user_id} is same as profile creator`);
         throw new Error(`Endorsed user with id ${user_id} is same as profile creator`);
@@ -181,8 +182,9 @@ export const resolvers = {
         const dpPhoneNumbers = creatorDetachedProfiles.map(dp => dp.phoneNumber);
         const apPhoneNumbers = creatorAttachedProfiles.map(ap => ap.phoneNumber);
         if (detachedProfileInput.phoneNumber === creator.phoneNumber) {
-          if (canMakeProfileForSelf.includes(creator.phoneNumber)) {
-            // we ignore this check if devmode is true AND phoneNumber is whitelisted
+          if (process.env.DB_NAME !== 'prod'
+            && canMakeProfileForSelf.includes(creator.phoneNumber)) {
+            // we ignore this check if phoneNumber is whitelisted and we aren't touching prod db
           } else {
             return {
               success: false,
