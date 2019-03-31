@@ -1,8 +1,8 @@
-import { updateAllDiscovery } from './discovery/DiscoverProfile';
-import { TICK_LENGTH_MILLIS } from './constants';
+import { STAT_SNAPSHOT_GENERATION_TIME } from './constants';
+import { saveStatsSnapshot } from './stats/Stats';
 
-const debug = require('debug')('dev:DiscoveryGeneration');
-const prodConsole = require('debug')('prod:DiscoveryGeneration');
+const debug = require('debug')('dev:StatsGeneration');
+const prodConsole = require('debug')('prod:StatsGeneration');
 
 if (process.env.PERF) {
   debug('Perf mode detected');
@@ -25,10 +25,10 @@ const mongoose = require('mongoose');
 
 debug(MONGO_URL);
 
-const name = 'Discovery Generation';
+const name = 'Stats Generation';
 debug('Booting %s', name);
 
-export const startDiscoveryGeneration = async () => {
+export const startStatsGeneration = async () => {
   try {
     mongoose.connect(MONGO_URL, { useNewUrlParser: true });
     mongoose.Promise = global.Promise;
@@ -43,11 +43,11 @@ export const startDiscoveryGeneration = async () => {
       setInterval(() => {
         try {
           debug('updating all discoveries');
-          updateAllDiscovery();
+          saveStatsSnapshot();
         } catch (e) {
           debug(`an error occurred in updating discoveries: ${e}`);
         }
-      }, TICK_LENGTH_MILLIS);
+      }, STAT_SNAPSHOT_GENERATION_TIME);
     });
   } catch (e) {
     debug(e);
@@ -55,4 +55,4 @@ export const startDiscoveryGeneration = async () => {
 };
 
 
-export default startDiscoveryGeneration;
+export default startStatsGeneration;

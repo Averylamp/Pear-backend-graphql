@@ -306,7 +306,7 @@ export const decideOnMatch = async ({ user_id, match_id, decision }) => {
   const previousMyStatusLastUpdated = match[myStatusLastUpdatedKeyName];
   const matchUpdateObj = {};
   matchUpdateObj[myStatusKeyName] = acceptedMatch ? 'accepted' : 'rejected';
-  matchUpdateObj[myStatusLastUpdatedKeyName] = Date();
+  matchUpdateObj[myStatusLastUpdatedKeyName] = new Date();
   // this throws if it errors, canceling the whole operation
   const matchUpdated = await Match.findByIdAndUpdate(match_id, matchUpdateObj,
     { new: true })
@@ -328,10 +328,10 @@ export const decideOnMatch = async ({ user_id, match_id, decision }) => {
   const theirMatchStatus = matchUpdated[theirStatusKeyName];
   const myEdgeLastUpdated = user.edgeSummaries.find(
     edgeSummary => edgeSummary.match_id.toString() === match_id,
-  ).lastStatusChange || Date();
+  ).lastStatusChange || new Date();
   const theirEdgeLastUpdated = otherUser.edgeSummaries.find(
     edgeSummary => edgeSummary.match_id.toString() === match_id,
-  ).lastStatusChange || Date();
+  ).lastStatusChange || new Date();
   if (['accepted', 'rejected'].includes(theirMatchStatus)) {
     if (theirMatchStatus === 'accepted' && acceptedMatch) {
       isAMatch = true;
@@ -342,7 +342,7 @@ export const decideOnMatch = async ({ user_id, match_id, decision }) => {
           currentMatch_ids: match_id,
         },
         'edgeSummaries.$[element].edgeStatus': 'match',
-        'edgeSummaries.$[element].lastStatusChange': Date(),
+        'edgeSummaries.$[element].lastStatusChange': new Date(),
       }, {
         arrayFilters: [{ 'element.match_id': match_id }],
       })
@@ -353,7 +353,7 @@ export const decideOnMatch = async ({ user_id, match_id, decision }) => {
         _id: { $in: [user_id, otherUser._id.toString()] },
       }, {
         'edgeSummaries.$[element].edgeStatus': 'rejected',
-        'edgeSummaries.$[element].lastStatusChange': Date(),
+        'edgeSummaries.$[element].lastStatusChange': new Date(),
       }, {
         arrayFilters: [{ 'element.match_id': match_id }],
       })
