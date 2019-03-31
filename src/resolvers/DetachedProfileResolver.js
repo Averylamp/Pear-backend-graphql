@@ -106,7 +106,12 @@ export const resolvers = {
     findDetachedProfiles: async (_, { phoneNumber }) => {
       functionCallConsole('Find Detached Profile Called');
       debug(`Looking for detached profiles for: ${phoneNumber}`);
-      return DetachedProfile.find({ phoneNumber });
+      return DetachedProfile.find({
+        phoneNumber,
+        status: {
+          $ne: 'accepted',
+        },
+      });
     },
   },
   DetachedProfile: {
@@ -405,8 +410,10 @@ export const resolvers = {
         .exec()
         .catch(err => err);
 
-      // delete detached profile
-      const deleteDetachedProfilePromise = DetachedProfile.deleteOne({ _id: detachedProfile_id })
+      // update status of detached profile
+      const updateDetachedProfilePromise = DetachedProfile.findByIdAndUpdate(detachedProfile_id, {
+        status: 'accepted',
+      })
         .exec()
         .catch(err => err);
 
@@ -420,15 +427,15 @@ export const resolvers = {
 
       return Promise.all([
         createUserProfileObjectPromise, updateUserObjectPromise,
-        updateCreatorObjectPromise, deleteDetachedProfilePromise, createChatPromise])
+        updateCreatorObjectPromise, updateDetachedProfilePromise, createChatPromise])
         .then(async ([
           createUserProfileObjectResult, updateUserObjectResult,
-          updateCreatorObjectResult, deleteDetachedProfileResult, createChatResult]) => {
+          updateCreatorObjectResult, updateDetachedProfileResult, createChatResult]) => {
           // if at least one of the above four operations failed, roll back the others
           if (createUserProfileObjectResult instanceof Error
             || updateUserObjectResult instanceof Error
             || updateCreatorObjectResult instanceof Error
-            || deleteDetachedProfileResult instanceof Error
+            || updateDetachedProfileResult instanceof Error
             || createChatResult instanceof Error) {
             debug('error attaching profile, rolling back');
             let errorMessage = '';
@@ -513,33 +520,19 @@ export const resolvers = {
                 }
               });
             }
-            if (deleteDetachedProfileResult instanceof Error) {
-              errorMessage += deleteDetachedProfileResult.toString();
+            if (updateDetachedProfileResult instanceof Error) {
+              errorMessage += updateDetachedProfileResult.toString();
             } else {
-              const detachedProfileInput = pick(detachedProfile, [
-                '_id',
-                'creatorUser_id',
-                'creatorFirstName',
-                'firstName',
-                'phoneNumber',
-                'age',
-                'gender',
-                'interests',
-                'vibes',
-                'bio',
-                'dos',
-                'donts',
-                'images',
-                'matchingDemographics',
-                'matchingPreferences',
-              ]);
-              createDetachedProfileObject(detachedProfileInput)
+              DetachedProfile.findByIdAndUpdate(detachedProfile_id, {
+                status: 'waitingSeen',
+              })
+                .exec()
                 .then(() => {
-                  debug('Recreated detached profile object successfully');
+                  debug('Rolled back detached profile object successfully');
                 })
                 .catch((err) => {
-                  errorLog(`Failed to recreate detached profile ${err}`);
-                  debug(`Failed to recreate detached profile ${err}`);
+                  errorLog(`Failed to roll back detached profile ${err}`);
+                  debug(`Failed to roll back detached profile ${err}`);
                 });
             }
             if (createChatResult instanceof Error) {
