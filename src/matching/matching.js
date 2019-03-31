@@ -166,6 +166,7 @@ export const createNewMatch = async ({
     sentByUser_id,
     sentForUser_id,
     receivedByUser_id,
+    isMatchmakerMade: matchmakerMade,
     firebaseChatDocumentID: firebaseId,
     firebaseChatDocumentPath: getChatDocPathFromId(firebaseId),
   };
