@@ -147,7 +147,7 @@ export const runTests = async function runTests() {
         result.forEach((imageResult) => {
           if (!imageResult.imageID) {
             errorLog(('Image not uploaded properly'));
-            errorLog((`${imageResult}`));
+            errorLog(imageResult);
             imageErrorCount += 1;
           }
         });
@@ -350,6 +350,10 @@ export const runTests = async function runTests() {
       const line = '****************************************\n';
       const passed = '*********** All Tests Passed ***********\n';
       successLog(line + passed + line);
+
+      // testLog('TESTING: Deleting a user');
+      // await deleteUser(SAMMI);
+      // testLog('Deleted successfully');
 
       // wait for any async db calls to finish
       setTimeout(() => {
