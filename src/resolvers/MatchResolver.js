@@ -73,7 +73,7 @@ export const resolvers = {
         const matchUpdateObj = {
           unmatched: true,
           unmatchedBy_id: user_id,
-          unmatchedTimestamp: Date(),
+          unmatchedTimestamp: new Date(),
         };
         if (reason) {
           matchUpdateObj.unmatchedReason = reason;
@@ -85,10 +85,10 @@ export const resolvers = {
         // update the user objects: currentMatch_ids list, and edges
         const myEdgeLastUpdated = user.edgeSummaries.find(
           edgeSummary => edgeSummary.match_id.toString() === match_id,
-        ).lastStatusChange || Date();
+        ).lastStatusChange || new Date();
         const theirEdgeLastUpdated = otherUser.edgeSummaries.find(
           edgeSummary => edgeSummary.match_id.toString() === match_id,
-        ).lastStatusChange || Date();
+        ).lastStatusChange || new Date();
         const edgeUpdate = await User.updateMany({
           _id: { $in: [user_id, otherUser._id.toString()] },
         }, {
@@ -96,7 +96,7 @@ export const resolvers = {
             currentMatch_ids: match_id,
           },
           'edgeSummaries.$[element].edgeStatus': 'unmatched',
-          'edgeSummaries.$[element].lastStatusChange': Date(),
+          'edgeSummaries.$[element].lastStatusChange': new Date(),
         }, {
           arrayFilters: [{ 'element.match_id': match_id }],
         }).exec()
