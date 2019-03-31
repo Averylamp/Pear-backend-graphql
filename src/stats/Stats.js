@@ -118,7 +118,7 @@ export const saveStatsSnapshot = () => {
     nPersonalMatchAccepted: countDocumentOperationTimeSummary(countPersonalMatchesAcceptedInRange,
       now),
     nMatchmakerMatchAccepted: countDocumentOperationTimeSummary(
-      countMatchmakerMatchesAcceptedInRange, now
+      countMatchmakerMatchesAcceptedInRange, now,
     ),
   };
   createStatSnapshot(statInput);
