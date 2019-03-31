@@ -64,6 +64,8 @@ type DetachedProfile {
   dos: [String!]!
   donts: [String!]!
   images: [ImageContainer!]!
+  userProfile_id: ID
+  userProfile: UserProfile
 
   matchingDemographics: MatchingDemographics!
   matchingPreferences: MatchingPreferences!
@@ -124,6 +126,7 @@ const DetachedProfileSchema = new Schema({
     required: true,
     default: MatchingPreferencesSchema,
   },
+  userProfile_id: { type: Schema.Types.ObjectId, required: false },
 
 }, { timestamps: true });
 

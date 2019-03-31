@@ -116,6 +116,7 @@ export const resolvers = {
   },
   DetachedProfile: {
     creatorUser: async ({ creatorUser_id }) => User.findById(creatorUser_id),
+    userProfile: async ({ userProfile_id }) => UserProfile.findById(userProfile_id),
   },
   Mutation: {
     createDetachedProfile: async (_, { detachedProfileInput }) => {
@@ -229,6 +230,7 @@ export const resolvers = {
       const createDetachedProfileObj = createDetachedProfileObject(finalDetachedProfileInput)
         .catch(err => err);
 
+      // TODO: should also check if updateCreatorUserObject instanceof Error
       return Promise.all([updateCreatorUserObject, createDetachedProfileObj])
         .then(async ([newUser, detachedProfileObject]) => {
           if (newUser == null || detachedProfileObject instanceof Error) {
@@ -413,6 +415,7 @@ export const resolvers = {
       // update status of detached profile
       const updateDetachedProfilePromise = DetachedProfile.findByIdAndUpdate(detachedProfile_id, {
         status: 'accepted',
+        userProfile_id: profileId,
       })
         .exec()
         .catch(err => err);
@@ -525,6 +528,9 @@ export const resolvers = {
             } else {
               DetachedProfile.findByIdAndUpdate(detachedProfile_id, {
                 status: 'waitingSeen',
+                $unset: {
+                  userProfile_id: 1,
+                },
               })
                 .exec()
                 .then(() => {
