@@ -42,10 +42,10 @@ export const startStatsGeneration = async () => {
 
       setInterval(() => {
         try {
-          debug('updating all discoveries');
+          debug('saving new stats snapshot');
           saveStatsSnapshot();
         } catch (e) {
-          debug(`an error occurred in updating discoveries: ${e}`);
+          debug(`an error occurred in generating stats: ${e}`);
         }
       }, STAT_SNAPSHOT_GENERATION_TIME);
     });
@@ -53,6 +53,3 @@ export const startStatsGeneration = async () => {
     debug(e);
   }
 };
-
-
-export default startStatsGeneration;
