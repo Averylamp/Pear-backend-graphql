@@ -66,6 +66,7 @@ type Match{
   sentForUser: User
   receivedByUser_id: ID!
   receivedByUser: User
+  isMatchmakerMade: Boolean!
 
   sentForUserStatus: RequestResponse!
   sentForUserStatusLastUpdated: String!
@@ -115,6 +116,7 @@ const MatchSchema = new Schema({
   sentByUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
   sentForUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
   receivedByUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
+  isMatchmakerMade: { type: Boolean, required: true },
 
   sentForUserStatus: {
     type: String,
