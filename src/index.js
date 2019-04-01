@@ -2,6 +2,8 @@ import 'babel-core/register';
 import 'babel-polyfill';
 import { start } from './start';
 import { runTests } from './tests/RunTests';
+import { startStatsGeneration } from './StatsGeneration';
+import { startDiscoveryGeneration } from './DiscoveryGeneration';
 
 const debug = require('debug')('dev:Index');
 const testsLog = require('debug')('tests:Index');
@@ -19,4 +21,12 @@ if (devMode && regenTestDBMode) {
   }, 3000);
 }
 
-start();
+if (process.env.TASK === 'stats-generation') {
+  debug('starting stats generation');
+  startStatsGeneration();
+} else if (process.env.TASK === 'discovery-generation') {
+  debug('starting discovery generation');
+  startDiscoveryGeneration();
+} else if (!process.env.TASK) {
+  start();
+}

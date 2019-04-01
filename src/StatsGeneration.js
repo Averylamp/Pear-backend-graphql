@@ -1,12 +1,11 @@
-import { updateAllDiscovery } from './discovery/DiscoverProfile';
-import { TICK_LENGTH_MILLIS } from './constants';
+import { STAT_SNAPSHOT_GENERATION_TIME } from './constants';
+import { saveStatsSnapshot } from './stats/Stats';
 
-const debug = require('debug')('dev:DiscoveryGeneration');
-const prodConsole = require('debug')('prod:DiscoveryGeneration');
+const debug = require('debug')('dev:StatsGeneration');
+const prodConsole = require('debug')('prod:StatsGeneration');
 const mongoose = require('mongoose');
 
-
-export const startDiscoveryGeneration = async () => {
+export const startStatsGeneration = async () => {
   if (process.env.PERF) {
     debug('Perf mode detected');
   }
@@ -25,8 +24,7 @@ export const startDiscoveryGeneration = async () => {
   const MONGO_URL = `mongodb+srv://avery:0bz8M0eMEtyXlj2aZodIPpJpy@cluster0-w4ecv.mongodb.net/${dbName}?retryWrites=true`;
   debug(MONGO_URL);
 
-
-  const name = 'Discovery Generation';
+  const name = 'Stats Generation';
   debug('Booting %s', name);
 
   try {
@@ -42,12 +40,12 @@ export const startDiscoveryGeneration = async () => {
 
       setInterval(() => {
         try {
-          debug('updating all discoveries');
-          updateAllDiscovery();
+          debug('saving new stats snapshot');
+          saveStatsSnapshot();
         } catch (e) {
-          debug(`an error occurred in updating discoveries: ${e}`);
+          debug(`an error occurred in generating stats: ${e}`);
         }
-      }, TICK_LENGTH_MILLIS);
+      }, STAT_SNAPSHOT_GENERATION_TIME);
     });
   } catch (e) {
     debug(e);
