@@ -157,7 +157,7 @@ export const CREATE_SOPHIA2_DETACHED_PROFILE_VARIABLES = {
     creatorUser_id: UMA_ID,
     creatorFirstName: 'Uma',
     firstName: 'Sophia',
-    phoneNumber: '7777777777',
+    phoneNumber: '9165189165',
     age: 20,
     gender: 'female',
     interests: ['dance', 'coding', 'music', 'environment'],
