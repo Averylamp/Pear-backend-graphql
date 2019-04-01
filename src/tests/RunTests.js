@@ -146,7 +146,7 @@ export const runTests = async function runTests() {
         imageCount += result.length;
         result.forEach((imageResult) => {
           if (!imageResult.imageID) {
-            errorLog(('Image not uploaded properly'));
+            errorLog('Image not uploaded properly');
             errorLog(imageResult);
             imageErrorCount += 1;
           }
