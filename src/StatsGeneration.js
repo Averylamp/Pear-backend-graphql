@@ -3,32 +3,30 @@ import { saveStatsSnapshot } from './stats/Stats';
 
 const debug = require('debug')('dev:StatsGeneration');
 const prodConsole = require('debug')('prod:StatsGeneration');
-
-if (process.env.PERF) {
-  debug('Perf mode detected');
-}
-
-const devMode = process.env.DEV === 'true';
-let dbName = 'prod';
-if (devMode) {
-  dbName = 'dev';
-}
-if (process.env.DB_NAME) {
-  dbName = process.env.DB_NAME;
-}
-debug(`Database: ${dbName}`);
-prodConsole('Running in Prod');
-prodConsole(`Database: ${dbName}`);
-
-const MONGO_URL = `mongodb+srv://avery:0bz8M0eMEtyXlj2aZodIPpJpy@cluster0-w4ecv.mongodb.net/${dbName}?retryWrites=true`;
 const mongoose = require('mongoose');
 
-debug(MONGO_URL);
-
-const name = 'Stats Generation';
-debug('Booting %s', name);
-
 export const startStatsGeneration = async () => {
+  if (process.env.PERF) {
+    debug('Perf mode detected');
+  }
+
+  const devMode = process.env.DEV === 'true';
+  let dbName = 'prod';
+  if (devMode) {
+    dbName = 'dev';
+  }
+  if (process.env.DB_NAME) {
+    dbName = process.env.DB_NAME;
+  }
+  debug(`Database: ${dbName}`);
+  prodConsole('Running in Prod');
+  prodConsole(`Database: ${dbName}`);
+  const MONGO_URL = `mongodb+srv://avery:0bz8M0eMEtyXlj2aZodIPpJpy@cluster0-w4ecv.mongodb.net/${dbName}?retryWrites=true`;
+  debug(MONGO_URL);
+
+  const name = 'Stats Generation';
+  debug('Booting %s', name);
+
   try {
     mongoose.connect(MONGO_URL, { useNewUrlParser: true });
     mongoose.Promise = global.Promise;

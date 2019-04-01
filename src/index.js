@@ -2,8 +2,8 @@ import 'babel-core/register';
 import 'babel-polyfill';
 import { start } from './start';
 import { runTests } from './tests/RunTests';
-import startStatsGeneration from './StatsGeneration';
-import startDiscoveryGeneration from './DiscoveryGeneration';
+import { startStatsGeneration } from './StatsGeneration';
+import { startDiscoveryGeneration } from './DiscoveryGeneration';
 
 const debug = require('debug')('dev:Index');
 const testsLog = require('debug')('tests:Index');
