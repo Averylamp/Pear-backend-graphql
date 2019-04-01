@@ -17,7 +17,7 @@ const StatSnapshotSchema = new Schema({
   nMatchmakerMatchReqs: { type: StatTimeSummary, required: false },
   nPersonalMatchAccepted: { type: StatTimeSummary, required: false },
   nMatchmakerMatchAccepted: { type: StatTimeSummary, required: false },
-});
+}, { timestamps: true });
 
 export const StatSnapshot = mongoose.model('StatSnapshot', StatSnapshotSchema);
 
