@@ -53,6 +53,3 @@ export const startDiscoveryGeneration = async () => {
     debug(e);
   }
 };
-
-
-export default startDiscoveryGeneration;

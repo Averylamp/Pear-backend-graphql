@@ -4,6 +4,8 @@ import { UserProfile } from '../models/UserProfileModel';
 import { Match } from '../models/MatchModel';
 import { createStatSnapshot } from '../models/StatsModel';
 
+const debug = require('debug')('dev:Stats');
+
 const countDocumentsCreatedInRange = (start, end, model, customFilters = null) => {
   let filters = {};
   if (!customFilters) {
@@ -17,7 +19,8 @@ const countDocumentsCreatedInRange = (start, end, model, customFilters = null) =
     filters = customFilters;
   }
   return model.find(filters)
-    .countDocuments();
+    .countDocuments()
+    .exec();
 };
 
 const countUsersCreatedInRange = (start, end) => countDocumentsCreatedInRange(start, end, User);
@@ -92,34 +95,70 @@ const countMatchmakerMatchesAcceptedInRange = (start, end) => {
   return countDocumentsCreatedInRange(start, end, Match, customFilters);
 };
 
-const countDocumentOperationTimeSummary = (countFn, currentDate) => {
+const countDocumentOperationTimeSummary = async (countFn, currentDate) => {
   const oneDayAgo = new Date(currentDate.getTime() - 1 * 24 * 60 * 60 * 1000);
   const oneWeekAgo = new Date(currentDate.getTime() - 7 * 24 * 60 * 60 * 1000);
   const oneMonthAgo = new Date(currentDate.getTime() - 30 * 24 * 60 * 60 * 1000);
   const beginning = new Date(0);
+  const [lastDay, lastWeek, lastMonth, allTime] = await Promise.all(
+    [oneDayAgo, oneWeekAgo, oneMonthAgo, beginning]
+      .map(date => countFn(date, currentDate)),
+  );
   return {
-    lastDay: countFn(oneDayAgo, currentDate),
-    lastWeek: countFn(oneWeekAgo, currentDate),
-    lastMonth: countFn(oneMonthAgo, currentDate),
-    allTime: countFn(beginning, currentDate),
+    lastDay,
+    lastWeek,
+    lastMonth,
+    allTime,
   };
 };
 
-export const saveStatsSnapshot = () => {
+export const saveStatsSnapshot = async () => {
+  debug('generating and saving stats snapshot');
   const now = new Date();
+  const nUsersPromise = countDocumentOperationTimeSummary(countUsersCreatedInRange, now);
+  const nDetachedProfilesPromise = countDocumentOperationTimeSummary(
+    countDetachedProfilesCreatedInRange, now,
+  );
+  const nProfileApprovalsPromise = countDocumentOperationTimeSummary(countProfilesApprovedInRange,
+    now);
+  const nPersonalMatchReqsPromise = countDocumentOperationTimeSummary(
+    countPersonalMatchRequestsSentInRange, now,
+  );
+  const nMatchmakerMatchReqsPromise = countDocumentOperationTimeSummary(
+    countMatchmakerMatchRequestsSentInRange, now,
+  );
+  const nPersonalMatchAcceptedPromise = countDocumentOperationTimeSummary(
+    countPersonalMatchesAcceptedInRange, now,
+  );
+  const nMatchmakerMatchAcceptedPromise = countDocumentOperationTimeSummary(
+    countMatchmakerMatchesAcceptedInRange, now,
+  );
+  const [
+    nUsers,
+    nDetachedProfiles,
+    nProfileApprovals,
+    nPersonalMatchReqs,
+    nMatchmakerMatchReqs,
+    nPersonalMatchAccepted,
+    nMatchmakerMatchAccepted,
+  ] = await Promise.all(
+    [
+      nUsersPromise,
+      nDetachedProfilesPromise,
+      nProfileApprovalsPromise,
+      nPersonalMatchReqsPromise,
+      nMatchmakerMatchReqsPromise,
+      nPersonalMatchAcceptedPromise,
+      nMatchmakerMatchAcceptedPromise],
+  );
   const statInput = {
-    nUsers: countDocumentOperationTimeSummary(countUsersCreatedInRange, now),
-    nDetachedProfiles: countDocumentOperationTimeSummary(countDetachedProfilesCreatedInRange, now),
-    nProfileApprovals: countDocumentOperationTimeSummary(countProfilesApprovedInRange, now),
-    nPersonalMatchReqs: countDocumentOperationTimeSummary(countPersonalMatchRequestsSentInRange,
-      now),
-    nMatchmakerMatchReqs: countDocumentOperationTimeSummary(countMatchmakerMatchRequestsSentInRange,
-      now),
-    nPersonalMatchAccepted: countDocumentOperationTimeSummary(countPersonalMatchesAcceptedInRange,
-      now),
-    nMatchmakerMatchAccepted: countDocumentOperationTimeSummary(
-      countMatchmakerMatchesAcceptedInRange, now,
-    ),
+    nUsers,
+    nDetachedProfiles,
+    nProfileApprovals,
+    nPersonalMatchReqs,
+    nMatchmakerMatchReqs,
+    nPersonalMatchAccepted,
+    nMatchmakerMatchAccepted,
   };
   createStatSnapshot(statInput);
 };
