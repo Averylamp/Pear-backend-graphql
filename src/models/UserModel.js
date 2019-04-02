@@ -14,6 +14,8 @@ extend type Query {
   user(id: ID): User
   # Get a user by firebase tokens
   getUser(userInput: GetUserInput): UserMutationResponse!
+  # send a push notification indicating new message
+  notifyNewMessage(fromUser_id: ID!, toUser_id: ID!): Boolean!
 }
 
 `;
@@ -75,6 +77,9 @@ input CreationUserInput{
 
   # Option url for profile thumbnail
   thumbnailURL: String
+  
+  # Optional firebase remote instance ID for push notifications
+  firebaseRemoteInstanceID: String
 }
 `;
 
@@ -325,6 +330,8 @@ const UserSchema = new Schema({
     type: [Schema.Types.ObjectId], required: true, index: true, default: [],
   },
   edgeSummaries: { type: [EdgeSummarySchema], required: true, default: [] },
+
+  firebaseRemoteInstanceID: { type: String, required: false },
 }, { timestamps: true });
 
 UserSchema.virtual('fullName')
