@@ -86,7 +86,8 @@ export const resolvers = {
         'firebaseAuthID',
         'facebookId',
         'facebookAccessToken',
-        'thumbnailURL']);
+        'thumbnailURL',
+        'firebaseRemoteInstanceID']);
       finalUserInput._id = userObjectID;
       finalUserInput.discoveryQueue_id = discoveryQueueObjectID;
       const locationObj = {
