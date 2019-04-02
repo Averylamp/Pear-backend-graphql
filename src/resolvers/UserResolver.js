@@ -4,7 +4,7 @@ import { DiscoveryQueue, createDiscoveryQueueObject } from '../models/DiscoveryQ
 import { User, createUserObject } from '../models/UserModel';
 import { UserProfile } from '../models/UserProfileModel';
 import { Match } from '../models/MatchModel';
-import { authenticateUser } from '../FirebaseManager';
+import { authenticateUser, sendNewMessagePushNotification } from '../FirebaseManager';
 import {
   CREATE_USER_ERROR,
   GET_USER_ERROR,
@@ -64,6 +64,15 @@ export const resolvers = {
             message: GET_USER_ERROR,
           });
         }));
+    },
+    notifyNewMessage: async (_source, { fromUser_id, toUser_id }) => {
+      const from = await User.findById(fromUser_id).exec();
+      const to = await User.findById(toUser_id).exec();
+      if (!from || !to) {
+        return false;
+      }
+      sendNewMessagePushNotification({ from, to });
+      return true;
     },
   },
   Mutation: {
