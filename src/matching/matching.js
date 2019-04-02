@@ -3,9 +3,16 @@ import { receiveRequest, sendRequest, User } from '../models/UserModel';
 import { createMatchObject, Match } from '../models/MatchModel';
 import { UserProfile } from '../models/UserProfileModel';
 import {
-  createMatchChat, getChatDocPathFromId, notifyEndorsementChatAcceptedRequest,
-  notifyEndorsementChatNewRequest, sendMatchAcceptedServerMessage,
+  createMatchChat,
+  getChatDocPathFromId,
+  notifyEndorsementChatAcceptedRequest,
+  notifyEndorsementChatNewRequest,
+  sendMatchAcceptedMatchmakerPushNotification,
+  sendMatchAcceptedPushNotification,
+  sendMatchAcceptedServerMessage,
+  sendMatchReceivedByPushNotification,
   sendMatchRequestServerMessage,
+  sendMatchSentForPushNotification,
 } from '../FirebaseManager';
 import {
   GET_USER_ERROR,
@@ -268,7 +275,12 @@ export const createNewMatch = async ({
       sentFor,
       receivedBy,
     });
+    sendMatchSentForPushNotification({
+      sentBy,
+      sentFor,
+    });
   }
+  sendMatchReceivedByPushNotification({ receivedBy });
   return {
     success: true,
     match,
@@ -421,6 +433,8 @@ export const decideOnMatch = async ({ user_id, match_id, decision }) => {
   }
   if (isAMatch) {
     sendMatchAcceptedServerMessage({ chatID: match.firebaseChatDocumentID });
+    sendMatchAcceptedPushNotification({ user, otherUser });
+    sendMatchAcceptedPushNotification({ otherUser, user });
     const matchmakerMade = match.sentForUser_id.toString() !== match.sentByUser_id.toString();
     if (matchmakerMade) {
       const sentBy = await User.findById(match.sentByUser_id);
@@ -443,9 +457,11 @@ export const decideOnMatch = async ({ user_id, match_id, decision }) => {
         sentFor,
         receivedBy,
       });
+      sendMatchAcceptedMatchmakerPushNotification({ sentBy, sentFor });
       // increment pear points
       // call .exec() to make sure this query/update actually runs, since the result isn't used
       // anywhere
+      // it's not a big deal if pear points update fails, so this isn't included in rollback
       User.findByIdAndUpdate(match.sentByUser_id, {
         $inc: {
           pearPoints: 1,
