@@ -1,5 +1,6 @@
 export const GET_USER_ERROR = 'Failed to find user.';
 export const CREATE_USER_ERROR = 'Failed to initialize user.';
+export const UPDATE_USER_ERROR = 'Couldn\'t update user.';
 export const UPDATE_USER_PHOTOS_ERROR = 'Failed to update photos.';
 export const CREATE_DETACHED_PROFILE_ERROR = 'Failed to create profile.';
 export const WRONG_CREATOR_ERROR = 'Matchmaker did not create profile for this user.';

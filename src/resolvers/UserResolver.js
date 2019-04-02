@@ -7,7 +7,7 @@ import { Match } from '../models/MatchModel';
 import { authenticateUser, sendNewMessagePushNotification } from '../FirebaseManager';
 import {
   CREATE_USER_ERROR,
-  GET_USER_ERROR,
+  GET_USER_ERROR, UPDATE_USER_ERROR,
   UPDATE_USER_PHOTOS_ERROR,
 } from './ResolverErrorStrings';
 
@@ -66,12 +66,17 @@ export const resolvers = {
         }));
     },
     notifyNewMessage: async (_source, { fromUser_id, toUser_id }) => {
-      const from = await User.findById(fromUser_id).exec();
-      const to = await User.findById(toUser_id).exec();
+      const from = await User.findById(fromUser_id)
+        .exec();
+      const to = await User.findById(toUser_id)
+        .exec();
       if (!from || !to) {
         return false;
       }
-      sendNewMessagePushNotification({ from, to });
+      sendNewMessagePushNotification({
+        from,
+        to,
+      });
       return true;
     },
   },
@@ -165,7 +170,84 @@ export const resolvers = {
           };
         });
     },
-    updateUser: async () => null,
+    updateUser: async (_source, { id, updateUserInput }) => {
+      try {
+        const now = new Date();
+        const user = await User.findById(id);
+        if (!user) {
+          return {
+            success: false,
+            message: GET_USER_ERROR,
+          };
+        }
+        const userUpdateObj = pick(updateUserInput, [
+          'age',
+          'birthdate',
+          'email',
+          'emailVerified',
+          'phoneNumber',
+          'phoneNumberVerified',
+          'firstName',
+          'lastName',
+          'gender',
+          'school',
+          'isSeeking',
+          'thumbnailURL',
+          'firebaseRemoteInstanceID',
+        ]);
+
+        // mongo dot notation for updates
+        if (updateUserInput.seekingGender) {
+          userUpdateObj['matchingPreferences.seekingGender'] = updateUserInput.seekingGender.filter(
+            item => ['male', 'female', 'nonbinary'].includes(item),
+          );
+        }
+        if (updateUserInput.maxDistance) {
+          userUpdateObj['matchingPreferences.maxDistance'] = updateUserInput.maxDistance;
+        }
+        if (updateUserInput.minAgeRange) {
+          userUpdateObj['matchingPreferences.minAgeRange'] = updateUserInput.minAgeRange;
+        }
+        if (updateUserInput.maxAgeRange) {
+          userUpdateObj['matchingPreferences.maxAgeRange'] = updateUserInput.maxAgeRange;
+        }
+        if (updateUserInput.age) {
+          userUpdateObj['matchingDemographics.age'] = updateUserInput.age;
+        }
+        if (updateUserInput.gender) {
+          userUpdateObj['matchingDemographics.gender'] = updateUserInput.gender;
+        }
+        if (updateUserInput.location) {
+          userUpdateObj['matchingPreferences.location.point.coordinates'] = updateUserInput.location;
+          userUpdateObj['matchingPreferences.location.point.updatedAt'] = now;
+          userUpdateObj['matchingDemographics.location.point.coordinates'] = updateUserInput.location;
+          userUpdateObj['matchingDemographics.location.point.updatedAt'] = now;
+        }
+        if (updateUserInput.locationName) {
+          // note that if locationName has never been set, it won't have a createdAt field
+          // TODO either rewrite all of this resolver's logic to use model.save, or else do a check
+          // and set createdAt here if necessary.
+          // TODO actually we gotta do this for pretty much any object we're using the driver to
+          // update that has mongoose timestamps :(
+          userUpdateObj['matchingPreferences.location.locationName.name'] = updateUserInput.locationName;
+          userUpdateObj['matchingPreferences.location.locationName.updatedAt'] = now;
+          userUpdateObj['matchingDemographics.location.locationName.name'] = updateUserInput.locationName;
+          userUpdateObj['matchingDemographics.location.locationName.updatedAt'] = now;
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(id, userUpdateObj, { new: true });
+        return {
+          success: true,
+          user: updatedUser,
+        };
+      } catch (e) {
+        errorLog(`error occurred while updating user: ${e}`);
+        return {
+          success: false,
+          message: UPDATE_USER_ERROR,
+        };
+      }
+    },
     updateUserPhotos: async (_source, { updateUserPhotosInput }) => {
       functionCallConsole('Update Photos Called');
       const { user_id, displayedImages, additionalImages } = updateUserPhotosInput;
