@@ -192,6 +192,7 @@ export const resolvers = {
           'gender',
           'school',
           'isSeeking',
+          'deactivated',
           'thumbnailURL',
           'firebaseRemoteInstanceID',
         ]);
