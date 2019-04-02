@@ -9,7 +9,7 @@ import {
   sendPersonalRequests,
   sendMatchmakerRequests,
   acceptRequests,
-  rejectRequests, unmatches, updateFeeds, viewDetachedProfiles,
+  rejectRequests, unmatches, updateFeeds, viewDetachedProfiles, updateUsers,
 } from './CreateTestDB';
 import {
   ACCEPT_REQUEST,
@@ -19,7 +19,7 @@ import {
   CREATE_MATCH_REQUEST,
   REJECT_REQUEST,
   UNMATCH,
-  FORCE_FEED_UPDATE, VIEW_DETACHED_PROFILE, UPDATE_DISPLAYED_PHOTOS,
+  FORCE_FEED_UPDATE, VIEW_DETACHED_PROFILE, UPDATE_DISPLAYED_PHOTOS, UPDATE_USER,
 } from './Mutations';
 import {
   MONGO_URL,
@@ -250,6 +250,25 @@ export const runTests = async function runTests() {
         }
       }
       successLog('***** Success Attaching Detached Profiles *****\n');
+
+      // UPDATE USERS
+      testLog('TESTING: Updating Users');
+      for (const updateUserVars of updateUsers) {
+        try {
+          const result = await mutate({
+            mutation: UPDATE_USER,
+            variables: updateUserVars,
+          });
+          if (verbose) {
+            verboseDebug(result);
+          }
+          checkForAndLogErrors(result, 'updateUser');
+        } catch (e) {
+          errorLog((`${e}`));
+          process.exit(1);
+        }
+      }
+      successLog('***** Success Updating Users *****\n');
 
 
       testLog('TESTING: Generating Discovery Items');

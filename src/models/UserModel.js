@@ -84,56 +84,35 @@ input CreationUserInput{
 `;
 
 const updateUserInputs = `
-input UserPreferencesInput{
-  ethnicities: [String!]
-  seekingGender: [Gender!]
-  seekingReason: [String!]
-  reasonDealbreaker: Int
-  seekingEthnicity: [String!]
-  ethnicityDealbreaker: Int
-  maxDistance: Int
-  distanceDealbreaker: Int
-  minAgeRange: Int
-  maxAgeRange: Int
-  ageDealbreaker: Int
-  minHeightRange: Int
-  maxHeightRange: Int
-  heightDealbreaker: Int
-}
-
-input UserDemographicsInput{
-  ethnicities: [String!]
-  religion: [String!]
-  political: [String!]
-  smoking: [String!]
-  drinking: [String!]
-  height: Int
-}
-
 input UpdateUserInput {
-  deactivated: Boolean
-  firebaseToken: String
-  firebaseAuthID: String
-  facebookId: String
-  facebookAccessToken: String
+  age: Int
+  birthdate: String
   email: String
+  emailVerified: Boolean
   phoneNumber: String
   phoneNumberVerified: Boolean
   firstName: String
   lastName: String
-  thumbnailURL: String
   gender: Gender
+  school: String
+  isSeeking: Boolean
+  deactivated: Boolean
+  
+  seekingGender: [String!]
+  maxDistance: Int
+  minAgeRange: Int
+  maxAgeRange: Int
+
+  # [longitude, latitude]
   location: [Float!]
   locationName: String
-  school: String
-  schoolEmail: String
-  schoolEmailVerified: Boolean
-  birthdate: String
-  age: Int
-  userPreferences: UserPreferencesInput
-  userDemographics: UserDemographicsInput
-}
 
+  # Option url for profile thumbnail
+  thumbnailURL: String
+  
+  # Optional firebase remote instance ID for push notifications
+  firebaseRemoteInstanceID: String
+}
 `;
 
 const updateUserPhotosInput = `

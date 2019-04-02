@@ -59,6 +59,7 @@ import {
   VIEW_SOPHIA2_PROFILE_VARIABLES,
   VIEW_UMA1_PROFILE_VARIABLES,
 } from './ViewDetachedProfileVars';
+import { UPDATE_BRIAN_VARIABLES, UPDATE_JOEL_VARIABLES } from './UpdateUserVars';
 
 export const createUsers = [
   CREATE_AVERY_USER_VARIABLES,
@@ -105,6 +106,11 @@ export const attachProfiles = [
   ATTACH_UMA1_PROFILE_VARIABLES,
   ATTACH_SOPHIA1_PROFILE_VARIABLES,
   ATTACH_SOPHIA2_PROFILE_VARIABLES,
+];
+
+export const updateUsers = [
+  UPDATE_BRIAN_VARIABLES,
+  UPDATE_JOEL_VARIABLES,
 ];
 
 export const updateFeeds = [

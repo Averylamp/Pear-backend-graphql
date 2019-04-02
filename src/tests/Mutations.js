@@ -82,6 +82,28 @@ export const ATTACH_DETACHED_PROFILE = gql`
   }
 `;
 
+export const UPDATE_USER = gql`
+  mutation UpdateUser($id: ID!, $updateUserInput: UpdateUserInput) {
+    updateUser(id: $id, updateUserInput: $updateUserInput) {
+      success
+      message
+      user {
+        _id
+        deactivated
+        email
+        phoneNumber
+        fullName
+        thumbnailURL
+        school
+        schoolEmail
+        schoolEmailVerified
+        birthdate
+        isSeeking
+      }
+    }
+  }
+`;
+
 export const UPDATE_DISPLAYED_PHOTOS = gql`
   mutation UpdatePhotos($updateUserPhotosInput: UpdateUserPhotosInput) {
     updateUserPhotos(updateUserPhotosInput: $updateUserPhotosInput) {
