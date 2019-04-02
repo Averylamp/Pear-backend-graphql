@@ -5,3 +5,5 @@ export const INITIALIZED_FEED_LENGTH = 3;
 export const TICK_LENGTH_MILLIS = 1000 * 60;
 
 export const EXPECTED_TICKS_PER_NEW_PROFILE = 60;
+
+export const STAT_SNAPSHOT_GENERATION_TIME = 15 * 1000;

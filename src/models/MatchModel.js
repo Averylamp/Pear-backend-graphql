@@ -11,26 +11,31 @@ extend type Query {
 
 const mutationRoutes = `
 extend type Mutation {
-  matchmakerCreateRequest(requestInput: MatchmakerCreateRequestInput!): MatchMutationResponse!
-  personalCreateRequest(requestInput: PersonalCreateRequestInput!): MatchMutationResponse!
-  viewRequest(user_id: ID!, match_id: ID!): MatchMutationResponse!
+  # Creates Match Request between Users
+  createMatchRequest(requestInput: CreateMatchRequestInput!): MatchMutationResponse!
+
+  # TODO: Document
   acceptRequest(user_id: ID!, match_id: ID!): MatchMutationResponse!
+
+  # TODO: Document
   rejectRequest(user_id: ID!, match_id: ID!): MatchMutationResponse!
+
+  # TODO: Document
   unmatch(user_id: ID!, match_id: ID!, reason: String): MatchMutationResponse!
 }
 `;
 
 const createRequestMutationInputs = `
-input MatchmakerCreateRequestInput {
+input CreateMatchRequestInput {
   _id: ID # only for testing
-  matchmakerUser_id: ID!
-  sentForUser_id: ID!
-  receivedByUser_id: ID!
-}
 
-input PersonalCreateRequestInput {
-  _id: ID # only for testing
+  # Either Matchmaker ID or User ID if personal request
+  sentByUser_id: ID!
+
+  # Always primary user
   sentForUser_id: ID!
+
+  # Discovered user receiving the request
   receivedByUser_id: ID!
 }
 `;
@@ -45,8 +50,7 @@ type MatchMutationResponse {
 
 const requestResponseEnum = `
 enum RequestResponse {
-  unseen
-  seen
+  undecided
   rejected
   accepted
 }
@@ -62,6 +66,7 @@ type Match{
   sentForUser: User
   receivedByUser_id: ID!
   receivedByUser: User
+  isMatchmakerMade: Boolean!
 
   sentForUserStatus: RequestResponse!
   sentForUserStatusLastUpdated: String!
@@ -74,6 +79,7 @@ type Match{
   unmatchedTimestamp: String
 
   firebaseChatDocumentID: String!
+  firebaseChatDocumentPath: String!
 }
 `;
 
@@ -84,6 +90,7 @@ type EdgeSummary {
   edgeStatus: EdgeStatus!
   lastStatusChange: String!
   match_id: ID!
+  match: Match
 }
 
 enum EdgeStatus{
@@ -109,19 +116,20 @@ const MatchSchema = new Schema({
   sentByUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
   sentForUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
   receivedByUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
+  isMatchmakerMade: { type: Boolean, required: true },
 
   sentForUserStatus: {
     type: String,
     required: true,
-    enum: ['unseen', 'seen', 'rejected', 'accepted'],
-    default: 'unseen',
+    enum: ['undecided', 'rejected', 'accepted'],
+    default: 'undecided',
   },
   sentForUserStatusLastUpdated: { type: Date, required: true, default: Date },
   receivedByUserStatus: {
     type: String,
     required: true,
-    enum: ['unseen', 'seen', 'rejected', 'accepted'],
-    default: 'unseen',
+    enum: ['undecided', 'rejected', 'accepted'],
+    default: 'undecided',
   },
   receivedByUserStatusLastUpdated: { type: Date, required: true, default: Date },
 
@@ -131,6 +139,7 @@ const MatchSchema = new Schema({
   unmatchedTimestamp: { type: Date, required: false },
 
   firebaseChatDocumentID: { type: String, required: true },
+  firebaseChatDocumentPath: { type: String, required: true },
 }, { timestamps: true });
 
 export const EdgeSummarySchema = new Schema({

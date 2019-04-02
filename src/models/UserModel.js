@@ -1,7 +1,7 @@
 import { MatchingDemographicsSchema, MatchingPreferencesSchema } from './MatchingSchemas';
-import { GeoJSONSchema } from './TypeSchemas';
 import { ImageContainerSchema } from './ImageSchemas';
 import { EdgeSummarySchema } from './MatchModel';
+import { EndorsementEdgeSchema } from './UserProfileModel';
 
 const mongoose = require('mongoose');
 
@@ -14,6 +14,8 @@ extend type Query {
   user(id: ID): User
   # Get a user by firebase tokens
   getUser(userInput: GetUserInput): UserMutationResponse!
+  # send a push notification indicating new message
+  notifyNewMessage(fromUser_id: ID!, toUser_id: ID!): Boolean!
 }
 
 `;
@@ -58,6 +60,10 @@ input CreationUserInput{
   lastName: String!
   gender: Gender!
 
+  # [longitude, latitude]
+  location: [Float!]!
+  locationName: String
+
   # The Firebase generated token
   firebaseToken: String!
 
@@ -71,61 +77,42 @@ input CreationUserInput{
 
   # Option url for profile thumbnail
   thumbnailURL: String
+  
+  # Optional firebase remote instance ID for push notifications
+  firebaseRemoteInstanceID: String
 }
 `;
 
 const updateUserInputs = `
-input UserPreferencesInput{
-  ethnicities: [String!]
-  seekingGender: [Gender!]
-  seekingReason: [String!]
-  reasonDealbreaker: Int
-  seekingEthnicity: [String!]
-  ethnicityDealbreaker: Int
-  maxDistance: Int
-  distanceDealbreaker: Int
-  minAgeRange: Int
-  maxAgeRange: Int
-  ageDealbreaker: Int
-  minHeightRange: Int
-  maxHeightRange: Int
-  heightDealbreaker: Int
-}
-
-input UserDemographicsInput{
-  ethnicities: [String!]
-  religion: [String!]
-  political: [String!]
-  smoking: [String!]
-  drinking: [String!]
-  height: Int
-}
-
 input UpdateUserInput {
-  deactivated: Boolean
-  firebaseToken: String
-  firebaseAuthID: String
-  facebookId: String
-  facebookAccessToken: String
+  age: Int
+  birthdate: String
   email: String
+  emailVerified: Boolean
   phoneNumber: String
   phoneNumberVerified: Boolean
   firstName: String
   lastName: String
-  thumbnailURL: String
   gender: Gender
-  locationName: String
-  locationCoordinates: String
   school: String
-  schoolEmail: String
-  schoolEmailVerified: Boolean
-  birthdate: String
-  age: Int
-  userPreferences: UserPreferencesInput
-  userDemographics: UserDemographicsInput
-  pearPoints: Int
-}
+  isSeeking: Boolean
+  deactivated: Boolean
+  
+  seekingGender: [String!]
+  maxDistance: Int
+  minAgeRange: Int
+  maxAgeRange: Int
 
+  # [longitude, latitude]
+  location: [Float!]
+  locationName: String
+
+  # Option url for profile thumbnail
+  thumbnailURL: String
+  
+  # Optional firebase remote instance ID for push notifications
+  firebaseRemoteInstanceID: String
+}
 `;
 
 const updateUserPhotosInput = `
@@ -153,11 +140,10 @@ type User {
   lastName: String!
   fullName: String!
   thumbnailURL: String
-  gender: Gender
+  gender: Gender!
   age: Int!
   birthdate: String!
-  locationName: String
-  locationCoordinates: String
+
   school: String
   schoolEmail: String
   schoolEmailVerified: Boolean
@@ -168,12 +154,14 @@ type User {
   # All images uploaded for a user
   bankImages: [ImageContainer!]!
 
-  pearPoints: Int
+  pearPoints: Int!
 
   # All Attached Profile IDs for a user
   profile_ids: [ID!]!
   # All Attached Profiles for a user
   profileObjs: [UserProfile!]!
+  # Number of profiles associated with the user
+  profileCount: Int!
 
   # All Created and Attached Profile IDs for a user
   endorsedProfile_ids: [ID!]!
@@ -184,6 +172,9 @@ type User {
   detachedProfile_ids: [ID!]!
   # All Detached Profiles for a user
   detachedProfileObjs: [DetachedProfile!]!
+
+  # metainfo about matchmaker chats
+  endorsementEdges: [EndorsementEdge!]!
 
   discoveryQueue_id: ID!
   discoveryQueueObj: DiscoveryQueue!
@@ -213,7 +204,6 @@ type User {
 
 `;
 
-
 const mutationResponse = `
 type UserMutationResponse{
   success: Boolean!
@@ -229,6 +219,7 @@ enum Gender{
   nonbinary
 }
 `;
+
 export const typeDef = queryRoutes
   + mutationRoutes
   + getUserInputs
@@ -268,8 +259,6 @@ const UserSchema = new Schema({
     type: Number, required: true, min: 18, max: 100, index: true,
   },
   birthdate: { type: Date, required: true },
-  locationName: { type: String, required: false },
-  locationCoordinates: { type: GeoJSONSchema, required: false },
   school: { type: String, required: false },
   schoolEmail: { type: String, required: false },
   schoolEmailVerified: { type: Boolean, required: false, default: false },
@@ -283,11 +272,18 @@ const UserSchema = new Schema({
   profile_ids: {
     type: [Schema.Types.ObjectId], required: true, index: true, default: [],
   },
+  profileCount: {
+    type: Number, required: true, index: true, default: 0,
+  },
   endorsedProfile_ids: {
     type: [Schema.Types.ObjectId], required: true, index: true, default: [],
   },
   detachedProfile_ids: {
     type: [Schema.Types.ObjectId], required: true, index: true, default: [],
+  },
+
+  endorsementEdges: {
+    type: [EndorsementEdgeSchema], required: true, default: [],
   },
 
   discoveryQueue_id: { type: Schema.Types.ObjectId, required: true },
@@ -313,6 +309,8 @@ const UserSchema = new Schema({
     type: [Schema.Types.ObjectId], required: true, index: true, default: [],
   },
   edgeSummaries: { type: [EdgeSummarySchema], required: true, default: [] },
+
+  firebaseRemoteInstanceID: { type: String, required: false },
 }, { timestamps: true });
 
 UserSchema.virtual('fullName')

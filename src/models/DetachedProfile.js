@@ -19,6 +19,8 @@ const mutationRoutes = `
 extend type Mutation{
   # Creates a new detached profile and attaches it to the creator's profile
   createDetachedProfile(detachedProfileInput: CreationDetachedProfileInput): DetachedProfileMutationResponse!
+  # Changes the status of the detached profile from waitingSeen to waitingUnseen
+  viewDetachedProfile(user_id: ID! detachedProfile_id: ID!): DetachedProfileMutationResponse!
   # Deletes the existing detached profile, converts it into a User Profile and attaches the user profile to both the creator's and user's User Object
   approveNewDetachedProfile(user_id: ID!, detachedProfile_id: ID!, creatorUser_id: ID!): UserMutationResponse!
 }
@@ -40,14 +42,14 @@ input CreationDetachedProfileInput {
   dos: [String!]!
   donts: [String!]!
   images: [CreateImageContainer!]!
-
+  location: [Float!]!
+  locationName: String
 }
 `;
 
 const detachedProfileType = `
 type DetachedProfile {
   _id: ID!
-  # The current status of this profile
   status: DetachedProfileStatus!
   creatorUser_id: ID!
   creatorUser: User
@@ -62,17 +64,19 @@ type DetachedProfile {
   dos: [String!]!
   donts: [String!]!
   images: [ImageContainer!]!
+  userProfile_id: ID
+  userProfile: UserProfile
 
   matchingDemographics: MatchingDemographics!
   matchingPreferences: MatchingPreferences!
 }
 
 enum DetachedProfileStatus {
-waitingUnseen
-waitingSeen
-declined
+  waitingUnseen
+  waitingSeen
+  declined
+  accepted
 }
-
 `;
 
 const detachedProfileMutationResponse = `
@@ -93,7 +97,7 @@ export const typeDef = queryRoutes
 const DetachedProfileSchema = new Schema({
   _id: { type: Schema.Types.ObjectId, required: true },
   status: {
-    type: String, required: true, enum: ['waitingUnseen', 'waitingSeen', 'declined'], default: 'waitingUnseen',
+    type: String, required: true, enum: ['waitingUnseen', 'waitingSeen', 'declined', 'accepted'], default: 'waitingUnseen',
   },
   creatorUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
   creatorFirstName: { type: String, required: true },
@@ -122,6 +126,7 @@ const DetachedProfileSchema = new Schema({
     required: true,
     default: MatchingPreferencesSchema,
   },
+  userProfile_id: { type: Schema.Types.ObjectId, required: false },
 
 }, { timestamps: true });
 
