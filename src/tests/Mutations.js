@@ -17,8 +17,6 @@ export const CREATE_USER = gql`
         phoneNumberVerified
         fullName
         thumbnailURL
-        locationName
-        locationCoordinates
         school
         schoolEmail
         schoolEmailVerified
@@ -48,6 +46,23 @@ export const CREATE_DETACHED_PROFILE = gql`
         bio
         dos
         donts
+        status
+      }
+    }
+  }
+`;
+
+export const VIEW_DETACHED_PROFILE = gql`
+  mutation ViewDetachedProfile($user_id: ID!, $detachedProfile_id: ID!) {
+    viewDetachedProfile(user_id: $user_id, detachedProfile_id: $detachedProfile_id) {
+      success
+      message
+      detachedProfile {
+        _id
+        creatorUser_id
+        creatorFirstName
+        firstName
+        status
       }
     }
   }
@@ -62,6 +77,28 @@ export const ATTACH_DETACHED_PROFILE = gql`
         _id
         fullName
         profile_ids
+      }
+    }
+  }
+`;
+
+export const UPDATE_USER = gql`
+  mutation UpdateUser($id: ID!, $updateUserInput: UpdateUserInput) {
+    updateUser(id: $id, updateUserInput: $updateUserInput) {
+      success
+      message
+      user {
+        _id
+        deactivated
+        email
+        phoneNumber
+        fullName
+        thumbnailURL
+        school
+        schoolEmail
+        schoolEmailVerified
+        birthdate
+        isSeeking
       }
     }
   }
@@ -106,76 +143,22 @@ export const UPDATE_DISPLAYED_PHOTOS = gql`
   }
 `;
 
-export const PERSONAL_SEND_REQUEST = gql`
-  mutation PersonalCreateRequest($requestInput: PersonalCreateRequestInput!) {
-    personalCreateRequest(requestInput: $requestInput) {
+export const FORCE_FEED_UPDATE = gql`
+  mutation ForceUpdateFeed($user_id: ID!, $numberOfItems: Int) {
+    forceUpdateFeed(user_id: $user_id, numberOfItems: $numberOfItems) {
+      success
+      message
+    }
+  }
+`;
+
+export const CREATE_MATCH_REQUEST = gql`
+  mutation CreateMatchRequest($requestInput: CreateMatchRequestInput!) {
+    createMatchRequest(requestInput: $requestInput) {
       success
       message
       match {
         _id
-        sentByUser {
-          _id
-          fullName
-        }
-        sentForUser {
-          _id
-          fullName
-          requestedMatch_ids
-          currentMatch_ids
-          edgeUser_ids
-        }
-        receivedByUser {
-          _id
-          fullName
-          requestedMatch_ids
-          currentMatch_ids
-          edgeUser_ids
-        }
-        sentForUserStatus
-        receivedByUserStatus
-      }
-    }
-  }
-`;
-
-export const MATCHMAKER_SEND_REQUEST = gql`
-  mutation MatchmakerCreateRequest($requestInput: MatchmakerCreateRequestInput!) {
-    matchmakerCreateRequest(requestInput: $requestInput) {
-      success
-      message
-      match {
-        sentByUser {
-          _id
-          fullName
-          
-        }
-        sentForUser {
-          _id
-          fullName
-          requestedMatch_ids
-          currentMatch_ids
-          edgeUser_ids
-        }
-        receivedByUser {
-          _id
-          fullName
-          requestedMatch_ids
-          currentMatch_ids
-          edgeUser_ids
-        }
-        sentForUserStatus
-        receivedByUserStatus
-      }
-    }
-  }
-`;
-
-export const VIEW_REQUEST = gql`
-  mutation ViewRequest($user_id: ID!, $match_id: ID!) {
-    viewRequest(user_id: $user_id, match_id: $match_id) {
-      success
-      message
-      match {
         sentByUser {
           _id
           fullName

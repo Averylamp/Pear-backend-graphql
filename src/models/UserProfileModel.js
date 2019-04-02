@@ -20,6 +20,8 @@ type UserProfile {
   dos: [String!]!
   donts: [String!]!
 
+  firebaseChatDocumentID: String!
+  firebaseChatDocumentPath: String!
 }
 
 `;
@@ -32,9 +34,26 @@ type UserProfileMutationResponse{
 }
 `;
 
+const endorsementEdgeType = `
+type EndorsementEdge {
+  _id: ID!
+  active: Boolean!
+  otherUser_id: ID!
+  otherUser: User
+  
+  myProfile_id: ID
+  myProfile: UserProfile
+  theirProfile_id: ID
+  theirProfile: UserProfile
+  
+  firebaseChatDocumentID: String!
+  firebaseChatDocumentPath: String!
+}
+`;
 
 export const typeDef = userProfileType
-+ userProfileMutationResponse;
++ userProfileMutationResponse
++ endorsementEdgeType;
 
 
 const UserProfileSchema = new Schema({
@@ -47,7 +66,18 @@ const UserProfileSchema = new Schema({
   bio: { type: String, required: true },
   dos: { type: [String], required: true },
   donts: { type: [String], required: true },
+  firebaseChatDocumentID: { type: String, required: true },
+  firebaseChatDocumentPath: { type: String, required: true },
 }, { timestamps: true });
+
+export const EndorsementEdgeSchema = new Schema({
+  active: { type: Schema.Types.Boolean, required: true, default: true },
+  otherUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
+  myProfile_id: { type: Schema.Types.ObjectId, required: false, index: true },
+  theirProfile_id: { type: Schema.Types.ObjectId, required: false, index: true },
+  firebaseChatDocumentID: { type: String, required: true },
+  firebaseChatDocumentPath: { type: String, required: true },
+});
 
 
 export const UserProfile = mongoose.model('UserProfile', UserProfileSchema);

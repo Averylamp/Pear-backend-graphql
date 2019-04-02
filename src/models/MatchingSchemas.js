@@ -1,3 +1,4 @@
+import { LocationSchema } from './LocationModels';
 
 const mongoose = require('mongoose');
 
@@ -7,83 +8,86 @@ const matchingDemographicsType = `
 type MatchingDemographics{
   gender: Gender!
   age: Int!
-  birthdate: String!
-  height: Int
-  religion: [String!]
-  ethnicities: [String!]
-  political: [String!]
-  smoking: [String!]
-  drinking: [String!]
-  school: String
+  location: Location!
 }
 `;
 
 const matchingPreferencesType = `
 type MatchingPreferences{
-  ethnicities: [String!]
   seekingGender: [Gender!]!
-  seekingReason: [String!]
-  reasonDealbreaker: Int!
-  seekingEthnicity: [String!]!
-  ethnicityDealbreaker: Int!
   maxDistance: Int!
-  distanceDealbreaker: Int!
   minAgeRange: Int!
   maxAgeRange: Int!
-  ageDealbreaker: Int!
-  minHeightRange: Int!
-  maxHeightRange: Int!
-  heightDealbreaker: Int!
+  location: Location!
 }
 `;
 
 export const typeDef = matchingDemographicsType + matchingPreferencesType;
 
 export const MatchingDemographicsSchema = new Schema({
-  ethnicities: { type: [String], required: false },
-  religion: { type: [String], required: false },
-  political: { type: [String], required: false },
-  smoking: { type: [String], required: false },
-  drinking: { type: [String], required: false },
-  height: { type: Number, required: false },
+  gender: {
+    type: String,
+    required: true,
+    enum: ['male', 'female', 'nonbinary'],
+    default: 'male',
+  },
+  age: {
+    type: Number,
+    required: true,
+    min: 18,
+    max: 100,
+    default: 20,
+  },
+  location: {
+    type: LocationSchema,
+    required: true,
+    default: {
+      point: {
+        type: 'Point',
+        coordinates: [-71.093609, 42.358620],
+      },
+    },
+  },
 }, { timestamps: true });
 
 
 export const MatchingPreferencesSchema = new Schema({
-  ethnicities: { type: [String], required: true, default: ['No Preference'] },
   seekingGender: {
-    type: [String], required: true, enum: ['male', 'female', 'nonbinary'], default: ['male', 'female', 'nonbinary'],
-  },
-  seekingReason: { type: [String], required: true, default: ['No Preference'] },
-  reasonDealbreaker: {
-    type: Number, required: true, min: 0, max: 1, default: 0,
-  },
-  seekingEthnicity: { type: [String], required: true, default: ['No Preference'] },
-  ethnicityDealbreaker: {
-    type: Number, required: true, min: 0, max: 1, default: 0,
+    type: [String],
+    required: true,
+    enum: ['male', 'female', 'nonbinary'],
+    default: ['male', 'female', 'nonbinary'],
   },
   maxDistance: {
-    type: Number, required: true, min: 1, max: 100, default: 25,
-  },
-  distanceDealbreaker: {
-    type: Number, required: true, min: 0, max: 1, default: 0,
+    // in miles
+    type: Number,
+    required: true,
+    min: 5,
+    max: 200,
+    default: 25,
   },
   minAgeRange: {
-    type: Number, required: true, min: 18, max: 100, default: 18,
+    type: Number,
+    required: true,
+    min: 18,
+    max: 100,
+    default: 18,
   },
   maxAgeRange: {
-    type: Number, required: true, min: 18, max: 100, default: 40,
+    type: Number,
+    required: true,
+    min: 18,
+    max: 100,
+    default: 40,
   },
-  ageDealbreaker: {
-    type: Number, required: true, min: 0, max: 1, default: 0,
-  },
-  minHeightRange: {
-    type: Number, required: true, min: 40, max: 100, default: 40,
-  },
-  maxHeightRange: {
-    type: Number, required: true, min: 40, max: 100, default: 100,
-  },
-  heightDealbreaker: {
-    type: Number, required: true, min: 0, max: 1, default: 0,
+  location: {
+    type: LocationSchema,
+    required: true,
+    default: {
+      point: {
+        type: 'Point',
+        coordinates: [-71.093609, 42.358620],
+      },
+    },
   },
 }, { timestamps: true });
