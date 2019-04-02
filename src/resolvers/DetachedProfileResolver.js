@@ -9,7 +9,7 @@ import { DiscoveryQueue } from '../models/DiscoveryQueueModel';
 import {
   createEndorsementChat,
   getChatDocPathFromId,
-  sendNewEndorsementMessage,
+  sendNewEndorsementMessage, sendProfileApprovedPushNotification,
 } from '../FirebaseManager';
 import {
   ALREADY_MADE_PROFILE,
@@ -574,6 +574,8 @@ export const resolvers = {
             endorser: creator,
             endorsee: user,
           });
+          // send a push notification. not a big deal if this silent fails also
+          sendProfileApprovedPushNotification({ creator, user });
           return {
             success: true,
             user: updateUserObjectResult,
