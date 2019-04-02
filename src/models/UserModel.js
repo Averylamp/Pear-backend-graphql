@@ -14,6 +14,8 @@ extend type Query {
   user(id: ID): User
   # Get a user by firebase tokens
   getUser(userInput: GetUserInput): UserMutationResponse!
+  # send a push notification indicating new message
+  notifyNewMessage(fromUser_id: ID!, toUser_id: ID!): Boolean!
 }
 
 `;

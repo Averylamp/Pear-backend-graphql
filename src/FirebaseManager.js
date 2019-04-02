@@ -235,9 +235,20 @@ export const sendPushNotification = async ({ deviceToken, title, body }) => {
           body,
         },
         token: deviceToken,
+        apns: {
+          payload: {
+            aps: {
+              'content-available': true, // this is necessary to ensure client logic executes in bg
+              sound: 'default',
+            },
+          },
+        },
       };
       admin.messaging()
-        .send(message);
+        .send(message)
+        .catch((err) => {
+          errorLog(`error occurred sending push notification: ${err}`);
+        });
     }
   } catch (e) {
     errorLog(`error occurred sending push notification: ${e}`);
@@ -277,4 +288,10 @@ export const sendMatchAcceptedMatchmakerPushNotification = async ({ sentBy, sent
     deviceToken: sentBy.firebaseRemoteInstanceID,
     title: 'It\'s a Pear!',
     body: `You helped your friend ${sentFor.firstName} find a match!`,
+  }));
+
+export const sendNewMessagePushNotification = async ({ from, to }) => (
+  sendPushNotification({
+    deviceToken: to.firebaseRemoteInstanceID,
+    body: `${from.firstName} sent you a new message`,
   }));
