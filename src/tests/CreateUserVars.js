@@ -1,90 +1,95 @@
 import {
-  AVERY, BRIAN, JOEL, JOSH, MADE, SAMMI, SOPHIA, UMA,
+  AVERY_ID, BRIAN_ID, JOEL_ID, JOSH_ID, MADE_ID, SAMMI_ID, SOPHIA_ID, UMA_ID,
 } from './TestsContants';
 
 export const CREATE_AVERY_USER_VARIABLES = {
   userInput: {
-    _id: AVERY,
+    _id: AVERY_ID,
     age: 21,
     birthdate: '1/11/1998',
     email: 'avery+test@getpear.com',
     emailVerified: false,
-    phoneNumber: '9738735555',
+    phoneNumber: '9738738225',
     phoneNumberVerified: false,
     firstName: 'Avery',
     lastName: 'Lamp',
     gender: 'male',
     firebaseToken: 'FakeFirebaseTokenAvery',
-    firebaseAuthID: 'FakeFirebaseAuthIdAvery',
+    firebaseAuthID: '1cSO718vkCMzOufAfnZalMhQ00O2',
     // facebookId: '1',
     // facebookAccessToken: '2',
     thumbnailURL: '',
+    location: [-71.101366, 42.362580],
   },
 };
 
 export const CREATE_BRIAN_USER_VARIABLES = {
   userInput: {
-    _id: BRIAN,
+    _id: BRIAN_ID,
     age: 20,
     birthdate: '3/15/1998',
     email: 'brian+test@getpear.com',
     emailVerified: false,
-    phoneNumber: '2067789237',
+    phoneNumber: '2067789236',
     phoneNumberVerified: false,
     firstName: 'Brian',
     lastName: 'Gu',
     gender: 'male',
     firebaseToken: 'FakeFirebaseTokenBrian',
-    firebaseAuthID: 'FakeFirebaseAuthIdBrian',
+    firebaseAuthID: 'L65BKgYPWnZHRi4d1iQQlOEg6603',
     // facebookId: '3',
     // facebookAccessToken: '4',
     thumbnailURL: '',
+    location: [-71.101366, 42.362580],
   },
 };
 
 export const CREATE_JOEL_USER_VARIABLES = {
   userInput: {
-    _id: JOEL,
+    _id: JOEL_ID,
     age: 27,
     birthdate: '1/1/1992',
     email: 'joel+test@getpear.com',
     emailVerified: false,
-    phoneNumber: '9165290385',
+    phoneNumber: '7777777777',
     phoneNumberVerified: false,
     firstName: 'Joel',
     lastName: 'Aguero',
     gender: 'male',
     firebaseToken: 'FakeFirebaseTokenJoel',
-    firebaseAuthID: 'FakeFirebaseAuthIdJoel',
+    firebaseAuthID: 'o7EMRiOefBWGVzOnP7sgMH6jf9m2',
     // facebookId: '3',
     // facebookAccessToken: '4',
     thumbnailURL: '',
+    location: [-122.422484, 37.751370],
+    locationName: 'San Francisco, CA',
   },
 };
 
 export const CREATE_JOSH_USER_VARIABLES = {
   userInput: {
-    _id: JOSH,
+    _id: JOSH_ID,
     age: 20,
     birthdate: '7/14/1998',
     email: 'joshua+test@getpear.com',
     emailVerified: false,
-    phoneNumber: '6196160849',
+    phoneNumber: '7897897898',
     phoneNumberVerified: false,
     firstName: 'Josh',
     lastName: 'Lee',
     gender: 'male',
     firebaseToken: 'FakeFirebaseTokenJosh',
-    firebaseAuthID: 'FakeFirebaseAuthIdJosh',
+    firebaseAuthID: 'PCAPSxX4LiP9LGd2WEaK2jAUmYs2',
     // facebookId: '3',
     // facebookAccessToken: '4',
     thumbnailURL: '',
+    location: [-71.332174, 42.299819],
   },
 };
 
 export const CREATE_SAMMI_USER_VARIABLES = {
   userInput: {
-    _id: SAMMI,
+    _id: SAMMI_ID,
     age: 19,
     birthdate: '1/1/2000',
     email: 'sammi+test@getpear.com',
@@ -99,12 +104,13 @@ export const CREATE_SAMMI_USER_VARIABLES = {
     // facebookId: '3',
     // facebookAccessToken: '4',
     thumbnailURL: '',
+    location: [-71.098088, 42.355988],
   },
 };
 
 export const CREATE_MADE_USER_VARIABLES = {
   userInput: {
-    _id: MADE,
+    _id: MADE_ID,
     age: 20,
     birthdate: '1/1/1999',
     email: 'made+test@getpear.com',
@@ -119,12 +125,13 @@ export const CREATE_MADE_USER_VARIABLES = {
     // facebookId: '3',
     // facebookAccessToken: '4',
     thumbnailURL: '',
+    location: [-71.116492, 42.373999],
   },
 };
 
 export const CREATE_UMA_USER_VARIABLES = {
   userInput: {
-    _id: UMA,
+    _id: UMA_ID,
     age: 21,
     birthdate: '1/1/1998',
     email: 'uma+test@getpear.com',
@@ -139,17 +146,18 @@ export const CREATE_UMA_USER_VARIABLES = {
     // facebookId: '3',
     // facebookAccessToken: '4',
     thumbnailURL: '',
+    location: [-71.226725, 42.444342],
   },
 };
 
 export const CREATE_SOPHIA_USER_VARIABLES = {
   userInput: {
-    _id: SOPHIA,
+    _id: SOPHIA_ID,
     age: 20,
     birthdate: '1/1/1999',
     email: 'sophia+test@getpear.com',
     emailVerified: false,
-    phoneNumber: '7777777777',
+    phoneNumber: '9165189165',
     phoneNumberVerified: false,
     firstName: 'Sophia',
     lastName: 'Tang',
@@ -159,5 +167,6 @@ export const CREATE_SOPHIA_USER_VARIABLES = {
     // facebookId: '3',
     // facebookAccessToken: '4',
     thumbnailURL: '',
+    location: [-71.116492, 42.373999],
   },
 };

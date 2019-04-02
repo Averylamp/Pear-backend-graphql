@@ -1,0 +1,13 @@
+Status: active
+
+To                         Action      From
+--                         ------      ----
+27017                      ALLOW       Anywhere                  
+OpenSSH                    ALLOW       Anywhere                  
+Nginx HTTP                 ALLOW       Anywhere                  
+Nginx HTTPS                ALLOW       Anywhere                  
+27017 (v6)                 ALLOW       Anywhere (v6)             
+OpenSSH (v6)               ALLOW       Anywhere (v6)             
+Nginx HTTP (v6)            ALLOW       Anywhere (v6)             
+Nginx HTTPS (v6)           ALLOW       Anywhere (v6)             
+

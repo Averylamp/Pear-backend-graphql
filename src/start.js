@@ -1,7 +1,6 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import { merge } from 'lodash';
-import sendMessage from './SMSHelper';
 import {
   typeDef as User,
 } from './models/UserModel';
@@ -48,13 +47,17 @@ import {
   typeDef as MatchingSchemas,
 } from './models/MatchingSchemas';
 import {
-  updateDiscoveryForUserById,
-} from './discovery/DiscoverProfile';
+  typeDef as LocationSchemas,
+} from './models/LocationModels';
+import {
+  resolvers as LocationResolvers,
+} from './resolvers/LocationResolver';
+import { deleteUser } from './deletion/UserDeletion';
 
 const { ApolloServer } = require('apollo-server-express');
 
 const debug = require('debug')('dev:Start');
-const errorLog = require('debug')('dev:error:Start');
+const errorLog = require('debug')('error:Start');
 const prodConsole = require('debug')('prod:Start');
 
 
@@ -80,7 +83,7 @@ const tracing = process.env.PERF === 'true';
 if (tracing) debug('Perf mode detected');
 
 const URL = 'http://localhost';
-const PORT = 1234;
+const PORT = process.env.PORT ? process.env.PORT : 1234;
 const dbHost = process.env.DB_HOST ? process.env.DB_HOST : 'localhost';
 const mongoPrefix = dbHost.includes('localhost') ? 'mongodb://' : 'mongodb+srv://';
 const dbName = process.env.DB_NAME ? process.env.DB_NAME : 'dev';
@@ -121,7 +124,8 @@ function createApolloServer() {
     DiscoveryQueue,
     TestObject,
     ImageContainer,
-    MatchingSchemas];
+    MatchingSchemas,
+    LocationSchemas];
 
   const resolvers = {
     Query: {},
@@ -134,7 +138,8 @@ function createApolloServer() {
     DiscoveryQueueResolvers,
     TestObjectResolvers,
     ImageResolvers,
-    UserProfileResolvers);
+    UserProfileResolvers,
+    LocationResolvers);
 
 
   const server = new ApolloServer({
@@ -173,25 +178,16 @@ export const start = async () => {
       const server = apolloServer;
 
       server.applyMiddleware({ app });
-      app.post('/echo', (req, res) => {
-        res.json(req.body);
-      });
 
-      app.post('/sms-test', (req, res) => {
-        sendMessage('+12067789236', 'hello!');
-        res.json(req.body);
-      });
-
-      // only expose this route if in devMode
       if (devMode) {
-        app.post('/add-to-discovery', async (req, res) => {
+        app.post('/delete-user', async (req, res) => {
           try {
             const { user_id } = req.body;
-            debug(`adding to discovery for user: ${user_id}`);
-            await updateDiscoveryForUserById(user_id);
-            res.send('success');
+            debug(`attempting to delete user ${user_id}`);
+            await deleteUser(user_id);
+            res.send(`deleted user ${user_id}`);
           } catch (e) {
-            debug(e.toString());
+            errorLog(e.toString());
             res.send(`an error occurred ${e.toString()}`);
           }
         });

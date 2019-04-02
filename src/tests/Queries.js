@@ -20,7 +20,7 @@ export const GET_USER = gql`
       age
       birthdate
       locationName
-      locationCoordinates
+      location
       school
       schoolEmail
       schoolEmailVerified
