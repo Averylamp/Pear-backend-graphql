@@ -96,6 +96,7 @@ input UpdateUserInput {
   gender: Gender
   school: String
   isSeeking: Boolean
+  deactivated: Boolean
   
   seekingGender: [String!]
   maxDistance: Int
