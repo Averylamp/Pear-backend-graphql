@@ -22,6 +22,14 @@ const initialize = () => {
   });
 };
 
+const getAdminObj = () => {
+  if (!initialized) {
+    initialize();
+    initialized = true;
+  }
+  return firebaseAdmin;
+};
+
 const getFirebaseDb = () => {
   if (!initialized) {
     initialize();
@@ -104,6 +112,7 @@ const createChat = ({
     });
 };
 
+// throws if fails
 export const createEndorsementChat = ({ documentID, firstPerson, secondPerson }) => (
   createChat({
     documentID,
@@ -113,6 +122,7 @@ export const createEndorsementChat = ({ documentID, firstPerson, secondPerson })
   })
 );
 
+// throws if fails
 export const createMatchChat = ({
   documentID, firstPerson, secondPerson, mongoID,
 }) => (
@@ -125,6 +135,7 @@ export const createMatchChat = ({
   })
 );
 
+// does not throw
 export const sendServerMessage = async ({ chatID, params, paramsToMessage }) => {
   try {
     const db = getFirebaseDb();
@@ -213,3 +224,74 @@ export const notifyEndorsementChatAcceptedRequest = async ({
     paramsToMessage,
   });
 };
+
+export const sendPushNotification = async ({ deviceToken, title, body }) => {
+  try {
+    if (deviceToken) {
+      const admin = getAdminObj();
+      const message = {
+        notification: {
+          title,
+          body,
+        },
+        token: deviceToken,
+        apns: {
+          payload: {
+            aps: {
+              'content-available': true, // this is necessary to ensure client logic executes in bg
+              sound: 'default',
+            },
+          },
+        },
+      };
+      admin.messaging()
+        .send(message)
+        .catch((err) => {
+          errorLog(`error occurred sending push notification: ${err}`);
+        });
+    }
+  } catch (e) {
+    errorLog(`error occurred sending push notification: ${e}`);
+  }
+};
+
+export const sendProfileApprovedPushNotification = async ({ creator, user }) => (
+  sendPushNotification({
+    deviceToken: creator.firebaseRemoteInstanceID,
+    title: 'Start Pear-ing for your friend',
+    body: `${user.firstName} approved the profile you wrote for them!`,
+  }));
+
+export const sendMatchReceivedByPushNotification = async ({ receivedBy }) => (
+  sendPushNotification({
+    deviceToken: receivedBy.firebaseRemoteInstanceID,
+    title: 'New match request',
+    body: 'Tap to check them out 😉',
+  }));
+
+export const sendMatchSentForPushNotification = async ({ sentBy, sentFor }) => (
+  sendPushNotification({
+    deviceToken: sentFor.firebaseRemoteInstanceID,
+    title: 'New match request',
+    body: `${sentBy.firstName} wants to Pear you with someone new 🙈 🙉`,
+  }));
+
+export const sendMatchAcceptedPushNotification = async ({ user, otherUser }) => (
+  sendPushNotification({
+    deviceToken: user.firebaseRemoteInstanceID,
+    title: 'It\'s a Pear!',
+    body: `You matched with ${otherUser.firstName}`,
+  }));
+
+export const sendMatchAcceptedMatchmakerPushNotification = async ({ sentBy, sentFor }) => (
+  sendPushNotification({
+    deviceToken: sentBy.firebaseRemoteInstanceID,
+    title: 'It\'s a Pear!',
+    body: `You helped your friend ${sentFor.firstName} find a match!`,
+  }));
+
+export const sendNewMessagePushNotification = async ({ from, to }) => (
+  sendPushNotification({
+    deviceToken: to.firebaseRemoteInstanceID,
+    body: `${from.firstName} sent you a new message`,
+  }));
