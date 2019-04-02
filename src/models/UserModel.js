@@ -75,6 +75,9 @@ input CreationUserInput{
 
   # Option url for profile thumbnail
   thumbnailURL: String
+  
+  # Optional firebase remote instance ID for push notifications
+  firebaseRemoteInstanceID: String
 }
 `;
 
@@ -325,6 +328,8 @@ const UserSchema = new Schema({
     type: [Schema.Types.ObjectId], required: true, index: true, default: [],
   },
   edgeSummaries: { type: [EdgeSummarySchema], required: true, default: [] },
+
+  firebaseRemoteInstanceID: { type: String, required: false },
 }, { timestamps: true });
 
 UserSchema.virtual('fullName')
