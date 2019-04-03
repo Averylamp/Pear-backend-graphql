@@ -191,6 +191,7 @@ export const resolvers = {
           'lastName',
           'gender',
           'school',
+          'schoolYear',
           'isSeeking',
           'deactivated',
           'thumbnailURL',
