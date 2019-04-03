@@ -9,6 +9,7 @@ export const UPDATE_BRIAN_VARIABLES = {
     firebaseRemoteInstanceID: 'testasdf',
     school: 'M.I.T.',
     isSeeking: false,
+    schoolYear: '2020',
   },
 };
 
