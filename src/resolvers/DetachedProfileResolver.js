@@ -319,6 +319,7 @@ export const resolvers = {
     approveNewDetachedProfile: async (_source, { user_id, detachedProfile_id, creatorUser_id }) => {
       functionCallConsole('Approve Profile Called');
 
+      // TODO: Handle error
       const { user, detachedProfile, creator } = await getAndValidateUsersAndDetachedProfileObjects(
         {
           user_id,
