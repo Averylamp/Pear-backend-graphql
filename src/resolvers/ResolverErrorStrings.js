@@ -5,6 +5,8 @@ export const UPDATE_USER_PHOTOS_ERROR = 'Failed to update photos.';
 export const CREATE_DETACHED_PROFILE_ERROR = 'Failed to create profile.';
 export const WRONG_CREATOR_ERROR = 'Matchmaker did not create profile for this user.';
 export const VIEW_DETACHED_PROFILE_ERROR = 'Failed to perform this operation.';
+export const DELETE_USER_PROFILE_ERROR = 'Couldn\'t delete this profile.';
+export const DELETE_DETACHED_PROFILE_ERROR = 'Couldn\'t delete this profile.';
 export const CANT_ENDORSE_YOURSELF = 'Can\'t create a profile for yourself.';
 export const ALREADY_MADE_PROFILE = 'Already made a profile for this person.';
 export const APPROVE_PROFILE_ERROR = 'Couldn\'t approve this profile.';
@@ -15,3 +17,5 @@ export const REJECT_MATCH_REQUEST_ERROR = 'Couldn\'t perform action on match req
 export const UNMATCH_ERROR = 'Couldn\'t perform action on match.';
 
 export const FORCE_FEED_UPDATE_SUCCESS = 'Updated feed successfully.';
+export const DELETE_USER_PROFILE_SUCCESS = 'Deleted profile successfully.';
+export const DELETE_DETACHED_PROFILE_SUCCESS = 'Deleted profile successfully.';
