@@ -9,10 +9,10 @@ import {
   notifyEndorsementChatNewRequest,
   sendMatchAcceptedMatchmakerPushNotification,
   sendMatchAcceptedPushNotification,
-  sendMatchAcceptedServerMessage,
+  sendMatchAcceptedServerMessage, sendMatchmakerRequestMessage,
   sendMatchReceivedByPushNotification,
   sendMatchRequestServerMessage,
-  sendMatchSentForPushNotification,
+  sendMatchSentForPushNotification, sendPersonalRequestMessage,
 } from '../FirebaseManager';
 import {
   GET_USER_ERROR,
@@ -109,7 +109,7 @@ export const getAndValidateUserAndMatchObjects = async ({ user_id, match_id, val
 };
 
 export const createNewMatch = async ({
-  sentByUser_id, sentForUser_id, receivedByUser_id, _id = mongoose.Types.ObjectId(),
+  sentByUser_id, sentForUser_id, receivedByUser_id, _id = mongoose.Types.ObjectId(), requestText,
 }) => {
   const matchID = _id;
   // determine whether this is a matchmaker request or a personal request
@@ -269,12 +269,19 @@ export const createNewMatch = async ({
     };
   }
   // send server message to the new match object
-  sendMatchRequestServerMessage({
+  await sendMatchRequestServerMessage({
     chatID: firebaseId,
     initiator: sentBy,
     hasMatchmaker: matchmakerMade,
   });
   if (matchmakerMade) {
+    if (requestText) {
+      sendMatchmakerRequestMessage({
+        chatID: firebaseId,
+        sentBy,
+        requestText,
+      });
+    }
     const endorsementChatId = profile.firebaseChatDocumentID;
     notifyEndorsementChatNewRequest({
       chatID: endorsementChatId,
@@ -285,6 +292,12 @@ export const createNewMatch = async ({
     sendMatchSentForPushNotification({
       sentBy,
       sentFor,
+    });
+  } else if (requestText) {
+    sendPersonalRequestMessage({
+      chatID: firebaseId,
+      sentBy,
+      requestText,
     });
   }
   sendMatchReceivedByPushNotification({ receivedBy });
