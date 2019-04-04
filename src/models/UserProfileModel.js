@@ -26,6 +26,13 @@ type UserProfile {
 
 `;
 
+const mutationRoutes = `
+extend type Mutation {
+  # deletes the user profile. user_id must be either the underlying user or the creator
+  deleteUserProfile(user_id: ID!, userProfile_id: ID!): UserProfileMutationResponse
+}
+`;
+
 const userProfileMutationResponse = `
 type UserProfileMutationResponse{
   success: Boolean!
@@ -52,6 +59,7 @@ type EndorsementEdge {
 `;
 
 export const typeDef = userProfileType
++ mutationRoutes
 + userProfileMutationResponse
 + endorsementEdgeType;
 
