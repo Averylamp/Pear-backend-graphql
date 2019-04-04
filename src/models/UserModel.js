@@ -95,6 +95,7 @@ input UpdateUserInput {
   lastName: String
   gender: Gender
   school: String
+  schoolYear: String
   isSeeking: Boolean
   deactivated: Boolean
   
@@ -145,6 +146,7 @@ type User {
   birthdate: String!
 
   school: String
+  schoolYear: String
   schoolEmail: String
   schoolEmailVerified: Boolean
   isSeeking: Boolean!
@@ -260,6 +262,7 @@ const UserSchema = new Schema({
   },
   birthdate: { type: Date, required: true },
   school: { type: String, required: false },
+  schoolYear: { type: String, required: false },
   schoolEmail: { type: String, required: false },
   schoolEmailVerified: { type: Boolean, required: false, default: false },
   isSeeking: { type: Boolean, required: true, default: false },
