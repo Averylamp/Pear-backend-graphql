@@ -136,7 +136,7 @@ export const createMatchChat = ({
 );
 
 // does not throw
-export const sendServerMessage = async ({ chatID, params, paramsToMessage }) => {
+export const sendMessage = async ({ chatID, messageType, content, sender_id }) => {
   try {
     const db = getFirebaseDb();
     const now = new Date();
@@ -145,13 +145,17 @@ export const sendServerMessage = async ({ chatID, params, paramsToMessage }) => 
     const newMessageRef = chatDocRef.collection('messages')
       .doc();
     // in general we don't do rollbacks because chat messages are pretty low stakes
-    await newMessageRef.set({
+    const messageSetObj = {
       documentID: newMessageRef.id,
-      type: 'SERVER_MESSAGE',
+      type: messageType,
       contentType: 'TEXT',
-      content: paramsToMessage(params),
+      content,
       timestamp: now,
-    });
+    };
+    if (sender_id) {
+      messageSetObj.sender_id = sender_id;
+    }
+    await newMessageRef.set(messageSetObj);
     await chatDocRef.set({
       lastActivity: now,
     }, { merge: true });
@@ -162,13 +166,14 @@ export const sendServerMessage = async ({ chatID, params, paramsToMessage }) => 
 
 export const sendNewEndorsementMessage = async ({ chatID, endorser, endorsee }) => {
   const paramsToMessage = ({ u1, u2 }) => `${u1.firstName} created a profile for ${u2.firstName}.`;
-  await sendServerMessage({
+  const params = {
+    u1: endorser,
+    u2: endorsee,
+  };
+  return sendMessage({
     chatID,
-    params: {
-      u1: endorser,
-      u2: endorsee,
-    },
-    paramsToMessage,
+    messageType: 'SERVER_MESSAGE',
+    content: paramsToMessage(params),
   });
 };
 
@@ -176,13 +181,14 @@ export const sendMatchRequestServerMessage = async ({ chatID, initiator, hasMatc
   const paramsToMessage = ({ u, matchmaker }) => (matchmaker
     ? `${u.firstName} sent both of you a match request.`
     : `${u.firstName} sent a match request.`);
-  await sendServerMessage({
+  const params = {
+    u: initiator,
+    matchmaker: hasMatchmaker,
+  };
+  return sendMessage({
     chatID,
-    params: {
-      u: initiator,
-      matchmaker: hasMatchmaker,
-    },
-    paramsToMessage,
+    messageType: 'SERVER_MESSAGE',
+    content: paramsToMessage(params),
   });
 };
 
@@ -190,23 +196,24 @@ export const notifyEndorsementChatNewRequest = async ({
   chatID, sentBy, sentFor, receivedBy,
 }) => {
   const paramsToMessage = ({ u1, u2, u3 }) => `${u1.firstName} wants to Pear ${u2.firstName} with ${u3.firstName}.`;
-  await sendServerMessage({
+  const params = {
+    u1: sentBy,
+    u2: sentFor,
+    u3: receivedBy,
+  };
+  return sendMessage({
     chatID,
-    params: {
-      u1: sentBy,
-      u2: sentFor,
-      u3: receivedBy,
-    },
-    paramsToMessage,
+    messageType: 'SERVER_MESSAGE',
+    content: paramsToMessage(params),
   });
 };
 
 export const sendMatchAcceptedServerMessage = async ({ chatID }) => {
   const paramsToMessage = () => 'Chat request accepted.';
-  await sendServerMessage({
+  return sendMessage({
     chatID,
-    params: {},
-    paramsToMessage,
+    messageType: 'SERVER_MESSAGE',
+    content: paramsToMessage(),
   });
 };
 
@@ -214,14 +221,33 @@ export const notifyEndorsementChatAcceptedRequest = async ({
   chatID, sentBy, sentFor, receivedBy,
 }) => {
   const paramsToMessage = ({ u1, u2, u3 }) => `${u1.firstName} Peared ${u2.firstName} with ${u3.firstName}.`;
-  await sendServerMessage({
+  const params = {
+    u1: sentBy,
+    u2: sentFor,
+    u3: receivedBy,
+  };
+  return sendMessage({
     chatID,
-    params: {
-      u1: sentBy,
-      u2: sentFor,
-      u3: receivedBy,
-    },
-    paramsToMessage,
+    messageType: 'SERVER_MESSAGE',
+    content: paramsToMessage(params),
+  });
+};
+
+export const sendMatchmakerRequestMessage = async ({ chatID, sentBy, requestText }) => {
+  return sendMessage({
+    chatID,
+    messageType: 'MATCHMAKER_REQUEST',
+    content: requestText,
+    sender_id: sentBy._id.toString(),
+  });
+};
+
+export const sendPersonalRequestMessage = async ({ chatID, sentBy, requestText }) => {
+  return sendMessage({
+    chatID,
+    messageType: 'PERSONAL_REQUEST',
+    content: requestText,
+    sender_id: sentBy._id.toString(),
   });
 };
 
