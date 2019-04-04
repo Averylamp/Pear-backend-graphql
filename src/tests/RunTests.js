@@ -25,7 +25,8 @@ import {
   MONGO_URL,
   apolloServer,
 } from '../start';
-import { deleteChatsCollection } from '../FirebaseManager';
+import { deleteChatsCollection, sendMessage } from '../FirebaseManager';
+import { Match } from '../models/MatchModel';
 
 
 const debug = require('debug')('tests:RunTests');
@@ -348,6 +349,34 @@ export const runTests = async function runTests() {
       }
       successLog('***** Success Rejecting Match Requests *****\n');
 
+      testLog('TESTING: Sending Chat Messages');
+      const match1 = await Match.findById('5c82162afec46c84e0000000');
+      const match3 = await Match.findById('5c82162afec46c84e0000002');
+      await sendMessage({
+        chatID: match1.firebaseChatDocumentID,
+        messageType: 'USER_MESSAGE',
+        content: 'Hey there!',
+        sender_id: match1.receivedByUser_id.toString(),
+      });
+      await sendMessage({
+        chatID: match3.firebaseChatDocumentID,
+        messageType: 'USER_MESSAGE',
+        content: 'Nice to meet you :)',
+        sender_id: match3.sentForUser_id.toString(),
+      });
+      await sendMessage({
+        chatID: match3.firebaseChatDocumentID,
+        messageType: 'USER_MESSAGE',
+        content: 'Cool pics uwu',
+        sender_id: match3.receivedByUser_id.toString(),
+      });
+      await sendMessage({
+        chatID: match1.firebaseChatDocumentID,
+        messageType: 'USER_MESSAGE',
+        content: 'wanna get boba?',
+        sender_id: match1.sentForUser_id.toString(),
+      });
+      successLog('***** Success Sending Chats *****');
 
       if (!process.env.SKIP_UNMATCHING) {
         testLog('TESTING: Unmatching');
