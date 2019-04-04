@@ -136,7 +136,9 @@ export const createMatchChat = ({
 );
 
 // does not throw
-export const sendMessage = async ({ chatID, messageType, content, sender_id }) => {
+export const sendMessage = async ({
+  chatID, messageType, content, sender_id,
+}) => {
   try {
     const db = getFirebaseDb();
     const now = new Date();
@@ -233,23 +235,19 @@ export const notifyEndorsementChatAcceptedRequest = async ({
   });
 };
 
-export const sendMatchmakerRequestMessage = async ({ chatID, sentBy, requestText }) => {
-  return sendMessage({
-    chatID,
-    messageType: 'MATCHMAKER_REQUEST',
-    content: requestText,
-    sender_id: sentBy._id.toString(),
-  });
-};
+export const sendMatchmakerRequestMessage = async ({ chatID, sentBy, requestText }) => sendMessage({
+  chatID,
+  messageType: 'MATCHMAKER_REQUEST',
+  content: requestText,
+  sender_id: sentBy._id.toString(),
+});
 
-export const sendPersonalRequestMessage = async ({ chatID, sentBy, requestText }) => {
-  return sendMessage({
-    chatID,
-    messageType: 'PERSONAL_REQUEST',
-    content: requestText,
-    sender_id: sentBy._id.toString(),
-  });
-};
+export const sendPersonalRequestMessage = async ({ chatID, sentBy, requestText }) => sendMessage({
+  chatID,
+  messageType: 'PERSONAL_REQUEST',
+  content: requestText,
+  sender_id: sentBy._id.toString(),
+});
 
 export const sendPushNotification = async ({ deviceToken, title, body }) => {
   try {
