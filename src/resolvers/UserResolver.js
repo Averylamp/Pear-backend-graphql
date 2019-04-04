@@ -287,14 +287,21 @@ export const resolvers = {
         }
       });
 
-      return User.findByIdAndUpdate(user_id, {
+      const userUpdate = {
         displayedImages,
         $push: {
           bankImages: {
             $each: toAddToImageBank,
           },
         },
-      }, { new: true })
+      };
+      if (displayedImages.length > 0
+        && displayedImages[0]
+        && displayedImages[0].thumbnail
+        && displayedImages[0].thumbnail.imageURL) {
+        userUpdate.thumbnailURL = displayedImages[0].thumbnail.imageURL;
+      }
+      return User.findByIdAndUpdate(user_id, userUpdate, { new: true })
         .then(res => ({
           success: true,
           user: res,
