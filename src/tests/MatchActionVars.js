@@ -9,6 +9,7 @@ export const SEND_PERSONAL_REQUEST_1_VARIABLES = {
     sentByUser_id: JOSH_ID,
     sentForUser_id: JOSH_ID,
     receivedByUser_id: SAMMI_ID,
+    requestText: 'I\'d like to match with you!',
   },
 };
 
@@ -27,6 +28,7 @@ export const SEND_MATCHMAKER_REQUEST_3_VARIABLES = {
     sentByUser_id: BRIAN_ID,
     sentForUser_id: SAMMI_ID,
     receivedByUser_id: UMA_ID,
+    requestText: 'You two would make a great Pear!',
   },
 };
 
@@ -54,6 +56,7 @@ export const SEND_MATCHMAKER_REQUEST_6_VARIABLES = {
     sentByUser_id: JOSH_ID,
     sentForUser_id: SAMMI_ID,
     receivedByUser_id: BRIAN_ID,
+    requestText: 'You both love doggos!',
   },
 };
 

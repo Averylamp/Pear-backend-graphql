@@ -37,6 +37,9 @@ input CreateMatchRequestInput {
 
   # Discovered user receiving the request
   receivedByUser_id: ID!
+  
+  # Optional text that goes along with the chat request
+  requestText: String
 }
 `;
 
