@@ -15,10 +15,10 @@ export const CREATE_AVERY_USER_VARIABLES = {
     lastName: 'Lamp',
     gender: 'male',
     firebaseToken: 'FakeFirebaseTokenAvery',
-    firebaseAuthID: '1cSO718vkCMzOufAfnZalMhQ00O2',
-    // facebookId: '1',
+    firebaseAuthID: 'lgzBEq79HOY6UaCTme5WBViSkEf2',
+    facebookId: '2110109769065310',
     // facebookAccessToken: '2',
-    thumbnailURL: '',
+    thumbnailURL: 'https://platform-lookaside.fbsbx.com/platform/profilepic/?asid=2110109769065310&height=300&width=300&ext=1556961773&hash=AeQthY3WpTN3wZ5M',
     location: [-71.101366, 42.362580],
   },
 };

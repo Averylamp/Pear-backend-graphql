@@ -19,10 +19,15 @@ const mutationRoutes = `
 extend type Mutation{
   # Creates a new detached profile and attaches it to the creator's profile
   createDetachedProfile(detachedProfileInput: CreationDetachedProfileInput): DetachedProfileMutationResponse!
+  
   # Changes the status of the detached profile from waitingSeen to waitingUnseen
   viewDetachedProfile(user_id: ID! detachedProfile_id: ID!): DetachedProfileMutationResponse!
-  # Deletes the existing detached profile, converts it into a User Profile and attaches the user profile to both the creator's and user's User Object
+  
+  # updates status of existing detached profile, converts it into a User Profile and attaches the user profile to both the creator's and user's User Object
   approveNewDetachedProfile(user_id: ID!, detachedProfile_id: ID!, creatorUser_id: ID!): UserMutationResponse!
+  
+  # deletes the detached profile
+  deleteDetachedProfile(creator_id: ID!, detachedProfile_id: ID!): DetachedProfileMutationResponse
 }
 `;
 

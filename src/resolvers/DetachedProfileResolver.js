@@ -14,9 +14,10 @@ import {
 import {
   ALREADY_MADE_PROFILE,
   APPROVE_PROFILE_ERROR, CANT_ENDORSE_YOURSELF,
-  CREATE_DETACHED_PROFILE_ERROR,
-  GET_USER_ERROR, VIEW_DETACHED_PROFILE_ERROR,
+  CREATE_DETACHED_PROFILE_ERROR, DELETE_DETACHED_PROFILE_ERROR,
+  GET_USER_ERROR, VIEW_DETACHED_PROFILE_ERROR, WRONG_CREATOR_ERROR,
 } from './ResolverErrorStrings';
+import { deleteDetachedProfile } from '../deletion/UserProfileDeletion';
 
 const mongoose = require('mongoose');
 const debug = require('debug')('dev:DetachedProfileResolvers');
@@ -318,6 +319,7 @@ export const resolvers = {
     approveNewDetachedProfile: async (_source, { user_id, detachedProfile_id, creatorUser_id }) => {
       functionCallConsole('Approve Profile Called');
 
+      // TODO: Handle error
       const { user, detachedProfile, creator } = await getAndValidateUsersAndDetachedProfileObjects(
         {
           user_id,
@@ -575,12 +577,44 @@ export const resolvers = {
             endorsee: user,
           });
           // send a push notification. not a big deal if this silent fails also
-          sendProfileApprovedPushNotification({ creator, user });
+          sendProfileApprovedPushNotification({
+            creator,
+            user,
+          });
           return {
             success: true,
             user: updateUserObjectResult,
           };
         });
+    },
+    deleteDetachedProfile: async (_source, { creator_id, detachedProfile_id }) => {
+      functionCallConsole('deleteDetachedProfile called');
+      const creator = await User.findById(creator_id)
+        .exec()
+        .catch(err => err);
+      if (!creator || creator instanceof Error) {
+        return {
+          success: false,
+          message: GET_USER_ERROR,
+        };
+      }
+
+      if (!creator.detachedProfile_ids.map(id => id.toString())
+        .includes(detachedProfile_id.toString())) {
+        return {
+          success: false,
+          message: WRONG_CREATOR_ERROR,
+        };
+      }
+
+      try {
+        return deleteDetachedProfile(detachedProfile_id);
+      } catch (e) {
+        return {
+          success: false,
+          message: DELETE_DETACHED_PROFILE_ERROR,
+        };
+      }
     },
 
   },
