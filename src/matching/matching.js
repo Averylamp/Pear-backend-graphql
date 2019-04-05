@@ -9,14 +9,14 @@ import {
   notifyEndorsementChatNewRequest,
   sendMatchAcceptedMatchmakerPushNotification,
   sendMatchAcceptedPushNotification,
-  sendMatchAcceptedServerMessage,
+  sendMatchAcceptedServerMessage, sendMatchmakerRequestMessage,
   sendMatchReceivedByPushNotification,
   sendMatchRequestServerMessage,
-  sendMatchSentForPushNotification,
+  sendMatchSentForPushNotification, sendPersonalRequestMessage,
 } from '../FirebaseManager';
 import {
   GET_USER_ERROR,
-  SEND_MATCH_REQUEST_ERROR,
+  SEND_MATCH_REQUEST_ERROR, USERS_ALREADY_MATCHED_ERROR,
   WRONG_CREATOR_ERROR,
 } from '../resolvers/ResolverErrorStrings';
 
@@ -109,7 +109,7 @@ export const getAndValidateUserAndMatchObjects = async ({ user_id, match_id, val
 };
 
 export const createNewMatch = async ({
-  sentByUser_id, sentForUser_id, receivedByUser_id, _id = mongoose.Types.ObjectId(),
+  sentByUser_id, sentForUser_id, receivedByUser_id, _id = mongoose.Types.ObjectId(), requestText,
 }) => {
   const matchID = _id;
   // determine whether this is a matchmaker request or a personal request
@@ -208,6 +208,7 @@ export const createNewMatch = async ({
     || receivedByEdgeResult instanceof Error
     || createChatResult instanceof Error) {
     let errorMessage = '';
+    let responseMessage = SEND_MATCH_REQUEST_ERROR;
     if (match instanceof Error) {
       errorLog(`Failed to create match Object: ${match.toString()}`);
       errorMessage += match.toString();
@@ -220,6 +221,9 @@ export const createNewMatch = async ({
     if (sentForEdgeResult instanceof Error) {
       errorLog(`Sent For Edge Failure:${sentForEdgeResult.toString()}`);
       errorMessage += sentForEdgeResult.toString();
+      if (sentForEdgeResult.toString() === (new Error(USERS_ALREADY_MATCHED_ERROR)).toString()) {
+        responseMessage = USERS_ALREADY_MATCHED_ERROR;
+      }
     } else {
       const update = {
         $pop: matchmakerMade ? {
@@ -238,6 +242,9 @@ export const createNewMatch = async ({
     if (receivedByEdgeResult instanceof Error) {
       errorLog(`Received By Edge Failure:${receivedByEdgeResult.toString()}`);
       errorMessage += receivedByEdgeResult.toString();
+      if (receivedByEdgeResult.toString() === (new Error(USERS_ALREADY_MATCHED_ERROR)).toString()) {
+        responseMessage = USERS_ALREADY_MATCHED_ERROR;
+      }
     } else {
       User.findByIdAndUpdate(receivedBy._id, {
         $pop: {
@@ -258,16 +265,23 @@ export const createNewMatch = async ({
     errorLog(errorMessage);
     return {
       success: false,
-      message: SEND_MATCH_REQUEST_ERROR,
+      message: responseMessage,
     };
   }
   // send server message to the new match object
-  sendMatchRequestServerMessage({
+  await sendMatchRequestServerMessage({
     chatID: firebaseId,
     initiator: sentBy,
     hasMatchmaker: matchmakerMade,
   });
   if (matchmakerMade) {
+    if (requestText) {
+      sendMatchmakerRequestMessage({
+        chatID: firebaseId,
+        sentBy,
+        requestText,
+      });
+    }
     const endorsementChatId = profile.firebaseChatDocumentID;
     notifyEndorsementChatNewRequest({
       chatID: endorsementChatId,
@@ -278,6 +292,12 @@ export const createNewMatch = async ({
     sendMatchSentForPushNotification({
       sentBy,
       sentFor,
+    });
+  } else if (requestText) {
+    sendPersonalRequestMessage({
+      chatID: firebaseId,
+      sentBy,
+      requestText,
     });
   }
   sendMatchReceivedByPushNotification({ receivedBy });

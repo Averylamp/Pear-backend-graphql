@@ -2,6 +2,7 @@ import { MatchingDemographicsSchema, MatchingPreferencesSchema } from './Matchin
 import { ImageContainerSchema } from './ImageSchemas';
 import { EdgeSummarySchema } from './MatchModel';
 import { EndorsementEdgeSchema } from './UserProfileModel';
+import { USERS_ALREADY_MATCHED_ERROR } from '../resolvers/ResolverErrorStrings';
 
 const mongoose = require('mongoose');
 
@@ -334,7 +335,9 @@ export const receiveRequest = (me, otherUser, match_id) => {
     edgeSummary => (edgeSummary.otherUser_id.toString() === otherUser._id.toString()),
   );
   if (alreadyExists !== undefined) {
-    throw new Error(`edge between ${me._id} and ${otherUser._id} already exists`);
+    return Promise.reject(
+      new Error(USERS_ALREADY_MATCHED_ERROR),
+    );
   }
   me.edgeSummaries.push({
     otherUser_id: otherUser._id,
@@ -349,7 +352,9 @@ export const sendRequest = (me, otherUser, match_id) => {
     edgeSummary => (edgeSummary.otherUser_id.toString() === otherUser._id.toString()),
   );
   if (alreadyExists !== undefined) {
-    throw new Error(`edge between ${me._id} and ${otherUser._id} already exists`);
+    return Promise.reject(
+      new Error(USERS_ALREADY_MATCHED_ERROR),
+    );
   }
   me.edgeSummaries.push({
     otherUser_id: otherUser._id,
