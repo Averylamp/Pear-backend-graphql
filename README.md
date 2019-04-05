@@ -64,9 +64,6 @@ https://github.com/nvie/gitflow
 
 ```
 
-
-
-
 To set up linting scripts run from root project folder: 
 ```
 cp pre-commit .git/hooks
@@ -85,4 +82,35 @@ Upload schema to Apollo:
 ```
 apollo service:push --key="service:pear-matchmaking-8936:V43kf4Urhi-63wQycK_yoA" --endpoint=host/graphql  --tags="Optional tags"
 ```
+
+
+### Deployment
+
+We will be using pm2 for cluster deployment
+Our two servers are koala.mit.edu (prod) and sloths.mit.edu (dev)
+
+To update a deploy, pull the latest changes, build them into dist with `yarn build`, then `pm2 reload` to perform a zero-downtime reload.
+
+To install pm2:
+```
+npm install pm2 -g && pm2 update
+pm2 completion install
+```
+
+To monitor the deployment:
+`pm2 monit`
+
+To list instances:
+`pm2 ls`
+
+To start a pm2 deploy
+`pm2 start pm2.config.json --env development/production`
+
+Other helpful commands
+```
+pm2 delete all
+pm2 logs all
+```
+
+
 
