@@ -106,6 +106,11 @@ To list instances:
 To start a pm2 deploy
 `pm2 start pm2.config.json --env development/production`
 
+Other helpful commands
+```
+pm2 delete all
+pm2 logs all
+```
 
 
 
