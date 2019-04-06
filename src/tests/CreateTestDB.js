@@ -95,7 +95,7 @@ export const createDetachedProfiles = [
 export const editDetachedProfiles = [
   EDIT_UMA1_DETACHED_PROFILE_VARIABLES,
   EDIT_BRIAN1_DETACHED_PROFILE_VARIABLES,
-  EDIT_SOPHIA2_DETACHED_PROFILE_VARIABLES
+  EDIT_SOPHIA2_DETACHED_PROFILE_VARIABLES,
 ];
 
 export const viewDetachedProfiles = [
