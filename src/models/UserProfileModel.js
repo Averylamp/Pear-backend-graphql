@@ -26,8 +26,25 @@ type UserProfile {
 
 `;
 
+const editUserProfileType = `
+input EditUserProfileInput {
+  # id of the profile being edited
+  _id: ID!
+  # The creator's User Object ID
+  creatorUser_id: ID!
+  interests: [String!]
+  vibes: [String!]
+  bio: String
+  dos: [String!]
+  donts: [String!]
+}
+`;
+
 const mutationRoutes = `
 extend type Mutation {
+  # edit the user profile. the creatorUser_id must be the creator of the profile
+  editUserProfile(editUserProfileInput: EditUserProfileInput!): UserProfileMutationResponse
+
   # deletes the user profile. user_id must be either the underlying user or the creator
   deleteUserProfile(user_id: ID!, userProfile_id: ID!): UserProfileMutationResponse
 }
@@ -59,6 +76,7 @@ type EndorsementEdge {
 `;
 
 export const typeDef = userProfileType
++ editUserProfileType
 + mutationRoutes
 + userProfileMutationResponse
 + endorsementEdgeType;
