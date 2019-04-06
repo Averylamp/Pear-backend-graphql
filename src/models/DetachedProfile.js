@@ -11,14 +11,14 @@ const debug = require('debug')('dev:DetachedProfile');
 const queryRoutes = `
 extend type Query {
   # Queries for existing detached profiles
-  findDetachedProfiles(phoneNumber: String): [DetachedProfile!]!
+  findDetachedProfiles(phoneNumber: String!): [DetachedProfile!]!
 }
 `;
 
 const mutationRoutes = `
 extend type Mutation{
   # Creates a new detached profile and attaches it to the creator's profile
-  createDetachedProfile(detachedProfileInput: CreationDetachedProfileInput): DetachedProfileMutationResponse!
+  createDetachedProfile(detachedProfileInput: CreationDetachedProfileInput!): DetachedProfileMutationResponse!
   
   # Changes the status of the detached profile from waitingSeen to waitingUnseen
   viewDetachedProfile(user_id: ID! detachedProfile_id: ID!): DetachedProfileMutationResponse!
@@ -31,12 +31,13 @@ extend type Mutation{
   editDetachedProfile(editDetachedProfileInput: EditDetachedProfileInput!): DetachedProfileMutationResponse!
   
   # deletes the detached profile
-  deleteDetachedProfile(creator_id: ID!, detachedProfile_id: ID!): DetachedProfileMutationResponse
+  deleteDetachedProfile(creator_id: ID!, detachedProfile_id: ID!): DetachedProfileMutationResponse!
 }
 `;
 
 const createDetachedProfileInput = `
 input CreationDetachedProfileInput {
+  # for testing only: set the detached profile to have a specific id deterministically
   _id: ID
   # The creator's User Object ID
   creatorUser_id: ID!

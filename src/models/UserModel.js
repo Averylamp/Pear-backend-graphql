@@ -12,9 +12,9 @@ const { Schema } = mongoose;
 const queryRoutes = `
 extend type Query {
   # Get a user by an ID
-  user(id: ID): User
+  user(id: ID!): User
   # Get a user by firebase tokens
-  getUser(userInput: GetUserInput): UserMutationResponse!
+  getUser(userInput: GetUserInput!): UserMutationResponse!
   # send a push notification indicating new message
   notifyNewMessage(fromUser_id: ID!, toUser_id: ID!): Boolean!
 }
@@ -24,13 +24,13 @@ extend type Query {
 const mutationRoutes = `
 extend type Mutation{
   # Creates a new User Object
-  createUser(userInput: CreationUserInput): UserMutationResponse!
+  createUser(userInput: CreationUserInput!): UserMutationResponse!
 
   # Updates an existing User
-  updateUser(id: ID, updateUserInput: UpdateUserInput) : UserMutationResponse!
+  updateUser(id: ID!, updateUserInput: UpdateUserInput!) : UserMutationResponse!
 
   # Updates a User's photos or photo bank
-  updateUserPhotos(updateUserPhotosInput: UpdateUserPhotosInput): UserMutationResponse!
+  updateUserPhotos(updateUserPhotosInput: UpdateUserPhotosInput!): UserMutationResponse!
 }
 `;
 
@@ -39,7 +39,7 @@ input GetUserInput{
   # The Firebase generated token
   firebaseToken: String!
 
-  #The UID of the Fireabse user
+  # The UID of the Firebase user
   firebaseAuthID: String!
 }
 `;
@@ -86,6 +86,8 @@ input CreationUserInput{
 
 const updateUserInputs = `
 input UpdateUserInput {
+  # you only need to pass in fields you want to update
+
   age: Int
   birthdate: String
   email: String

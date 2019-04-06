@@ -14,13 +14,13 @@ extend type Mutation {
   # Creates Match Request between Users
   createMatchRequest(requestInput: CreateMatchRequestInput!): MatchMutationResponse!
 
-  # TODO: Document
+  # user with id user_id is accepting the match with match_id
   acceptRequest(user_id: ID!, match_id: ID!): MatchMutationResponse!
 
-  # TODO: Document
+  # user with id user_id is rejecting the match with match_id
   rejectRequest(user_id: ID!, match_id: ID!): MatchMutationResponse!
 
-  # TODO: Document
+  # user with id user_id is unmatching match with match_id, for reason
   unmatch(user_id: ID!, match_id: ID!, reason: String): MatchMutationResponse!
 }
 `;

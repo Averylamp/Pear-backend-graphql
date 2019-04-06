@@ -26,8 +26,9 @@ type DiscoveryQueue{
   user_id: ID!
   user: User
 
-  historyDiscoveryItems: [DiscoveryItem!]!
-  currentDiscoveryItems: [DiscoveryItem!]!
+  # i think we should plan for the case that discovery generation gives us nulls
+  historyDiscoveryItems: [DiscoveryItem]!
+  currentDiscoveryItems: [DiscoveryItem]!
 }
 
 type DiscoveryItem {

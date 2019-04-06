@@ -28,6 +28,8 @@ type UserProfile {
 
 const editUserProfileType = `
 input EditUserProfileInput {
+  # only include fields you want to update
+
   # id of the profile being edited
   _id: ID!
   # The creator's User Object ID
@@ -43,10 +45,10 @@ input EditUserProfileInput {
 const mutationRoutes = `
 extend type Mutation {
   # edit the user profile. the creatorUser_id must be the creator of the profile
-  editUserProfile(editUserProfileInput: EditUserProfileInput!): UserProfileMutationResponse
+  editUserProfile(editUserProfileInput: EditUserProfileInput!): UserProfileMutationResponse!
 
   # deletes the user profile. user_id must be either the underlying user or the creator
-  deleteUserProfile(user_id: ID!, userProfile_id: ID!): UserProfileMutationResponse
+  deleteUserProfile(user_id: ID!, userProfile_id: ID!): UserProfileMutationResponse!
 }
 `;
 
