@@ -14,7 +14,7 @@ import {
 import {
   ALREADY_MADE_PROFILE,
   APPROVE_PROFILE_ERROR, CANT_ENDORSE_YOURSELF,
-  CREATE_DETACHED_PROFILE_ERROR, DELETE_DETACHED_PROFILE_ERROR,
+  CREATE_DETACHED_PROFILE_ERROR, DELETE_DETACHED_PROFILE_ERROR, GET_DETACHED_PROFILE_ERROR,
   GET_USER_ERROR, VIEW_DETACHED_PROFILE_ERROR, WRONG_CREATOR_ERROR,
 } from './ResolverErrorStrings';
 import { deleteDetachedProfile } from '../deletion/UserProfileDeletion';
@@ -316,7 +316,48 @@ export const resolvers = {
         };
       }
     },
-    approveNewDetachedProfile: async (_source, { user_id, detachedProfile_id, creatorUser_id }) => {
+    editDetachedProfile: async (_source, { editDetachedProfileInput }) => {
+      functionCallConsole('Edit Detached Profile Called');
+
+      const creator = await User.findById(editDetachedProfileInput.creatorUser_id)
+        .exec()
+        .catch(err => err);
+      let detachedProfile = await DetachedProfile.findById(editDetachedProfileInput._id)
+        .exec()
+        .catch(err => err);
+      if (!creator || creator instanceof Error) {
+        return {
+          success: false,
+          message: GET_USER_ERROR,
+        };
+      }
+      if (!detachedProfile || detachedProfile instanceof Error) {
+        return {
+          success: false,
+          message: GET_DETACHED_PROFILE_ERROR,
+        };
+      }
+      if (detachedProfile.creatorUser_id.toString() !== creator._id.toString()) {
+        return {
+          success: false,
+          message: WRONG_CREATOR_ERROR,
+        };
+      }
+
+      detachedProfile = Object.assign(detachedProfile, editDetachedProfileInput);
+      detachedProfile.status = 'waitingUnseen';
+      detachedProfile = await detachedProfile.save();
+      return {
+        success: true,
+        detachedProfile,
+      };
+    },
+    approveNewDetachedProfile: async (_source, {
+      user_id,
+      detachedProfile_id,
+      creatorUser_id,
+      userProfile_id,
+    }) => {
       functionCallConsole('Approve Profile Called');
 
       // TODO: Handle error
@@ -327,7 +368,7 @@ export const resolvers = {
           creator_id: creatorUser_id,
         },
       );
-      const profileId = mongoose.Types.ObjectId();
+      const profileId = userProfile_id || mongoose.Types.ObjectId();
       const userProfileInput = {
         _id: profileId,
         creatorUser_id: creator._id,
