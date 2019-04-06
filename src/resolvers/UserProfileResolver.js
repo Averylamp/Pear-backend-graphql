@@ -1,12 +1,50 @@
 import { User } from '../models/UserModel';
 import { UserProfile } from '../models/UserProfileModel';
-import { DELETE_USER_PROFILE_ERROR, GET_USER_ERROR } from './ResolverErrorStrings';
+import {
+  DELETE_USER_PROFILE_ERROR,
+  GET_USER_ERROR, GET_USER_PROFILE_ERROR, WRONG_CREATOR_ERROR,
+} from './ResolverErrorStrings';
 import { deleteUserProfile } from '../deletion/UserProfileDeletion';
 
 const functionCallConsole = require('debug')('dev:FunctionCalls');
 
 export const resolvers = {
   Mutation: {
+    editUserProfile: async (_source, { editUserProfileInput }) => {
+      functionCallConsole('Edit User Profile Called');
+
+      const creator = await User.findById(editUserProfileInput.creatorUser_id)
+        .exec()
+        .catch(err => err);
+      let userProfile = await UserProfile.findById(editUserProfileInput._id)
+        .exec()
+        .catch(err => err);
+      if (!creator || creator instanceof Error) {
+        return {
+          success: false,
+          message: GET_USER_ERROR,
+        };
+      }
+      if (!userProfile || userProfile instanceof Error) {
+        return {
+          success: false,
+          message: GET_USER_PROFILE_ERROR,
+        };
+      }
+      if (userProfile.creatorUser_id.toString() !== creator._id.toString()) {
+        return {
+          success: false,
+          message: WRONG_CREATOR_ERROR,
+        };
+      }
+
+      userProfile = Object.assign(userProfile, editUserProfileInput);
+      userProfile = await userProfile.save();
+      return {
+        success: true,
+        userProfile,
+      };
+    },
     deleteUserProfile: async (_source, { user_id, userProfile_id }) => {
       functionCallConsole('deleteUserProfile called');
       const user = await User.findById(user_id)
