@@ -9,7 +9,13 @@ import {
   sendPersonalRequests,
   sendMatchmakerRequests,
   acceptRequests,
-  rejectRequests, unmatches, updateFeeds, viewDetachedProfiles, updateUsers,
+  rejectRequests,
+  unmatches,
+  updateFeeds,
+  viewDetachedProfiles,
+  updateUsers,
+  editUserProfiles,
+  editDetachedProfiles,
 } from './CreateTestDB';
 import {
   ACCEPT_REQUEST,
@@ -19,7 +25,12 @@ import {
   CREATE_MATCH_REQUEST,
   REJECT_REQUEST,
   UNMATCH,
-  FORCE_FEED_UPDATE, VIEW_DETACHED_PROFILE, UPDATE_DISPLAYED_PHOTOS, UPDATE_USER,
+  FORCE_FEED_UPDATE,
+  VIEW_DETACHED_PROFILE,
+  UPDATE_DISPLAYED_PHOTOS,
+  UPDATE_USER,
+  EDIT_USER_PROFILE,
+  EDIT_DETACHED_PROFILE,
 } from './Mutations';
 import {
   MONGO_URL,
@@ -202,6 +213,23 @@ export const runTests = async function runTests() {
       }
       successLog('***** Success Viewing Detached Profiles *****\n');
 
+      testLog('TESTING: Editing Detached Profiles');
+      for (const editDetachedProfileVars of editDetachedProfiles) {
+        try {
+          const result = await mutate({
+            mutation: EDIT_DETACHED_PROFILE,
+            variables: editDetachedProfileVars,
+          });
+          if (verbose) {
+            verboseDebug(result);
+          }
+          checkForAndLogErrors(result, 'editDetachedProfile');
+        } catch (e) {
+          errorLog((`${e}`));
+          process.exit(1);
+        }
+      }
+      successLog('***** Success Editing Detached Profiles *****\n');
 
       // UPDATING USER PROFILES
       testLog('TESTING: Updating User Images');
@@ -393,6 +421,20 @@ export const runTests = async function runTests() {
         }
         successLog('***** Success Unmatching *****\n');
       }
+
+      testLog('TESTING: Editing user profiles');
+      for (const editVars of editUserProfiles) {
+        try {
+          const result = await mutate(({
+            mutation: EDIT_USER_PROFILE,
+            variables: editVars,
+          }));
+          checkForAndLogErrors(result, 'editUserProfile');
+        } catch (e) {
+          errorLog((`Error: ${e.toString()}`));
+        }
+      }
+      successLog('***** Success Editing User Profiles *****\n');
 
 
       const line = '****************************************\n';

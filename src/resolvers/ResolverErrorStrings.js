@@ -1,4 +1,6 @@
 export const GET_USER_ERROR = 'Failed to find user.';
+export const GET_DETACHED_PROFILE_ERROR = 'Failed to find profile.';
+export const GET_USER_PROFILE_ERROR = 'Failed to find profile.';
 export const CREATE_USER_ERROR = 'Failed to initialize user.';
 export const UPDATE_USER_ERROR = 'Couldn\'t update user.';
 export const UPDATE_USER_PHOTOS_ERROR = 'Failed to update photos.';
