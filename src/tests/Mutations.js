@@ -68,9 +68,40 @@ export const VIEW_DETACHED_PROFILE = gql`
   }
 `;
 
+export const EDIT_DETACHED_PROFILE = gql`
+  mutation EditDetachedProfile($editDetachedProfileInput: EditDetachedProfileInput!) {
+    editDetachedProfile(editDetachedProfileInput: $editDetachedProfileInput) {
+      success
+      message
+      detachedProfile {
+        _id
+        creatorUser_id
+        creatorFirstName
+        firstName
+        status
+        bio
+        dos
+        donts
+        images {
+          imageID
+          uploadedByUser {
+            firstName
+          }
+        }
+        matchingDemographics {
+          location {
+            coords
+            locationName
+          }
+        }
+      }
+    }
+  }
+`;
+
 export const ATTACH_DETACHED_PROFILE = gql`
-  mutation ApproveNewDetachedProfile($user_id: ID!, $detachedProfile_id: ID!, $creatorUser_id: ID!) {
-    approveNewDetachedProfile(user_id: $user_id, detachedProfile_id: $detachedProfile_id, creatorUser_id: $creatorUser_id) {
+  mutation ApproveNewDetachedProfile($user_id: ID!, $detachedProfile_id: ID!, $creatorUser_id: ID!, $userProfile_id: ID) {
+    approveNewDetachedProfile(user_id: $user_id, detachedProfile_id: $detachedProfile_id, creatorUser_id: $creatorUser_id, userProfile_id: $userProfile_id) {
       success
       message
       user {
@@ -275,6 +306,20 @@ export const UNMATCH = gql`
         unmatched
         unmatchedBy_id
         unmatchedReason
+      }
+    }
+  }
+`;
+
+export const EDIT_USER_PROFILE = gql`
+  mutation EditUserProfile($editUserProfileInput: EditUserProfileInput!) {
+    editUserProfile(editUserProfileInput: $editUserProfileInput) {
+      success
+      message
+      userProfile {
+        _id
+        creatorUser_id
+        creatorFirstName
       }
     }
   }

@@ -24,7 +24,11 @@ extend type Mutation{
   viewDetachedProfile(user_id: ID! detachedProfile_id: ID!): DetachedProfileMutationResponse!
   
   # updates status of existing detached profile, converts it into a User Profile and attaches the user profile to both the creator's and user's User Object
-  approveNewDetachedProfile(user_id: ID!, detachedProfile_id: ID!, creatorUser_id: ID!): UserMutationResponse!
+  # ID is optional, for testing only
+  approveNewDetachedProfile(user_id: ID!, detachedProfile_id: ID!, creatorUser_id: ID!, userProfile_id: ID): UserMutationResponse!
+  
+  # creator can edit the detached profile
+  editDetachedProfile(editDetachedProfileInput: EditDetachedProfileInput!): DetachedProfileMutationResponse!
   
   # deletes the detached profile
   deleteDetachedProfile(creator_id: ID!, detachedProfile_id: ID!): DetachedProfileMutationResponse
@@ -49,6 +53,21 @@ input CreationDetachedProfileInput {
   images: [CreateImageContainer!]!
   location: [Float!]!
   locationName: String
+}
+`;
+
+const editDetachedProfileInput = `
+input EditDetachedProfileInput {
+  # id of the profile being edited
+  _id: ID!
+  # The creator's User Object ID
+  creatorUser_id: ID!
+  interests: [String!]
+  vibes: [String!]
+  bio: String
+  dos: [String!]
+  donts: [String!]
+  images: [CreateImageContainer!]
 }
 `;
 
@@ -95,6 +114,7 @@ type DetachedProfileMutationResponse{
 export const typeDef = queryRoutes
 + mutationRoutes
 + createDetachedProfileInput
++ editDetachedProfileInput
 + detachedProfileType
 + detachedProfileMutationResponse;
 
