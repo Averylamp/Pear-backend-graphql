@@ -24,7 +24,7 @@
        "NODE_ENV": "production",
        "APP_NAME":"Pear Prod GraphQL Server",
        "APP_ENV":"prod",
-       "DEBUG":"prod*,error*",
+       "DEBUG":"prod*,error*,dev:FunctionCall*",
        "DEV":"false",
        "REGEN_DB":"false",
        "PERF":"false",
