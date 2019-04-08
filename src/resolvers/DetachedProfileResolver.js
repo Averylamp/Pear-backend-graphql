@@ -343,6 +343,13 @@ export const resolvers = {
           message: WRONG_CREATOR_ERROR,
         };
       }
+      if (detachedProfile.userProfile_id || detachedProfile.status === 'accepted') {
+        // edits don't happen if detached profile has already been approved
+        return {
+          success: true,
+          detachedProfile,
+        };
+      }
 
       detachedProfile = Object.assign(detachedProfile, editDetachedProfileInput);
       detachedProfile.status = 'waitingUnseen';
