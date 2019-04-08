@@ -53,6 +53,8 @@ input CreationDetachedProfileInput {
   images: [CreateImageContainer!]!
   location: [Float!]!
   locationName: String
+  school: String
+  schoolYear: String
 }
 `;
 
@@ -68,6 +70,8 @@ input EditDetachedProfileInput {
   dos: [String!]
   donts: [String!]
   images: [CreateImageContainer!]
+  school: String
+  schoolYear: String
 }
 `;
 
@@ -90,6 +94,8 @@ type DetachedProfile {
   images: [ImageContainer!]!
   userProfile_id: ID
   userProfile: UserProfile
+  school: String
+  schoolYear: String
 
   matchingDemographics: MatchingDemographics!
   matchingPreferences: MatchingPreferences!
@@ -140,6 +146,8 @@ const DetachedProfileSchema = new Schema({
   bio: { type: String, required: true, default: '' },
   dos: { type: [String], required: true, default: [] },
   donts: { type: [String], required: true, default: [] },
+  school: { type: String, required: false },
+  schoolYear: { type: String, required: false },
   images: { type: [ImageContainerSchema], required: true, default: [] },
   matchingDemographics: {
     type: MatchingDemographicsSchema,

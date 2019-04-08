@@ -138,6 +138,8 @@ export const resolvers = {
         'bio',
         'dos',
         'donts',
+        'school',
+        'schoolYear',
         'images',
         'matchingDemographics',
         'matchingPreferences',
