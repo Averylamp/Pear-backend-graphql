@@ -41,6 +41,7 @@ export const CREATE_BRIAN_USER_VARIABLES = {
     // facebookAccessToken: '4',
     thumbnailURL: '',
     location: [-71.101366, 42.362580],
+    referredByCode: 'Testcode123',
   },
 };
 
