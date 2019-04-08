@@ -20,7 +20,7 @@ const generateReferralCode = async (firstName, maxIters = 20) => {
   const numeric = '0123456789';
   const alphanumeric = '0123456789abcdefghijklmnopqrstuvwxyz';
   let flag = true;
-  let code = '';
+  let code = null;
   let count = 0;
   while (flag && count < maxIters) {
     count += 1;
@@ -141,7 +141,10 @@ export const resolvers = {
         finalUserInput.matchingDemographics.locationName = { name: userInput.locationName };
         finalUserInput.matchingPreferences.locationName = { name: userInput.locationName };
       }
-      finalUserInput.referralCode = await generateReferralCode(userInput.firstName);
+      const referralCode = await generateReferralCode(userInput.firstName);
+      if (referralCode) {
+        finalUserInput.referralCode = referralCode;
+      }
       const createUserObj = createUserObject(finalUserInput)
         .catch(err => err);
 
