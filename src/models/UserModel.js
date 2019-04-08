@@ -81,6 +81,9 @@ input CreationUserInput{
   
   # Optional firebase remote instance ID for push notifications
   firebaseRemoteInstanceID: String
+  
+  # referral codes, for tracking
+  referredByCode: String
 }
 `;
 
@@ -203,6 +206,10 @@ type User {
 
   # FOR TESTING ONLY:
   # edgeSummaries: [EdgeSummary!]!
+  
+  # referral codes
+  referredByCode: String
+  referralCode: String
 }
 
 `;
@@ -315,6 +322,14 @@ const UserSchema = new Schema({
   edgeSummaries: { type: [EdgeSummarySchema], required: true, default: [] },
 
   firebaseRemoteInstanceID: { type: String, required: false },
+
+  referredByCode: {
+    type: String, required: false, index: true, sparse: true,
+  },
+  referralCode: {
+    type: String, required: false, unique: true, index: true, sparse: true,
+  },
+
 }, { timestamps: true });
 
 UserSchema.virtual('fullName')
