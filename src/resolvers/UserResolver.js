@@ -16,6 +16,27 @@ const debug = require('debug')('dev:UserResolvers');
 const errorLog = require('debug')('error:UserResolver');
 const functionCallConsole = require('debug')('dev:FunctionCalls');
 
+const generateReferralCode = async (firstName, maxIters = 20) => {
+  const numeric = '0123456789';
+  const alphanumeric = '0123456789abcdefghijklmnopqrstuvwxyz';
+  let flag = true;
+  let code = '';
+  let count = 0;
+  while (flag && count < maxIters) {
+    count += 1;
+    code = firstName;
+    code += numeric[Math.floor(Math.random() * numeric.length)];
+    code += alphanumeric[Math.floor(Math.random() * alphanumeric.length)];
+    code += numeric[Math.floor(Math.random() * numeric.length)];
+    code += alphanumeric[Math.floor(Math.random() * alphanumeric.length)];
+    const findResult = await User.findOne({ referralCode: code });
+    if (!findResult) {
+      flag = false;
+    }
+  }
+  errorLog(code);
+  return code;
+};
 
 export const resolvers = {
   User: {
@@ -101,7 +122,8 @@ export const resolvers = {
         'facebookId',
         'facebookAccessToken',
         'thumbnailURL',
-        'firebaseRemoteInstanceID']);
+        'firebaseRemoteInstanceID',
+        'referredByCode']);
       finalUserInput._id = userObjectID;
       finalUserInput.discoveryQueue_id = discoveryQueueObjectID;
       const locationObj = {
@@ -119,6 +141,7 @@ export const resolvers = {
         finalUserInput.matchingDemographics.locationName = { name: userInput.locationName };
         finalUserInput.matchingPreferences.locationName = { name: userInput.locationName };
       }
+      finalUserInput.referralCode = await generateReferralCode(userInput.firstName);
       const createUserObj = createUserObject(finalUserInput)
         .catch(err => err);
 
