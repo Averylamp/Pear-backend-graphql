@@ -138,6 +138,8 @@ export const resolvers = {
         'bio',
         'dos',
         'donts',
+        'school',
+        'schoolYear',
         'images',
         'matchingDemographics',
         'matchingPreferences',
@@ -341,6 +343,13 @@ export const resolvers = {
         return {
           success: false,
           message: WRONG_CREATOR_ERROR,
+        };
+      }
+      if (detachedProfile.userProfile_id || detachedProfile.status === 'accepted') {
+        // edits don't happen if detached profile has already been approved
+        return {
+          success: true,
+          detachedProfile,
         };
       }
 
