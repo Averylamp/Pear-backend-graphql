@@ -43,7 +43,7 @@ export const CREATE_BRIAN1_DETACHED_PROFILE_VARIABLES = {
     bio: 'Seeking a guy who will treat you right???? Well look no further than BRIAN GU\nMIT math boi, currently Boston based.\n\nGreatest accomplishments: can outfit you with the thriving apparel line he runs out of his dorm 😎, runs a meme page with 20k+ likes, has a diversity of interests aka frisbee/boulder/tennis/travel.\nCONS: failed out of 6th grade Chinese school, you\'ll have to compete with his stuffed animals for attention',
     dos: ['be direct (he hates guessing)', 'ask him about Mass Tech', 'go out for any Asian food!'],
     donts: ['take him the movies on a first date'],
-    location: [-71.101366, 42.362580],
+    location: [42.3601, -71.0589],
   },
 };
 
