@@ -143,6 +143,7 @@ export const resolvers = {
         'images',
         'matchingDemographics',
         'matchingPreferences',
+        'seekingGender',
       ]);
       finalDetachedProfileInput._id = detachedProfileID;
       const locationObj = {
@@ -173,6 +174,15 @@ export const resolvers = {
           name: detachedProfileInput.locationName,
         };
       }
+      if (!detachedProfileInput.seekingGender) {
+        if (detachedProfileInput.gender === 'male') {
+          finalDetachedProfileInput.matchingPreferences.seekingGender = ['female'];
+        }
+        if (detachedProfileInput.gender === 'female') {
+          finalDetachedProfileInput.matchingPreferences.seekingGender = ['male'];
+        }
+      }
+
 
       // perform validation
       const { creatorUser_id } = detachedProfileInput;
