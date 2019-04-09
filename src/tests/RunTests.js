@@ -407,7 +407,7 @@ export const runTests = async function runTests() {
         });
         successLog('***** Success Sending Chats *****');
       } else {
-        errorLog('Error occurred sending chats: couldn\'t find match objs')
+        errorLog('Error occurred sending chats: couldn\'t find match objs');
       }
 
 
