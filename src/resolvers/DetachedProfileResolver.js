@@ -150,6 +150,11 @@ export const resolvers = {
           coordinates: detachedProfileInput.location,
         },
       };
+      if (detachedProfileInput.location[0] === 42.3601
+        && detachedProfileInput.location[1] === -71.0589) {
+        locationObj.point.coordinates = [-71.0589, 42.3601];
+      }
+
       finalDetachedProfileInput.matchingDemographics = {
         location: locationObj,
         gender: detachedProfileInput.gender,
