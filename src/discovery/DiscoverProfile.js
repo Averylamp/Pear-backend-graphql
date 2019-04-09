@@ -59,7 +59,7 @@ const getUserSatisfyingConstraints = async ({ constraints, demographics, blackli
       errorLog(err);
       throw err;
     });
-  if (users.length === 1) {
+  if (users.length > 0) {
     return users[0];
   }
   throw new Error('no users found in constraints');
