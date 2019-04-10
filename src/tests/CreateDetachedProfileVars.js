@@ -24,6 +24,7 @@ export const CREATE_AVERY1_DETACHED_PROFILE_VARIABLES = {
     dos: ['ask him about his new dating app', 'ask him to eat ramen with you'],
     donts: ['be too clingy - sometimes he needs his space!!', 'plan a date for before 1PM'],
     location: [-71.101366, 42.362580],
+    seekingGender: ['female'],
   },
 };
 
@@ -44,6 +45,7 @@ export const CREATE_BRIAN1_DETACHED_PROFILE_VARIABLES = {
     dos: ['be direct (he hates guessing)', 'ask him about Mass Tech', 'go out for any Asian food!'],
     donts: ['take him the movies on a first date'],
     location: [42.3601, -71.0589],
+    seekingGender: [],
   },
 };
 
@@ -63,6 +65,7 @@ export const CREATE_JOSH1_DETACHED_PROFILE_VARIABLES = {
     dos: ['ask him about dance', 'be intellectual (mans loves a good conversation)'],
     donts: ['try to go shot for shot with him (this man won\'t make it past three drinks)'],
     location: [-71.101366, 42.362580],
+    seekingGender: ['male'],
   },
 };
 
@@ -81,6 +84,7 @@ export const CREATE_SAMMI1_DETACHED_PROFILE_VARIABLES = {
     dos: ['CHECK OUT HER ART INSTA @ARTBYSAMMI it\'s 🔥🔥', 'be thoughtful', 'make the first move'],
     donts: ['just be looking for a hookup - she\'s not here for that'],
     location: [-71.101366, 42.362580],
+    seekingGender: [],
   },
 };
 
@@ -99,6 +103,7 @@ export const CREATE_SAMMI2_DETACHED_PROFILE_VARIABLES = {
     dos: ['ask her about her drawings (she\'s insta famous)', 'put effort into dates!'],
     donts: ['feed her peanuts (she\'s deathly allergic)'],
     location: [-71.101366, 42.362580],
+    seekingGender: ['male'],
   },
 };
 
@@ -117,6 +122,7 @@ export const CREATE_MADE1_DETACHED_PROFILE_VARIABLES = {
     dos: ['take her out somewhere nice', 'be a gentleman', 'buy her mint oreos, those are her FAVORITE'],
     donts: ['be an asshole or too full of yourself', 'be too forward'],
     location: [-71.101366, 42.362580],
+    seekingGender: ['male'],
   },
 };
 
@@ -128,13 +134,14 @@ export const CREATE_UMA1_DETACHED_PROFILE_VARIABLES = {
     firstName: 'Uma',
     phoneNumber: '9784296614',
     age: 21,
-    gender: 'female',
+    gender: 'nonbinary',
     interests: ['coding', 'writing', 'skiing', 'philosophy', 'poetry'],
     vibes: ['Just Add Water', 'Fruity Cutie'],
     bio: 'This girl has it all: beauty, brains, and of course a resume packed with the hottest tech companies 🤑🤑. She\'s ambitious and brilliant but is also super grounded and a 10/10 caring friend. Catch her while she\'s still single because this deal is LIMITED 👏 TIME 👏 ONLY',
     dos: ['be able to hold a conversation', 'tell her about your favorite books', 'go to the gym with her'],
     donts: ['play games', 'be intimidated by her - she won\'t bite!'],
     location: [-71.101366, 42.362580],
+    seekingGender: ['nonbinary', 'male', 'female'],
   },
 };
 
@@ -153,6 +160,7 @@ export const CREATE_SOPHIA1_DETACHED_PROFILE_VARIABLES = {
     dos: ['let her know when ur hungry because chances are she is too', 'have late night deep convos with her because she\'s a great listener and advice-giver'],
     donts: ['watch the bachelor without her', 'put beans in her nachos'],
     location: [-71.101366, 42.362580],
+    seekingGender: ['male', 'female'],
   },
 };
 
@@ -171,5 +179,6 @@ export const CREATE_SOPHIA2_DETACHED_PROFILE_VARIABLES = {
     dos: ['Take her to the movies! she\'s a bit of a movie junkie and loves a good horror flick too, so you won\'t have to give those up.'],
     donts: ['be late to a date! Sophia is the most punctual person I know'],
     location: [-71.101366, 42.362580],
+    seekingGender: [],
   },
 };
