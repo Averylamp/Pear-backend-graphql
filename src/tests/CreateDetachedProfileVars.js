@@ -122,7 +122,6 @@ export const CREATE_MADE1_DETACHED_PROFILE_VARIABLES = {
     dos: ['take her out somewhere nice', 'be a gentleman', 'buy her mint oreos, those are her FAVORITE'],
     donts: ['be an asshole or too full of yourself', 'be too forward'],
     location: [-71.101366, 42.362580],
-    seekingGender: ['male'],
   },
 };
 
@@ -179,6 +178,5 @@ export const CREATE_SOPHIA2_DETACHED_PROFILE_VARIABLES = {
     dos: ['Take her to the movies! she\'s a bit of a movie junkie and loves a good horror flick too, so you won\'t have to give those up.'],
     donts: ['be late to a date! Sophia is the most punctual person I know'],
     location: [-71.101366, 42.362580],
-    seekingGender: [],
   },
 };
