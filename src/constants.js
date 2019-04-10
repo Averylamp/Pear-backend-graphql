@@ -1,4 +1,4 @@
-export const MAX_FEED_LENGTH = 10;
+export const MAX_FEED_LENGTH = 6;
 
 export const INITIALIZED_FEED_LENGTH = 3;
 
