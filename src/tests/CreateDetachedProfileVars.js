@@ -45,7 +45,6 @@ export const CREATE_BRIAN1_DETACHED_PROFILE_VARIABLES = {
     dos: ['be direct (he hates guessing)', 'ask him about Mass Tech', 'go out for any Asian food!'],
     donts: ['take him the movies on a first date'],
     location: [42.3601, -71.0589],
-    seekingGender: [],
   },
 };
 
