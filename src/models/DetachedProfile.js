@@ -55,6 +55,7 @@ input CreationDetachedProfileInput {
   locationName: String
   school: String
   schoolYear: String
+  seekingGender: [Gender!]!
 }
 `;
 
