@@ -28,6 +28,7 @@ const canMakeProfileForSelf = [
   '9738738225',
   '2067789236',
   '6196160848',
+  '9165290384',
 ];
 
 const getAndValidateUsersAndDetachedProfileObjects = async ({
@@ -143,7 +144,6 @@ export const resolvers = {
         'images',
         'matchingDemographics',
         'matchingPreferences',
-        'seekingGender',
       ]);
       finalDetachedProfileInput._id = detachedProfileID;
       const locationObj = {
@@ -165,6 +165,7 @@ export const resolvers = {
         location: locationObj,
         minAgeRange: Math.max(detachedProfileInput.age - 3, 18),
         maxAgeRange: Math.min(detachedProfileInput.age + 3, 100),
+        seekingGender: detachedProfileInput.seekingGender,
       };
       if (detachedProfileInput.locationName) {
         finalDetachedProfileInput.matchingDemographics.locationName = {
@@ -174,12 +175,17 @@ export const resolvers = {
           name: detachedProfileInput.locationName,
         };
       }
-      if (!detachedProfileInput.seekingGender) {
+
+      // Set defaults for gender preference if not specified
+      if (!finalDetachedProfileInput.matchingPreferences.seekingGender) {
         if (detachedProfileInput.gender === 'male') {
           finalDetachedProfileInput.matchingPreferences.seekingGender = ['female'];
         }
         if (detachedProfileInput.gender === 'female') {
           finalDetachedProfileInput.matchingPreferences.seekingGender = ['male'];
+        }
+        if (detachedProfileInput.gender === 'nonbinary') {
+          finalDetachedProfileInput.matchingPreferences.seekingGender = ['nonbinary', 'male', 'female'];
         }
       }
 
