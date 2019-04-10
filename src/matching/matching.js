@@ -11,7 +11,6 @@ import {
   sendMatchAcceptedPushNotification,
   sendMatchAcceptedServerMessage, sendMatchmakerRequestMessage,
   sendMatchReceivedByPushNotification,
-  sendMatchRequestServerMessage,
   sendMatchSentForPushNotification, sendPersonalRequestMessage,
 } from '../FirebaseManager';
 import {
@@ -268,20 +267,12 @@ export const createNewMatch = async ({
       message: responseMessage,
     };
   }
-  // send server message to the new match object
-  await sendMatchRequestServerMessage({
-    chatID: firebaseId,
-    initiator: sentBy,
-    hasMatchmaker: matchmakerMade,
-  });
   if (matchmakerMade) {
-    if (requestText) {
-      sendMatchmakerRequestMessage({
-        chatID: firebaseId,
-        sentBy,
-        requestText,
-      });
-    }
+    sendMatchmakerRequestMessage({
+      chatID: firebaseId,
+      sentBy,
+      requestText: requestText || '',
+    });
     const endorsementChatId = profile.firebaseChatDocumentID;
     notifyEndorsementChatNewRequest({
       chatID: endorsementChatId,
@@ -293,11 +284,11 @@ export const createNewMatch = async ({
       sentBy,
       sentFor,
     });
-  } else if (requestText) {
+  } else {
     sendPersonalRequestMessage({
       chatID: firebaseId,
       sentBy,
-      requestText,
+      requestText: requestText || '',
     });
   }
   sendMatchReceivedByPushNotification({ receivedBy });
