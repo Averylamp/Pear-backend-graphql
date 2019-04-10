@@ -43,26 +43,8 @@ export const resolvers = {
     profileObjs: async ({ profile_ids }) => UserProfile.find({ _id: { $in: profile_ids } }),
     endorsedProfileObjs: async ({ endorsedProfile_ids }) => UserProfile
       .find({ _id: { $in: endorsedProfile_ids } }),
-    detachedProfile_ids: async ({ detachedProfile_ids }) => {
-      const unaccepted = await DetachedProfile.find({
-        _id: { $in: detachedProfile_ids },
-        status: { $ne: 'accepted' },
-      }).exec().catch(err => err);
-      if (unaccepted instanceof Error) {
-        return [];
-      }
-      return unaccepted.map(dp => dp._id);
-    },
-    detachedProfileObjs: async ({ detachedProfile_ids }) => {
-      const unaccepted = await DetachedProfile.find({
-        _id: { $in: detachedProfile_ids },
-        status: { $ne: 'accepted' },
-      }).exec().catch(err => err);
-      if (unaccepted instanceof Error) {
-        return [];
-      }
-      return unaccepted;
-    },
+    detachedProfileObjs: async ({ detachedProfile_ids }) => DetachedProfile
+      .find({ _id: { $in: detachedProfile_ids } }),
     discoveryQueueObj: async ({ discoveryQueue_id }) => DiscoveryQueue.findById(discoveryQueue_id),
     blockedUsers: async ({ blockedUser_ids }) => User.find({ _id: { $in: blockedUser_ids } }),
     requestedMatches: async ({ requestedMatch_ids }) => Match
