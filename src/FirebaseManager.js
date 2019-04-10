@@ -179,21 +179,6 @@ export const sendNewEndorsementMessage = async ({ chatID, endorser, endorsee }) 
   });
 };
 
-export const sendMatchRequestServerMessage = async ({ chatID, initiator, hasMatchmaker }) => {
-  const paramsToMessage = ({ u, matchmaker }) => (matchmaker
-    ? `${u.firstName} sent both of you a match request.`
-    : `${u.firstName} sent a match request.`);
-  const params = {
-    u: initiator,
-    matchmaker: hasMatchmaker,
-  };
-  return sendMessage({
-    chatID,
-    messageType: 'SERVER_MESSAGE',
-    content: paramsToMessage(params),
-  });
-};
-
 export const notifyEndorsementChatNewRequest = async ({
   chatID, sentBy, sentFor, receivedBy,
 }) => {
