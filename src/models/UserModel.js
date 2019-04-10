@@ -174,9 +174,9 @@ type User {
   # All Created and Attached Profiles for a user
   endorsedProfileObjs: [UserProfile!]!
 
-  # All UNACCEPTED Detached Profile IDs for a user
+  # All Detached Profile IDs for a user
   detachedProfile_ids: [ID!]!
-  # All UNACCEPTED Detached Profiles for a user
+  # All Detached Profiles for a user
   detachedProfileObjs: [DetachedProfile!]!
 
   # metainfo about matchmaker chats
