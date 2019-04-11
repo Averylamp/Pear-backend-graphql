@@ -379,7 +379,7 @@ export const runTests = async function runTests() {
 
       testLog('TESTING: Sending Chat Messages');
       const match1 = await Match.findById('5c82162afec46c84e0000000');
-      const match3 = await Match.findById('5c82162afec46c84e0000002');
+      const match3 = await Match.findById('5c82162afec46c84e0000003');
       await sendMessage({
         chatID: match1.firebaseChatDocumentID,
         messageType: 'USER_MESSAGE',
