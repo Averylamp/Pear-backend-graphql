@@ -12,6 +12,7 @@ import {
   sendNewEndorsementMessage, sendProfileApprovedPushNotification,
 } from '../FirebaseManager';
 import {
+  ALREADY_APPROVED_PROFILE,
   ALREADY_MADE_PROFILE,
   APPROVE_PROFILE_ERROR, CANT_ENDORSE_YOURSELF,
   CREATE_DETACHED_PROFILE_ERROR, DELETE_DETACHED_PROFILE_ERROR, GET_DETACHED_PROFILE_ERROR,
@@ -398,6 +399,12 @@ export const resolvers = {
           creator_id: creatorUser_id,
         },
       );
+      if (detachedProfile.userProfile_id) {
+        return {
+          success: false,
+          message: ALREADY_APPROVED_PROFILE,
+        };
+      }
       const profileId = userProfile_id || mongoose.Types.ObjectId();
       const userProfileInput = {
         _id: profileId,
