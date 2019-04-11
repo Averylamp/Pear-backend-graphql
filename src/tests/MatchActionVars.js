@@ -85,6 +85,11 @@ export const ACCEPT_REQUEST_4_1_VARIABLES = {
   match_id: MATCH4_ID,
 };
 
+export const ACCEPT_REQUEST_4_2_VARIABLES = {
+  user_id: AVERY_ID,
+  match_id: MATCH4_ID,
+};
+
 export const REJECT_REQUEST_4_2_VARIABLES = {
   user_id: AVERY_ID,
   match_id: MATCH4_ID,
