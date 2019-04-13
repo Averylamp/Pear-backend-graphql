@@ -21,6 +21,7 @@ export const CREATE_AVERY_USER_VARIABLES = {
     // facebookAccessToken: '2',
     thumbnailURL: 'https://platform-lookaside.fbsbx.com/platform/profilepic/?asid=2110109769065310&height=300&width=300&ext=1556961773&hash=AeQthY3WpTN3wZ5M',
     location: [-71.101366, 42.362580],
+    seeded: true,
   },
 };
 
@@ -87,6 +88,7 @@ export const CREATE_JOSH_USER_VARIABLES = {
     // facebookAccessToken: '4',
     thumbnailURL: '',
     location: [-71.332174, 42.299819],
+    seeded: true,
   },
 };
 
@@ -173,5 +175,6 @@ export const CREATE_SOPHIA_USER_VARIABLES = {
     // facebookAccessToken: '4',
     thumbnailURL: '',
     location: [-71.116492, 42.373999],
+    seeded: true,
   },
 };

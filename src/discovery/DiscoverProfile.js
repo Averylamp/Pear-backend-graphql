@@ -3,66 +3,143 @@ import { User } from '../models/UserModel';
 import { UserProfile } from '../models/UserProfileModel';
 import { DetachedProfile } from '../models/DetachedProfile';
 import { DiscoveryItem, DiscoveryQueue } from '../models/DiscoveryQueueModel';
-import { EXPECTED_TICKS_PER_NEW_PROFILE, MAX_FEED_LENGTH } from '../constants';
+import { EXPECTED_TICKS_PER_NEW_PROFILE, FUZZY_SCHOOL_LIST, MAX_FEED_LENGTH } from '../constants';
 
 const debug = require('debug')('dev:DiscoverProfile');
 const errorLog = require('debug')('error:DiscoverProfile');
 
+const getSeededUserPipeline = ({ constraints, demographics, blacklist }) => ([
+  {
+    $match: {
+      isSeeking: true,
+      seeded: true,
+      'matchingDemographics.gender': {
+        $in: constraints.seekingGender,
+      },
+      'matchingPreferences.seekingGender': demographics.gender,
+      _id: {
+        $nin: blacklist,
+      },
+      profileCount: {
+        $gte: 0,
+      },
+    },
+  },
+  {
+    $sample: {
+      size: 1,
+    },
+  },
+]);
+
+const getSeededSchoolUserPipeline = ({ constraints, demographics, blacklist }) => ([
+  {
+    $match: {
+      isSeeking: true,
+      'matchingDemographics.gender': {
+        $in: constraints.seekingGender,
+      },
+      'matchingPreferences.seekingGender': demographics.gender,
+      _id: {
+        $nin: blacklist,
+      },
+      school: {
+        $in: FUZZY_SCHOOL_LIST,
+      },
+      profileCount: {
+        $gte: 0,
+      },
+    },
+  },
+  {
+    $sample: {
+      size: 1,
+    },
+  },
+]);
 
 // gets a user u such that:
 // u's demographics satisfies constraints
 // demographics satisfies u's constraints
 // u is not in the blacklist
-// throws error if can't find a user satisfying the above
-const getUserSatisfyingConstraints = async ({ constraints, demographics, blacklist }) => {
-  debug(`Blacklist contains: ${blacklist}`);
-  const users = await User.aggregate([
-    {
-      $match: {
-        isSeeking: true,
-        'matchingDemographics.gender': {
-          $in: constraints.seekingGender,
-        },
-        'matchingDemographics.age': {
-          $lte: constraints.maxAgeRange,
-          $gte: constraints.minAgeRange,
-        },
-        'matchingDemographics.location.point': {
-          $geoWithin: {
-            $centerSphere: [
-              constraints.location.point.coordinates,
-              constraints.maxDistance / 3963.2],
-          },
-        },
-        'matchingPreferences.seekingGender': demographics.gender,
-        'matchingPreferences.minAgeRange': {
-          $lte: demographics.age,
-        },
-        'matchingPreferences.maxAgeRange': {
-          $gte: demographics.age,
-        },
-        _id: {
-          $nin: blacklist,
-        },
-        profileCount: {
-          $gte: 0,
+// returns null if can't find a user satisfying the above
+const getUserSatisfyingConstraintsPipeline = ({ constraints, demographics, blacklist }) => ([
+  {
+    $match: {
+      isSeeking: true,
+      'matchingDemographics.gender': {
+        $in: constraints.seekingGender,
+      },
+      'matchingDemographics.age': {
+        $lte: constraints.maxAgeRange,
+        $gte: constraints.minAgeRange,
+      },
+      'matchingDemographics.location.point': {
+        $geoWithin: {
+          $centerSphere: [
+            constraints.location.point.coordinates,
+            constraints.maxDistance / 3963.2],
         },
       },
-    },
-    {
-      $sample: {
-        size: 1,
+      'matchingPreferences.seekingGender': demographics.gender,
+      'matchingPreferences.minAgeRange': {
+        $lte: demographics.age,
+      },
+      'matchingPreferences.maxAgeRange': {
+        $gte: demographics.age,
+      },
+      _id: {
+        $nin: blacklist,
+      },
+      profileCount: {
+        $gte: 0,
       },
     },
-  ])
+  },
+  {
+    $sample: {
+      size: 1,
+    },
+  },
+]);
+
+const getUserSatisfyingGenderConstraintsPipeline = ({ constraints, demographics, blacklist }) => ([
+  {
+    $match: {
+      isSeeking: true,
+      'matchingDemographics.gender': {
+        $in: constraints.seekingGender,
+      },
+      'matchingPreferences.seekingGender': demographics.gender,
+      _id: {
+        $nin: blacklist,
+      },
+      profileCount: {
+        $gte: 0,
+      },
+    },
+  },
+  {
+    $sample: {
+      size: 1,
+    },
+  },
+]);
+
+const getUserForPipeline = async ({
+  constraints, demographics, blacklist, pipelineFn,
+}) => {
+  const users = await User
+    .aggregate(pipelineFn({ constraints, demographics, blacklist }))
     .catch((err) => {
       errorLog(err);
-      throw err;
+      return null;
     });
   if (users.length > 0) {
     return users[0];
   }
-  throw new Error('no users found in constraints');
+  errorLog('no users found in constraints');
+  return null;
 };
 
 // gets a summary object from a detached profile object
@@ -156,7 +233,9 @@ const getUserBlacklist = async ({ userObj }) => {
 
 // gets a user to put in user's discovery feed
 // returns null if we can't find a next user to put in the discovery feed
-export const nextDiscoveryItem = async ({ userObj }) => {
+export const nextDiscoveryItem = async ({
+  userObj, pipelineFn = getUserSatisfyingConstraintsPipeline,
+}) => {
   // blacklist includes several types of blocked users:
   // 0. the user themselves
   // 1. users already in user's discovery feed
@@ -230,6 +309,7 @@ export const nextDiscoveryItem = async ({ userObj }) => {
     }
 
     if (!summary || !summary.isSeeking) {
+      errorLog('not seeking');
       continue;
     }
 
@@ -238,12 +318,16 @@ export const nextDiscoveryItem = async ({ userObj }) => {
     debug(`Suggesting item for ${searchOrder[i].profileType}: ${item_id}`);
     summary.blacklist = [...new Set([...summary.blacklist, ...userBlacklist])];
     try {
-      const discoveredUser = await getUserSatisfyingConstraints({
+      const discoveredUser = await getUserForPipeline({
         constraints: summary.constraints,
         demographics: summary.demographics,
         blacklist: summary.blacklist,
+        pipelineFn,
       });
-      return discoveredUser;
+      if (discoveredUser) {
+        return discoveredUser;
+      }
+      errorLog(`Couldn't find profile in constraints for ${searchOrder[i].profileType}: ${item_id}`);
     } catch (err) {
       errorLog(err);
       errorLog(
@@ -252,7 +336,7 @@ export const nextDiscoveryItem = async ({ userObj }) => {
     }
   }
   errorLog(`No suggested discovery items for User: ${userObj._id}`);
-  throw Error(`Could not retrieve next discoveryitem for user: ${userObj._id}`);
+  return null;
 };
 
 // finds a suitable user for the passed-in user object's feed, and pushes to the user's feed object
@@ -260,26 +344,52 @@ export const nextDiscoveryItem = async ({ userObj }) => {
 // item, or if the update failed
 // TODO: Send a push notification to user through firebase
 export const updateDiscoveryWithNextItem = async ({ userObj }) => {
+  const discoveryQueue = await DiscoveryQueue.findOne({ user_id: userObj._id }).exec();
+  const pipelineFns = [
+    getSeededUserPipeline,
+    getSeededSchoolUserPipeline,
+    getUserSatisfyingConstraintsPipeline,
+    getUserSatisfyingGenderConstraintsPipeline,
+  ];
+  let index = 0;
+  if (discoveryQueue.historyDiscoveryItems.length < 15) {
+    index = 0;
+  } else if (discoveryQueue.historyDiscoveryItems.length < 25) {
+    index = 1;
+  } else {
+    index = 2;
+  }
+
   debug(`Getting next discovery item and updating user feed: ${userObj._id}`);
   if (!userObj || userObj.deactivated) {
     throw Error('User doesn\'t exist or is deactivated');
   }
-  const nextUser = await nextDiscoveryItem({ userObj });
+  let nextUser = null;
+  while (!nextUser && index < pipelineFns.length) {
+    nextUser = await nextDiscoveryItem({
+      userObj,
+      pipelineFn: pipelineFns[index],
+    });
+    index += 1;
+  }
 
-  debug(`Found and Adding user with id: ${nextUser._id}`);
-  return DiscoveryQueue
-    .findOneAndUpdate({ user_id: userObj._id }, {
-      $push: {
-        currentDiscoveryItems: {
-          $each: [new DiscoveryItem({ user_id: nextUser._id })],
-          $slice: -1 * MAX_FEED_LENGTH,
+  if (nextUser) {
+    debug(`Found and Adding user with id: ${nextUser._id}`);
+    return DiscoveryQueue
+      .findOneAndUpdate({ user_id: userObj._id }, {
+        $push: {
+          currentDiscoveryItems: {
+            $each: [new DiscoveryItem({ user_id: nextUser._id })],
+            $slice: -1 * MAX_FEED_LENGTH,
+          },
+          historyDiscoveryItems: {
+            $each: [new DiscoveryItem({ user_id: nextUser._id })],
+          },
         },
-        historyDiscoveryItems: {
-          $each: [new DiscoveryItem({ user_id: nextUser._id })],
-        },
-      },
-    }, { new: true })
-    .exec();
+      }, { new: true })
+      .exec();
+  }
+  throw new Error(`Couldn't find any discovery items for user ${userObj._id}`);
 };
 
 // finds a suitable user for the feed of the user corresponding to the passed-in user_id
