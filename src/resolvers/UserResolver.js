@@ -206,7 +206,11 @@ export const resolvers = {
           const regenTestDBMode = (process.env.REGEN_DB === 'true' && devMode);
           if (discoveryQueueObject.currentDiscoveryItems.length === 0 && !regenTestDBMode) {
             for (let i = 0; i < INITIALIZED_FEED_LENGTH; i += 1) {
-              await updateDiscoveryWithNextItem({ userObj: userObject });
+              try {
+                await updateDiscoveryWithNextItem({ userObj: userObject });
+              } catch (e) {
+                errorLog(`Error updating discovery: ${e}`);
+              }
             }
           }
           return {
