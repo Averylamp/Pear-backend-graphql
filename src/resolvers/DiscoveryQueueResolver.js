@@ -1,6 +1,8 @@
 import { User } from '../models/UserModel';
 import { DiscoveryQueue, DiscoveryItem } from '../models/DiscoveryQueueModel';
-import { updateDiscoveryForUserById } from '../discovery/DiscoverProfile';
+import {
+  updateDiscoveryForUserById,
+} from '../discovery/DiscoverProfile';
 import { FORCE_FEED_UPDATE_ERROR, FORCE_FEED_UPDATE_SUCCESS } from './ResolverErrorStrings';
 
 const debug = require('debug')('dev:DiscoveryQueueResolver');
@@ -50,19 +52,19 @@ export const resolvers = {
   DiscoveryQueue: {
     user: async ({ user_id }) => User.findById(user_id),
 
+    /*
     currentDiscoveryItems: async () => {
       const users = await User.find({
         $where: 'this.profile_ids.length > 0',
       }).sort({ updatedAt: -1 }).limit(30).exec();
       return users.map(({ _id }) => new DiscoveryItem({ user_id: _id }));
     },
-    /*
+    */
     // .reverse() reverses in place, so we want to use .slice()
     currentDiscoveryItems: async ({ currentDiscoveryItems }) => (
       currentDiscoveryItems.slice()
         .reverse()
     ),
-    */
   },
   DiscoveryItem: {
     user: async ({ user_id }) => (User.findById(user_id)),
