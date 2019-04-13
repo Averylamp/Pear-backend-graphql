@@ -21,8 +21,14 @@ export const resolvers = {
           currentDiscoveryItems: new DiscoveryItem({ user_id: addedUser_id }),
         },
       })
-      .then(() => ({ success: true, message: 'Successfully added to queue.' }))
-      .catch(err => ({ success: false, message: err.toString() })),
+      .then(() => ({
+        success: true,
+        message: 'Successfully added to queue.',
+      }))
+      .catch(err => ({
+        success: false,
+        message: err.toString(),
+      })),
     forceUpdateFeed: async (_, { user_id, numberOfItems = 1 }) => {
       for (let i = 0; i < numberOfItems; i += 1) {
         try {
@@ -43,14 +49,21 @@ export const resolvers = {
   },
   DiscoveryQueue: {
     user: async ({ user_id }) => User.findById(user_id),
+    /*
     currentDiscoveryItems: async () => {
       const users = await User.find({
         $where: 'this.profile_ids.length > 0',
       }).sort({ updatedAt: -1 }).limit(30).exec();
       return users.map(({ _id }) => new DiscoveryItem({ user_id: _id }));
     },
+    */
+    // .reverse() reverses in place, so we want to use .slice()
+    currentDiscoveryItems: async ({ currentDiscoveryItems }) => (
+      currentDiscoveryItems.slice()
+        .reverse()
+    ),
   },
   DiscoveryItem: {
-    user: async ({ user_id }) => User.findById(user_id),
+    user: async ({ user_id }) => (User.findById(user_id)),
   },
 };
