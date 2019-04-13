@@ -8,7 +8,6 @@ export const UPDATE_BRIAN_VARIABLES = {
     locationName: 'Boston',
     firebaseRemoteInstanceID: 'testasdf',
     school: 'M.I.T.',
-    isSeeking: false,
     schoolYear: '2020',
   },
 };
