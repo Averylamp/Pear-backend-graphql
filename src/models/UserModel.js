@@ -78,10 +78,10 @@ input CreationUserInput{
 
   # Option url for profile thumbnail
   thumbnailURL: String
-  
+
   # Optional firebase remote instance ID for push notifications
   firebaseRemoteInstanceID: String
-  
+
   # referral codes, for tracking
   referredByCode: String
 }
@@ -102,8 +102,8 @@ input UpdateUserInput {
   schoolYear: String
   isSeeking: Boolean
   deactivated: Boolean
-  
-  seekingGender: [String!]
+
+  seekingGender: [Gender!]
   maxDistance: Int
   minAgeRange: Int
   maxAgeRange: Int
@@ -114,7 +114,7 @@ input UpdateUserInput {
 
   # Option url for profile thumbnail
   thumbnailURL: String
-  
+
   # Optional firebase remote instance ID for push notifications
   firebaseRemoteInstanceID: String
 }
@@ -206,7 +206,7 @@ type User {
 
   # FOR TESTING ONLY:
   # edgeSummaries: [EdgeSummary!]!
-  
+
   # referral codes
   referredByCode: String
   referralCode: String
