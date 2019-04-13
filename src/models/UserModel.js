@@ -84,6 +84,9 @@ input CreationUserInput{
 
   # referral codes, for tracking
   referredByCode: String
+  
+  # seeded?
+  seeded: Boolean
 }
 `;
 
@@ -210,6 +213,9 @@ type User {
   # referral codes
   referredByCode: String
   referralCode: String
+  
+  # seeded profile? null is false
+  seeded: Boolean
 }
 
 `;
@@ -330,6 +336,9 @@ const UserSchema = new Schema({
     type: String, required: false, unique: true, index: true, sparse: true,
   },
 
+  seeded: {
+    type: Boolean, required: false, default: false,
+  },
 }, { timestamps: true });
 
 UserSchema.virtual('fullName')
