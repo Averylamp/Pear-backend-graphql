@@ -392,13 +392,24 @@ export const resolvers = {
       functionCallConsole('Approve Profile Called');
 
       // TODO: Handle error
-      const { user, detachedProfile, creator } = await getAndValidateUsersAndDetachedProfileObjects(
-        {
-          user_id,
-          detachedProfile_id,
-          creator_id: creatorUser_id,
-        },
-      );
+      let user = null;
+      let detachedProfile = null;
+      let creator = null;
+      try {
+        ({ user, detachedProfile, creator } = await getAndValidateUsersAndDetachedProfileObjects(
+          {
+            user_id,
+            detachedProfile_id,
+            creator_id: creatorUser_id,
+          },
+        ));
+      } catch (e) {
+        errorLog(`Error occurred validating dp and user objs: ${e}`);
+        return {
+          success: false,
+          message: APPROVE_PROFILE_ERROR,
+        };
+      }
       if (detachedProfile.userProfile_id) {
         return {
           success: false,
