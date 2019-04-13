@@ -83,7 +83,7 @@ export const CREATE_SAMMI1_DETACHED_PROFILE_VARIABLES = {
     dos: ['CHECK OUT HER ART INSTA @ARTBYSAMMI it\'s 🔥🔥', 'be thoughtful', 'make the first move'],
     donts: ['just be looking for a hookup - she\'s not here for that'],
     location: [-71.101366, 42.362580],
-    seekingGender: [],
+    seekingGender: ['male'],
   },
 };
 
@@ -139,7 +139,7 @@ export const CREATE_UMA1_DETACHED_PROFILE_VARIABLES = {
     dos: ['be able to hold a conversation', 'tell her about your favorite books', 'go to the gym with her'],
     donts: ['play games', 'be intimidated by her - she won\'t bite!'],
     location: [-71.101366, 42.362580],
-    seekingGender: ['nonbinary', 'male', 'female'],
+    seekingGender: ['male'],
   },
 };
 
@@ -158,7 +158,7 @@ export const CREATE_SOPHIA1_DETACHED_PROFILE_VARIABLES = {
     dos: ['let her know when ur hungry because chances are she is too', 'have late night deep convos with her because she\'s a great listener and advice-giver'],
     donts: ['watch the bachelor without her', 'put beans in her nachos'],
     location: [-71.101366, 42.362580],
-    seekingGender: ['male', 'female'],
+    seekingGender: ['male'],
   },
 };
 

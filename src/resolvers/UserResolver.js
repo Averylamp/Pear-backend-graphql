@@ -10,6 +10,8 @@ import {
   GET_USER_ERROR, UPDATE_USER_ERROR,
   UPDATE_USER_PHOTOS_ERROR,
 } from './ResolverErrorStrings';
+import { INITIALIZED_FEED_LENGTH } from '../constants';
+import { updateDiscoveryWithNextItem } from '../discovery/DiscoverProfile';
 
 const mongoose = require('mongoose');
 const debug = require('debug')('dev:UserResolvers');
@@ -17,18 +19,13 @@ const errorLog = require('debug')('error:UserResolver');
 const functionCallConsole = require('debug')('dev:FunctionCalls');
 
 const generateReferralCode = async (firstName, maxIters = 20) => {
-  const numeric = '0123456789';
-  const alphanumeric = '0123456789abcdefghijklmnopqrstuvwxyz';
   let flag = true;
   let code = null;
   let count = 0;
   while (flag && count < maxIters) {
     count += 1;
     code = firstName;
-    code += numeric[Math.floor(Math.random() * numeric.length)];
-    code += alphanumeric[Math.floor(Math.random() * alphanumeric.length)];
-    code += numeric[Math.floor(Math.random() * numeric.length)];
-    code += alphanumeric[Math.floor(Math.random() * alphanumeric.length)];
+    code += Math.floor(Math.random() * 900 + 100).toString();
     const findResult = await User.findOne({ referralCode: code });
     if (!findResult) {
       flag = false;
@@ -123,7 +120,9 @@ export const resolvers = {
         'facebookAccessToken',
         'thumbnailURL',
         'firebaseRemoteInstanceID',
-        'referredByCode']);
+        'referredByCode',
+        'seeded',
+      ]);
       finalUserInput._id = userObjectID;
       finalUserInput.discoveryQueue_id = discoveryQueueObjectID;
       const locationObj = {
@@ -137,6 +136,18 @@ export const resolvers = {
         age: userInput.age,
       };
       finalUserInput.matchingPreferences = { location: locationObj };
+      // Set defaults for gender preference if not specified
+      if (!finalUserInput.matchingPreferences.seekingGender) {
+        if (userInput.gender === 'male') {
+          finalUserInput.matchingPreferences.seekingGender = ['female'];
+        }
+        if (userInput.gender === 'female') {
+          finalUserInput.matchingPreferences.seekingGender = ['male'];
+        }
+        if (userInput.gender === 'nonbinary') {
+          finalUserInput.matchingPreferences.seekingGender = ['nonbinary', 'male', 'female'];
+        }
+      }
       if (userInput.locationName) {
         finalUserInput.matchingDemographics.locationName = { name: userInput.locationName };
         finalUserInput.matchingPreferences.locationName = { name: userInput.locationName };
@@ -157,7 +168,7 @@ export const resolvers = {
         .catch(err => err);
 
       return Promise.all([createUserObj, createDiscoveryQueueObj])
-        .then(([userObject, discoveryQueueObject]) => {
+        .then(async ([userObject, discoveryQueueObject]) => {
           if (userObject instanceof Error
             || discoveryQueueObject instanceof Error) {
             debug('error occurred while creating user');
@@ -189,6 +200,14 @@ export const resolvers = {
               success: false,
               message: CREATE_USER_ERROR,
             };
+          }
+          // initialize feed with some people
+          const devMode = process.env.DEV === 'true';
+          const regenTestDBMode = (process.env.REGEN_DB === 'true' && devMode);
+          if (discoveryQueueObject.currentDiscoveryItems.length === 0 && !regenTestDBMode) {
+            for (let i = 0; i < INITIALIZED_FEED_LENGTH; i += 1) {
+              await updateDiscoveryWithNextItem({ userObj: userObject });
+            }
           }
           return {
             success: true,
