@@ -7,13 +7,15 @@ import {
   ACCEPT_MATCH_REQUEST_ERROR, REJECT_MATCH_REQUEST_ERROR,
   SEND_MATCH_REQUEST_ERROR, UNMATCH_ERROR,
 } from './ResolverErrorStrings';
-import { errorStyling } from '../utils/logging';
 
 const debug = require('debug')('dev:MatchResolver');
 const errorLogger = require('debug')('error:MatchResolver');
-const functionCallLog = require('debug')('dev:FunctionCalls');
-
-const errorLog = log => errorLogger(errorStyling(log));
+//
+// const chalk = require('chalk');
+//
+// const errorStyling = chalk.red.bold;
+//
+// const errorLog = log => errorLogger(errorStyling(log));
 
 export const resolvers = {
   Query: {
@@ -24,11 +26,10 @@ export const resolvers = {
   },
   Mutation: {
     createMatchRequest: async (_source, { requestInput }) => {
-      functionCallLog('Create Match Request');
       try {
         return createNewMatch(requestInput);
       } catch (e) {
-        errorLog(`Error while creating match: ${e.toString()}`);
+        errorLogger(`Error while creating match: ${e}`);
         return {
           success: false,
           message: SEND_MATCH_REQUEST_ERROR,
@@ -36,11 +37,10 @@ export const resolvers = {
       }
     },
     acceptRequest: async (_source, { user_id, match_id }) => {
-      functionCallLog(`Accept Match Request: ${user_id} -> ${match_id}`);
       try {
         return decideOnMatch({ user_id, match_id, decision: 'accept' });
       } catch (e) {
-        errorLog(`Error occurred in accepting request: ${e.toString()}`);
+        errorLogger(`Error occurred in accepting request: ${e}`);
         return {
           success: false,
           message: ACCEPT_MATCH_REQUEST_ERROR,
@@ -48,11 +48,10 @@ export const resolvers = {
       }
     },
     rejectRequest: async (_source, { user_id, match_id }) => {
-      functionCallLog(`Reject Match Request: ${user_id} -> ${match_id}`);
       try {
         return decideOnMatch({ user_id, match_id, decision: 'reject' });
       } catch (e) {
-        errorLog(`Error occurred in rejecting request: ${e.toString()}`);
+        errorLogger(`Error occurred in rejecting request: ${e}`);
         return {
           success: false,
           message: REJECT_MATCH_REQUEST_ERROR,
@@ -60,7 +59,6 @@ export const resolvers = {
       }
     },
     unmatch: async (_source, { user_id, match_id, reason }) => {
-      functionCallLog(`Unmatch Match Request: ${user_id} -> ${match_id}`);
       try {
         // get and validate user and match objects
         const promisesResult = await getAndValidateUserAndMatchObjects({
@@ -151,7 +149,7 @@ export const resolvers = {
               debug(`Failed to rollback edge updates: ${e.toString()}`);
             }
           }
-          errorLog(`Error occurred unmatching: ${errorMessage}`);
+          errorLogger(`Error occurred unmatching: ${errorMessage}`);
           return {
             success: false,
             message: UNMATCH_ERROR,
@@ -162,7 +160,7 @@ export const resolvers = {
           match: matchUpdate,
         };
       } catch (e) {
-        errorLog(`Error occurred unmatching: ${e}`);
+        errorLogger(`Error occurred unmatching: ${e}`);
         return {
           success: false,
           message: UNMATCH_ERROR,
