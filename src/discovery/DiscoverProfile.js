@@ -415,7 +415,6 @@ export const updateAllDiscovery = async () => {
           updateDiscoveryWithNextItem({ userObj: user })
             .catch((err) => {
               errorLog(`An error occurred: ${err.toString()}`);
-              throw err;
             });
         }
       }
