@@ -12,6 +12,7 @@ export const DELETE_DETACHED_PROFILE_ERROR = 'Couldn\'t delete this profile.';
 export const CANT_ENDORSE_YOURSELF = 'Can\'t create a profile for yourself.';
 export const ALREADY_MADE_PROFILE = 'Already made a profile for this person.';
 export const APPROVE_PROFILE_ERROR = 'Couldn\'t approve this profile.';
+export const ALREADY_APPROVED_PROFILE = 'This profile has already been approved.';
 export const FORCE_FEED_UPDATE_ERROR = 'Couldn\'t update feed.';
 export const SEND_MATCH_REQUEST_ERROR = 'Couldn\'t send match request.';
 export const USERS_ALREADY_MATCHED_ERROR = 'These users have already been Peared!';

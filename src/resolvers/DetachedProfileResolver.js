@@ -12,6 +12,7 @@ import {
   sendNewEndorsementMessage, sendProfileApprovedPushNotification,
 } from '../FirebaseManager';
 import {
+  ALREADY_APPROVED_PROFILE,
   ALREADY_MADE_PROFILE,
   APPROVE_PROFILE_ERROR, CANT_ENDORSE_YOURSELF,
   CREATE_DETACHED_PROFILE_ERROR, DELETE_DETACHED_PROFILE_ERROR, GET_DETACHED_PROFILE_ERROR,
@@ -28,6 +29,7 @@ const canMakeProfileForSelf = [
   '9738738225',
   '2067789236',
   '6196160848',
+  '9165290384',
 ];
 
 const getAndValidateUsersAndDetachedProfileObjects = async ({
@@ -150,6 +152,11 @@ export const resolvers = {
           coordinates: detachedProfileInput.location,
         },
       };
+      if (detachedProfileInput.location[0] === 42.3601
+        && detachedProfileInput.location[1] === -71.0589) {
+        locationObj.point.coordinates = [-71.0589, 42.3601];
+      }
+
       finalDetachedProfileInput.matchingDemographics = {
         location: locationObj,
         gender: detachedProfileInput.gender,
@@ -159,6 +166,7 @@ export const resolvers = {
         location: locationObj,
         minAgeRange: Math.max(detachedProfileInput.age - 3, 18),
         maxAgeRange: Math.min(detachedProfileInput.age + 3, 100),
+        seekingGender: detachedProfileInput.seekingGender,
       };
       if (detachedProfileInput.locationName) {
         finalDetachedProfileInput.matchingDemographics.locationName = {
@@ -168,6 +176,20 @@ export const resolvers = {
           name: detachedProfileInput.locationName,
         };
       }
+
+      // Set defaults for gender preference if not specified
+      if (!finalDetachedProfileInput.matchingPreferences.seekingGender) {
+        if (detachedProfileInput.gender === 'male') {
+          finalDetachedProfileInput.matchingPreferences.seekingGender = ['female'];
+        }
+        if (detachedProfileInput.gender === 'female') {
+          finalDetachedProfileInput.matchingPreferences.seekingGender = ['male'];
+        }
+        if (detachedProfileInput.gender === 'nonbinary') {
+          finalDetachedProfileInput.matchingPreferences.seekingGender = ['nonbinary', 'male', 'female'];
+        }
+      }
+
 
       // perform validation
       const { creatorUser_id } = detachedProfileInput;
@@ -377,6 +399,12 @@ export const resolvers = {
           creator_id: creatorUser_id,
         },
       );
+      if (detachedProfile.userProfile_id) {
+        return {
+          success: false,
+          message: ALREADY_APPROVED_PROFILE,
+        };
+      }
       const profileId = userProfile_id || mongoose.Types.ObjectId();
       const userProfileInput = {
         _id: profileId,
