@@ -19,16 +19,11 @@ import {
   GET_USER_ERROR, VIEW_DETACHED_PROFILE_ERROR, WRONG_CREATOR_ERROR,
 } from './ResolverErrorStrings';
 import { deleteDetachedProfile } from '../deletion/UserProfileDeletion';
-import { successStyling, errorStyling } from '../utils/logging';
 
 const mongoose = require('mongoose');
 const debug = require('debug')('dev:DetachedProfileResolvers');
-const errorLogger = require('debug')('error:DetachedProfileResolvers');
-const successLogger = require('debug')('prod:DetachedProfileResolvers');
+const errorLog = require('debug')('error:DetachedProfileResolvers');
 const functionCallConsole = require('debug')('dev:FunctionCalls');
-
-const errorLog = log => errorLogger(errorStyling(log));
-const successLog = log => successLogger(successStyling(log));
 
 const canMakeProfileForSelf = [
   '9738738225',
@@ -102,7 +97,6 @@ const getAndValidateUsersAndDetachedProfileObjects = async ({
       throw new Error(`creator ${creator_id} has already made a profile for user ${user_id}`);
     }
   }
-  successLog(`Successfully created profile for user ${user_id}`);
   return {
     user,
     detachedProfile,
@@ -203,7 +197,6 @@ export const resolvers = {
         .exec()
         .catch(err => err);
       if (!creator) {
-        errorLog(`Failed to find the creator user ${creatorUser_id}`);
         return {
           success: false,
           message: GET_USER_ERROR,
@@ -243,7 +236,6 @@ export const resolvers = {
           };
         }
       } catch (e) {
-        errorLog(`Unknown Error creating detached profile: ${e.toString()}`);
         return {
           success: false,
           message: CREATE_DETACHED_PROFILE_ERROR,
@@ -314,8 +306,7 @@ export const resolvers = {
               }
             }
           } catch (e) {
-            errorLog(`error occurred when trying to populate discovery feed: ${e.toString()}`);
-            debug(`error occurred when trying to populate discovery feed: ${e.toString()}`);
+            debug(`error occurred when trying to populate discovery feed: ${e}`);
           }
           return {
             success: true,
@@ -342,7 +333,7 @@ export const resolvers = {
           detachedProfile: updatedDetachedProfile,
         };
       } catch (e) {
-        errorLog(`An error occurred viewing detached profile: ${e.toString()}`);
+        errorLog(`An error occurred viewing detached profile: ${e}`);
         return {
           success: false,
           message: VIEW_DETACHED_PROFILE_ERROR,
@@ -365,14 +356,12 @@ export const resolvers = {
         };
       }
       if (!detachedProfile || detachedProfile instanceof Error) {
-        errorLog(`Unable to find detached profile with ID: ${editDetachedProfileInput._id}`);
         return {
           success: false,
           message: GET_DETACHED_PROFILE_ERROR,
         };
       }
       if (detachedProfile.creatorUser_id.toString() !== creator._id.toString()) {
-        errorLog(`Creator ${editDetachedProfileInput._id} of detached profile ${editDetachedProfileInput._id} is incorrect`);
         return {
           success: false,
           message: WRONG_CREATOR_ERROR,
@@ -380,7 +369,6 @@ export const resolvers = {
       }
       if (detachedProfile.userProfile_id || detachedProfile.status === 'accepted') {
         // edits don't happen if detached profile has already been approved
-        errorLog('Approved profile cannot be edited');
         return {
           success: true,
           detachedProfile,
@@ -412,7 +400,6 @@ export const resolvers = {
         },
       );
       if (detachedProfile.userProfile_id) {
-        errorLog(`User already approved profile: ${detachedProfile.userProfile_id}`);
         return {
           success: false,
           message: ALREADY_APPROVED_PROFILE,
@@ -657,8 +644,8 @@ export const resolvers = {
               }
             }
           } catch (e) {
-            errorLog(`error occurred when trying to populate discovery feed: ${e.toString()}`);
-            debug(`error occurred when trying to populate discovery feed: ${e.toString()}`);
+            errorLog(`error occurred when trying to populate discovery feed: ${e}`);
+            debug(`error occurred when trying to populate discovery feed: ${e}`);
           }
           // send the server message to the endorsement chat. it's mostly ok if this silent fails
           // so we don't do the whole rollback thing
