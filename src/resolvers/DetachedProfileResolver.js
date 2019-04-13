@@ -3,8 +3,7 @@ import { pick } from 'lodash';
 import { DetachedProfile, createDetachedProfileObject } from '../models/DetachedProfile';
 import { User } from '../models/UserModel';
 import { createUserProfileObject, UserProfile } from '../models/UserProfileModel';
-import { updateDiscoveryWithNextItem } from '../discovery/DiscoverProfile';
-import { INITIALIZED_FEED_LENGTH } from '../constants';
+import { NEW_PROFILE_BONUS } from '../constants';
 import { DiscoveryQueue } from '../models/DiscoveryQueueModel';
 import {
   createEndorsementChat,
@@ -19,6 +18,7 @@ import {
   GET_USER_ERROR, VIEW_DETACHED_PROFILE_ERROR, WRONG_CREATOR_ERROR,
 } from './ResolverErrorStrings';
 import { deleteDetachedProfile } from '../deletion/UserProfileDeletion';
+import { updateDiscoveryWithNextItem } from '../discovery/DiscoverProfile';
 
 const mongoose = require('mongoose');
 const debug = require('debug')('dev:DetachedProfileResolvers');
@@ -301,7 +301,7 @@ export const resolvers = {
             const devMode = process.env.DEV === 'true';
             const regenTestDBMode = (process.env.REGEN_DB === 'true' && devMode);
             if (feed.currentDiscoveryItems.length === 0 && !regenTestDBMode) {
-              for (let i = 0; i < INITIALIZED_FEED_LENGTH; i += 1) {
+              for (let i = 0; i < NEW_PROFILE_BONUS; i += 1) {
                 await updateDiscoveryWithNextItem({ userObj: newUser });
               }
             }
@@ -639,7 +639,7 @@ export const resolvers = {
             const devMode = process.env.DEV === 'true';
             const regenTestDBMode = (process.env.REGEN_DB === 'true' && devMode);
             if (feed.currentDiscoveryItems.length === 0 && !regenTestDBMode) {
-              for (let i = 0; i < INITIALIZED_FEED_LENGTH; i += 1) {
+              for (let i = 0; i < NEW_PROFILE_BONUS; i += 1) {
                 await updateDiscoveryWithNextItem({ userObj: updateCreatorObjectResult });
               }
             }
