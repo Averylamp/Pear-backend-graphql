@@ -410,13 +410,11 @@ export const updateAllDiscovery = async () => {
   User.find({})
     .cursor()
     .on('data', (user) => {
-      if (user.isSeeking || user.endorsedProfile_ids.length + user.detachedProfile_ids.length > 0) {
-        if (Math.random() < (1 / EXPECTED_TICKS_PER_NEW_PROFILE)) {
-          updateDiscoveryWithNextItem({ userObj: user })
-            .catch((err) => {
-              errorLog(`An error occurred: ${err.toString()}`);
-            });
-        }
+      if (Math.random() < (1 / EXPECTED_TICKS_PER_NEW_PROFILE)) {
+        updateDiscoveryWithNextItem({ userObj: user })
+          .catch((err) => {
+            errorLog(`An error occurred: ${err.toString()}`);
+          });
       }
     })
     .on('end', () => {
