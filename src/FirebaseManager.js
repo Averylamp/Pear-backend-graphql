@@ -48,19 +48,18 @@ const getFirebaseAuth = () => {
 
 export const getChatDocPathFromId = firebaseId => `${CHAT_COLLECTION_NAME}/${firebaseId}`;
 
-export const authenticateUser = function authenticateUser(uid, token) {
-  return new Promise((resolve, reject) => getFirebaseAuth()
-    .verifyIdToken(token)
-    .then((decodedToken) => {
-      const tokenUID = decodedToken.uid;
-      if (uid === tokenUID) {
-        resolve(uid);
-      } else {
-        debug(`Failed Authentication for uid: ${uid}`);
-        reject(Error('Unauthenticated Token'));
-      }
-    }));
-};
+export const authenticateUser = async (uid, token) => new
+Promise((resolve, reject) => getFirebaseAuth()
+  .verifyIdToken(token)
+  .then((decodedToken) => {
+    const tokenUID = decodedToken.uid;
+    if (uid === tokenUID) {
+      resolve(uid);
+    } else {
+      debug(`Failed Authentication for uid: ${uid}`);
+      reject(Error('Unauthenticated Token'));
+    }
+  }));
 
 export const deleteChatsCollection = async () => {
   if (chatCollection === 'chats' || chatCollection === 'chats-prod') {
