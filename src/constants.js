@@ -10,6 +10,8 @@ export const EXPECTED_TICKS_PER_NEW_PROFILE = 240;
 
 export const STAT_SNAPSHOT_GENERATION_TIME = 30 * 60 * 1000;
 
+export const LAST_ACTIVE_ARRAY_LEN = 20;
+
 export const FUZZY_SCHOOL_LIST = [
   'Harvard',
   'harvard',
