@@ -1,24 +1,25 @@
 import nanoid from 'nanoid';
 import { pick } from 'lodash';
-import { DetachedProfile, createDetachedProfileObject } from '../models/DetachedProfile';
-import { User } from '../models/UserModel';
-import { createUserProfileObject, UserProfile } from '../models/UserProfileModel';
-import { NEW_PROFILE_BONUS } from '../constants';
-import { DiscoveryQueue } from '../models/DiscoveryQueueModel';
+import { DetachedProfile, createDetachedProfileObject } from '../../models/DetachedProfile';
+import { User } from '../../models/UserModel';
+import { createUserProfileObject, UserProfile } from '../../models/UserProfileModel';
+import { NEW_PROFILE_BONUS } from '../../constants';
+import { DiscoveryQueue } from '../../models/DiscoveryQueueModel';
 import {
   createEndorsementChat,
   getChatDocPathFromId,
   sendNewEndorsementMessage, sendProfileApprovedPushNotification,
-} from '../FirebaseManager';
+} from '../../FirebaseManager';
 import {
   ALREADY_APPROVED_PROFILE,
   ALREADY_MADE_PROFILE,
   APPROVE_PROFILE_ERROR, CANT_ENDORSE_YOURSELF,
   CREATE_DETACHED_PROFILE_ERROR, DELETE_DETACHED_PROFILE_ERROR, GET_DETACHED_PROFILE_ERROR,
   GET_USER_ERROR, VIEW_DETACHED_PROFILE_ERROR, WRONG_CREATOR_ERROR,
-} from './ResolverErrorStrings';
-import { deleteDetachedProfile } from '../deletion/UserProfileDeletion';
-import { updateDiscoveryWithNextItem } from '../discovery/DiscoverProfile';
+} from '../ResolverErrorStrings';
+import { deleteDetachedProfile } from '../../deletion/UserProfileDeletion';
+import { updateDiscoveryWithNextItem } from '../../discovery/DiscoverProfile';
+import { createDetachedProfileResolver } from './CreateDetachedProfile';
 
 const mongoose = require('mongoose');
 const debug = require('debug')('dev:DetachedProfileResolvers');
@@ -74,14 +75,14 @@ const getAndValidateUsersAndDetachedProfileObjects = async ({
     }
 
     // check that creator made detached profile
-    if (creator_id !== detachedProfile.creatorUser_id.toString()) {
+    if (creator_id.toString() !== detachedProfile.creatorUser_id.toString()) {
       errorLog(`Creator with id ${creator_id} did not make detached profile ${detachedProfile_id}`);
       throw new Error(
         `Creator with id ${creator_id} did not make detached profile ${detachedProfile_id}`,
       );
     }
     // check creator != user
-    if (creator_id === user_id) {
+    if (creator_id.toString() === user_id.toString()) {
       if (process.env.DB_NAME !== 'prod'
         && canMakeProfileForSelf.includes(detachedProfile.phoneNumber)) {
         // we ignore this check if phoneNumber is whitelisted and we aren't touching prod db
@@ -91,8 +92,7 @@ const getAndValidateUsersAndDetachedProfileObjects = async ({
       }
     }
     // check creator has not already made a profile for user
-    const endorserIDs = await UserProfile.find({ user_id });
-    if (detachedProfile.creatorUser_id in endorserIDs) {
+    if (creator_id.toString() in user.endorser_ids.map(endorser_id => endorser_id.toString())) {
       errorLog(`creator ${creator_id} has already made a profile for user ${user_id}`);
       throw new Error(`creator ${creator_id} has already made a profile for user ${user_id}`);
     }
@@ -119,200 +119,19 @@ export const resolvers = {
   },
   DetachedProfile: {
     creatorUser: async ({ creatorUser_id }) => User.findById(creatorUser_id),
-    userProfile: async ({ userProfile_id }) => UserProfile.findById(userProfile_id),
   },
   Mutation: {
     createDetachedProfile: async (_, { detachedProfileInput }) => {
       functionCallConsole('Create Detached Profile Called');
-
-      // create input object
-      const detachedProfileID = '_id' in detachedProfileInput
-        ? detachedProfileInput._id : mongoose.Types.ObjectId();
-      const finalDetachedProfileInput = pick(detachedProfileInput, [
-        'creatorUser_id',
-        'creatorFirstName',
-        'firstName',
-        'phoneNumber',
-        'age',
-        'gender',
-        'interests',
-        'vibes',
-        'bio',
-        'dos',
-        'donts',
-        'school',
-        'schoolYear',
-        'images',
-        'matchingDemographics',
-        'matchingPreferences',
-      ]);
-      finalDetachedProfileInput._id = detachedProfileID;
-      const locationObj = {
-        point: {
-          coordinates: detachedProfileInput.location,
-        },
-      };
-      if (detachedProfileInput.location[0] === 42.3601
-        && detachedProfileInput.location[1] === -71.0589) {
-        locationObj.point.coordinates = [-71.0589, 42.3601];
-      }
-
-      finalDetachedProfileInput.matchingDemographics = {
-        location: locationObj,
-        gender: detachedProfileInput.gender,
-        age: detachedProfileInput.age,
-      };
-      finalDetachedProfileInput.matchingPreferences = {
-        location: locationObj,
-        minAgeRange: Math.max(detachedProfileInput.age - 3, 18),
-        maxAgeRange: Math.min(detachedProfileInput.age + 3, 100),
-        seekingGender: detachedProfileInput.seekingGender,
-      };
-      if (detachedProfileInput.locationName) {
-        finalDetachedProfileInput.matchingDemographics.locationName = {
-          name: detachedProfileInput.locationName,
-        };
-        finalDetachedProfileInput.matchingPreferences.locationName = {
-          name: detachedProfileInput.locationName,
-        };
-      }
-
-      // Set defaults for gender preference if not specified
-      if (!finalDetachedProfileInput.matchingPreferences.seekingGender) {
-        if (detachedProfileInput.gender === 'male') {
-          finalDetachedProfileInput.matchingPreferences.seekingGender = ['female'];
-        }
-        if (detachedProfileInput.gender === 'female') {
-          finalDetachedProfileInput.matchingPreferences.seekingGender = ['male'];
-        }
-        if (detachedProfileInput.gender === 'nonbinary') {
-          finalDetachedProfileInput.matchingPreferences.seekingGender = ['nonbinary', 'male', 'female'];
-        }
-      }
-
-
-      // perform validation
-      const { creatorUser_id } = detachedProfileInput;
-      const creator = await User.findById(creatorUser_id)
-        .exec()
-        .catch(err => err);
-      if (!creator) {
-        return {
-          success: false,
-          message: GET_USER_ERROR,
-        };
-      }
       try {
-        const creatorDetachedProfilesPromise = DetachedProfile.find({ creatorUser_id })
-          .exec();
-        const creatorAttachedProfilesPromise = UserProfile.find({ creatorUser_id })
-          .exec();
-        const [creatorDetachedProfiles, creatorAttachedProfiles] = await Promise.all(
-          [creatorDetachedProfilesPromise, creatorAttachedProfilesPromise],
-        );
-        const dpPhoneNumbers = creatorDetachedProfiles.map(dp => dp.phoneNumber);
-        const apPhoneNumbers = creatorAttachedProfiles.map(ap => ap.phoneNumber);
-        if (detachedProfileInput.phoneNumber === creator.phoneNumber) {
-          if (process.env.DB_NAME !== 'prod'
-            && canMakeProfileForSelf.includes(creator.phoneNumber)) {
-            // we ignore this check if phoneNumber is whitelisted and we aren't touching prod db
-          } else {
-            return {
-              success: false,
-              message: CANT_ENDORSE_YOURSELF,
-            };
-          }
-        }
-        if (dpPhoneNumbers.includes(detachedProfileInput.phoneNumber)) {
-          return {
-            success: false,
-            message: ALREADY_MADE_PROFILE,
-          };
-        }
-        if (apPhoneNumbers.includes(detachedProfileInput.phoneNumber)) {
-          return {
-            success: false,
-            message: ALREADY_MADE_PROFILE,
-          };
-        }
+        return createDetachedProfileResolver({ detachedProfileInput });
       } catch (e) {
+        errorLog(`error occurred creating detached profile: ${e}`);
         return {
           success: false,
           message: CREATE_DETACHED_PROFILE_ERROR,
         };
       }
-
-      // update creator's user object
-      const updateCreatorUserObject = User.findByIdAndUpdate(creatorUser_id, {
-        $push: {
-          detachedProfile_ids: detachedProfileID,
-        },
-      }, { new: true })
-        .exec()
-        .catch(err => err);
-
-      // create new detached profile
-      const createDetachedProfileObj = createDetachedProfileObject(finalDetachedProfileInput)
-        .catch(err => err);
-
-      // TODO: should also check if updateCreatorUserObject instanceof Error
-      return Promise.all([updateCreatorUserObject, createDetachedProfileObj])
-        .then(async ([newUser, detachedProfileObject]) => {
-          if (newUser == null || detachedProfileObject instanceof Error) {
-            let errorMessage = '';
-            if (newUser == null) {
-              errorMessage += 'Was unable to add Detached Profile to User\n';
-            }
-            if (detachedProfileObject instanceof Error) {
-              errorMessage += 'Was unable to create Detached Profile Object';
-              if (newUser) {
-                User.findByIdAndUpdate(creatorUser_id, {
-                  $pull: {
-                    detachedProfile_ids: detachedProfileID,
-                  },
-                }, { new: true }, (err) => {
-                  if (err) {
-                    debug('Failed to remove Detached Profile ID from user');
-                  } else {
-                    debug('Successfully removed Detached Profile ID from user');
-                  }
-                });
-              }
-            } else {
-              detachedProfileObject.remove((err) => {
-                if (err) {
-                  debug(`Failed to remove discovery object${err}`);
-                } else {
-                  debug('Removed created discovery object successfully');
-                }
-              });
-            }
-            debug('Completed unsuccessfully');
-            errorLog(errorMessage);
-            return {
-              success: false,
-              message: CREATE_DETACHED_PROFILE_ERROR,
-            };
-          }
-          debug('Completed successfully');
-          // populate creator's feed if feed is empty (i.e. this is the first profile they've made)
-          try {
-            const feed = await DiscoveryQueue.findById(creator.discoveryQueue_id);
-            const devMode = process.env.DEV === 'true';
-            const regenTestDBMode = (process.env.REGEN_DB === 'true' && devMode);
-            if (feed.currentDiscoveryItems.length === 0 && !regenTestDBMode) {
-              for (let i = 0; i < NEW_PROFILE_BONUS; i += 1) {
-                await updateDiscoveryWithNextItem({ userObj: newUser });
-              }
-            }
-          } catch (e) {
-            debug(`error occurred when trying to populate discovery feed: ${e}`);
-          }
-          return {
-            success: true,
-            detachedProfile: detachedProfileObject,
-          };
-        });
     },
     viewDetachedProfile: async (_source, { user_id, detachedProfile_id }) => {
       functionCallConsole('View Detached Profile Called');
