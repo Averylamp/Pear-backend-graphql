@@ -1,6 +1,9 @@
 import { pick } from 'lodash';
 import { DetachedProfile } from '../models/DetachedProfile';
-import { DiscoveryQueue, createDiscoveryQueueObject } from '../models/DiscoveryQueueModel';
+import {
+  DiscoveryQueue,
+  createDiscoveryQueueObject,
+} from '../models/DiscoveryQueueModel';
 import { User, createUserObject } from '../models/UserModel';
 import { UserProfile } from '../models/UserProfileModel';
 import { Match } from '../models/MatchModel';
@@ -10,7 +13,7 @@ import {
   GET_USER_ERROR, UPDATE_USER_ERROR,
   UPDATE_USER_PHOTOS_ERROR,
 } from './ResolverErrorStrings';
-import { INITIALIZED_FEED_LENGTH } from '../constants';
+import { INITIALIZED_FEED_LENGTH, LAST_ACTIVE_ARRAY_LEN } from '../constants';
 import { updateDiscoveryWithNextItem } from '../discovery/DiscoverProfile';
 
 const mongoose = require('mongoose');
@@ -61,27 +64,41 @@ export const resolvers = {
       functionCallConsole('Get User Called');
       const token = userInput.firebaseToken;
       const uid = userInput.firebaseAuthID;
-      return new Promise(resolve => authenticateUser(uid, token)
-        .then((authenticatedUID) => {
-          const user = User.findOne({ firebaseAuthID: authenticatedUID });
-          if (user) {
-            resolve({
-              success: true,
-              user,
-            });
+      try {
+        const authenticatedUID = await authenticateUser(uid, token);
+        const user = await User.findOne({ firebaseAuthID: authenticatedUID })
+          .exec();
+        if (user) {
+          let userUpdateObj = {};
+          if (user.lastActive) {
+            userUpdateObj.$push = {
+              lastActive: {
+                $each: [new Date()],
+                $slice: -1 * LAST_ACTIVE_ARRAY_LEN,
+              },
+            };
           } else {
-            resolve({
-              success: false,
-              message: GET_USER_ERROR,
-            });
+            userUpdateObj = {
+              lastActive: [new Date()],
+            };
           }
-        })
-        .catch(() => {
-          resolve({
-            success: false,
-            message: GET_USER_ERROR,
-          });
-        }));
+          await User.findByIdAndUpdate(user._id, userUpdateObj);
+          return {
+            success: true,
+            user,
+          };
+        }
+        return {
+          success: false,
+          message: GET_USER_ERROR,
+        };
+      } catch (e) {
+        errorLog(`An error occurred getting user: ${e}`);
+        return {
+          success: false,
+          message: GET_USER_ERROR,
+        };
+      }
     },
     notifyNewMessage: async (_source, { fromUser_id, toUser_id }) => {
       const from = await User.findById(fromUser_id)
@@ -133,6 +150,7 @@ export const resolvers = {
         'referredByCode',
         'seeded',
       ]);
+      finalUserInput.lastActive = [new Date()];
       finalUserInput._id = userObjectID;
       finalUserInput.discoveryQueue_id = discoveryQueueObjectID;
       const locationObj = {
@@ -256,7 +274,16 @@ export const resolvers = {
           'thumbnailURL',
           'firebaseRemoteInstanceID',
         ]);
-
+        if (user.lastActive) {
+          userUpdateObj.$push = {
+            lastActive: {
+              $each: [new Date()],
+              $slice: -1 * LAST_ACTIVE_ARRAY_LEN,
+            },
+          };
+        } else {
+          userUpdateObj.lastActive = [new Date()];
+        }
         // mongo dot notation for updates
         if (updateUserInput.seekingGender) {
           userUpdateObj['matchingPreferences.seekingGender'] = updateUserInput.seekingGender.filter(
