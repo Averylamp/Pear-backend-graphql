@@ -341,6 +341,10 @@ const UserSchema = new Schema({
   seeded: {
     type: Boolean, required: false, default: false,
   },
+
+  lastActive: {
+    type: [Date], required: false, default: [],
+  },
 }, { timestamps: true });
 
 UserSchema.virtual('fullName')
