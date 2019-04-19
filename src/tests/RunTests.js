@@ -175,7 +175,7 @@ export const runTests = async function runTests() {
       const detachedProfiles = [];
       for (let i = 0; i < createDetachedProfiles.length; i += 1) {
         const detachedProfileVars = createDetachedProfiles[i];
-        detachedProfileVars.detachedProfileInput.images = uploadImagesResults[i];
+        //  detachedProfileVars.detachedProfileInput.images = uploadImagesResults[i];
         detachedProfiles.push(detachedProfileVars.detachedProfileInput);
         try {
           const result = await mutate({
@@ -194,6 +194,7 @@ export const runTests = async function runTests() {
       }
       successLog('***** Success Creating Detached Profiles *****\n');
 
+      /*
       // VIEW DETACHED PROFILES
       testLog('TESTING: Viewing Detached Profiles');
       for (const viewProfileVars of viewDetachedProfiles) {
@@ -444,6 +445,7 @@ export const runTests = async function runTests() {
       // testLog('TESTING: Deleting a user');
       // await deleteUser(SAMMI);
       // testLog('Deleted successfully');
+      */
 
       // wait for any async db calls to finish
       setTimeout(() => {
