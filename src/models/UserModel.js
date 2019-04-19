@@ -17,6 +17,8 @@ extend type Query {
   getUser(userInput: GetUserInput): UserMutationResponse!
   # send a push notification indicating new message
   notifyNewMessage(fromUser_id: ID!, toUser_id: ID!): Boolean!
+  # get fake user count
+  getUserCount: Int!
 }
 
 `;
