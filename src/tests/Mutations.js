@@ -1,14 +1,13 @@
 import gql from 'graphql-tag';
 
 export const CREATE_USER = gql`
-  mutation CreateUser($userInput: CreationUserInput) {
+  mutation CreateUser($userInput: CreationUserInput!) {
     createUser(userInput: $userInput) {
       success
       message
       user {
         _id
         deactivated
-        firebaseToken
         firebaseAuthID
         facebookId
         facebookAccessToken
@@ -21,8 +20,6 @@ export const CREATE_USER = gql`
         schoolEmail
         schoolEmailVerified
         birthdate
-        profile_ids
-        endorsedProfile_ids
         pearPoints
       }
     }
@@ -30,7 +27,7 @@ export const CREATE_USER = gql`
 `;
 
 export const CREATE_DETACHED_PROFILE = gql`
-  mutation CreateDetachedProfile($detachedProfileInput: CreationDetachedProfileInput) {
+  mutation CreateDetachedProfile($detachedProfileInput: CreationDetachedProfileInput!) {
     createDetachedProfile(detachedProfileInput: $detachedProfileInput) {
       success
       message
@@ -39,14 +36,23 @@ export const CREATE_DETACHED_PROFILE = gql`
         creatorUser_id
         firstName
         phoneNumber
-        age
-        gender
-        interests
-        vibes
-        bio
-        dos
-        donts
         status
+        boasts {
+          authorFirstName
+          content
+        }
+        roasts {
+          authorFirstName
+          content
+        }
+        vibes {
+          authorFirstName
+          content
+        }
+        interests {
+          authorFirstName
+          content
+        }
       }
     }
   }
@@ -114,7 +120,7 @@ export const ATTACH_DETACHED_PROFILE = gql`
 `;
 
 export const UPDATE_USER = gql`
-  mutation UpdateUser($id: ID!, $updateUserInput: UpdateUserInput) {
+  mutation UpdateUser($id: ID!, $updateUserInput: UpdateUserInput!) {
     updateUser(id: $id, updateUserInput: $updateUserInput) {
       success
       message
@@ -136,7 +142,7 @@ export const UPDATE_USER = gql`
 `;
 
 export const UPDATE_DISPLAYED_PHOTOS = gql`
-  mutation UpdatePhotos($updateUserPhotosInput: UpdateUserPhotosInput) {
+  mutation UpdatePhotos($updateUserPhotosInput: UpdateUserPhotosInput!) {
     updateUserPhotos(updateUserPhotosInput: $updateUserPhotosInput) {
       success
       message

@@ -3,6 +3,13 @@ import { ImageContainerSchema } from './ImageSchemas';
 import { EdgeSummarySchema } from './MatchModel';
 import { EndorsementEdgeSchema } from './UserProfileModel';
 import { USERS_ALREADY_MATCHED_ERROR } from '../resolvers/ResolverErrorStrings';
+import {
+  BioSchema,
+  BoastSchema, DontSchema, DoSchema, InterestSchema,
+  QuestionUserResponseSchema,
+  RoastSchema,
+  VibeSchema,
+} from './ContentModels';
 
 const mongoose = require('mongoose');
 
@@ -24,13 +31,13 @@ extend type Query {
 const mutationRoutes = `
 extend type Mutation{
   # Creates a new User Object
-  createUser(userInput: CreationUserInput): UserMutationResponse!
+  createUser(userInput: CreationUserInput!): UserMutationResponse!
 
   # Updates an existing User
-  updateUser(id: ID, updateUserInput: UpdateUserInput) : UserMutationResponse!
+  updateUser(id: ID, updateUserInput: UpdateUserInput!) : UserMutationResponse!
 
   # Updates a User's photos or photo bank
-  updateUserPhotos(updateUserPhotosInput: UpdateUserPhotosInput): UserMutationResponse!
+  updateUserPhotos(updateUserPhotosInput: UpdateUserPhotosInput!): UserMutationResponse!
 }
 `;
 
@@ -47,64 +54,40 @@ input GetUserInput{
 const createUserInputs = `
 input CreationUserInput{
   _id: ID
-  # User's Age
-  age: Int!
-  # User's birthday
-  birthdate: String!
-  # User's email
-  email: String!
-  emailVerified: Boolean!
   # User's phone number
   phoneNumber: String!
   phoneNumberVerified: Boolean!
-  firstName: String!
-  lastName: String!
-  gender: Gender!
-
-  # [longitude, latitude]
-  location: [Float!]!
-  locationName: String
-
-  # The Firebase generated token
-  firebaseToken: String!
-
-  # The Firebase generated token
+  
+  # The Firebase auth ID
   firebaseAuthID: String!
-
-  # Option ID of the Facebook User
-  facebookId: String
-  # Option Facebook Graph API Access token
-  facebookAccessToken: String
-
-  # Option url for profile thumbnail
-  thumbnailURL: String
 
   # Optional firebase remote instance ID for push notifications
   firebaseRemoteInstanceID: String
 
   # referral codes, for tracking
   referredByCode: String
-  
-  # seeded?
-  seeded: Boolean
 }
 `;
 
 const updateUserInputs = `
 input UpdateUserInput {
-  age: Int
-  birthdate: String
+  deactivated: Boolean
   email: String
   emailVerified: Boolean
   phoneNumber: String
   phoneNumberVerified: Boolean
   firstName: String
   lastName: String
+  thumbnailURL: String
   gender: Gender
+  age: Int
+  birthdate: String
+  
   school: String
   schoolYear: String
+  schoolEmail: String
+  schoolEmailVerified: Boolean
   isSeeking: Boolean
-  deactivated: Boolean
 
   seekingGender: [Gender!]
   maxDistance: Int
@@ -114,9 +97,6 @@ input UpdateUserInput {
   # [longitude, latitude]
   location: [Float!]
   locationName: String
-
-  # Option url for profile thumbnail
-  thumbnailURL: String
 
   # Optional firebase remote instance ID for push notifications
   firebaseRemoteInstanceID: String
@@ -136,21 +116,32 @@ const userType = `
 type User {
   _id: ID!
   deactivated: Boolean!
-  firebaseToken: String!
   firebaseAuthID: String!
   facebookId: String
   facebookAccessToken: String
-  email: String!
-  emailVerified: Boolean!
+  email: String
+  emailVerified: Boolean
   phoneNumber: String!
   phoneNumberVerified: Boolean!
-  firstName: String!
-  lastName: String!
-  fullName: String!
+  firstName: String
+  lastName: String
+  fullName: String
   thumbnailURL: String
-  gender: Gender!
-  age: Int!
-  birthdate: String!
+  gender: Gender
+  age: Int
+  birthdate: String
+  
+  # profile content. ordered
+  bios: [Bio!]!
+  boasts: [Boast!]!
+  roasts: [Roast!]!
+  questionResponses: [QuestionUserResponse!]!
+  vibes: [Vibe!]!
+  
+  # deprecating?
+  dos: [Do!]!
+  donts: [Dont!]!
+  interests: [Interest!]!
 
   school: String
   schoolYear: String
@@ -165,24 +156,23 @@ type User {
 
   pearPoints: Int!
 
-  # All Attached Profile IDs for a user
-  profile_ids: [ID!]!
-  # All Attached Profiles for a user
-  profileObjs: [UserProfile!]!
-  # Number of profiles associated with the user
-  profileCount: Int!
-
-  # All Created and Attached Profile IDs for a user
-  endorsedProfile_ids: [ID!]!
-  # All Created and Attached Profiles for a user
-  endorsedProfileObjs: [UserProfile!]!
-
-  # All Detached Profile IDs for a user
+  # All users who have endorsed this user
+  endorser_ids: [ID!]!
+  endorsers: [User]!
+  # Number of endorsers this user has
+  endorserCount: Int!
+  
+  # All users this user has endorsed
+  endorsedUser_ids: [ID!]!
+  endorsedUsers: [User]!
+  endorsedUsersCount: Int!
+  
+  # All pending endorsements this user has created
   detachedProfile_ids: [ID!]!
-  # All Detached Profiles for a user
   detachedProfileObjs: [DetachedProfile!]!
+  detachedProfilesCount: Int!
 
-  # metainfo about matchmaker chats
+  # metainfo about endorser/endorsee chats
   endorsementEdges: [EndorsementEdge!]!
 
   discoveryQueue_id: ID!
@@ -248,7 +238,6 @@ export const typeDef = queryRoutes
 
 const UserSchema = new Schema({
   deactivated: { type: Boolean, required: true, default: false },
-  firebaseToken: { type: String, required: true },
   firebaseAuthID: {
     type: String, required: true, index: true, unique: true,
   },
@@ -267,36 +256,54 @@ const UserSchema = new Schema({
     index: true,
   },
   phoneNumberVerified: { type: Boolean, required: true, default: false },
-  firstName: { type: String, required: true },
-  lastName: { type: String, required: true },
+  firstName: { type: String, required: false },
+  lastName: { type: String, required: false },
   thumbnailURL: { type: String, required: false },
-  gender: { type: String, required: true, enum: ['male', 'female', 'nonbinary'] },
+  gender: { type: String, required: false, enum: ['male', 'female', 'nonbinary'] },
   age: {
-    type: Number, required: true, min: 18, max: 100, index: true,
+    type: Number, required: false, min: 18, max: 100, index: true,
   },
-  birthdate: { type: Date, required: true },
+  birthdate: { type: Date, required: false },
+
+  bios: { type: [BioSchema], required: true, default: [] },
+  boasts: { type: [BoastSchema], required: true, default: [] },
+  roasts: { type: [RoastSchema], required: true, default: [] },
+  questionResponses: { type: [QuestionUserResponseSchema], required: true, default: [] },
+  vibes: { type: [VibeSchema], required: true, default: [] },
+
+  // dos, donts, interests are not used currently
+  dos: { type: [DoSchema], required: true, default: [] },
+  donts: { type: [DontSchema], required: true, default: [] },
+  interests: { type: [InterestSchema], required: true, default: [] },
+
   school: { type: String, required: false },
   schoolYear: { type: String, required: false },
   schoolEmail: { type: String, required: false },
   schoolEmailVerified: { type: Boolean, required: false, default: false },
-  isSeeking: { type: Boolean, required: true, default: false },
+  isSeeking: { type: Boolean, required: true, default: true },
 
   pearPoints: { type: Number, required: true, default: 0 },
 
   displayedImages: { type: [ImageContainerSchema], required: true, default: [] },
   bankImages: { type: [ImageContainerSchema], required: true, default: [] },
 
-  profile_ids: {
+  endorser_ids: {
     type: [Schema.Types.ObjectId], required: true, index: true, default: [],
   },
-  profileCount: {
+  endorserCount: {
     type: Number, required: true, index: true, default: 0,
   },
-  endorsedProfile_ids: {
+  endorsedUser_ids: {
     type: [Schema.Types.ObjectId], required: true, index: true, default: [],
+  },
+  endorsedUsersCount: {
+    type: Number, required: true, index: true, default: 0,
   },
   detachedProfile_ids: {
     type: [Schema.Types.ObjectId], required: true, index: true, default: [],
+  },
+  detachedProfilesCount: {
+    type: Number, required: true, index: true, default: 0,
   },
 
   endorsementEdges: {
@@ -347,6 +354,12 @@ const UserSchema = new Schema({
 
 UserSchema.virtual('fullName')
   .get(function fullName() {
+    if (!this.firstName) {
+      return null;
+    }
+    if (this.firstName && !this.lastName) {
+      return this.firstName;
+    }
     return `${this.firstName} ${this.lastName}`;
   });
 

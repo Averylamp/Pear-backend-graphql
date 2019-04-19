@@ -8,123 +8,157 @@ import { EXPECTED_TICKS_PER_NEW_PROFILE, FUZZY_SCHOOL_LIST, MAX_FEED_LENGTH } fr
 const debug = require('debug')('dev:DiscoverProfile');
 const errorLog = require('debug')('error:DiscoverProfile');
 
-const getSeededUserPipeline = ({ constraints, demographics, blacklist }) => ([
-  {
-    $match: {
-      isSeeking: true,
-      seeded: true,
-      'matchingDemographics.gender': {
-        $in: constraints.seekingGender,
-      },
-      'matchingPreferences.seekingGender': demographics.gender,
-      _id: {
-        $nin: blacklist,
-      },
-      profileCount: {
-        $gte: 0,
+const getSeededUserPipeline = ({ constraints, demographics, blacklist }) => {
+  const matchStage = {
+    isSeeking: true,
+    seeded: true,
+    _id: {
+      $nin: blacklist,
+    },
+    endorserCount: {
+      $gte: 0,
+    },
+  };
+  if (constraints && constraints.seekingGender) {
+    matchStage['matchingDemographics.gender'] = {
+      $in: constraints.seekingGender,
+    };
+  }
+  if (demographics && demographics.gender) {
+    matchStage['matchingPreferences.seekingGender'] = demographics.gender;
+  }
+  return [
+    {
+      $match: matchStage,
+    },
+    {
+      $sample: {
+        size: 1,
       },
     },
-  },
-  {
-    $sample: {
-      size: 1,
-    },
-  },
-]);
+  ];
+};
 
-const getSeededSchoolUserPipeline = ({ constraints, demographics, blacklist }) => ([
-  {
-    $match: {
-      isSeeking: true,
-      'matchingDemographics.gender': {
-        $in: constraints.seekingGender,
-      },
-      'matchingPreferences.seekingGender': demographics.gender,
-      _id: {
-        $nin: blacklist,
-      },
-      school: {
-        $in: FUZZY_SCHOOL_LIST,
-      },
-      profileCount: {
-        $gte: 0,
+const getSeededSchoolUserPipeline = ({ constraints, demographics, blacklist }) => {
+  const matchStage = {
+    isSeeking: true,
+    school: {
+      $in: FUZZY_SCHOOL_LIST,
+    },
+    _id: {
+      $nin: blacklist,
+    },
+    endorserCount: {
+      $gte: 0,
+    },
+  };
+  if (constraints && constraints.seekingGender) {
+    matchStage['matchingDemographics.gender'] = {
+      $in: constraints.seekingGender,
+    };
+  }
+  if (demographics && demographics.gender) {
+    matchStage['matchingPreferences.seekingGender'] = demographics.gender;
+  }
+  return [
+    {
+      $match: matchStage,
+    },
+    {
+      $sample: {
+        size: 1,
       },
     },
-  },
-  {
-    $sample: {
-      size: 1,
-    },
-  },
-]);
+  ];
+};
 
 // gets a user u such that:
 // u's demographics satisfies constraints
 // demographics satisfies u's constraints
 // u is not in the blacklist
 // returns null if can't find a user satisfying the above
-const getUserSatisfyingConstraintsPipeline = ({ constraints, demographics, blacklist }) => ([
-  {
-    $match: {
-      isSeeking: true,
-      'matchingDemographics.gender': {
-        $in: constraints.seekingGender,
-      },
-      'matchingDemographics.age': {
-        $lte: constraints.maxAgeRange,
-        $gte: constraints.minAgeRange,
-      },
-      'matchingDemographics.location.point': {
-        $geoWithin: {
-          $centerSphere: [
-            constraints.location.point.coordinates,
-            constraints.maxDistance / 3963.2],
-        },
-      },
-      'matchingPreferences.seekingGender': demographics.gender,
-      'matchingPreferences.minAgeRange': {
-        $lte: demographics.age,
-      },
-      'matchingPreferences.maxAgeRange': {
-        $gte: demographics.age,
-      },
-      _id: {
-        $nin: blacklist,
-      },
-      profileCount: {
-        $gte: 0,
-      },
+const getUserSatisfyingConstraintsPipeline = ({ constraints, demographics, blacklist }) => {
+  const matchStage = {
+    isSeeking: true,
+    'matchingDemographics.age': {
+      $lte: constraints.maxAgeRange,
+      $gte: constraints.minAgeRange,
     },
-  },
-  {
-    $sample: {
-      size: 1,
+    _id: {
+      $nin: blacklist,
     },
-  },
-]);
+    profileCount: {
+      $gte: 0,
+    },
+  };
+  if (constraints && constraints.location) {
+    matchStage['matchingDemographics.location.point'] = {
+      $geoWithin: {
+        $centerSphere: [
+          constraints.location.point.coordinates,
+          constraints.maxDistance / 3963.2],
+      },
+    };
+  }
+  if (constraints && constraints.seekingGender) {
+    matchStage['matchingDemographics.gender'] = {
+      $in: constraints.seekingGender,
+    };
+  }
+  if (demographics && demographics.gender) {
+    matchStage['matchingPreferences.seekingGender'] = demographics.gender;
+  }
+  if (demographics && demographics.age) {
+    matchStage['matchingPreferences.minAgeRange'] = {
+      $lte: demographics.age,
+    };
+    matchStage['matchingPreferences.maxAgeRange'] = {
+      $gte: demographics.age,
+    };
+  }
 
-const getUserSatisfyingGenderConstraintsPipeline = ({ constraints, demographics, blacklist }) => ([
-  {
-    $match: {
-      isSeeking: true,
-      'matchingDemographics.gender': {
-        $in: constraints.seekingGender,
-      },
-      'matchingPreferences.seekingGender': demographics.gender,
-      _id: {
-        $nin: blacklist,
-      },
-      profileCount: {
-        $gte: 0,
+  return [
+    {
+      $match: matchStage,
+    },
+    {
+      $sample: {
+        size: 1,
       },
     },
-  },
-  {
-    $sample: {
-      size: 1,
+  ];
+};
+
+const getUserSatisfyingGenderConstraintsPipeline = ({ constraints, demographics, blacklist }) => {
+  const matchStage = {
+    isSeeking: true,
+    _id: {
+      $nin: blacklist,
     },
-  },
-]);
+    profileCount: {
+      $gte: 0,
+    },
+  };
+  if (constraints && constraints.seekingGender) {
+    matchStage['matchingDemographics.gender'] = {
+      $in: constraints.seekingGender,
+    };
+  }
+  if (demographics && demographics.gender) {
+    matchStage['matchingPreferences.seekingGender'] = demographics.gender;
+  }
+
+  return [
+    {
+      $match: matchStage,
+    },
+    {
+      $sample: {
+        size: 1,
+      },
+    },
+  ];
+};
 
 const getUserForPipeline = async ({
   constraints, demographics, blacklist, pipelineFn,
