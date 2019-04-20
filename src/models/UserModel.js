@@ -86,7 +86,7 @@ input CreationUserInput{
 
   # referral codes, for tracking
   referredByCode: String
-  
+
   # seeded?
   seeded: Boolean
 }
@@ -215,7 +215,7 @@ type User {
   # referral codes
   referredByCode: String
   referralCode: String
-  
+
   # seeded profile? null is false
   seeded: Boolean
 }
