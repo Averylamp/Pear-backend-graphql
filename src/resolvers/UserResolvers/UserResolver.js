@@ -14,6 +14,7 @@ import {
 } from '../ResolverErrorStrings';
 import { LAST_ACTIVE_ARRAY_LEN } from '../../constants';
 import { createUserResolver } from './CreateUser';
+import { updateUserResolver } from './UpdateUser';
 
 const debug = require('debug')('dev:UserResolvers');
 const errorLog = require('debug')('error:UserResolver');
@@ -30,6 +31,10 @@ export const resolvers = {
     edgeUser_ids: async ({ edgeSummaries }) => [
       ...new Set(edgeSummaries.map(summary => summary.otherUser_id)),
     ],
+    endorsers: async ({ endorser_ids }) => User.find({ _id: { $in: endorser_ids } }),
+    endorsedUsers: async ({ endorsedUser_ids }) => User.find({ _id: { $in: endorsedUser_ids } }),
+    detachedProfiles: async ({ detachedProfile_ids }) => DetachedProfile
+      .find({ _id: { $in: detachedProfile_ids } }),
   },
   Query: {
     user: async (_source, { id }) => {
@@ -97,93 +102,16 @@ export const resolvers = {
       try {
         return createUserResolver({ userInput });
       } catch (e) {
+        errorLog(`error occurred while creating user: ${e}`);
         return {
           success: false,
           message: CREATE_USER_ERROR,
         };
       }
     },
-    updateUser: async (_source, { id, updateUserInput }) => {
+    updateUser: async (_source, { updateUserInput }) => {
       try {
-        const now = new Date();
-        const user = await User.findById(id);
-        if (!user) {
-          return {
-            success: false,
-            message: GET_USER_ERROR,
-          };
-        }
-        const userUpdateObj = pick(updateUserInput, [
-          'age',
-          'birthdate',
-          'email',
-          'emailVerified',
-          'phoneNumber',
-          'phoneNumberVerified',
-          'firstName',
-          'lastName',
-          'gender',
-          'school',
-          'schoolYear',
-          'isSeeking',
-          'deactivated',
-          'thumbnailURL',
-          'firebaseRemoteInstanceID',
-        ]);
-        if (user.lastActive) {
-          userUpdateObj.$push = {
-            lastActive: {
-              $each: [new Date()],
-              $slice: -1 * LAST_ACTIVE_ARRAY_LEN,
-            },
-          };
-        } else {
-          userUpdateObj.lastActive = [new Date()];
-        }
-        // mongo dot notation for updates
-        if (updateUserInput.seekingGender) {
-          userUpdateObj['matchingPreferences.seekingGender'] = updateUserInput.seekingGender.filter(
-            item => ['male', 'female', 'nonbinary'].includes(item),
-          );
-        }
-        if (updateUserInput.maxDistance) {
-          userUpdateObj['matchingPreferences.maxDistance'] = updateUserInput.maxDistance;
-        }
-        if (updateUserInput.minAgeRange) {
-          userUpdateObj['matchingPreferences.minAgeRange'] = updateUserInput.minAgeRange;
-        }
-        if (updateUserInput.maxAgeRange) {
-          userUpdateObj['matchingPreferences.maxAgeRange'] = updateUserInput.maxAgeRange;
-        }
-        if (updateUserInput.age) {
-          userUpdateObj['matchingDemographics.age'] = updateUserInput.age;
-        }
-        if (updateUserInput.gender) {
-          userUpdateObj['matchingDemographics.gender'] = updateUserInput.gender;
-        }
-        if (updateUserInput.location) {
-          userUpdateObj['matchingPreferences.location.point.coordinates'] = updateUserInput.location;
-          userUpdateObj['matchingPreferences.location.point.updatedAt'] = now;
-          userUpdateObj['matchingDemographics.location.point.coordinates'] = updateUserInput.location;
-          userUpdateObj['matchingDemographics.location.point.updatedAt'] = now;
-        }
-        if (updateUserInput.locationName) {
-          // note that if locationName has never been set, it won't have a createdAt field
-          // TODO either rewrite all of this resolver's logic to use model.save, or else do a check
-          // and set createdAt here if necessary.
-          // TODO actually we gotta do this for pretty much any object we're using the driver to
-          // update that has mongoose timestamps :(
-          userUpdateObj['matchingPreferences.location.locationName.name'] = updateUserInput.locationName;
-          userUpdateObj['matchingPreferences.location.locationName.updatedAt'] = now;
-          userUpdateObj['matchingDemographics.location.locationName.name'] = updateUserInput.locationName;
-          userUpdateObj['matchingDemographics.location.locationName.updatedAt'] = now;
-        }
-
-        const updatedUser = await User.findByIdAndUpdate(id, userUpdateObj, { new: true });
-        return {
-          success: true,
-          user: updatedUser,
-        };
+        return updateUserResolver({ updateUserInput });
       } catch (e) {
         errorLog(`error occurred while updating user: ${e}`);
         return {

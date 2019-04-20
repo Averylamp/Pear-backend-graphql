@@ -1,11 +1,24 @@
 import {
-  AVERY_PROFILE_MADE_D_ID, BRIAN_ID,
-  BRIAN_PROFILE_SAMMI_D_ID, JOSH_ID,
-  JOSH_PROFILE_SOPHIA_D_ID, MADE_ID,
-  MADE_PROFILE_JOSH_D_ID, SAMMI_ID, SAMMI_PROFILE_BRIAN_D_ID,
-  SAMMI_PROFILE_JOSH_D_ID, SOPHIA_ID,
-  SOPHIA_PROFILE_SAMMI_D_ID, SOPHIA_PROFILE_UMA_D_ID, UMA_ID, UMA_PROFILE_BRIAN_D_ID,
+  AVERY_PROFILE_MADE_D_ID,
+  BRIAN_ID,
+  BRIAN_PROFILE_SAMMI_D_ID,
+  JOSH_ID,
+  JOSH_PROFILE_SOPHIA_D_ID,
+  MADE_ID,
+  MADE_PROFILE_JOSH_D_ID,
+  QUESTION1_ID,
+  QUESTION2_ID,
+  QUESTION3_ID,
+  SAMMI_ID,
+  SAMMI_PROFILE_BRIAN_D_ID,
+  SAMMI_PROFILE_JOSH_D_ID,
+  SOPHIA_ID,
+  SOPHIA_PROFILE_SAMMI_D_ID,
+  SOPHIA_PROFILE_UMA_D_ID,
+  UMA_ID,
+  UMA_PROFILE_BRIAN_D_ID,
 } from './TestsContants';
+import { ADD_QUESTIONS_VARIABLES } from './TestQuestions';
 
 export const CREATE_AVERY1_DETACHED_PROFILE_VARIABLES = {
   detachedProfileInput: {
@@ -22,8 +35,37 @@ export const CREATE_AVERY1_DETACHED_PROFILE_VARIABLES = {
       },
     ],
     roasts: [],
-    questionResponses: [],
-    vibes: [],
+    questionResponses: [
+      {
+        author_id: MADE_ID,
+        authorFirstName: 'Made',
+        question_id: QUESTION1_ID,
+        questionText: 'What\'s your favorite color?',
+        responseBody: 'red',
+        responseTitle: 'red is a great color',
+        color: {
+          red: 1.0,
+          green: 0.0,
+          blue: 0.0,
+          alpha: 1.0,
+        },
+        icon: {
+          assetString: 'red-icon',
+        },
+      },
+    ],
+    vibes: [
+      {
+        author_id: MADE_ID,
+        authorFirstName: 'Made',
+        content: 'Fruity Cutie',
+      },
+      {
+        author_id: MADE_ID,
+        authorFirstName: 'Made',
+        content: 'Just Add Water',
+      },
+    ],
   },
 };
 
@@ -42,8 +84,22 @@ export const CREATE_BRIAN1_DETACHED_PROFILE_VARIABLES = {
         content: 'The kind of guy who would make a dating app',
       },
     ],
-    questionResponses: [],
-    vibes: [],
+    questionResponses: [
+      {
+        author_id: SAMMI_ID,
+        authorFirstName: 'Sammi',
+        question_id: QUESTION2_ID,
+        questionText: 'What\'s your favorite shoe??',
+        responseBody: 'crocs',
+      },
+    ],
+    vibes: [
+      {
+        author_id: SAMMI_ID,
+        authorFirstName: 'Sammi',
+        content: 'Extra Like Guac',
+      },
+    ],
   },
 };
 
@@ -62,8 +118,27 @@ export const CREATE_JOSH1_DETACHED_PROFILE_VARIABLES = {
       },
     ],
     roasts: [],
-    questionResponses: [],
-    vibes: [],
+    questionResponses: [
+      {
+        author_id: SOPHIA_ID,
+        authorFirstName: 'Made',
+        question_id: QUESTION3_ID,
+        questionText: 'What\'s your weird flex?',
+        responseBody: 'he\'s a RALPH POLO LAUREN campus ambassador so hit him up for free shirts',
+      },
+    ],
+    vibes: [
+      {
+        author_id: SOPHIA_ID,
+        authorFirstName: 'Sophia',
+        content: 'Kiki Kiwi',
+      },
+      {
+        author_id: SOPHIA_ID,
+        authorFirstName: 'Sophia',
+        content: 'Zesty',
+      },
+    ],
   },
 };
 
@@ -82,7 +157,15 @@ export const CREATE_SAMMI1_DETACHED_PROFILE_VARIABLES = {
         content: 'Red as a tomato after one drink',
       },
     ],
-    questionResponses: [],
+    questionResponses: [
+      {
+        author_id: JOSH_ID,
+        authorFirstName: 'Josh',
+        question_id: QUESTION1_ID,
+        questionText: 'What\'s your favorite color?',
+        responseBody: 'blue',
+      },
+    ],
     vibes: [],
   },
 };
@@ -102,7 +185,32 @@ export const CREATE_SAMMI2_DETACHED_PROFILE_VARIABLES = {
       },
     ],
     roasts: [],
-    questionResponses: [],
+    questionResponses: [
+      {
+        author_id: BRIAN_ID,
+        authorFirstName: 'Brian',
+        question_id: QUESTION1_ID,
+        questionText: 'What\'s your favorite color?',
+        responseBody: 'red',
+        responseTitle: 'red is a great color',
+        color: {
+          red: 1.0,
+          green: 0.0,
+          blue: 0.0,
+          alpha: 1.0,
+        },
+        icon: {
+          assetString: 'red-icon',
+        },
+      },
+      {
+        author_id: BRIAN_ID,
+        authorFirstName: 'Brian',
+        question_id: QUESTION2_ID,
+        questionText: 'What\'s your favorite shoe??',
+        responseBody: 'yeezys',
+      },
+    ],
     vibes: [],
   },
 };
@@ -140,6 +248,12 @@ export const CREATE_UMA1_DETACHED_PROFILE_VARIABLES = {
         authorFirstName: 'Uma',
         content: 'Gyms religiously',
       },
+      {
+        author_id: BRIAN_ID,
+        authorFirstName: 'Brian',
+        content: 'Casually gets onsite tech interviews when she wants to visit the Bay',
+      },
+
     ],
     roasts: [],
     questionResponses: [],
@@ -163,7 +277,18 @@ export const CREATE_SOPHIA1_DETACHED_PROFILE_VARIABLES = {
     ],
     roasts: [],
     questionResponses: [],
-    vibes: [],
+    vibes: [
+      {
+        author_id: SAMMI_ID,
+        authorFirstName: 'Sammi',
+        content: 'BANANAS',
+      },
+      {
+        author_id: SAMMI_ID,
+        authorFirstName: 'Sammi',
+        content: 'Coco-NUTS',
+      },
+    ],
   },
 };
 
@@ -174,7 +299,13 @@ export const CREATE_SOPHIA2_DETACHED_PROFILE_VARIABLES = {
     creatorFirstName: 'Uma',
     firstName: 'Sophia',
     phoneNumber: '9165189165',
-    boasts: [],
+    boasts: [
+      {
+        author_id: UMA_ID,
+        authorFirstName: 'Uma',
+        content: 'This girl can juggle!!',
+      },
+    ],
     roasts: [
       {
         author_id: UMA_ID,
@@ -183,6 +314,22 @@ export const CREATE_SOPHIA2_DETACHED_PROFILE_VARIABLES = {
       },
     ],
     questionResponses: [],
-    vibes: [],
+    vibes: [
+      {
+        author_id: UMA_ID,
+        authorFirstName: 'Uma',
+        content: 'Zesty',
+      },
+      {
+        author_id: UMA_ID,
+        authorFirstName: 'Uma',
+        content: 'BANANAS',
+      },
+      {
+        author_id: UMA_ID,
+        authorFirstName: 'Uma',
+        content: 'Spicy',
+      },
+    ],
   },
 };

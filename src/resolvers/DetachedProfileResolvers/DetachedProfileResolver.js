@@ -1,108 +1,24 @@
-import nanoid from 'nanoid';
-import { pick } from 'lodash';
-import { DetachedProfile, createDetachedProfileObject } from '../../models/DetachedProfile';
+import { DetachedProfile } from '../../models/DetachedProfile';
 import { User } from '../../models/UserModel';
-import { createUserProfileObject, UserProfile } from '../../models/UserProfileModel';
-import { NEW_PROFILE_BONUS } from '../../constants';
-import { DiscoveryQueue } from '../../models/DiscoveryQueueModel';
 import {
-  createEndorsementChat,
-  getChatDocPathFromId,
-  sendNewEndorsementMessage, sendProfileApprovedPushNotification,
-} from '../../FirebaseManager';
-import {
-  ALREADY_APPROVED_PROFILE,
-  ALREADY_MADE_PROFILE,
-  APPROVE_PROFILE_ERROR, CANT_ENDORSE_YOURSELF,
-  CREATE_DETACHED_PROFILE_ERROR, DELETE_DETACHED_PROFILE_ERROR, GET_DETACHED_PROFILE_ERROR,
-  GET_USER_ERROR, VIEW_DETACHED_PROFILE_ERROR, WRONG_CREATOR_ERROR,
+  APPROVE_PROFILE_ERROR,
+  CREATE_DETACHED_PROFILE_ERROR,
+  DELETE_DETACHED_PROFILE_ERROR,
+  EDIT_DETACHED_PROFILE_ERROR,
+  GET_DETACHED_PROFILE_ERROR,
+  GET_USER_ERROR,
+  VIEW_DETACHED_PROFILE_ERROR,
+  WRONG_CREATOR_ERROR,
 } from '../ResolverErrorStrings';
 import { deleteDetachedProfile } from '../../deletion/UserProfileDeletion';
-import { updateDiscoveryWithNextItem } from '../../discovery/DiscoverProfile';
 import { createDetachedProfileResolver } from './CreateDetachedProfile';
+import { approveDetachedProfileResolver } from './ApproveDetachedProfile';
+import { getAndValidateUsersAndDetachedProfileObjects } from './DetachedProfileResolverUtils';
+import { editDetachedProfileResolver } from './EditDetachedProfile';
 
-const mongoose = require('mongoose');
 const debug = require('debug')('dev:DetachedProfileResolvers');
 const errorLog = require('debug')('error:DetachedProfileResolvers');
 const functionCallConsole = require('debug')('dev:FunctionCalls');
-
-const canMakeProfileForSelf = [
-  '9738738225',
-  '2067789236',
-  '6196160848',
-  '9165290384',
-];
-
-const getAndValidateUsersAndDetachedProfileObjects = async ({
-  user_id, detachedProfile_id, creator_id,
-}) => {
-  const userPromise = User.findById(user_id)
-    .exec()
-    .catch(() => null);
-  const detachedProfilePromise = DetachedProfile.findById(detachedProfile_id)
-    .exec()
-    .catch(() => null);
-  const [user, detachedProfile] = await Promise.all([
-    userPromise,
-    detachedProfilePromise]);
-  if (!user) {
-    errorLog(`Couldn't find user with id ${user_id}`);
-    throw new Error(`Couldn't find user with id ${user_id}`);
-  }
-  if (!detachedProfile) {
-    errorLog(`Couldn't find detached profile with id ${detachedProfile_id}`);
-    throw new Error(`Couldn't find detached profile with id ${detachedProfile_id}`);
-  }
-  // check that this user is indeed the user referenced by the detached profile
-  if (user.phoneNumber !== detachedProfile.phoneNumber) {
-    errorLog(`user phone number is ${user.phoneNumber}`);
-    errorLog(`detached profile phone number is ${detachedProfile.phoneNumber}`);
-    errorLog(
-      `Detached profile with phone number ${detachedProfile.phoneNumber} can't be viewed by this user`,
-    );
-    throw new Error(
-      `Detached profile with phone number ${detachedProfile.phoneNumber} can't be viewed by this user`,
-    );
-  }
-  let creator = null;
-  if (creator_id) {
-    creator = await User.findById(creator_id)
-      .exec()
-      .catch(() => null);
-    if (!creator) {
-      errorLog(`Couldn't find creator with id ${creator_id}`);
-      throw new Error(`Couldn't find creator with id ${creator_id}`);
-    }
-
-    // check that creator made detached profile
-    if (creator_id.toString() !== detachedProfile.creatorUser_id.toString()) {
-      errorLog(`Creator with id ${creator_id} did not make detached profile ${detachedProfile_id}`);
-      throw new Error(
-        `Creator with id ${creator_id} did not make detached profile ${detachedProfile_id}`,
-      );
-    }
-    // check creator != user
-    if (creator_id.toString() === user_id.toString()) {
-      if (process.env.DB_NAME !== 'prod'
-        && canMakeProfileForSelf.includes(detachedProfile.phoneNumber)) {
-        // we ignore this check if phoneNumber is whitelisted and we aren't touching prod db
-      } else {
-        errorLog(`Endorsed user with id ${user_id} is same as profile creator`);
-        throw new Error(`Endorsed user with id ${user_id} is same as profile creator`);
-      }
-    }
-    // check creator has not already made a profile for user
-    if (creator_id.toString() in user.endorser_ids.map(endorser_id => endorser_id.toString())) {
-      errorLog(`creator ${creator_id} has already made a profile for user ${user_id}`);
-      throw new Error(`creator ${creator_id} has already made a profile for user ${user_id}`);
-    }
-  }
-  return {
-    user,
-    detachedProfile,
-    creator,
-  };
-};
 
 export const resolvers = {
   Query: {
@@ -162,338 +78,27 @@ export const resolvers = {
     editDetachedProfile: async (_source, { editDetachedProfileInput }) => {
       functionCallConsole('Edit Detached Profile Called');
 
-      const creator = await User.findById(editDetachedProfileInput.creatorUser_id)
-        .exec()
-        .catch(err => err);
-      let detachedProfile = await DetachedProfile.findById(editDetachedProfileInput._id)
-        .exec()
-        .catch(err => err);
-      if (!creator || creator instanceof Error) {
-        return {
-          success: false,
-          message: GET_USER_ERROR,
-        };
-      }
-      if (!detachedProfile || detachedProfile instanceof Error) {
-        return {
-          success: false,
-          message: GET_DETACHED_PROFILE_ERROR,
-        };
-      }
-      if (detachedProfile.creatorUser_id.toString() !== creator._id.toString()) {
-        return {
-          success: false,
-          message: WRONG_CREATOR_ERROR,
-        };
-      }
-      if (detachedProfile.userProfile_id || detachedProfile.status === 'accepted') {
-        // edits don't happen if detached profile has already been approved
-        return {
-          success: true,
-          detachedProfile,
-        };
-      }
-
-      detachedProfile = Object.assign(detachedProfile, editDetachedProfileInput);
-      detachedProfile.status = 'waitingUnseen';
-      detachedProfile = await detachedProfile.save();
-      return {
-        success: true,
-        detachedProfile,
-      };
-    },
-    approveNewDetachedProfile: async (_source, {
-      user_id,
-      detachedProfile_id,
-      creatorUser_id,
-      userProfile_id,
-    }) => {
-      functionCallConsole('Approve Profile Called');
-
-      // TODO: Handle error
-      let user = null;
-      let detachedProfile = null;
-      let creator = null;
       try {
-        ({ user, detachedProfile, creator } = await getAndValidateUsersAndDetachedProfileObjects(
-          {
-            user_id,
-            detachedProfile_id,
-            creator_id: creatorUser_id,
-          },
-        ));
+        return editDetachedProfileResolver({ editDetachedProfileInput });
       } catch (e) {
-        errorLog(`Error occurred validating dp and user objs: ${e}`);
+        errorLog(`error occurred editing detached profile: ${e}`);
+        return {
+          success: false,
+          message: EDIT_DETACHED_PROFILE_ERROR,
+        };
+      }
+    },
+    approveNewDetachedProfile: async (_source, { approveDetachedProfileInput }) => {
+      functionCallConsole('Approve Profile Called');
+      try {
+        return approveDetachedProfileResolver({ approveDetachedProfileInput });
+      } catch (e) {
+        errorLog(`error occurred approving detached profile: ${e}`);
         return {
           success: false,
           message: APPROVE_PROFILE_ERROR,
         };
       }
-      if (detachedProfile.userProfile_id) {
-        return {
-          success: false,
-          message: ALREADY_APPROVED_PROFILE,
-        };
-      }
-      const profileId = userProfile_id || mongoose.Types.ObjectId();
-      const userProfileInput = {
-        _id: profileId,
-        creatorUser_id: creator._id,
-        creatorFirstName: creator.firstName,
-        user_id,
-        interests: detachedProfile.interests,
-        vibes: detachedProfile.vibes,
-        bio: detachedProfile.bio,
-        dos: detachedProfile.dos,
-        donts: detachedProfile.donts,
-      };
-
-      const userObjectUpdate = {
-        isSeeking: true,
-        $inc: { profileCount: 1 },
-        $push: {
-          profile_ids: profileId,
-          bankImages: {
-            $each: detachedProfile.images,
-          },
-        },
-      };
-
-      let userUpdateArrayFilters = [];
-
-      const creatorObjectUpdate = {
-        $pull: {
-          detachedProfile_ids: detachedProfile_id,
-        },
-        $push: {
-          endorsedProfile_ids: profileId,
-        },
-      };
-      let creatorUpdateArrayFilters = [];
-
-      // generate a tentative firebase ID, to update the edges and userProfile with if one doesn't
-      // already exist
-      let firebaseId = nanoid(20);
-      const endorsementEdge = user.endorsementEdges.find(
-        edge => (edge.otherUser_id.toString() === creator._id.toString()),
-      );
-      if (!endorsementEdge) {
-        userObjectUpdate.$push.endorsementEdges = {
-          otherUser_id: creator._id,
-          myProfile_id: profileId,
-          firebaseChatDocumentID: firebaseId,
-          firebaseChatDocumentPath: getChatDocPathFromId(firebaseId),
-        };
-        creatorObjectUpdate.$push.endorsementEdges = {
-          otherUser_id: user._id,
-          theirProfile_id: profileId,
-          firebaseChatDocumentID: firebaseId,
-          firebaseChatDocumentPath: getChatDocPathFromId(firebaseId),
-        };
-      } else {
-        userObjectUpdate['endorsementEdges.$[element].myProfile_id'] = profileId;
-        creatorObjectUpdate['endorsementEdges.$[element].theirProfile_id'] = profileId;
-        userUpdateArrayFilters = [{ 'element.otherUser_id': creator._id.toString() }];
-        creatorUpdateArrayFilters = [{ 'element.otherUser_id': user._id.toString() }];
-        firebaseId = endorsementEdge.firebaseChatDocumentID;
-      }
-
-      userProfileInput.firebaseChatDocumentID = firebaseId;
-      userProfileInput.firebaseChatDocumentPath = getChatDocPathFromId(firebaseId);
-      // create new user profile
-      const createUserProfileObjectPromise = createUserProfileObject(userProfileInput)
-        .catch(err => err);
-
-      // link to first party, add photos to photobank
-      const updateUserObjectPromise = User
-        .findByIdAndUpdate(user_id, userObjectUpdate, {
-          new: true,
-          arrayFilters: userUpdateArrayFilters,
-        })
-        .exec()
-        .catch(err => err);
-
-      // unlink detached profile from creator, link new endorsed profile
-      const updateCreatorObjectPromise = User
-        .findByIdAndUpdate(creator._id, creatorObjectUpdate, {
-          new: true,
-          arrayFilters: creatorUpdateArrayFilters,
-        })
-        .exec()
-        .catch(err => err);
-
-      // update status of detached profile
-      const updateDetachedProfilePromise = DetachedProfile.findByIdAndUpdate(detachedProfile_id, {
-        status: 'accepted',
-        userProfile_id: profileId,
-      })
-        .exec()
-        .catch(err => err);
-
-      // create chat object
-      const createChatPromise = endorsementEdge ? null : createEndorsementChat({
-        documentID: firebaseId,
-        firstPerson: user,
-        secondPerson: creator,
-      })
-        .catch(err => err);
-
-      return Promise.all([
-        createUserProfileObjectPromise, updateUserObjectPromise,
-        updateCreatorObjectPromise, updateDetachedProfilePromise, createChatPromise])
-        .then(async ([
-          createUserProfileObjectResult, updateUserObjectResult,
-          updateCreatorObjectResult, updateDetachedProfileResult, createChatResult]) => {
-          // if at least one of the above four operations failed, roll back the others
-          if (createUserProfileObjectResult instanceof Error
-            || updateUserObjectResult instanceof Error
-            || updateCreatorObjectResult instanceof Error
-            || updateDetachedProfileResult instanceof Error
-            || createChatResult instanceof Error) {
-            debug('error attaching profile, rolling back');
-            let errorMessage = '';
-            if (createUserProfileObjectResult instanceof Error) {
-              errorMessage += createUserProfileObjectResult.toString();
-            } else {
-              createUserProfileObjectResult.remove((err) => {
-                if (err) {
-                  errorLog(`Failed to remove user profile object: ${err}`);
-                  debug(`Failed to remove user profile object: ${err}`);
-                } else {
-                  debug('Removed created user profile object successfully');
-                }
-              });
-            }
-            if (updateUserObjectResult instanceof Error) {
-              errorMessage += updateUserObjectResult.toString();
-            } else {
-              let arrayFilters = [];
-              const userUpdateRollback = {
-                $inc: { profileCount: -1 },
-                $pull: {
-                  profile_ids: profileId,
-                  bankImages: {
-                    uploadedByUser_id: creator._id,
-                  },
-                },
-              };
-              if (!endorsementEdge) {
-                // we created an edge, so remove the edge
-                userUpdateRollback.$pull.endorsementEdges = {
-                  otherUser_id: creator._id,
-                };
-              } else {
-                // remove the reference to user's profile
-                userUpdateRollback['endorsementEdges.$[element].myProfile_id'] = undefined;
-                arrayFilters = [{ 'element.otherUser_id': creator._id.toString() }];
-              }
-              User.findByIdAndUpdate(user_id, userUpdateRollback, {
-                new: true,
-                arrayFilters,
-              }, (err) => {
-                if (err) {
-                  errorLog(`Failed to rollback user updates: ${err}`);
-                  debug(`Failed to rollback user updates: ${err}`);
-                } else {
-                  debug('Rolled back user updates successfully');
-                }
-              });
-            }
-            if (updateCreatorObjectResult instanceof Error) {
-              errorMessage += updateCreatorObjectResult.toString();
-            } else {
-              let arrayFilters = [];
-              const creatorUpdateRollback = {
-                $push: {
-                  detachedProfile_ids: detachedProfile_id,
-                },
-                $pull: {
-                  endorsedProfile_ids: profileId,
-                },
-              };
-              if (!endorsementEdge) {
-                // we created an edge, so remove the edge
-                creatorUpdateRollback.$pull.endorsementEdges = {
-                  otherUser_id: user._id,
-                };
-              } else {
-                // remove the reference to the user's profile
-                creatorUpdateRollback['endorsementEdges.$[element].theirProfile_id'] = undefined;
-                arrayFilters = [{ 'element.otherUser_id': user._id.toString() }];
-              }
-              User.findByIdAndUpdate(creator._id.toString(), creatorUpdateRollback, {
-                new: true,
-                arrayFilters,
-              }, (err) => {
-                if (err) {
-                  errorLog(`Failed to roll back creator object: ${err}`);
-                  debug(`Failed to roll back creator object: ${err}`);
-                } else {
-                  debug('Rolled back creator object successfully');
-                }
-              });
-            }
-            if (updateDetachedProfileResult instanceof Error) {
-              errorMessage += updateDetachedProfileResult.toString();
-            } else {
-              DetachedProfile.findByIdAndUpdate(detachedProfile_id, {
-                status: 'waitingSeen',
-                $unset: {
-                  userProfile_id: 1,
-                },
-              })
-                .exec()
-                .then(() => {
-                  debug('Rolled back detached profile object successfully');
-                })
-                .catch((err) => {
-                  errorLog(`Failed to roll back detached profile ${err}`);
-                  debug(`Failed to roll back detached profile ${err}`);
-                });
-            }
-            if (createChatResult instanceof Error) {
-              errorMessage += createChatResult.toString();
-            } else if (!endorsementEdge) {
-              // TODO: decide if we want to actually delete the chat, or just de-reference
-              // i.e. at this point, mongo contains no references to the chat anymore
-            }
-            errorLog(errorMessage);
-            return {
-              success: false,
-              message: APPROVE_PROFILE_ERROR,
-            };
-          }
-          // all operations succeeded; populate discovery feeds if this the endorsee's first profile
-          try {
-            const feed = await DiscoveryQueue.findById(user.discoveryQueue_id);
-            const devMode = process.env.DEV === 'true';
-            const regenTestDBMode = (process.env.REGEN_DB === 'true' && devMode);
-            if (feed.currentDiscoveryItems.length === 0 && !regenTestDBMode) {
-              for (let i = 0; i < NEW_PROFILE_BONUS; i += 1) {
-                await updateDiscoveryWithNextItem({ userObj: updateCreatorObjectResult });
-              }
-            }
-          } catch (e) {
-            errorLog(`error occurred when trying to populate discovery feed: ${e}`);
-            debug(`error occurred when trying to populate discovery feed: ${e}`);
-          }
-          // send the server message to the endorsement chat. it's mostly ok if this silent fails
-          // so we don't do the whole rollback thing
-          sendNewEndorsementMessage({
-            chatID: firebaseId,
-            endorser: creator,
-            endorsee: user,
-          });
-          // send a push notification. not a big deal if this silent fails also
-          sendProfileApprovedPushNotification({
-            creator,
-            user,
-          });
-          return {
-            success: true,
-            user: updateUserObjectResult,
-          };
-        });
     },
     deleteDetachedProfile: async (_source, { creator_id, detachedProfile_id }) => {
       functionCallConsole('deleteDetachedProfile called');
