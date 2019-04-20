@@ -8,7 +8,7 @@ extend type Query {
   getAllQuestions: [Question!]!
   
   # get question by id
-  getQuestionById: Question
+  getQuestionById(question_id: ID!): Question
 }
 `;
 
@@ -24,6 +24,7 @@ extend type Mutation {
 
 const bioType = `
 type Bio {
+  _id: ID!
   author_id: ID!
   author: User
   authorFirstName: String!
@@ -33,15 +34,19 @@ type Bio {
 }
 
 input BioInput {
+  # _id is optional. if it's set, it replaces an existing bio if one exists w/same id. else
+  # if not set, we just insert a new bio.
+  _id: ID
   author_id: ID!
   authorFirstName: String!
   content: String!
-  hidden: Boolean!
+  hidden: Boolean
 }
 `;
 
 const boastType = `
 type Boast {
+  _id: ID!
   author_id: ID!
   author: User
   authorFirstName: String!
@@ -51,6 +56,9 @@ type Boast {
 }
 
 input BoastInput {
+  # _id is optional. if it's set, it replaces an existing bio if one exists w/same id. else
+  # if not set, we just insert a new bio.
+  _id: ID
   author_id: ID!
   authorFirstName: String!
   content: String!
@@ -60,6 +68,7 @@ input BoastInput {
 
 const roastType = `
 type Roast {
+  _id: ID!
   author_id: ID!
   author: User
   authorFirstName: String!
@@ -69,6 +78,31 @@ type Roast {
 }
 
 input RoastInput {
+  # _id is optional. if it's set, it replaces an existing bio if one exists w/same id. else
+  # if not set, we just insert a new bio.
+  _id: ID
+  author_id: ID!
+  authorFirstName: String!
+  content: String!
+  hidden: Boolean
+}
+`;
+
+const vibeType = `
+type Vibe {
+  _id: ID!
+  author_id: ID!
+  author: User
+  authorFirstName: String!
+  
+  content: String!
+  hidden: Boolean!
+}
+
+input VibeInput {
+  # _id is optional. if it's set, it replaces an existing bio if one exists w/same id. else
+  # if not set, we just insert a new bio.
+  _id: ID
   author_id: ID!
   authorFirstName: String!
   content: String!
@@ -78,6 +112,7 @@ input RoastInput {
 
 const doType = `
 type Do {
+  _id: ID!
   author_id: ID!
   author: User
   authorFirstName: String!
@@ -87,6 +122,9 @@ type Do {
 }
 
 input DoInput {
+  # _id is optional. if it's set, it replaces an existing bio if one exists w/same id. else
+  # if not set, we just insert a new bio.
+  _id: ID
   author_id: ID!
   authorFirstName: String!
   content: String!
@@ -96,6 +134,7 @@ input DoInput {
 
 const dontType = `
 type Dont {
+  _id: ID!
   author_id: ID!
   author: User
   authorFirstName: String!
@@ -105,6 +144,9 @@ type Dont {
 }
 
 input DontInput {
+  # _id is optional. if it's set, it replaces an existing bio if one exists w/same id. else
+  # if not set, we just insert a new bio.
+  _id: ID
   author_id: ID!
   authorFirstName: String!
   content: String!
@@ -114,6 +156,7 @@ input DontInput {
 
 const interestType = `
 type Interest {
+  _id: ID!
   author_id: ID!
   author: User
   authorFirstName: String!
@@ -123,6 +166,9 @@ type Interest {
 }
 
 input InterestInput {
+  # _id is optional. if it's set, it replaces an existing bio if one exists w/same id. else
+  # if not set, we just insert a new bio.
+  _id: ID
   author_id: ID!
   authorFirstName: String!
   content: String!
@@ -162,9 +208,11 @@ const questionType = `
 type Question {
   _id: ID!
   questionText: String!
+  questionSubtext: String
   questionTextWithName: String
   questionType: QuestionType!
   suggestedResponses: [QuestionSuggestedResponse!]!
+  placeholderResponseText: String
   
   # shows up in questionnaire or not
   hiddenInQuestionnaire: Boolean!
@@ -173,14 +221,17 @@ type Question {
 }
 
 input NewQuestionInput {
+  # optional, for testing
+  _id: ID
   questionText: String!
+  questionSubtext: String
   questionTextWithName: String
   questionType: QuestionType!
   suggestedResponses: [QuestionSuggestedResponseInput!]!
+  placeholderResponseText: String
 }
 
 type QuestionSuggestedResponse {
-  _id: ID!
   responseBody: String!
   responseTitle: String
   color: Color
@@ -203,6 +254,7 @@ enum QuestionType {
 
 const questionUserResponseType = `
 type QuestionUserResponse {
+  _id: ID!
   author_id: ID!
   author: User
   authorFirstName: String!
@@ -220,9 +272,12 @@ type QuestionUserResponse {
 }
 
 input QuestionUserResponseInput {
+  # _id is optional. if it's set, it replaces an existing bio if one exists w/same id. else
+  # if not set, we just insert a new bio.
+  _id: ID
   author_id: ID!
   authorFirstName: String!
-  questionID: String!
+  question_id: ID!
   questionText: String!
   responseBody: String!
   responseTitle: String
@@ -232,25 +287,9 @@ input QuestionUserResponseInput {
 }
 `;
 
-const vibeType = `
-type Vibe {
-  author_id: ID!
-  author: User
-  authorFirstName: String!
-  
-  content: String!
-  hidden: Boolean!
-}
-
-input VibeInput {
-  author_id: ID!
-  authorFirstName: String!
-  content: String!
-  hidden: Boolean
-}
-`;
-
-export const typeDef = bioType
+export const typeDef = queryRoutes
++ mutationRoutes
++ bioType
 + boastType
 + roastType
 + colorType
@@ -284,6 +323,7 @@ export const QuestionSuggestedResponseSchema = new Schema({
 export const QuestionSchema = new Schema({
   _id: { type: Schema.Types.ObjectId, required: true },
   questionText: { type: String, required: true },
+  questionSubtext: { type: String, required: false },
   questionTextWithName: { type: String, required: false },
   questionType: {
     type: String,
@@ -291,51 +331,10 @@ export const QuestionSchema = new Schema({
     enum: ['multipleChoice', 'multipleChoiceWithOther', 'freeResponse'],
   },
   suggestedResponses: { type: [QuestionSuggestedResponseSchema], required: false },
+  placeholderResponseText: { type: String, required: false },
   hiddenInQuestionnaire: { type: Boolean, required: true, default: false },
   hiddenInProfile: { type: Boolean, required: true, default: false },
-});
-
-export const BioSchema = new Schema({
-  author_id: { type: Schema.Types.ObjectId, required: true, index: true },
-  authorFirstName: { type: String, required: true },
-  content: { type: String, required: true },
-  hidden: { type: Boolean, required: true, default: false },
-});
-
-export const BoastSchema = new Schema({
-  author_id: { type: Schema.Types.ObjectId, required: true, index: true },
-  authorFirstName: { type: String, required: true },
-  content: { type: String, required: true },
-  hidden: { type: Boolean, required: true, default: false },
-});
-
-export const RoastSchema = new Schema({
-  author_id: { type: Schema.Types.ObjectId, required: true, index: true },
-  authorFirstName: { type: String, required: true },
-  content: { type: String, required: true },
-  hidden: { type: Boolean, required: true, default: false },
-});
-
-export const DoSchema = new Schema({
-  author_id: { type: Schema.Types.ObjectId, required: true, index: true },
-  authorFirstName: { type: String, required: true },
-  content: { type: String, required: true },
-  hidden: { type: Boolean, required: true, default: false },
-});
-
-export const DontSchema = new Schema({
-  author_id: { type: Schema.Types.ObjectId, required: true, index: true },
-  authorFirstName: { type: String, required: true },
-  content: { type: String, required: true },
-  hidden: { type: Boolean, required: true, default: false },
-});
-
-export const InterestSchema = new Schema({
-  author_id: { type: Schema.Types.ObjectId, required: true, index: true },
-  authorFirstName: { type: String, required: true },
-  content: { type: String, required: true },
-  hidden: { type: Boolean, required: true, default: false },
-});
+}, { timestamps: true });
 
 export const QuestionUserResponseSchema = new Schema({
   author_id: { type: Schema.Types.ObjectId, required: true, index: true },
@@ -348,11 +347,25 @@ export const QuestionUserResponseSchema = new Schema({
   hidden: { type: Boolean, required: true, default: false },
 });
 
-export const VibeSchema = new Schema({
+const simpleContentSchemaObject = {
   author_id: { type: Schema.Types.ObjectId, required: true, index: true },
   authorFirstName: { type: String, required: true },
   content: { type: String, required: true },
   hidden: { type: Boolean, required: true, default: false },
-});
+};
+
+export const BioSchema = new Schema(simpleContentSchemaObject, { timestamps: true });
+
+export const BoastSchema = new Schema(simpleContentSchemaObject, { timestamps: true });
+
+export const RoastSchema = new Schema(simpleContentSchemaObject, { timestamps: true });
+
+export const DoSchema = new Schema(simpleContentSchemaObject, { timestamps: true });
+
+export const DontSchema = new Schema(simpleContentSchemaObject, { timestamps: true });
+
+export const InterestSchema = new Schema(simpleContentSchemaObject, { timestamps: true });
+
+export const VibeSchema = new Schema(simpleContentSchemaObject, { timestamps: true });
 
 export const Question = mongoose.model('Question', QuestionSchema);

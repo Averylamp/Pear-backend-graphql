@@ -10,17 +10,11 @@ import { UserProfile } from '../../models/UserProfileModel';
 import { DiscoveryQueue } from '../../models/DiscoveryQueueModel';
 import { NEW_PROFILE_BONUS } from '../../constants';
 import { updateDiscoveryWithNextItem } from '../../discovery/DiscoverProfile';
+import { canMakeProfileForSelf } from './DetachedProfileResolverUtils';
 
 const mongoose = require('mongoose');
 const debug = require('debug')('dev:DetachedProfileResolvers');
 const errorLog = require('debug')('error:DetachedProfileResolvers');
-
-const canMakeProfileForSelf = [
-  '9738738225',
-  '2067789236',
-  '6196160848',
-  '9165290384',
-];
 
 export const createDetachedProfileResolver = async ({ detachedProfileInput }) => {
   const detachedProfileID = '_id' in detachedProfileInput

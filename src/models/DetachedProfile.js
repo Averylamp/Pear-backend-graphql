@@ -91,11 +91,15 @@ input EditDetachedProfileInput {
   # The creator's User Object ID
   creatorUser_id: ID!
   
-  bio: BioInput
   boasts: [BoastInput!]
   roasts: [RoastInput!]
   questionResponses: [QuestionUserResponseInput!]
   vibes: [VibeInput!]
+  
+  bio: BioInput
+  dos: [DoInput!]
+  donts: [DontInput!]
+  interests: [InterestInput!]
   
   images: [CreateImageContainer!]
   school: String
@@ -178,7 +182,7 @@ const DetachedProfileSchema = new Schema({
   bio: { type: BioSchema, required: false },
   boasts: { type: [BoastSchema], required: true, default: [] },
   roasts: { type: [RoastSchema], required: true, default: [] },
-  questionResponse: { type: [QuestionUserResponseSchema], required: true, default: [] },
+  questionResponses: { type: [QuestionUserResponseSchema], required: true, default: [] },
   vibes: { type: [VibeSchema], required: false, default: [] },
 
   // dos, donts, interests are not used currently
@@ -199,6 +203,9 @@ const DetachedProfileSchema = new Schema({
     required: true,
     default: MatchingPreferencesSchema,
   },
+
+  // not in graphql schema because once this is set, the DP should never be queried for
+  endorsedUser_id: { type: Schema.Types.ObjectId, required: false, index: true, sparse: true },
 }, { timestamps: true });
 
 
