@@ -9,23 +9,6 @@ const mongoose = require('mongoose');
 const errorLog = require('debug')('error:CreateUserResolver');
 const debug = require('debug')('dev:CreateUserResolver');
 
-const generateReferralCode = async (firstName, maxIters = 20) => {
-  let flag = true;
-  let code = null;
-  let count = 0;
-  while (flag && count < maxIters) {
-    count += 1;
-    code = firstName;
-    code += Math.floor(Math.random() * 900 + 100).toString();
-    const findResult = await User.findOne({ referralCode: code });
-    if (!findResult) {
-      flag = false;
-    }
-  }
-  errorLog(code);
-  return code;
-};
-
 export const createUserResolver = async ({ userInput }) => {
   const userObjectID = '_id' in userInput ? userInput._id : mongoose.Types.ObjectId();
   const discoveryQueueObjectID = mongoose.Types.ObjectId();
@@ -36,16 +19,13 @@ export const createUserResolver = async ({ userInput }) => {
     'firebaseToken',
     'firebaseAuthID',
     'firebaseRemoteInstanceID',
+    'referredByCode',
   ]);
   finalUserInput.lastActive = [new Date()];
   finalUserInput._id = userObjectID;
   finalUserInput.discoveryQueue_id = discoveryQueueObjectID;
   finalUserInput.matchingPreferences = {};
   finalUserInput.matchingDemographics = {};
-  const referralCode = await generateReferralCode(userInput.firstName);
-  if (referralCode) {
-    finalUserInput.referralCode = referralCode;
-  }
   const createUserObj = createUserObject(finalUserInput)
     .catch(err => err);
 

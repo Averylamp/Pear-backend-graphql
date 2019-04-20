@@ -55,6 +55,9 @@ import {
 import {
   typeDef as ContentSchemas,
 } from './models/ContentModels';
+import {
+  resolvers as ContentResolvers,
+} from './resolvers/ContentResolvers';
 import { deleteUser } from './deletion/UserDeletion';
 
 const { ApolloServer } = require('apollo-server-express');
@@ -143,7 +146,8 @@ function createApolloServer() {
     TestObjectResolvers,
     ImageResolvers,
     UserProfileResolvers,
-    LocationResolvers);
+    LocationResolvers,
+    ContentResolvers);
 
 
   const server = new ApolloServer({

@@ -5,6 +5,7 @@ export const CREATE_USER_ERROR = 'Failed to initialize user.';
 export const UPDATE_USER_ERROR = 'Couldn\'t update user.';
 export const UPDATE_USER_PHOTOS_ERROR = 'Failed to update photos.';
 export const CREATE_DETACHED_PROFILE_ERROR = 'Failed to create profile.';
+export const EDIT_DETACHED_PROFILE_ERROR = 'Couldn\'t edit profile.';
 export const WRONG_CREATOR_ERROR = 'Matchmaker did not create profile for this user.';
 export const VIEW_DETACHED_PROFILE_ERROR = 'Failed to perform this operation.';
 export const DELETE_USER_PROFILE_ERROR = 'Couldn\'t delete this profile.';

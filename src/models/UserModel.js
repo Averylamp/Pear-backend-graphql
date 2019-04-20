@@ -34,7 +34,7 @@ extend type Mutation{
   createUser(userInput: CreationUserInput!): UserMutationResponse!
 
   # Updates an existing User
-  updateUser(id: ID, updateUserInput: UpdateUserInput!) : UserMutationResponse!
+  updateUser(updateUserInput: UpdateUserInput!) : UserMutationResponse!
 
   # Updates a User's photos or photo bank
   updateUserPhotos(updateUserPhotosInput: UpdateUserPhotosInput!): UserMutationResponse!
@@ -53,6 +53,7 @@ input GetUserInput{
 
 const createUserInputs = `
 input CreationUserInput{
+  # for testing only
   _id: ID
   # User's phone number
   phoneNumber: String!
@@ -71,6 +72,8 @@ input CreationUserInput{
 
 const updateUserInputs = `
 input UpdateUserInput {
+  user_id: ID!
+  
   deactivated: Boolean
   email: String
   emailVerified: Boolean
@@ -129,6 +132,7 @@ type User {
   thumbnailURL: String
   gender: Gender
   age: Int
+  canUpdateAge: Boolean!
   birthdate: String
   
   # profile content. ordered
@@ -159,7 +163,6 @@ type User {
   # All users who have endorsed this user
   endorser_ids: [ID!]!
   endorsers: [User]!
-  # Number of endorsers this user has
   endorserCount: Int!
   
   # All users this user has endorsed
@@ -169,7 +172,7 @@ type User {
   
   # All pending endorsements this user has created
   detachedProfile_ids: [ID!]!
-  detachedProfileObjs: [DetachedProfile!]!
+  detachedProfiles: [DetachedProfile!]!
   detachedProfilesCount: Int!
 
   # metainfo about endorser/endorsee chats
@@ -263,6 +266,7 @@ const UserSchema = new Schema({
   age: {
     type: Number, required: false, min: 18, max: 100, index: true,
   },
+  ageLastUpdated: { type: [Date], required: true, default: [] },
   birthdate: { type: Date, required: false },
 
   bios: { type: [BioSchema], required: true, default: [] },
@@ -361,6 +365,15 @@ UserSchema.virtual('fullName')
       return this.firstName;
     }
     return `${this.firstName} ${this.lastName}`;
+  });
+
+UserSchema.virtual('canUpdateAge')
+  .get(() => {
+    const twoWeeksAgo = new Date(Date.now() - (14 * 24 * 60 * 60 * 1000));
+    if (this.ageLastUpdated.length >= 2 && this.ageLastUpdated[this.ageLastUpdated.length - 1] > twoWeeksAgo) {
+      return false;
+    }
+    return true;
   });
 
 export const User = mongoose.model('User', UserSchema);

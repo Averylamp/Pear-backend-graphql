@@ -15,7 +15,7 @@ import {
   viewDetachedProfiles,
   updateUsers,
   editUserProfiles,
-  editDetachedProfiles,
+  editDetachedProfiles, addQuestions, updateUserFirstNames,
 } from './CreateTestDB';
 import {
   ACCEPT_REQUEST,
@@ -30,7 +30,7 @@ import {
   UPDATE_DISPLAYED_PHOTOS,
   UPDATE_USER,
   EDIT_USER_PROFILE,
-  EDIT_DETACHED_PROFILE,
+  EDIT_DETACHED_PROFILE, ADD_QUESTIONS,
 } from './Mutations';
 import {
   MONGO_URL,
@@ -109,6 +109,22 @@ export const runTests = async function runTests() {
 
       const { mutate } = createTestClient(apolloServer);
 
+      // ADD QUESTIONS
+      testLog('TESTING: Add Questions');
+      try {
+        const result = await mutate({
+          mutation: ADD_QUESTIONS,
+          variables: addQuestions,
+        });
+        if (verbose) {
+          verboseDebug(result);
+        }
+      } catch (e) {
+        errorLog(`${e}`);
+        process.exit(1);
+      }
+      successLog('***** Success Adding Questions *****\n');
+
       // CREATE USERS
       const createUserResults = [];
       testLog('TESTING: Create Users');
@@ -131,6 +147,7 @@ export const runTests = async function runTests() {
       successLog('***** Success Creating Users *****\n');
 
 
+      /*
       // UPLOAD DETACHED PROFILE IMAGES
       testLog('TESTING: Uploading Images');
 
@@ -169,6 +186,7 @@ export const runTests = async function runTests() {
         errorLog((`ERROR UPLOADING ${imageErrorCount} Images`));
         process.exit(1);
       }
+      */
 
       // CREATE DETACHED PROFILES
       testLog('TESTING: Creating Detached Profiles');
@@ -194,6 +212,25 @@ export const runTests = async function runTests() {
       }
       successLog('***** Success Creating Detached Profiles *****\n');
 
+      // UPDATE USERS' FIRST NAMES
+      testLog('TESTING: Updating User First Names');
+      for (const updateUserFirstNameVars of updateUserFirstNames) {
+        try {
+          const result = await mutate({
+            mutation: UPDATE_USER,
+            variables: updateUserFirstNameVars,
+          });
+          if (verbose) {
+            verboseDebug(result);
+          }
+          checkForAndLogErrors(result, 'updateUser');
+        } catch (e) {
+          errorLog((`${e}`));
+          process.exit(1);
+        }
+      }
+      successLog('***** Success Updating Users *****\n');
+
       /*
       // VIEW DETACHED PROFILES
       testLog('TESTING: Viewing Detached Profiles');
@@ -213,6 +250,7 @@ export const runTests = async function runTests() {
         }
       }
       successLog('***** Success Viewing Detached Profiles *****\n');
+      */
 
       testLog('TESTING: Editing Detached Profiles');
       for (const editDetachedProfileVars of editDetachedProfiles) {
@@ -232,6 +270,7 @@ export const runTests = async function runTests() {
       }
       successLog('***** Success Editing Detached Profiles *****\n');
 
+      /*
       // UPDATING USER PROFILES
       testLog('TESTING: Updating User Images');
       for (let i = 0; i < createDetachedProfiles.length; i += 1) {
@@ -261,6 +300,7 @@ export const runTests = async function runTests() {
       }
 
       successLog('***** Success Updating User Images *****\n');
+      */
 
       // ATTACH DETACHED PROFILES
       testLog('TESTING: Attaching Detached Profiles');
@@ -281,6 +321,7 @@ export const runTests = async function runTests() {
       }
       successLog('***** Success Attaching Detached Profiles *****\n');
 
+      /*
       // UPDATE USERS
       testLog('TESTING: Updating Users');
       for (const updateUserVars of updateUsers) {
