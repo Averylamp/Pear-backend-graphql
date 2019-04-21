@@ -45,7 +45,7 @@ export const UPDATE_JOSH_USER_VARIABLES = {
     gender: 'male',
     age: 20,
     school: 'harvard',
-    isSeeking: false,
+    isSeeking: true,
     seekingGender: ['male'],
     location: [-71.332174, 42.299819],
   },

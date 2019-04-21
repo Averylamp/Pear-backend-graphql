@@ -176,6 +176,7 @@ type User {
 
   # The ordered images that currently make up the User's Profile
   displayedImages: [ImageContainer!]!
+  displayedImagesCount: Int!
   # All images uploaded for a user
   bankImages: [ImageContainer!]!
 
@@ -310,25 +311,26 @@ const UserSchema = new Schema({
   pearPoints: { type: Number, required: true, default: 0 },
 
   displayedImages: { type: [ImageContainerSchema], required: true, default: [] },
+  displayedImagesCount: { type: Number, required: true, default: 0 },
   bankImages: { type: [ImageContainerSchema], required: true, default: [] },
 
   endorser_ids: {
     type: [Schema.Types.ObjectId], required: true, index: true, default: [],
   },
   endorserCount: {
-    type: Number, required: true, index: true, default: 0,
+    type: Number, required: true, default: 0,
   },
   endorsedUser_ids: {
     type: [Schema.Types.ObjectId], required: true, index: true, default: [],
   },
   endorsedUsersCount: {
-    type: Number, required: true, index: true, default: 0,
+    type: Number, required: true, default: 0,
   },
   detachedProfile_ids: {
     type: [Schema.Types.ObjectId], required: true, index: true, default: [],
   },
   detachedProfilesCount: {
-    type: Number, required: true, index: true, default: 0,
+    type: Number, required: true, default: 0,
   },
 
   endorsementEdges: {
