@@ -6,7 +6,6 @@ import {
   GET_USER_ERROR,
 } from '../ResolverErrorStrings';
 import { createDetachedProfileObject, DetachedProfile } from '../../models/DetachedProfile';
-import { UserProfile } from '../../models/UserProfileModel';
 import { DiscoveryQueue } from '../../models/DiscoveryQueueModel';
 import { NEW_PROFILE_BONUS } from '../../constants';
 import { updateDiscoveryWithNextItem } from '../../discovery/DiscoverProfile';

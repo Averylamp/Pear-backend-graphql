@@ -1,7 +1,7 @@
 import {
   BRIAN_ID,
-  BRIAN_PROFILE_SAMMI_D_ID,
-  SAMMI_ID,
+  BRIAN_PROFILE_SAMMI_D_ID, JOSH_ID, SAMMI_BOAST1_ID,
+  SAMMI_ID, SAMMI_PROFILE_JOSH_D_ID,
   SOPHIA_PROFILE_UMA_D_ID,
   UMA_ID,
   UMA_PROFILE_BRIAN_D_ID,
@@ -49,6 +49,26 @@ export const EDIT_UMA1_DETACHED_PROFILE_VARIABLES = {
       },
     ],
     roasts: [],
+  },
+};
+
+export const EDIT_SAMMI1_DETACHED_PROFILE_VARIABLES = {
+  editDetachedProfileInput: {
+    _id: SAMMI_PROFILE_JOSH_D_ID,
+    creatorUser_id: JOSH_ID,
+    boasts: [
+      {
+        author_id: JOSH_ID,
+        authorFirstName: 'Josh',
+        content: 'Sammi boast 0',
+      },
+      {
+        _id: SAMMI_BOAST1_ID,
+        author_id: JOSH_ID,
+        authorFirstName: 'Josh',
+        content: 'Sammi boast 1',
+      },
+    ],
   },
 };
 

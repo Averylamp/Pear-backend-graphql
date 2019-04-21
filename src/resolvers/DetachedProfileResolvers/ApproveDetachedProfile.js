@@ -6,7 +6,7 @@ import {
 } from '../ResolverErrorStrings';
 import { DetachedProfile } from '../../models/DetachedProfile';
 import { DiscoveryQueue } from '../../models/DiscoveryQueueModel';
-import { NEW_PROFILE_BONUS } from '../../constants';
+import { LAST_EDITED_ARRAY_LEN, NEW_PROFILE_BONUS } from '../../constants';
 import { updateDiscoveryWithNextItem } from '../../discovery/DiscoverProfile';
 import {
   createEndorsementChat,
@@ -42,7 +42,8 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
       message: APPROVE_PROFILE_ERROR,
     };
   }
-  if (creatorUser_id.toString() in user.endorser_ids.map(endorser_id => endorser_id.toString())) {
+  if (user.endorser_ids.map(endorser_id => endorser_id.toString())
+    .includes(creatorUser_id.toString())) {
     return {
       success: false,
       message: ALREADY_APPROVED_PROFILE,
@@ -76,6 +77,10 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
       donts: { $each: approveDetachedProfileInput.donts ? approveDetachedProfileInput.donts : [] },
       interests: {
         $each: approveDetachedProfileInput.interests ? approveDetachedProfileInput.interests : [],
+      },
+      lastEdited: {
+        $each: [new Date()],
+        $slice: -1 * LAST_EDITED_ARRAY_LEN,
       },
     },
   };

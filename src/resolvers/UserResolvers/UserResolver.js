@@ -1,20 +1,19 @@
-import { pick } from 'lodash';
 import { DetachedProfile } from '../../models/DetachedProfile';
 import {
   DiscoveryQueue,
 } from '../../models/DiscoveryQueueModel';
 import { User } from '../../models/UserModel';
-import { UserProfile } from '../../models/UserProfileModel';
 import { Match } from '../../models/MatchModel';
 import { authenticateUser, sendNewMessagePushNotification } from '../../FirebaseManager';
 import {
-  CREATE_USER_ERROR,
+  CREATE_USER_ERROR, EDIT_ENDORSEMENT_ERROR,
   GET_USER_ERROR, UPDATE_USER_ERROR,
   UPDATE_USER_PHOTOS_ERROR,
 } from '../ResolverErrorStrings';
-import { LAST_ACTIVE_ARRAY_LEN } from '../../constants';
+import { LAST_ACTIVE_ARRAY_LEN, LAST_EDITED_ARRAY_LEN } from '../../constants';
 import { createUserResolver } from './CreateUser';
 import { updateUserResolver } from './UpdateUser';
+import { editEndorsementResolver } from './EditEndorsement';
 
 const debug = require('debug')('dev:UserResolvers');
 const errorLog = require('debug')('error:UserResolver');
@@ -50,19 +49,17 @@ export const resolvers = {
         const user = await User.findOne({ firebaseAuthID: authenticatedUID })
           .exec();
         if (user) {
-          let userUpdateObj = {};
-          if (user.lastActive) {
-            userUpdateObj.$push = {
-              lastActive: {
-                $each: [new Date()],
-                $slice: -1 * LAST_ACTIVE_ARRAY_LEN,
-              },
-            };
-          } else {
-            userUpdateObj = {
-              lastActive: [new Date()],
-            };
-          }
+          const userUpdateObj = {};
+          userUpdateObj.$push = {
+            lastActive: {
+              $each: [new Date()],
+              $slice: -1 * LAST_ACTIVE_ARRAY_LEN,
+            },
+            lastEdited: {
+              $each: [new Date()],
+              $slice: -1 * LAST_EDITED_ARRAY_LEN,
+            },
+          };
           await User.findByIdAndUpdate(user._id, userUpdateObj);
           return {
             success: true,
@@ -94,6 +91,14 @@ export const resolvers = {
         to,
       });
       return true;
+    },
+    alreadyOnPear: async (_source, { phoneNumbers }) => {
+      try {
+        const users = await User.find({ phoneNumber: { $in: phoneNumbers } }).exec();
+        return users.map(user => user.phoneNumber);
+      } catch (e) {
+        return [];
+      }
     },
   },
   Mutation: {
@@ -180,6 +185,18 @@ export const resolvers = {
           success: false,
           message: UPDATE_USER_PHOTOS_ERROR,
         }));
+    },
+    editEndorsement: async (_source, { editEndorsementInput }) => {
+      functionCallConsole('Edit Endorsement Called');
+      try {
+        return editEndorsementResolver({ editEndorsementInput });
+      } catch (e) {
+        errorLog(`error occurred while editing endorsement: ${e}`);
+        return {
+          success: false,
+          message: EDIT_ENDORSEMENT_ERROR,
+        };
+      }
     },
   }
   ,

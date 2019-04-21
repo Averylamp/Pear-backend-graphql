@@ -1,6 +1,8 @@
 import { User } from '../../models/UserModel';
 import { DetachedProfile } from '../../models/DetachedProfile';
 
+const errorLog = require('debug')('error:DetachedProfileResolverUtils');
+
 export const canMakeProfileForSelf = [
   '9738738225',
   '2067789236',
@@ -67,7 +69,8 @@ export const getAndValidateUsersAndDetachedProfileObjects = async ({
       }
     }
     // check creator has not already made a profile for user
-    if (creator_id.toString() in user.endorser_ids.map(endorser_id => endorser_id.toString())) {
+    if (user.endorser_ids.map(endorser_id => endorser_id.toString())
+      .includes(creator_id.toString())) {
       errorLog(`creator ${creator_id} has already made a profile for user ${user_id}`);
       throw new Error(`creator ${creator_id} has already made a profile for user ${user_id}`);
     }

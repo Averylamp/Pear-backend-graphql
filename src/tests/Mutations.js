@@ -264,6 +264,24 @@ export const UPDATE_DISPLAYED_PHOTOS = gql`
   }
 `;
 
+export const EDIT_ENDORSEMENT = gql`
+  mutation EditEndorsement($editEndorsementInput: EditEndorsementInput!) {
+    editEndorsement(editEndorsementInput: $editEndorsementInput) {
+      success
+      message
+      user {
+        _id
+        fullName
+        boasts {
+          _id
+          authorFirstName
+          content
+        }
+      }
+    }
+  }
+`;
+
 export const FORCE_FEED_UPDATE = gql`
   mutation ForceUpdateFeed($user_id: ID!, $numberOfItems: Int) {
     forceUpdateFeed(user_id: $user_id, numberOfItems: $numberOfItems) {

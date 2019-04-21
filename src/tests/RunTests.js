@@ -11,11 +11,10 @@ import {
   acceptRequests,
   rejectRequests,
   unmatches,
-  updateFeeds,
+  // updateFeeds,
   viewDetachedProfiles,
   updateUsers,
-  editUserProfiles,
-  editDetachedProfiles, addQuestions, updateUserFirstNames,
+  editDetachedProfiles, addQuestions, updateUserFirstNames, editEndorsements,
 } from './CreateTestDB';
 import {
   ACCEPT_REQUEST,
@@ -25,12 +24,11 @@ import {
   CREATE_MATCH_REQUEST,
   REJECT_REQUEST,
   UNMATCH,
-  FORCE_FEED_UPDATE,
+  // FORCE_FEED_UPDATE,
   VIEW_DETACHED_PROFILE,
   UPDATE_DISPLAYED_PHOTOS,
   UPDATE_USER,
-  EDIT_USER_PROFILE,
-  EDIT_DETACHED_PROFILE, ADD_QUESTIONS,
+  EDIT_DETACHED_PROFILE, ADD_QUESTIONS, EDIT_ENDORSEMENT,
 } from './Mutations';
 import {
   MONGO_URL,
@@ -146,8 +144,6 @@ export const runTests = async function runTests() {
       }
       successLog('***** Success Creating Users *****\n');
 
-
-      /*
       // UPLOAD DETACHED PROFILE IMAGES
       testLog('TESTING: Uploading Images');
 
@@ -186,7 +182,6 @@ export const runTests = async function runTests() {
         errorLog((`ERROR UPLOADING ${imageErrorCount} Images`));
         process.exit(1);
       }
-      */
 
       // CREATE DETACHED PROFILES
       testLog('TESTING: Creating Detached Profiles');
@@ -231,7 +226,6 @@ export const runTests = async function runTests() {
       }
       successLog('***** Success Updating Users *****\n');
 
-      /*
       // VIEW DETACHED PROFILES
       testLog('TESTING: Viewing Detached Profiles');
       for (const viewProfileVars of viewDetachedProfiles) {
@@ -250,7 +244,6 @@ export const runTests = async function runTests() {
         }
       }
       successLog('***** Success Viewing Detached Profiles *****\n');
-      */
 
       testLog('TESTING: Editing Detached Profiles');
       for (const editDetachedProfileVars of editDetachedProfiles) {
@@ -270,8 +263,7 @@ export const runTests = async function runTests() {
       }
       successLog('***** Success Editing Detached Profiles *****\n');
 
-      /*
-      // UPDATING USER PROFILES
+      // UPDATING USER IMAGES
       testLog('TESTING: Updating User Images');
       for (let i = 0; i < createDetachedProfiles.length; i += 1) {
         const viewProfileVars = viewDetachedProfiles[i];
@@ -300,7 +292,6 @@ export const runTests = async function runTests() {
       }
 
       successLog('***** Success Updating User Images *****\n');
-      */
 
       // ATTACH DETACHED PROFILES
       testLog('TESTING: Attaching Detached Profiles');
@@ -321,7 +312,6 @@ export const runTests = async function runTests() {
       }
       successLog('***** Success Attaching Detached Profiles *****\n');
 
-      /*
       // UPDATE USERS
       testLog('TESTING: Updating Users');
       for (const updateUserVars of updateUsers) {
@@ -341,7 +331,26 @@ export const runTests = async function runTests() {
       }
       successLog('***** Success Updating Users *****\n');
 
+      // EDIT ENDORSEMENTS
+      testLog('TESTING: Editing Endorsements');
+      for (const editEndorsementVars of editEndorsements) {
+        try {
+          const result = await mutate({
+            mutation: EDIT_ENDORSEMENT,
+            variables: editEndorsementVars,
+          });
+          if (verbose) {
+            verboseDebug(result);
+          }
+          checkForAndLogErrors(result, 'editEndorsement');
+        } catch (e) {
+          errorLog((`${e}`));
+          process.exit(1);
+        }
+      }
+      successLog('***** Success Editing Endorsements *****\n');
 
+      /*
       testLog('TESTING: Generating Discovery Items');
       let discoveryIterations = 4;
       if (process.env.DISCOVERY_GENERATION_ROUNDS
@@ -365,6 +374,7 @@ export const runTests = async function runTests() {
         successLog(`* Successful Discovery Round ${i + 1} *\n`);
       }
       successLog('***** Success Generating Discovery Items *****\n');
+      */
 
       testLog('TESTING: Sending Match Requests');
       for (const sendPersonalRequestVars of sendPersonalRequests) {
@@ -464,20 +474,6 @@ export const runTests = async function runTests() {
         successLog('***** Success Unmatching *****\n');
       }
 
-      testLog('TESTING: Editing user profiles');
-      for (const editVars of editUserProfiles) {
-        try {
-          const result = await mutate(({
-            mutation: EDIT_USER_PROFILE,
-            variables: editVars,
-          }));
-          checkForAndLogErrors(result, 'editUserProfile');
-        } catch (e) {
-          errorLog((`Error: ${e.toString()}`));
-        }
-      }
-      successLog('***** Success Editing User Profiles *****\n');
-
 
       const line = '****************************************\n';
       const passed = '*********** All Tests Passed ***********\n';
@@ -486,7 +482,6 @@ export const runTests = async function runTests() {
       // testLog('TESTING: Deleting a user');
       // await deleteUser(SAMMI);
       // testLog('Deleted successfully');
-      */
 
       // wait for any async db calls to finish
       setTimeout(() => {
