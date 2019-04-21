@@ -6,7 +6,11 @@ import {
   JOSH_ID,
   JOSH_PROFILE_SOPHIA_D_ID,
   MADE_ID,
-  MADE_PROFILE_JOSH_D_ID, QUESTION1_ID, QUESTION2_ID, QUESTION3_ID,
+  MADE_PROFILE_JOSH_D_ID,
+  QUESTION1_ID,
+  QUESTION2_ID,
+  QUESTION3_ID,
+  SAMMI_BOAST1_ID,
   SAMMI_ID,
   SAMMI_PROFILE_BRIAN_D_ID,
   SAMMI_PROFILE_JOSH_D_ID,
@@ -35,7 +39,28 @@ export const ATTACH_AVERY1_PROFILE_VARIABLES = {
         author_id: MADE_ID,
         authorFirstName: 'Made',
         question_id: QUESTION1_ID,
-        questionText: 'What\'s your favorite color?',
+        question: {
+          _id: QUESTION1_ID,
+          questionText: 'What\'s your favorite color?',
+          questionTextWithName: 'What\'s your favorite color, *name*?',
+          questionType: 'multipleChoice',
+          suggestedResponses: [
+            {
+              responseBody: 'blue',
+            }, {
+              responseBody: 'red',
+              responseTitle: 'red is a great color',
+              color: {
+                red: 1.0,
+                green: 0.0,
+                blue: 0.0,
+                alpha: 1.0,
+              },
+              icon: {
+                assetString: 'red-icon',
+              },
+            }],
+        },
         responseBody: 'red',
         responseTitle: 'red is a great color',
         color: {
@@ -93,7 +118,17 @@ export const ATTACH_BRIAN1_PROFILE_VARIABLES = {
         author_id: SAMMI_ID,
         authorFirstName: 'Sammi',
         question_id: QUESTION2_ID,
-        questionText: 'What\'s your favorite shoe??',
+        question: {
+          _id: QUESTION2_ID,
+          questionText: 'What\'s your favorite shoe??',
+          questionType: 'multipleChoiceWithOther',
+          suggestedResponses: [
+            {
+              responseBody: 'yeezys',
+            }, {
+              responseBody: 'crocs',
+            }],
+        },
         responseBody: 'crocs',
         hidden: true,
       },
@@ -126,7 +161,12 @@ export const ATTACH_JOSH1_PROFILE_VARIABLES = {
         author_id: SOPHIA_ID,
         authorFirstName: 'Made',
         question_id: QUESTION3_ID,
-        questionText: 'What\'s your weird flex?',
+        question: {
+          _id: QUESTION3_ID,
+          questionText: 'What\'s your weird flex?',
+          questionType: 'freeResponse',
+          suggestedResponses: [],
+        },
         responseBody: 'he\'s a RALPH POLO LAUREN campus ambassador so hit him up for free shirts',
       },
     ],
@@ -150,7 +190,19 @@ export const ATTACH_SAMMI1_PROFILE_VARIABLES = {
     user_id: SAMMI_ID,
     detachedProfile_id: SAMMI_PROFILE_JOSH_D_ID,
     creatorUser_id: JOSH_ID,
-    boasts: [],
+    boasts: [
+      {
+        author_id: JOSH_ID,
+        authorFirstName: 'Josh',
+        content: 'Sammi boast 0',
+      },
+      {
+        _id: SAMMI_BOAST1_ID,
+        author_id: JOSH_ID,
+        authorFirstName: 'Josh',
+        content: 'Sammi boast 1',
+      },
+    ],
     roasts: [
       {
         author_id: JOSH_ID,
@@ -163,7 +215,28 @@ export const ATTACH_SAMMI1_PROFILE_VARIABLES = {
         author_id: JOSH_ID,
         authorFirstName: 'Josh',
         question_id: QUESTION1_ID,
-        questionText: 'What\'s your favorite color?',
+        question: {
+          _id: QUESTION1_ID,
+          questionText: 'What\'s your favorite color?',
+          questionTextWithName: 'What\'s your favorite color, *name*?',
+          questionType: 'multipleChoice',
+          suggestedResponses: [
+            {
+              responseBody: 'blue',
+            }, {
+              responseBody: 'red',
+              responseTitle: 'red is a great color',
+              color: {
+                red: 1.0,
+                green: 0.0,
+                blue: 0.0,
+                alpha: 1.0,
+              },
+              icon: {
+                assetString: 'red-icon',
+              },
+            }],
+        },
         responseBody: 'blue',
       },
     ],
@@ -189,7 +262,28 @@ export const ATTACH_SAMMI2_PROFILE_VARIABLES = {
         author_id: BRIAN_ID,
         authorFirstName: 'Brian',
         question_id: QUESTION1_ID,
-        questionText: 'What\'s your favorite color?',
+        question: {
+          _id: QUESTION1_ID,
+          questionText: 'What\'s your favorite color?',
+          questionTextWithName: 'What\'s your favorite color, *name*?',
+          questionType: 'multipleChoice',
+          suggestedResponses: [
+            {
+              responseBody: 'blue',
+            }, {
+              responseBody: 'red',
+              responseTitle: 'red is a great color',
+              color: {
+                red: 1.0,
+                green: 0.0,
+                blue: 0.0,
+                alpha: 1.0,
+              },
+              icon: {
+                assetString: 'red-icon',
+              },
+            }],
+        },
         responseBody: 'red',
         responseTitle: 'red is a great color',
         color: {
@@ -206,7 +300,17 @@ export const ATTACH_SAMMI2_PROFILE_VARIABLES = {
         author_id: BRIAN_ID,
         authorFirstName: 'Brian',
         question_id: QUESTION2_ID,
-        questionText: 'What\'s your favorite shoe??',
+        question: {
+          _id: QUESTION2_ID,
+          questionText: 'What\'s your favorite shoe??',
+          questionType: 'multipleChoiceWithOther',
+          suggestedResponses: [
+            {
+              responseBody: 'yeezys',
+            }, {
+              responseBody: 'crocs',
+            }],
+        },
         responseBody: 'yeezys',
       },
     ],

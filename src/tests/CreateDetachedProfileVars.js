@@ -8,7 +8,7 @@ import {
   MADE_PROFILE_JOSH_D_ID,
   QUESTION1_ID,
   QUESTION2_ID,
-  QUESTION3_ID,
+  QUESTION3_ID, SAMMI_BOAST3_ID,
   SAMMI_ID,
   SAMMI_PROFILE_BRIAN_D_ID,
   SAMMI_PROFILE_JOSH_D_ID,
@@ -18,7 +18,6 @@ import {
   UMA_ID,
   UMA_PROFILE_BRIAN_D_ID,
 } from './TestsContants';
-import { ADD_QUESTIONS_VARIABLES } from './TestQuestions';
 
 export const CREATE_AVERY1_DETACHED_PROFILE_VARIABLES = {
   detachedProfileInput: {
@@ -40,7 +39,28 @@ export const CREATE_AVERY1_DETACHED_PROFILE_VARIABLES = {
         author_id: MADE_ID,
         authorFirstName: 'Made',
         question_id: QUESTION1_ID,
-        questionText: 'What\'s your favorite color?',
+        question: {
+          _id: QUESTION1_ID,
+          questionText: 'What\'s your favorite color?',
+          questionTextWithName: 'What\'s your favorite color, *name*?',
+          questionType: 'multipleChoice',
+          suggestedResponses: [
+            {
+              responseBody: 'blue',
+            }, {
+              responseBody: 'red',
+              responseTitle: 'red is a great color',
+              color: {
+                red: 1.0,
+                green: 0.0,
+                blue: 0.0,
+                alpha: 1.0,
+              },
+              icon: {
+                assetString: 'red-icon',
+              },
+            }],
+        },
         responseBody: 'red',
         responseTitle: 'red is a great color',
         color: {
@@ -89,7 +109,17 @@ export const CREATE_BRIAN1_DETACHED_PROFILE_VARIABLES = {
         author_id: SAMMI_ID,
         authorFirstName: 'Sammi',
         question_id: QUESTION2_ID,
-        questionText: 'What\'s your favorite shoe??',
+        question: {
+          _id: QUESTION2_ID,
+          questionText: 'What\'s your favorite shoe??',
+          questionType: 'multipleChoiceWithOther',
+          suggestedResponses: [
+            {
+              responseBody: 'yeezys',
+            }, {
+              responseBody: 'crocs',
+            }],
+        },
         responseBody: 'crocs',
       },
     ],
@@ -123,7 +153,12 @@ export const CREATE_JOSH1_DETACHED_PROFILE_VARIABLES = {
         author_id: SOPHIA_ID,
         authorFirstName: 'Made',
         question_id: QUESTION3_ID,
-        questionText: 'What\'s your weird flex?',
+        question: {
+          _id: QUESTION3_ID,
+          questionText: 'What\'s your weird flex?',
+          questionType: 'freeResponse',
+          suggestedResponses: [],
+        },
         responseBody: 'he\'s a RALPH POLO LAUREN campus ambassador so hit him up for free shirts',
       },
     ],
@@ -162,7 +197,28 @@ export const CREATE_SAMMI1_DETACHED_PROFILE_VARIABLES = {
         author_id: JOSH_ID,
         authorFirstName: 'Josh',
         question_id: QUESTION1_ID,
-        questionText: 'What\'s your favorite color?',
+        question: {
+          _id: QUESTION1_ID,
+          questionText: 'What\'s your favorite color?',
+          questionTextWithName: 'What\'s your favorite color, *name*?',
+          questionType: 'multipleChoice',
+          suggestedResponses: [
+            {
+              responseBody: 'blue',
+            }, {
+              responseBody: 'red',
+              responseTitle: 'red is a great color',
+              color: {
+                red: 1.0,
+                green: 0.0,
+                blue: 0.0,
+                alpha: 1.0,
+              },
+              icon: {
+                assetString: 'red-icon',
+              },
+            }],
+        },
         responseBody: 'blue',
       },
     ],
@@ -179,9 +235,15 @@ export const CREATE_SAMMI2_DETACHED_PROFILE_VARIABLES = {
     phoneNumber: '9788733736',
     boasts: [
       {
+        _id: SAMMI_BOAST3_ID,
         author_id: BRIAN_ID,
         authorFirstName: 'Brian',
         content: 'MIT girl who u can trust to make you the Big Bux',
+      },
+      {
+        author_id: BRIAN_ID,
+        authorFirstName: 'Brian',
+        content: 'Throwaway boast',
       },
     ],
     roasts: [],
@@ -190,7 +252,28 @@ export const CREATE_SAMMI2_DETACHED_PROFILE_VARIABLES = {
         author_id: BRIAN_ID,
         authorFirstName: 'Brian',
         question_id: QUESTION1_ID,
-        questionText: 'What\'s your favorite color?',
+        question: {
+          _id: QUESTION1_ID,
+          questionText: 'What\'s your favorite color?',
+          questionTextWithName: 'What\'s your favorite color, *name*?',
+          questionType: 'multipleChoice',
+          suggestedResponses: [
+            {
+              responseBody: 'blue',
+            }, {
+              responseBody: 'red',
+              responseTitle: 'red is a great color',
+              color: {
+                red: 1.0,
+                green: 0.0,
+                blue: 0.0,
+                alpha: 1.0,
+              },
+              icon: {
+                assetString: 'red-icon',
+              },
+            }],
+        },
         responseBody: 'red',
         responseTitle: 'red is a great color',
         color: {
@@ -207,7 +290,17 @@ export const CREATE_SAMMI2_DETACHED_PROFILE_VARIABLES = {
         author_id: BRIAN_ID,
         authorFirstName: 'Brian',
         question_id: QUESTION2_ID,
-        questionText: 'What\'s your favorite shoe??',
+        question: {
+          _id: QUESTION2_ID,
+          questionText: 'What\'s your favorite shoe??',
+          questionType: 'multipleChoiceWithOther',
+          suggestedResponses: [
+            {
+              responseBody: 'yeezys',
+            }, {
+              responseBody: 'crocs',
+            }],
+        },
         responseBody: 'yeezys',
       },
     ],

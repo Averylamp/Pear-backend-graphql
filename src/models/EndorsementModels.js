@@ -3,8 +3,6 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 // const $ = require('mongo-dot-notation');
 
-const debug = require('debug')('dev:EndorsementModels');
-
 // TODO: populate fields of EditEndorsementInput
 const editEndorsementType = `
 input EditEndorsementInput {
@@ -52,8 +50,6 @@ export const typeDef = editEndorsementType
 export const EndorsementEdgeSchema = new Schema({
   active: { type: Schema.Types.Boolean, required: true, default: true },
   otherUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
-  myProfile_id: { type: Schema.Types.ObjectId, required: false, index: true },
-  theirProfile_id: { type: Schema.Types.ObjectId, required: false, index: true },
   firebaseChatDocumentID: { type: String, required: true },
   firebaseChatDocumentPath: { type: String, required: true },
 });

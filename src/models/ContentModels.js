@@ -258,8 +258,7 @@ type QuestionUserResponse {
   author_id: ID!
   author: User
   authorFirstName: String!
-  
-  # the ID, referencable in the firebase remote config
+ 
   question_id: ID!
   question: Question!
   
@@ -278,7 +277,7 @@ input QuestionUserResponseInput {
   author_id: ID!
   authorFirstName: String!
   question_id: ID!
-  questionText: String!
+  question: NewQuestionInput!
   responseBody: String!
   responseTitle: String
   color: ColorInput
@@ -340,6 +339,7 @@ export const QuestionUserResponseSchema = new Schema({
   author_id: { type: Schema.Types.ObjectId, required: true, index: true },
   authorFirstName: { type: String, required: true },
   question_id: { type: Schema.Types.ObjectId, required: true },
+  question: { type: QuestionSchema, required: true },
   responseBody: { type: String, required: true },
   responseTitle: { type: String, required: false },
   color: { type: ColorSchema, required: false },
