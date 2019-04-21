@@ -9,7 +9,6 @@ import { DiscoveryQueue } from '../../models/DiscoveryQueueModel';
 import { LAST_EDITED_ARRAY_LEN, NEW_PROFILE_BONUS } from '../../constants';
 import {
   updateDiscoveryForUserById,
-  updateDiscoveryWithNextItem,
 } from '../../discovery/DiscoverProfile';
 import {
   createEndorsementChat,

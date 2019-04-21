@@ -5,7 +5,6 @@ import { CREATE_USER_ERROR } from '../ResolverErrorStrings';
 import { INITIALIZED_FEED_LENGTH } from '../../constants';
 import {
   updateDiscoveryForUserById,
-  updateDiscoveryWithNextItem,
 } from '../../discovery/DiscoverProfile';
 
 const mongoose = require('mongoose');
