@@ -1,5 +1,5 @@
 import { pick } from 'lodash';
-import { createUserObject, User } from '../../models/UserModel';
+import { createUserObject } from '../../models/UserModel';
 import { createDiscoveryQueueObject } from '../../models/DiscoveryQueueModel';
 import { CREATE_USER_ERROR } from '../ResolverErrorStrings';
 import { INITIALIZED_FEED_LENGTH } from '../../constants';

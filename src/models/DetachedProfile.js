@@ -205,7 +205,9 @@ const DetachedProfileSchema = new Schema({
   },
 
   // not in graphql schema because once this is set, the DP should never be queried for
-  endorsedUser_id: { type: Schema.Types.ObjectId, required: false, index: true, sparse: true },
+  endorsedUser_id: {
+    type: Schema.Types.ObjectId, required: false, index: true, sparse: true,
+  },
 }, { timestamps: true });
 
 

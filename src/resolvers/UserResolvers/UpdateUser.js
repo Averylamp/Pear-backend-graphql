@@ -1,11 +1,11 @@
+import { pick } from 'lodash';
 import { User } from '../../models/UserModel';
 import {
   GET_USER_ERROR,
 } from '../ResolverErrorStrings';
-import { pick } from 'lodash';
-import { LAST_ACTIVE_ARRAY_LEN } from '../../constants';
+import { LAST_ACTIVE_ARRAY_LEN, LAST_EDITED_ARRAY_LEN } from '../../constants';
 
-const errorLog = require('debug')('error:UpdateUserResolver');
+// const errorLog = require('debug')('error:UpdateUserResolver');
 
 const generateReferralCode = async (firstName, maxIters = 20) => {
   let flag = true;
@@ -49,32 +49,16 @@ export const updateUserResolver = async ({ updateUserInput }) => {
     'thumbnailURL',
     'firebaseRemoteInstanceID',
   ]);
-  if (user.lastActive) {
-    userUpdateObj.$push = {
-      lastActive: {
-        $each: [new Date()],
-        $slice: -1 * LAST_ACTIVE_ARRAY_LEN,
-      },
-    };
-  } else {
-    userUpdateObj.lastActive = [new Date()];
-  }
-  // set ageLastUpdated
-  if (updateUserInput.age) {
-    if (userUpdateObj.$push) {
-      userUpdateObj.$push.ageLastUpdated = {
-        $each: [new Date()],
-        $slice: -2,
-      };
-    } else {
-      userUpdateObj.$push = {
-        ageLastUpdated: {
-          $each: [new Date()],
-          $slice: -2,
-        },
-      };
-    }
-  }
+  userUpdateObj.$push = {
+    lastActive: {
+      $each: [new Date()],
+      $slice: -1 * LAST_ACTIVE_ARRAY_LEN,
+    },
+    lastEdited: {
+      $each: [new Date()],
+      $slice: -1 * LAST_EDITED_ARRAY_LEN,
+    },
+  };
   // set referral code if this is the first time setting firstName
   if (!user.firstName && updateUserInput.firstName) {
     const referralCode = await generateReferralCode(updateUserInput.firstName);

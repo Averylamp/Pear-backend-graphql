@@ -1,6 +1,6 @@
+import { pick } from 'lodash';
 import { User } from '../models/UserModel';
 import { Question } from '../models/ContentModels';
-import { pick } from 'lodash';
 
 const mongoose = require('mongoose');
 const errorLog = require('debug')('error:ContentResolvers');
@@ -79,6 +79,5 @@ export const resolvers = {
   },
   QuestionUserResponse: {
     author: async ({ author_id }) => User.findById(author_id),
-    question: async ({ question_id }) => Question.findById(question_id),
   },
 };

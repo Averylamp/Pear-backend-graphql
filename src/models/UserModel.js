@@ -1,7 +1,7 @@
 import { MatchingDemographicsSchema, MatchingPreferencesSchema } from './MatchingSchemas';
 import { ImageContainerSchema } from './ImageSchemas';
 import { EdgeSummarySchema } from './MatchModel';
-import { EndorsementEdgeSchema } from './UserProfileModel';
+import { EndorsementEdgeSchema } from './EndorsementModels';
 import { USERS_ALREADY_MATCHED_ERROR } from '../resolvers/ResolverErrorStrings';
 import {
   BioSchema,
@@ -21,9 +21,11 @@ extend type Query {
   # Get a user by an ID
   user(id: ID): User
   # Get a user by firebase tokens
-  getUser(userInput: GetUserInput): UserMutationResponse!
+  getUser(userInput: GetUserInput!): UserMutationResponse!
   # send a push notification indicating new message
   notifyNewMessage(fromUser_id: ID!, toUser_id: ID!): Boolean!
+  # return a sub-array of a list of phone numbers, representing users who are already on pear
+  alreadyOnPear(phoneNumbers: [String!]!): [String!]!
 }
 
 `;
@@ -38,6 +40,9 @@ extend type Mutation{
 
   # Updates a User's photos or photo bank
   updateUserPhotos(updateUserPhotosInput: UpdateUserPhotosInput!): UserMutationResponse!
+  
+  # an endorser can edit the things they've written for a user
+  editEndorsement(editEndorsementInput: EditEndorsementInput!): UserMutationResponse!
 }
 `;
 
@@ -115,6 +120,23 @@ input UpdateUserPhotosInput {
 
 `;
 
+const editEndorsementInput = `
+input EditEndorsementInput {
+  endorser_id: ID!
+  user_id: ID!
+  
+  boasts: [BoastInput!]
+  roasts: [RoastInput!]
+  questionResponses: [QuestionUserResponseInput!]
+  vibes: [VibeInput!]
+  
+  bio: BioInput
+  dos: [DoInput!]
+  donts: [DontInput!]
+  interests: [InterestInput!]
+}
+`;
+
 const userType = `
 type User {
   _id: ID!
@@ -132,7 +154,6 @@ type User {
   thumbnailURL: String
   gender: Gender
   age: Int
-  canUpdateAge: Boolean!
   birthdate: String
   
   # profile content. ordered
@@ -235,6 +256,7 @@ export const typeDef = queryRoutes
   + createUserInputs
   + updateUserInputs
   + updateUserPhotosInput
+  + editEndorsementInput
   + userType
   + mutationResponse
   + genderEnum;
@@ -266,7 +288,6 @@ const UserSchema = new Schema({
   age: {
     type: Number, required: false, min: 18, max: 100, index: true,
   },
-  ageLastUpdated: { type: [Date], required: true, default: [] },
   birthdate: { type: Date, required: false },
 
   bios: { type: [BioSchema], required: true, default: [] },
@@ -352,7 +373,10 @@ const UserSchema = new Schema({
   },
 
   lastActive: {
-    type: [Date], required: false, default: [],
+    type: [Date], required: true, default: [],
+  },
+  lastEdited: {
+    type: [Date], required: true, default: [],
   },
 }, { timestamps: true });
 
@@ -365,15 +389,6 @@ UserSchema.virtual('fullName')
       return this.firstName;
     }
     return `${this.firstName} ${this.lastName}`;
-  });
-
-UserSchema.virtual('canUpdateAge')
-  .get(() => {
-    const twoWeeksAgo = new Date(Date.now() - (14 * 24 * 60 * 60 * 1000));
-    if (this.ageLastUpdated.length >= 2 && this.ageLastUpdated[this.ageLastUpdated.length - 1] > twoWeeksAgo) {
-      return false;
-    }
-    return true;
   });
 
 export const User = mongoose.model('User', UserSchema);
