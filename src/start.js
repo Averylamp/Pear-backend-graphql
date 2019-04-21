@@ -53,7 +53,7 @@ import {
   resolvers as ContentResolvers,
 } from './resolvers/ContentResolvers';
 import {
-  typeDef as EndorsementModels
+  typeDef as EndorsementModels,
 } from './models/EndorsementModels';
 import { deleteUser } from './deletion/UserDeletion';
 

@@ -10,7 +10,6 @@ import { DiscoveryQueue } from '../../models/DiscoveryQueueModel';
 import { NEW_PROFILE_BONUS } from '../../constants';
 import {
   updateDiscoveryForUserById,
-  updateDiscoveryWithNextItem,
 } from '../../discovery/DiscoverProfile';
 import { canMakeProfileForSelf } from './DetachedProfileResolverUtils';
 
