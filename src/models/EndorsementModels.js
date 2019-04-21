@@ -3,22 +3,10 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 // const $ = require('mongo-dot-notation');
 
-// TODO: populate fields of EditEndorsementInput
-const editEndorsementType = `
-input EditEndorsementInput {
-  # id of the user editing
-  creatorUser_id: ID!
-  # The endorsed user's id
-  endorsedUser_id: ID!
-}
-`;
-
 const mutationRoutes = `
 extend type Mutation {
-  # edit the user profile. the creatorUser_id must be the creator of the profile
-  editEndorsement(editEndorsementInput: EditEndorsementInput!): EndorsementMutationResponse
-
-  # deletes the user profile. user_id must be either the underlying user or the creator
+  # deletes all content made by endorser for user. user_id must be either the underlying user or
+  # the creator
   deleteEndorsement(creatorUser_id: ID!, endorsedUser_id: ID!): EndorsementMutationResponse
 }
 `;
@@ -42,8 +30,7 @@ type EndorsementEdge {
 }
 `;
 
-export const typeDef = editEndorsementType
-  + mutationRoutes
+export const typeDef = mutationRoutes
   + endorsementMutationResponse
   + endorsementEdgeType;
 

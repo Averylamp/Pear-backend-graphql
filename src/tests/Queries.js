@@ -26,19 +26,6 @@ export const GET_USER = gql`
       schoolEmailVerified
       pearPoints
       
-      profileObjs {
-        _id
-        creatorObj {
-          fullName
-        }
-      }
-      
-      endorsedProfileObjs {
-        userObj {
-          fullName
-        }
-      }
-      
       detachedProfileObjs {
         firstName
         age

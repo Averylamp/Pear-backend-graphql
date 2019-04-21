@@ -11,7 +11,7 @@ import {
   acceptRequests,
   rejectRequests,
   unmatches,
-  // updateFeeds,
+  updateFeeds,
   viewDetachedProfiles,
   updateUsers,
   editDetachedProfiles, addQuestions, updateUserFirstNames, editEndorsements,
@@ -24,7 +24,7 @@ import {
   CREATE_MATCH_REQUEST,
   REJECT_REQUEST,
   UNMATCH,
-  // FORCE_FEED_UPDATE,
+  FORCE_FEED_UPDATE,
   VIEW_DETACHED_PROFILE,
   UPDATE_DISPLAYED_PHOTOS,
   UPDATE_USER,
@@ -350,7 +350,6 @@ export const runTests = async function runTests() {
       }
       successLog('***** Success Editing Endorsements *****\n');
 
-      /*
       testLog('TESTING: Generating Discovery Items');
       let discoveryIterations = 4;
       if (process.env.DISCOVERY_GENERATION_ROUNDS
@@ -374,7 +373,6 @@ export const runTests = async function runTests() {
         successLog(`* Successful Discovery Round ${i + 1} *\n`);
       }
       successLog('***** Success Generating Discovery Items *****\n');
-      */
 
       testLog('TESTING: Sending Match Requests');
       for (const sendPersonalRequestVars of sendPersonalRequests) {

@@ -7,7 +7,10 @@ import {
 import { DetachedProfile } from '../../models/DetachedProfile';
 import { DiscoveryQueue } from '../../models/DiscoveryQueueModel';
 import { LAST_EDITED_ARRAY_LEN, NEW_PROFILE_BONUS } from '../../constants';
-import { updateDiscoveryWithNextItem } from '../../discovery/DiscoverProfile';
+import {
+  updateDiscoveryForUserById,
+  updateDiscoveryWithNextItem,
+} from '../../discovery/DiscoverProfile';
 import {
   createEndorsementChat,
   getChatDocPathFromId,
@@ -221,7 +224,7 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
         const regenTestDBMode = (process.env.REGEN_DB === 'true' && devMode);
         if (feed.currentDiscoveryItems.length === 0 && !regenTestDBMode) {
           for (let i = 0; i < NEW_PROFILE_BONUS; i += 1) {
-            await updateDiscoveryWithNextItem({ userObj: updateCreatorObjectResult });
+            await updateDiscoveryForUserById({ user_id });
           }
         }
       } catch (e) {
