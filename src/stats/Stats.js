@@ -1,6 +1,5 @@
 import { User } from '../models/UserModel';
 import { DetachedProfile } from '../models/DetachedProfile';
-import { UserProfile } from '../models/UserProfileModel';
 import { Match } from '../models/MatchModel';
 import { createStatSnapshot } from '../models/StatsModel';
 
@@ -27,9 +26,6 @@ const countUsersCreatedInRange = (start, end) => countDocumentsCreatedInRange(st
 
 const countDetachedProfilesCreatedInRange = (start, end) => countDocumentsCreatedInRange(start, end,
   DetachedProfile);
-
-const countProfilesApprovedInRange = (start, end) => countDocumentsCreatedInRange(start, end,
-  UserProfile);
 
 const countPersonalMatchRequestsSentInRange = (start, end) => {
   const customFilters = {
@@ -119,8 +115,6 @@ export const saveStatsSnapshot = async () => {
   const nDetachedProfilesPromise = countDocumentOperationTimeSummary(
     countDetachedProfilesCreatedInRange, now,
   );
-  const nProfileApprovalsPromise = countDocumentOperationTimeSummary(countProfilesApprovedInRange,
-    now);
   const nPersonalMatchReqsPromise = countDocumentOperationTimeSummary(
     countPersonalMatchRequestsSentInRange, now,
   );
@@ -136,7 +130,6 @@ export const saveStatsSnapshot = async () => {
   const [
     nUsers,
     nDetachedProfiles,
-    nProfileApprovals,
     nPersonalMatchReqs,
     nMatchmakerMatchReqs,
     nPersonalMatchAccepted,
@@ -145,7 +138,6 @@ export const saveStatsSnapshot = async () => {
     [
       nUsersPromise,
       nDetachedProfilesPromise,
-      nProfileApprovalsPromise,
       nPersonalMatchReqsPromise,
       nMatchmakerMatchReqsPromise,
       nPersonalMatchAcceptedPromise,
@@ -154,7 +146,6 @@ export const saveStatsSnapshot = async () => {
   const statInput = {
     nUsers,
     nDetachedProfiles,
-    nProfileApprovals,
     nPersonalMatchReqs,
     nMatchmakerMatchReqs,
     nPersonalMatchAccepted,

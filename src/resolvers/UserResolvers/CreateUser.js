@@ -3,7 +3,10 @@ import { createUserObject } from '../../models/UserModel';
 import { createDiscoveryQueueObject } from '../../models/DiscoveryQueueModel';
 import { CREATE_USER_ERROR } from '../ResolverErrorStrings';
 import { INITIALIZED_FEED_LENGTH } from '../../constants';
-import { updateDiscoveryWithNextItem } from '../../discovery/DiscoverProfile';
+import {
+  updateDiscoveryForUserById,
+  updateDiscoveryWithNextItem,
+} from '../../discovery/DiscoverProfile';
 
 const mongoose = require('mongoose');
 const errorLog = require('debug')('error:CreateUserResolver');
@@ -77,7 +80,7 @@ export const createUserResolver = async ({ userInput }) => {
       if (discoveryQueueObject.currentDiscoveryItems.length === 0 && !regenTestDBMode) {
         for (let i = 0; i < INITIALIZED_FEED_LENGTH; i += 1) {
           try {
-            await updateDiscoveryWithNextItem({ userObj: userObject });
+            await updateDiscoveryForUserById({ user_id: userObjectID });
           } catch (e) {
             errorLog(`Error updating discovery: ${e}`);
           }

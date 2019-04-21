@@ -8,12 +8,6 @@ import {
   resolvers as UserResolvers,
 } from './resolvers/UserResolvers/UserResolver';
 import {
-  typeDef as UserProfile,
-} from './models/UserProfileModel';
-import {
-  resolvers as UserProfileResolvers,
-} from './resolvers/UserProfileResolver';
-import {
   typeDef as ImageContainer,
 } from './models/ImageSchemas';
 import {
@@ -58,6 +52,9 @@ import {
 import {
   resolvers as ContentResolvers,
 } from './resolvers/ContentResolvers';
+import {
+  typeDef as EndorsementModels
+} from './models/EndorsementModels';
 import { deleteUser } from './deletion/UserDeletion';
 
 const { ApolloServer } = require('apollo-server-express');
@@ -124,7 +121,6 @@ function createApolloServer() {
   const finalTypeDefs = [
     Query,
     User,
-    UserProfile,
     DetachedProfile,
     Match,
     DiscoveryQueue,
@@ -132,7 +128,9 @@ function createApolloServer() {
     ImageContainer,
     MatchingSchemas,
     LocationSchemas,
-    ContentSchemas];
+    ContentSchemas,
+    EndorsementModels,
+  ];
 
   const resolvers = {
     Query: {},
@@ -145,7 +143,6 @@ function createApolloServer() {
     DiscoveryQueueResolvers,
     TestObjectResolvers,
     ImageResolvers,
-    UserProfileResolvers,
     LocationResolvers,
     ContentResolvers);
 

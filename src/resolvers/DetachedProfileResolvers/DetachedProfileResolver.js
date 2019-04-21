@@ -99,6 +99,7 @@ export const resolvers = {
         };
       }
     },
+    // TODO
     deleteDetachedProfile: async (_source, { creator_id, detachedProfile_id }) => {
       functionCallConsole('deleteDetachedProfile called');
       const creator = await User.findById(creator_id)

@@ -8,7 +8,10 @@ import {
 import { createDetachedProfileObject, DetachedProfile } from '../../models/DetachedProfile';
 import { DiscoveryQueue } from '../../models/DiscoveryQueueModel';
 import { NEW_PROFILE_BONUS } from '../../constants';
-import { updateDiscoveryWithNextItem } from '../../discovery/DiscoverProfile';
+import {
+  updateDiscoveryForUserById,
+  updateDiscoveryWithNextItem,
+} from '../../discovery/DiscoverProfile';
 import { canMakeProfileForSelf } from './DetachedProfileResolverUtils';
 
 const mongoose = require('mongoose');
@@ -147,7 +150,7 @@ export const createDetachedProfileResolver = async ({ detachedProfileInput }) =>
         const regenTestDBMode = (process.env.REGEN_DB === 'true' && devMode);
         if (feed.currentDiscoveryItems.length === 0 && !regenTestDBMode) {
           for (let i = 0; i < NEW_PROFILE_BONUS; i += 1) {
-            await updateDiscoveryWithNextItem({ userObj: newUser });
+            await updateDiscoveryForUserById({ user_id: creatorUser_id });
           }
         }
       } catch (e) {

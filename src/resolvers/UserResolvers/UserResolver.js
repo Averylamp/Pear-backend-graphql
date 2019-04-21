@@ -176,6 +176,7 @@ export const resolvers = {
         && displayedImages[0].thumbnail.imageURL) {
         userUpdate.thumbnailURL = displayedImages[0].thumbnail.imageURL;
       }
+      userUpdate.displayedImagesCount = displayedImages.length;
       return User.findByIdAndUpdate(user_id, userUpdate, { new: true })
         .then(res => ({
           success: true,
