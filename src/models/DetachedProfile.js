@@ -217,7 +217,7 @@ const DetachedProfileSchema = new Schema({
 export const DetachedProfile = mongoose.model('DetachedProfile', DetachedProfileSchema);
 
 export const createDetachedProfileObject = function
-createUserProfileObject(detachedProfileInput) {
+createUserProfileObject(detachedProfileInput, skipTimestamps) {
   const detachedProfileModel = new DetachedProfile(detachedProfileInput);
-  return detachedProfileModel.save();
+  return detachedProfileModel.save({ timestamps: !skipTimestamps });
 };
