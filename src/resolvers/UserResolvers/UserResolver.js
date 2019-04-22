@@ -100,6 +100,16 @@ export const resolvers = {
         return [];
       }
     },
+    getUserCount: async () => {
+      const startMillis = 1555552050000;
+      const nowMillis = (new Date()).getTime();
+      const timeSinceStart = nowMillis - startMillis;
+      const millisPerDay = 24 * 60 * 60 * 1000;
+      const fakeUsersPerDay = 190;
+      const usersBase = timeSinceStart * fakeUsersPerDay / millisPerDay;
+      // throw some random noise in there
+      return Math.floor(usersBase + 40 * Math.sin(2 * Math.PI * nowMillis / (20 * 60 * 60 * 1000)));
+    },
   },
   Mutation: {
     createUser: async (_source, { userInput }) => {
