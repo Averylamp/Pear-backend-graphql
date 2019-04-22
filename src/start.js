@@ -99,6 +99,9 @@ prodConsole(`Database: ${dbName}`);
 export const MONGO_URL = `${mongoPrefix}${dbUser}${dbPass}${dbHost}/${dbName}?retryWrites=true`;
 const mongoose = require('mongoose');
 
+// see https://github.com/Automattic/mongoose/issues/7150
+mongoose.Schema.Types.String.checkRequired(v => v != null);
+
 debug(MONGO_URL);
 prodConsole(`Mongo URL: ${MONGO_URL}`);
 

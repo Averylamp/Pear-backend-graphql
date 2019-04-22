@@ -119,6 +119,7 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
   const detachedProfileUpdate = {
     status: 'accepted',
     endorsedUser_id: user_id,
+    acceptedTime: new Date(),
   };
 
   // execute user object update
@@ -164,7 +165,7 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
         } else {
           await User.findByIdAndUpdate(user_id, initialUser, {
             new: true,
-            overwrite: true,
+            overwrite: true, // delete fields that were created for first time in the update
           })
             .then(() => {
               debug('rolled back user object successfully');

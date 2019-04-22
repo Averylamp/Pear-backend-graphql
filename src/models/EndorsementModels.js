@@ -39,4 +39,4 @@ export const EndorsementEdgeSchema = new Schema({
   otherUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
   firebaseChatDocumentID: { type: String, required: true },
   firebaseChatDocumentPath: { type: String, required: true },
-});
+}, { timestamps: true });
