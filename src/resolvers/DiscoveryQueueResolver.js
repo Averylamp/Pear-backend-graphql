@@ -60,7 +60,7 @@ export const resolvers = {
       return users.map(({ _id }) => new DiscoveryItem({ user_id: _id }));
     },
     */
-    // .reverse() reverses in place, so we want to use .slice()
+    // .reverse() reverses in place, so we want to use .slice() to clone
     currentDiscoveryItems: async ({ currentDiscoveryItems }) => (
       currentDiscoveryItems.slice()
         .reverse()
