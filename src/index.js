@@ -4,7 +4,7 @@ import { start } from './start';
 import { runTests } from './tests/RunTests';
 import { startStatsGeneration } from './StatsGeneration';
 import { startDiscoveryGeneration } from './DiscoveryGeneration';
-import { runMigration } from './migrations/migration1/migration1';
+import { runMigration } from './migration1/Migration1';
 
 const debug = require('debug')('dev:Index');
 const testsLog = require('debug')('tests:Index');
