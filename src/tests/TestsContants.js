@@ -33,3 +33,11 @@ export const MATCH3_ID = '5c82162afec46c84e0000002';
 export const MATCH4_ID = '5c82162afec46c84e0000003';
 export const MATCH5_ID = '5c82162afec46c84e0000004';
 export const MATCH6_ID = '5c82162afec46c84e0000005';
+
+export const QUESTION1_ID = '5c82162afec46c84e0000000';
+export const QUESTION2_ID = '5c82162afec46c84e0000001';
+export const QUESTION3_ID = '5c82162afec46c84e0000002';
+
+export const SAMMI_BOAST1_ID = '5c82162afec55c55e5555500';
+export const SAMMI_BOAST2_ID = '5c82162afec55c55e5555501';
+export const SAMMI_BOAST3_ID = '5c82162afec55c55e5555502';
