@@ -51,16 +51,16 @@ export const resolvers = {
         if (user) {
           const userUpdateObj = {};
           userUpdateObj.$push = {
-            lastActive: {
+            lastActiveTimes: {
               $each: [new Date()],
               $slice: -1 * LAST_ACTIVE_ARRAY_LEN,
             },
-            lastEdited: {
+            lastEditedTimes: {
               $each: [new Date()],
               $slice: -1 * LAST_EDITED_ARRAY_LEN,
             },
           };
-          await User.findByIdAndUpdate(user._id, userUpdateObj);
+          User.findByIdAndUpdate(user._id, userUpdateObj).exec();
           return {
             success: true,
             user,

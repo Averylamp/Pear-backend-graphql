@@ -50,11 +50,11 @@ export const updateUserResolver = async ({ updateUserInput }) => {
     'firebaseRemoteInstanceID',
   ]);
   userUpdateObj.$push = {
-    lastActive: {
+    lastActiveTimes: {
       $each: [new Date()],
       $slice: -1 * LAST_ACTIVE_ARRAY_LEN,
     },
-    lastEdited: {
+    lastEditedTimes: {
       $each: [new Date()],
       $slice: -1 * LAST_EDITED_ARRAY_LEN,
     },
