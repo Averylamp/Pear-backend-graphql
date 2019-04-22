@@ -27,6 +27,16 @@ const countUsersCreatedInRange = (start, end) => countDocumentsCreatedInRange(st
 const countDetachedProfilesCreatedInRange = (start, end) => countDocumentsCreatedInRange(start, end,
   DetachedProfile);
 
+const countProfilesApprovedInRange = (start, end) => {
+  const customFilters = {
+    acceptedTime: {
+      $gte: start,
+      $lte: end,
+    },
+  };
+  return countDocumentsCreatedInRange(start, end, DetachedProfile, customFilters);
+};
+
 const countPersonalMatchRequestsSentInRange = (start, end) => {
   const customFilters = {
     createdAt: {
@@ -115,6 +125,8 @@ export const saveStatsSnapshot = async () => {
   const nDetachedProfilesPromise = countDocumentOperationTimeSummary(
     countDetachedProfilesCreatedInRange, now,
   );
+  const nProfileApprovalsPromise = countDocumentOperationTimeSummary(countProfilesApprovedInRange,
+    now);
   const nPersonalMatchReqsPromise = countDocumentOperationTimeSummary(
     countPersonalMatchRequestsSentInRange, now,
   );
@@ -130,6 +142,7 @@ export const saveStatsSnapshot = async () => {
   const [
     nUsers,
     nDetachedProfiles,
+    nProfileApprovals,
     nPersonalMatchReqs,
     nMatchmakerMatchReqs,
     nPersonalMatchAccepted,
@@ -138,6 +151,7 @@ export const saveStatsSnapshot = async () => {
     [
       nUsersPromise,
       nDetachedProfilesPromise,
+      nProfileApprovalsPromise,
       nPersonalMatchReqsPromise,
       nMatchmakerMatchReqsPromise,
       nPersonalMatchAcceptedPromise,
@@ -146,6 +160,7 @@ export const saveStatsSnapshot = async () => {
   const statInput = {
     nUsers,
     nDetachedProfiles,
+    nProfileApprovals,
     nPersonalMatchReqs,
     nMatchmakerMatchReqs,
     nPersonalMatchAccepted,
