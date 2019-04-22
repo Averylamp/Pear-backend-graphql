@@ -1,3 +1,4 @@
+import { dbOld } from '../migrations/migration1/migration1Setup';
 
 const mongoose = require('mongoose');
 
@@ -56,13 +57,12 @@ const DiscoveryQueueSchema = new Schema({
 }, { timestamps: true });
 
 
-export const DiscoveryQueue = mongoose.model('DiscoveryQueue', DiscoveryQueueSchema);
-export const DiscoveryItem = mongoose.model('DiscoveryItem', DiscoveryItemSchema);
+export const DiscoveryQueueOld = dbOld.model('DiscoveryQueue', DiscoveryQueueSchema);
 
 // discovery queue object is created when user is created
 export const createDiscoveryQueueObject = function
-  createDiscoveryQueueObject(discoveryInput) {
-  const discoveryQueueModel = new DiscoveryQueue(discoveryInput);
+createDiscoveryQueueObject(discoveryInput) {
+  const discoveryQueueModel = new DiscoveryQueueOld(discoveryInput);
 
 
   return new Promise((resolve, reject) => {

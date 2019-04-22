@@ -4,6 +4,7 @@ import { start } from './start';
 import { runTests } from './tests/RunTests';
 import { startStatsGeneration } from './StatsGeneration';
 import { startDiscoveryGeneration } from './DiscoveryGeneration';
+import { runMigration } from './migrations/migration1/migration1';
 
 const debug = require('debug')('dev:Index');
 const testsLog = require('debug')('tests:Index');
@@ -27,6 +28,9 @@ if (process.env.TASK === 'stats-generation') {
 } else if (process.env.TASK === 'discovery-generation') {
   debug('starting discovery generation');
   startDiscoveryGeneration();
+} else if (process.env.TASK === 'migration1') {
+  debug('performing migration 1');
+  runMigration();
 } else if (!process.env.TASK) {
   start();
 }

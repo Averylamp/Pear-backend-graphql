@@ -1,3 +1,5 @@
+import { dbOld } from '../migrations/migration1/migration1Setup';
+
 const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
@@ -19,9 +21,9 @@ const StatSnapshotSchema = new Schema({
   nMatchmakerMatchAccepted: { type: StatTimeSummary, required: false },
 }, { timestamps: true });
 
-export const StatSnapshot = mongoose.model('StatSnapshot', StatSnapshotSchema);
+export const StatSnapshotOld = dbOld.model('StatSnapshot', StatSnapshotSchema);
 
 export const createStatSnapshot = (statInput) => {
-  const statSnapshotModel = new StatSnapshot(statInput);
+  const statSnapshotModel = new StatSnapshotOld(statInput);
   statSnapshotModel.save();
 };
