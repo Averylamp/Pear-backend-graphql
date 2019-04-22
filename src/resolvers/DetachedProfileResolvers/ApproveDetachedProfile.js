@@ -80,7 +80,7 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
       interests: {
         $each: approveDetachedProfileInput.interests ? approveDetachedProfileInput.interests : [],
       },
-      lastEdited: {
+      lastEditedTimes: {
         $each: [new Date()],
         $slice: -1 * LAST_EDITED_ARRAY_LEN,
       },

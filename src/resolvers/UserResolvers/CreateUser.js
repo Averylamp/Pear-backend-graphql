@@ -23,7 +23,7 @@ export const createUserResolver = async ({ userInput }) => {
     'firebaseRemoteInstanceID',
     'referredByCode',
   ]);
-  finalUserInput.lastActive = [new Date()];
+  finalUserInput.lastActiveTimes = [new Date()];
   finalUserInput._id = userObjectID;
   finalUserInput.discoveryQueue_id = discoveryQueueObjectID;
   finalUserInput.matchingPreferences = {};
