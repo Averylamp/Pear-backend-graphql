@@ -286,8 +286,10 @@ input QuestionUserResponseInput {
 }
 `;
 
+const devMode = process.env.DEV === 'true';
+const devTypeDef = devMode ? mutationRoutes : '';
+
 export const typeDef = queryRoutes
-+ mutationRoutes
 + bioType
 + boastType
 + roastType
@@ -298,7 +300,8 @@ export const typeDef = queryRoutes
 + vibeType
 + doType
 + dontType
-+ interestType;
++ interestType
++ devTypeDef;
 
 export const ColorSchema = new Schema({
   red: { type: Number, required: true, default: 0.0 },

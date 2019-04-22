@@ -308,29 +308,39 @@ const UserSchema = new Schema({
   schoolEmailVerified: { type: Boolean, required: false, default: false },
   isSeeking: { type: Boolean, required: true, default: true },
 
-  pearPoints: { type: Number, required: true, default: 0 },
+  pearPoints: {
+    type: Number,
+    required: true,
+    index: true,
+    default: 0
+  },
 
   displayedImages: { type: [ImageContainerSchema], required: true, default: [] },
-  displayedImagesCount: { type: Number, required: true, default: 0 },
+  displayedImagesCount: {
+    type: Number,
+    required: true,
+    index: true,
+    default: 0,
+  },
   bankImages: { type: [ImageContainerSchema], required: true, default: [] },
 
   endorser_ids: {
     type: [Schema.Types.ObjectId], required: true, index: true, default: [],
   },
   endorserCount: {
-    type: Number, required: true, default: 0,
+    type: Number, required: true, index: true, default: 0,
   },
   endorsedUser_ids: {
     type: [Schema.Types.ObjectId], required: true, index: true, default: [],
   },
   endorsedUsersCount: {
-    type: Number, required: true, default: 0,
+    type: Number, required: true, index: true, default: 0,
   },
   detachedProfile_ids: {
     type: [Schema.Types.ObjectId], required: true, index: true, default: [],
   },
   detachedProfilesCount: {
-    type: Number, required: true, default: 0,
+    type: Number, required: true, index: true, default: 0,
   },
 
   endorsementEdges: {
@@ -374,11 +384,17 @@ const UserSchema = new Schema({
     type: Boolean, required: false, default: false,
   },
 
-  lastActive: {
-    type: [Date], required: true, default: [],
+  lastActiveTimes: {
+    type: [Date],
+    required: true,
+    index: true,
+    default: [],
   },
-  lastEdited: {
-    type: [Date], required: true, default: [],
+  lastEditedTimes: {
+    type: [Date],
+    required: true,
+    index: true,
+    default: [],
   },
 }, { timestamps: true });
 

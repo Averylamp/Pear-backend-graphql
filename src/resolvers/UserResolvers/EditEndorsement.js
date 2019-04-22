@@ -122,8 +122,8 @@ export const editEndorsementResolver = async ({ editEndorsementInput }) => {
       user.bios.push(editEndorsementInput.bio);
     }
   }
-  user.lastEdited.push(now);
-  user.lastEdited = user.lastEdited.slice(-1 * LAST_EDITED_ARRAY_LEN);
+  user.lastEditedTimes.push(now);
+  user.lastEditedTimes = user.lastEditedTimes.slice(-1 * LAST_EDITED_ARRAY_LEN);
   try {
     const updatedUser = await user.save();
     // errorLog(updatedUser);
