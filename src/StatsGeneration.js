@@ -5,6 +5,9 @@ const debug = require('debug')('dev:StatsGeneration');
 const prodConsole = require('debug')('prod:StatsGeneration');
 const mongoose = require('mongoose');
 
+// see https://github.com/Automattic/mongoose/issues/7150
+mongoose.Schema.Types.String.checkRequired(v => v != null);
+
 export const startStatsGeneration = async () => {
   if (process.env.PERF) {
     debug('Perf mode detected');

@@ -1,4 +1,4 @@
-import { dbOld } from '../migrations/migration1/migration1Setup';
+import { dbOld } from '../migration1/Migration1Setup';
 
 const mongoose = require('mongoose');
 

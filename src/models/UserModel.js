@@ -12,6 +12,7 @@ import {
 } from './ContentModels';
 
 const mongoose = require('mongoose');
+const debug = require('debug')('dev:UserModel');
 
 const { Schema } = mongoose;
 
@@ -390,13 +391,13 @@ const UserSchema = new Schema({
     type: [Date],
     required: true,
     index: true,
-    default: [Date],
+    default: [new Date()],
   },
   lastEditedTimes: {
     type: [Date],
     required: true,
     index: true,
-    default: [Date],
+    default: [new Date()],
   },
 }, { timestamps: true });
 
@@ -413,10 +414,13 @@ UserSchema.virtual('fullName')
 
 export const User = mongoose.model('User', UserSchema);
 
-// TODO: replace all of this with `return (new User(userinput)).save()` and handle error
-export const createUserObject = (userInput) => {
+export const createUserObject = (userInput, skipTimestamps) => {
   const userModel = new User(userInput);
-  return userModel.save();
+  return userModel.save({ timestamps: !skipTimestamps })
+    .catch((err) => {
+      debug(`error occurred: ${err}`);
+      return null;
+    });
 };
 
 export const receiveRequest = (me, otherUser, match_id) => {

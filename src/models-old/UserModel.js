@@ -3,7 +3,7 @@ import { ImageContainerSchema } from './ImageSchemas';
 import { EdgeSummarySchema } from './MatchModel';
 import { EndorsementEdgeSchema } from './UserProfileModel';
 import { USERS_ALREADY_MATCHED_ERROR } from '../resolvers/ResolverErrorStrings';
-import { dbOld } from '../migrations/migration1/migration1Setup';
+import { dbOld } from '../migration1/Migration1Setup';
 
 const mongoose = require('mongoose');
 
