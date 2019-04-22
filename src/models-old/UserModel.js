@@ -3,6 +3,7 @@ import { ImageContainerSchema } from './ImageSchemas';
 import { EdgeSummarySchema } from './MatchModel';
 import { EndorsementEdgeSchema } from './UserProfileModel';
 import { USERS_ALREADY_MATCHED_ERROR } from '../resolvers/ResolverErrorStrings';
+import { dbOld } from '../migrations/migration1/migration1Setup';
 
 const mongoose = require('mongoose');
 
@@ -352,11 +353,11 @@ UserSchema.virtual('fullName')
     return `${this.firstName} ${this.lastName}`;
   });
 
-export const User = mongoose.model('User', UserSchema);
+export const UserOld = dbOld.model('User', UserSchema);
 
 // TODO: replace all of this with `return (new User(userinput)).save()` and handle error
 export const createUserObject = (userInput) => {
-  const userModel = new User(userInput);
+  const userModel = new UserOld(userInput);
   return userModel.save();
 };
 

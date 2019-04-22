@@ -1,5 +1,6 @@
 import { ImageContainerSchema } from './ImageSchemas';
 import { MatchingDemographicsSchema, MatchingPreferencesSchema } from './MatchingSchemas';
+import { dbOld } from '../migrations/migration1/migration1Setup';
 
 
 const mongoose = require('mongoose');
@@ -165,11 +166,11 @@ const DetachedProfileSchema = new Schema({
 }, { timestamps: true });
 
 
-export const DetachedProfile = mongoose.model('DetachedProfile', DetachedProfileSchema);
+export const DetachedProfileOld = dbOld.model('DetachedProfile', DetachedProfileSchema);
 
 export const createDetachedProfileObject = function
-  createUserProfileObject(detachedProfileInput) {
-  const detachedProfileModel = new DetachedProfile(detachedProfileInput);
+createUserProfileObject(detachedProfileInput) {
+  const detachedProfileModel = new DetachedProfileOld(detachedProfileInput);
   return new Promise((resolve, reject) => {
     detachedProfileModel.save((err) => {
       if (err) {

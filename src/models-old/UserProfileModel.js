@@ -1,3 +1,5 @@
+import { dbOld } from '../migrations/migration1/migration1Setup';
+
 const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
@@ -106,10 +108,10 @@ export const EndorsementEdgeSchema = new Schema({
 });
 
 
-export const UserProfile = mongoose.model('UserProfile', UserProfileSchema);
+export const UserProfileOld = dbOld.model('UserProfile', UserProfileSchema);
 
 export const createUserProfileObject = function createUserProfileObject(userProfileInput) {
-  const userProfileModel = new UserProfile(userProfileInput);
+  const userProfileModel = new UserProfileOld(userProfileInput);
   return new Promise((resolve, reject) => {
     userProfileModel.save((err) => {
       if (err) {

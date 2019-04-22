@@ -1,3 +1,5 @@
+import { dbOld } from '../migrations/migration1/migration1Setup';
+
 const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
@@ -24,10 +26,10 @@ const TestObjectSchema = new Schema({
   testField: { type: Schema.Types.String, required: true },
 });
 
-export const TestObject = mongoose.model('TestObject', TestObjectSchema);
+export const TestObjectOld = dbOld.model('TestObject', TestObjectSchema);
 
 export const createTestObjectFn = (testObjectInput, _id = mongoose.Types.ObjectId()) => {
-  const testObjectModel = new TestObject(testObjectInput);
+  const testObjectModel = new TestObjectOld(testObjectInput);
   testObjectModel._id = _id;
   debug(testObjectModel);
   return new Promise((resolve, reject) => {
