@@ -1,3 +1,5 @@
+import { dbOld } from '../migration1/Migration1Setup';
+
 const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
@@ -13,13 +15,10 @@ const mutationRoutes = `
 extend type Mutation {
   # Creates Match Request between Users
   createMatchRequest(requestInput: CreateMatchRequestInput!): MatchMutationResponse!
-
   # TODO: Document
   acceptRequest(user_id: ID!, match_id: ID!): MatchMutationResponse!
-
   # TODO: Document
   rejectRequest(user_id: ID!, match_id: ID!): MatchMutationResponse!
-
   # TODO: Document
   unmatch(user_id: ID!, match_id: ID!, reason: String): MatchMutationResponse!
 }
@@ -28,13 +27,10 @@ extend type Mutation {
 const createRequestMutationInputs = `
 input CreateMatchRequestInput {
   _id: ID # only for testing
-
   # Either Matchmaker ID or User ID if personal request
   sentByUser_id: ID!
-
   # Always primary user
   sentForUser_id: ID!
-
   # Discovered user receiving the request
   receivedByUser_id: ID!
   
@@ -62,7 +58,6 @@ enum RequestResponse {
 const matchType = `
 type Match{
   _id: ID!
-
   sentByUser_id: ID!
   sentByUser: User
   sentForUser_id: ID!
@@ -70,17 +65,14 @@ type Match{
   receivedByUser_id: ID!
   receivedByUser: User
   isMatchmakerMade: Boolean!
-
   sentForUserStatus: RequestResponse!
   sentForUserStatusLastUpdated: String!
   receivedByUserStatus: RequestResponse!
   receivedByUserStatusLastUpdated: String!
-
   unmatched: Boolean!
   unmatchedBy_id: ID
   unmatchedReason: String
   unmatchedTimestamp: String
-
   firebaseChatDocumentID: String!
   firebaseChatDocumentPath: String!
 }
@@ -95,14 +87,12 @@ type EdgeSummary {
   match_id: ID!
   match: Match
 }
-
 enum EdgeStatus{
   open
   rejected
   match
   unmatched
 }
-
 `;
 
 
@@ -157,7 +147,6 @@ export const EdgeSummarySchema = new Schema({
   match_id: { type: Schema.Types.ObjectId, required: true, index: true },
 }, { timestamps: true });
 
-export const Match = mongoose.model('Match', MatchSchema);
+export const MatchOld = dbOld.model('Match', MatchSchema);
 
-export const createMatchObject = (matchInput, skipTimestamps) => (new Match(matchInput))
-  .save({ timestamps: !skipTimestamps });
+export const createMatchObject = matchInput => (new MatchOld(matchInput)).save();
