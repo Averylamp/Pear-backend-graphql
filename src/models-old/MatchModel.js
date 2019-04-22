@@ -1,3 +1,5 @@
+import { dbOld } from '../migrations/migration1/migration1Setup';
+
 const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
@@ -145,6 +147,6 @@ export const EdgeSummarySchema = new Schema({
   match_id: { type: Schema.Types.ObjectId, required: true, index: true },
 }, { timestamps: true });
 
-export const Match = mongoose.model('Match', MatchSchema);
+export const MatchOld = dbOld.model('Match', MatchSchema);
 
-export const createMatchObject = matchInput => (new Match(matchInput)).save();
+export const createMatchObject = matchInput => (new MatchOld(matchInput)).save();

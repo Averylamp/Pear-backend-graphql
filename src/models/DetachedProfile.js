@@ -210,7 +210,7 @@ const DetachedProfileSchema = new Schema({
   },
   acceptedTime: {
     type: Date, required: false, index: true, sparse: true,
-  }
+  },
 }, { timestamps: true });
 
 
