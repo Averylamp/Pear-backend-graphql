@@ -312,7 +312,7 @@ const UserSchema = new Schema({
     type: Number,
     required: true,
     index: true,
-    default: 0
+    default: 0,
   },
 
   displayedImages: { type: [ImageContainerSchema], required: true, default: [] },
