@@ -25,6 +25,7 @@ export const CREATE_AVERY1_DETACHED_PROFILE_VARIABLES = {
     creatorUser_id: MADE_ID,
     creatorFirstName: 'Made',
     firstName: 'Avery',
+    lastName: 'Lamp',
     phoneNumber: '9738738225',
     boasts: [
       {
