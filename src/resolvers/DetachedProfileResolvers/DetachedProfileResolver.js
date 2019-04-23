@@ -14,6 +14,7 @@ import { createDetachedProfileResolver } from './CreateDetachedProfile';
 import { approveDetachedProfileResolver } from './ApproveDetachedProfile';
 import { getAndValidateUsersAndDetachedProfileObjects } from './DetachedProfileResolverUtils';
 import { editDetachedProfileResolver } from './EditDetachedProfile';
+import { generateSentryErrorForResolver } from '../../SentryHelper';
 
 const debug = require('debug')('dev:DetachedProfileResolvers');
 const errorLog = require('debug')('error:DetachedProfileResolvers');
@@ -42,6 +43,13 @@ export const resolvers = {
         return createDetachedProfileResolver({ detachedProfileInput });
       } catch (e) {
         errorLog(`error occurred creating detached profile: ${e}`);
+        generateSentryErrorForResolver({
+          resolverType: 'mutation',
+          routeName: 'createDetachedProfile',
+          args: { detachedProfileInput },
+          errorMsg: e,
+          errorName: CREATE_DETACHED_PROFILE_ERROR,
+        });
         return {
           success: false,
           message: CREATE_DETACHED_PROFILE_ERROR,
@@ -68,6 +76,13 @@ export const resolvers = {
         };
       } catch (e) {
         errorLog(`An error occurred viewing detached profile: ${e}`);
+        generateSentryErrorForResolver({
+          resolverType: 'mutation',
+          routeName: 'viewDetachedProfile',
+          args: { user_id, detachedProfile_id },
+          errorMsg: e,
+          errorName: VIEW_DETACHED_PROFILE_ERROR,
+        });
         return {
           success: false,
           message: VIEW_DETACHED_PROFILE_ERROR,
@@ -81,6 +96,13 @@ export const resolvers = {
         return editDetachedProfileResolver({ editDetachedProfileInput });
       } catch (e) {
         errorLog(`error occurred editing detached profile: ${e}`);
+        generateSentryErrorForResolver({
+          resolverType: 'mutation',
+          routeName: 'editDetachedProfileInput',
+          args: { editDetachedProfileInput },
+          errorMsg: e,
+          errorName: EDIT_DETACHED_PROFILE_ERROR,
+        });
         return {
           success: false,
           message: EDIT_DETACHED_PROFILE_ERROR,
@@ -93,6 +115,13 @@ export const resolvers = {
         return approveDetachedProfileResolver({ approveDetachedProfileInput });
       } catch (e) {
         errorLog(`error occurred approving detached profile: ${e}`);
+        generateSentryErrorForResolver({
+          resolverType: 'mutation',
+          routeName: 'approveDetachedProfileInput',
+          args: { approveDetachedProfileInput },
+          errorMsg: e,
+          errorName: APPROVE_PROFILE_ERROR,
+        });
         return {
           success: false,
           message: APPROVE_PROFILE_ERROR,
