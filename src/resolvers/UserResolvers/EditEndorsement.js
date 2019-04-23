@@ -4,6 +4,7 @@ import {
   GET_USER_ERROR, WRONG_CREATOR_ERROR,
 } from '../ResolverErrorStrings';
 import { LAST_EDITED_ARRAY_LEN } from '../../constants';
+import { generateSentryErrorForResolver } from '../../SentryHelper';
 
 const errorLog = require('debug')('error:EditEndorsement');
 
@@ -133,6 +134,13 @@ export const editEndorsementResolver = async ({ editEndorsementInput }) => {
     };
   } catch (e) {
     errorLog(`error occurred editing endorsement: ${e}`);
+    generateSentryErrorForResolver({
+      resolverType: 'mutation',
+      routeName: 'editEndorsement',
+      args: { editEndorsementInput },
+      errorMsg: e,
+      errorName: EDIT_ENDORSEMENT_ERROR,
+    });
     return {
       success: false,
       message: EDIT_ENDORSEMENT_ERROR,

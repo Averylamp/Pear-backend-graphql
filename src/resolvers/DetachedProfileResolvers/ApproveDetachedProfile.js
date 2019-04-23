@@ -16,6 +16,7 @@ import {
   sendNewEndorsementMessage, sendProfileApprovedPushNotification,
 } from '../../FirebaseManager';
 import { getAndValidateUsersAndDetachedProfileObjects } from './DetachedProfileResolverUtils';
+import { generateSentryErrorForResolver } from '../../SentryHelper';
 
 const debug = require('debug')('dev:DetachedProfileResolvers');
 const errorLog = require('debug')('error:DetachedProfileResolvers');
@@ -212,6 +213,13 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
         }
 
         errorLog(errorMessage);
+        generateSentryErrorForResolver({
+          resolverType: 'mutation',
+          routeName: 'approveDetachedProfileInput',
+          args: { approveDetachedProfileInput },
+          errorMsg: errorMessage,
+          errorName: APPROVE_PROFILE_ERROR,
+        });
         return {
           success: false,
           message: APPROVE_PROFILE_ERROR,
