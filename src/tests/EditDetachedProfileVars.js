@@ -12,6 +12,7 @@ import { FAKE_IMAGE_1, FAKE_IMAGE_2 } from './FakeImages';
 export const EDIT_BRIAN1_DETACHED_PROFILE_VARIABLES = {
   editDetachedProfileInput: {
     _id: BRIAN_PROFILE_SAMMI_D_ID,
+    lastName: 'Gu',
     creatorUser_id: SAMMI_ID,
     bio: {
       author_id: SAMMI_ID,

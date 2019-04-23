@@ -24,6 +24,7 @@ export const createDetachedProfileResolver = async ({ detachedProfileInput }) =>
     'creatorUser_id',
     'creatorFirstName',
     'firstName',
+    'lastName',
     'phoneNumber',
     'boasts',
     'roasts',
