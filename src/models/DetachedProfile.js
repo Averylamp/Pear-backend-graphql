@@ -47,6 +47,7 @@ input CreationDetachedProfileInput {
   creatorUser_id: ID!
   creatorFirstName: String!
   firstName: String!
+  lastName: String
   phoneNumber: String!
   
   boasts: [BoastInput!]!
@@ -91,6 +92,7 @@ input EditDetachedProfileInput {
   # The creator's User Object ID
   creatorUser_id: ID!
   
+  lastName: String
   boasts: [BoastInput!]
   roasts: [RoastInput!]
   questionResponses: [QuestionUserResponseInput!]
@@ -115,6 +117,7 @@ type DetachedProfile {
   creatorUser: User
   creatorFirstName: String!
   firstName: String!
+  lastName: String
   phoneNumber: String!
   age: Int
   gender: Gender
@@ -170,6 +173,7 @@ const DetachedProfileSchema = new Schema({
   creatorUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
   creatorFirstName: { type: String, required: true },
   firstName: { type: String, required: true },
+  lastName: { type: String, required: false },
   phoneNumber: {
     type: String,
     required: true,
