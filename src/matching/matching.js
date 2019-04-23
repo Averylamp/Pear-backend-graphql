@@ -17,6 +17,7 @@ import {
   SEND_MATCH_REQUEST_ERROR, USERS_ALREADY_MATCHED_ERROR,
   WRONG_CREATOR_ERROR,
 } from '../resolvers/ResolverErrorStrings';
+import { generateSentryErrorForResolver } from '../SentryHelper';
 
 const debug = require('debug')('dev:Matching');
 const errorLogger = require('debug')('error:Matching');
@@ -263,6 +264,19 @@ export const createNewMatch = async ({
       // we don't delete the chat; we just leave it, and no mongo edges/matches reference it
     }
     errorLog(errorMessage);
+    generateSentryErrorForResolver({
+      resolverType: 'mutation',
+      routeName: 'createMatchRequest',
+      args: {
+        sentByUser_id,
+        sentForUser_id,
+        receivedByUser_id,
+        _id,
+        requestText,
+      },
+      errorMsg: errorMessage,
+      errorName: SEND_MATCH_REQUEST_ERROR,
+    });
     return {
       success: false,
       message: responseMessage,
