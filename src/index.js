@@ -20,7 +20,7 @@ const init = async () => {
 
   if (!devMode) {
     const release = await fs
-      .readFile('./releaseNumber.txt')
+      .readFile('./release')
       .then(buf => (buf.toString()))
       .catch((err) => {
         debug(`error occurred getting release number: ${err}`);
