@@ -7,6 +7,7 @@ import {
   ACCEPT_MATCH_REQUEST_ERROR, REJECT_MATCH_REQUEST_ERROR,
   SEND_MATCH_REQUEST_ERROR, UNMATCH_ERROR,
 } from './ResolverErrorStrings';
+import { generateSentryErrorForResolver } from '../SentryHelper';
 
 const debug = require('debug')('dev:MatchResolver');
 const errorLogger = require('debug')('error:MatchResolver');
@@ -29,6 +30,13 @@ export const resolvers = {
       try {
         return createNewMatch(requestInput);
       } catch (e) {
+        generateSentryErrorForResolver({
+          resolverType: 'mutation',
+          routeName: 'createMatchRequest',
+          args: { requestInput },
+          errorMsg: e,
+          errorName: SEND_MATCH_REQUEST_ERROR,
+        });
         errorLogger(`Error while creating match: ${e}`);
         return {
           success: false,
@@ -41,6 +49,13 @@ export const resolvers = {
         return decideOnMatch({ user_id, match_id, decision: 'accept' });
       } catch (e) {
         errorLogger(`Error occurred in accepting request: ${e}`);
+        generateSentryErrorForResolver({
+          resolverType: 'mutation',
+          routeName: 'acceptRequest',
+          args: { user_id, match_id },
+          errorMsg: e,
+          errorName: ACCEPT_MATCH_REQUEST_ERROR,
+        });
         return {
           success: false,
           message: ACCEPT_MATCH_REQUEST_ERROR,
@@ -52,6 +67,13 @@ export const resolvers = {
         return decideOnMatch({ user_id, match_id, decision: 'reject' });
       } catch (e) {
         errorLogger(`Error occurred in rejecting request: ${e}`);
+        generateSentryErrorForResolver({
+          resolverType: 'mutation',
+          routeName: 'rejectRequest',
+          args: { user_id, match_id },
+          errorMsg: e,
+          errorName: REJECT_MATCH_REQUEST_ERROR,
+        });
         return {
           success: false,
           message: REJECT_MATCH_REQUEST_ERROR,
@@ -150,6 +172,13 @@ export const resolvers = {
             }
           }
           errorLogger(`Error occurred unmatching: ${errorMessage}`);
+          generateSentryErrorForResolver({
+            resolverType: 'mutation',
+            routeName: 'unmatch',
+            args: { user_id, match_id, reason },
+            errorMsg: errorMessage,
+            errorName: UNMATCH_ERROR,
+          });
           return {
             success: false,
             message: UNMATCH_ERROR,
@@ -160,6 +189,13 @@ export const resolvers = {
           match: matchUpdate,
         };
       } catch (e) {
+        generateSentryErrorForResolver({
+          resolverType: 'mutation',
+          routeName: 'unmatch',
+          args: { user_id, match_id, reason },
+          errorMsg: e,
+          errorName: UNMATCH_ERROR,
+        });
         errorLogger(`Error occurred unmatching: ${e}`);
         return {
           success: false,
