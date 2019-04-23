@@ -12,6 +12,7 @@ import {
   updateDiscoveryForUserById,
 } from '../../discovery/DiscoverProfile';
 import { canMakeProfileForSelf } from './DetachedProfileResolverUtils';
+import { generateSentryErrorForResolver } from '../../SentryHelper';
 
 const mongoose = require('mongoose');
 const debug = require('debug')('dev:DetachedProfileResolvers');
@@ -84,6 +85,13 @@ export const createDetachedProfileResolver = async ({ detachedProfileInput }) =>
     }
   } catch (e) {
     errorLog(`An error occurred: ${e}`);
+    generateSentryErrorForResolver({
+      resolverType: 'mutation',
+      routeName: 'createDetachedProfile',
+      args: { detachedProfileInput },
+      errorMsg: e,
+      errorName: CREATE_DETACHED_PROFILE_ERROR,
+    });
     return {
       success: false,
       message: CREATE_DETACHED_PROFILE_ERROR,
@@ -137,6 +145,13 @@ export const createDetachedProfileResolver = async ({ detachedProfileInput }) =>
           }).exec();
         }
         errorLog(errorMessage);
+        generateSentryErrorForResolver({
+          resolverType: 'mutation',
+          routeName: 'createDetachedProfile',
+          args: { detachedProfileInput },
+          errorMsg: errorMessage,
+          errorName: CREATE_DETACHED_PROFILE_ERROR,
+        });
         return {
           success: false,
           message: CREATE_DETACHED_PROFILE_ERROR,

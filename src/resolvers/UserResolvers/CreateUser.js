@@ -6,6 +6,7 @@ import { INITIALIZED_FEED_LENGTH } from '../../constants';
 import {
   updateDiscoveryForUserById,
 } from '../../discovery/DiscoverProfile';
+import { generateSentryErrorForResolver } from '../../SentryHelper';
 
 const mongoose = require('mongoose');
 const errorLog = require('debug')('error:CreateUserResolver');
@@ -68,6 +69,13 @@ export const createUserResolver = async ({ userInput }) => {
           });
         }
         errorLog(errorMessage);
+        generateSentryErrorForResolver({
+          resolverType: 'mutation',
+          routeName: 'createUser',
+          args: { userInput },
+          errorMsg: errorMessage,
+          errorName: CREATE_USER_ERROR,
+        });
         return {
           success: false,
           message: CREATE_USER_ERROR,
