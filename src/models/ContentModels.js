@@ -88,28 +88,6 @@ input RoastInput {
 }
 `;
 
-const vibeType = `
-type Vibe {
-  _id: ID!
-  author_id: ID!
-  author: User
-  authorFirstName: String!
-  
-  content: String!
-  hidden: Boolean!
-}
-
-input VibeInput {
-  # _id is optional. if it's set, it replaces an existing bio if one exists w/same id. else
-  # if not set, we just insert a new bio.
-  _id: ID
-  author_id: ID!
-  authorFirstName: String!
-  content: String!
-  hidden: Boolean
-}
-`;
-
 const doType = `
 type Do {
   _id: ID!
@@ -201,6 +179,32 @@ type IconAssetRef {
 input IconAssetRefInput {
   assetString: String
   assetURL: String
+}
+`;
+
+const vibeType = `
+type Vibe {
+  _id: ID!
+  author_id: ID!
+  author: User
+  authorFirstName: String!
+  
+  content: String!
+  color: Color
+  icon: IconAssetRef
+  hidden: Boolean!
+}
+
+input VibeInput {
+  # _id is optional. if it's set, it replaces an existing bio if one exists w/same id. else
+  # if not set, we just insert a new bio.
+  _id: ID
+  author_id: ID!
+  authorFirstName: String!
+  content: String!
+  color: ColorInput
+  icon: IconAssetRefInput
+  hidden: Boolean
 }
 `;
 
@@ -350,6 +354,15 @@ export const QuestionUserResponseSchema = new Schema({
   hidden: { type: Boolean, required: true, default: false },
 });
 
+export const VibeSchema = new Schema({
+  author_id: { type: Schema.Types.ObjectId, required: true, index: true },
+  authorFirstName: { type: String, required: true },
+  content: { type: String, required: false },
+  color: { type: ColorSchema, required: false },
+  icon: { type: IconAssetRefSchema, required: false },
+  hidden: { type: Boolean, required: true, default: false },
+});
+
 const simpleContentSchemaObject = {
   author_id: { type: Schema.Types.ObjectId, required: true, index: true },
   authorFirstName: { type: String, required: true },
@@ -368,7 +381,5 @@ export const DoSchema = new Schema(simpleContentSchemaObject, { timestamps: true
 export const DontSchema = new Schema(simpleContentSchemaObject, { timestamps: true });
 
 export const InterestSchema = new Schema(simpleContentSchemaObject, { timestamps: true });
-
-export const VibeSchema = new Schema(simpleContentSchemaObject, { timestamps: true });
 
 export const Question = mongoose.model('Question', QuestionSchema);
