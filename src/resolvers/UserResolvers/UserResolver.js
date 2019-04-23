@@ -14,6 +14,7 @@ import { LAST_ACTIVE_ARRAY_LEN, LAST_EDITED_ARRAY_LEN } from '../../constants';
 import { createUserResolver } from './CreateUser';
 import { updateUserResolver } from './UpdateUser';
 import { editEndorsementResolver } from './EditEndorsement';
+import { generateSentryErrorForResolver } from '../../SentryHelper';
 
 const debug = require('debug')('dev:UserResolvers');
 const errorLog = require('debug')('error:UserResolver');
@@ -40,7 +41,8 @@ export const resolvers = {
       debug(`Getting user by id: ${id}`);
       return User.findById(id);
     },
-    getUser: async (_source, { userInput }) => {
+    getUser: async (_source, args) => {
+      const { userInput } = args;
       functionCallConsole('Get User Called');
       const token = userInput.firebaseToken;
       const uid = userInput.firebaseAuthID;
@@ -66,12 +68,25 @@ export const resolvers = {
             user,
           };
         }
+        generateSentryErrorForResolver({
+          resolverType: 'query',
+          routeName: 'getUser',
+          args,
+          errorName: GET_USER_ERROR,
+        });
         return {
           success: false,
           message: GET_USER_ERROR,
         };
       } catch (e) {
         errorLog(`An error occurred getting user: ${e}`);
+        generateSentryErrorForResolver({
+          resolverType: 'query',
+          routeName: 'getUser',
+          args,
+          errorName: GET_USER_ERROR,
+          errorMsg: e,
+        });
         return {
           success: false,
           message: GET_USER_ERROR,
@@ -118,6 +133,13 @@ export const resolvers = {
         return createUserResolver({ userInput });
       } catch (e) {
         errorLog(`error occurred while creating user: ${e}`);
+        generateSentryErrorForResolver({
+          resolverType: 'mutation',
+          routeName: 'createUser',
+          args: { userInput },
+          errorMsg: e,
+          errorName: CREATE_USER_ERROR,
+        });
         return {
           success: false,
           message: CREATE_USER_ERROR,
@@ -129,6 +151,13 @@ export const resolvers = {
         return updateUserResolver({ updateUserInput });
       } catch (e) {
         errorLog(`error occurred while updating user: ${e}`);
+        generateSentryErrorForResolver({
+          resolverType: 'mutation',
+          routeName: 'updateUser',
+          args: { updateUserInput },
+          errorMsg: e,
+          errorName: UPDATE_USER_ERROR,
+        });
         return {
           success: false,
           message: UPDATE_USER_ERROR,
@@ -192,10 +221,19 @@ export const resolvers = {
           success: true,
           user: res,
         }))
-        .catch(() => ({
-          success: false,
-          message: UPDATE_USER_PHOTOS_ERROR,
-        }));
+        .catch((e) => {
+          generateSentryErrorForResolver({
+            resolverType: 'mutation',
+            routeName: 'updateUserPhotos',
+            args: { updateUserPhotosInput },
+            errorMsg: e,
+            errorName: UPDATE_USER_PHOTOS_ERROR,
+          });
+          return {
+            success: false,
+            message: UPDATE_USER_PHOTOS_ERROR,
+          };
+        });
     },
     editEndorsement: async (_source, { editEndorsementInput }) => {
       functionCallConsole('Edit Endorsement Called');
@@ -203,6 +241,13 @@ export const resolvers = {
         return editEndorsementResolver({ editEndorsementInput });
       } catch (e) {
         errorLog(`error occurred while editing endorsement: ${e}`);
+        generateSentryErrorForResolver({
+          resolverType: 'mutation',
+          routeName: 'editEndorsement',
+          args: { editEndorsementInput },
+          errorMsg: e,
+          errorName: EDIT_ENDORSEMENT_ERROR,
+        });
         return {
           success: false,
           message: EDIT_ENDORSEMENT_ERROR,

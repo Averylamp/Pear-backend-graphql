@@ -3,7 +3,11 @@ import { DiscoveryQueue, DiscoveryItem } from '../models/DiscoveryQueueModel';
 import {
   updateDiscoveryForUserById,
 } from '../discovery/DiscoverProfile';
-import { FORCE_FEED_UPDATE_ERROR, FORCE_FEED_UPDATE_SUCCESS } from './ResolverErrorStrings';
+import {
+  FORCE_FEED_UPDATE_ERROR,
+  FORCE_FEED_UPDATE_SUCCESS,
+} from './ResolverErrorStrings';
+import { generateSentryErrorForResolver } from '../SentryHelper';
 
 const debug = require('debug')('dev:DiscoveryQueueResolver');
 const errorLog = require('debug')('error:DiscoveryQueueResolver');
@@ -37,6 +41,13 @@ export const resolvers = {
           await updateDiscoveryForUserById({ user_id });
         } catch (e) {
           errorLog(`An error occurred: ${e}`);
+          generateSentryErrorForResolver({
+            resolverType: 'mutation',
+            routeName: 'forceUpdateFeed',
+            args: { user_id, numberOfItems },
+            errorMsg: e,
+            errorName: FORCE_FEED_UPDATE_ERROR,
+          });
           return {
             success: false,
             message: FORCE_FEED_UPDATE_ERROR,
