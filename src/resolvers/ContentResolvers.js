@@ -19,6 +19,7 @@ const mutations = devMode ? {
           'questionType',
           'suggestedResponses',
           'placeholderResponseText',
+          'tags',
         ]);
         finalQuestionInput._id = question_id;
         const questionModel = new Question(finalQuestionInput);
@@ -43,6 +44,7 @@ const mutations = devMode ? {
         'questionType',
         'suggestedResponses',
         'placeholderResponseText',
+        'tags',
       ]);
       finalQuestionInput._id = question_id;
       const questionModel = new Question(finalQuestionInput);

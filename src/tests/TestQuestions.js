@@ -22,6 +22,7 @@ export const ADD_QUESTIONS_VARIABLES = {
           assetString: 'red-icon',
         },
       }],
+      tags: ['starter', 'spicy'],
     },
     {
       _id: QUESTION2_ID,
@@ -38,6 +39,7 @@ export const ADD_QUESTIONS_VARIABLES = {
       questionText: 'What\'s your weird flex?',
       questionType: 'freeResponse',
       suggestedResponses: [],
+      tags: ['dating', 'personality'],
     },
   ],
 };
