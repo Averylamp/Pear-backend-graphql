@@ -42,37 +42,28 @@ export const CREATE_AVERY1_DETACHED_PROFILE_VARIABLES = {
         question_id: QUESTION1_ID,
         question: {
           _id: QUESTION1_ID,
-          questionText: 'What\'s your favorite color?',
-          questionTextWithName: 'What\'s your favorite color, *name*?',
-          questionType: 'multipleChoice',
+          questionText: 'How did they end up on the cover of Forbes?',
+          questionTextWithName: 'How did {{name}} end up on the cover of Forbes?',
+          questionType: 'multipleChoiceWithOther',
           suggestedResponses: [
             {
-              responseBody: 'blue',
-            }, {
-              responseBody: 'red',
-              responseTitle: 'red is a great color',
-              color: {
-                red: 1.0,
-                green: 0.0,
-                blue: 0.0,
-                alpha: 1.0,
-              },
-              icon: {
-                assetString: 'red-icon',
-              },
-            }],
+              responseBody: 'Because they\'re a "self-made" billionaire',
+            },
+            {
+              responseBody: 'Because they actually deserved it 😍',
+            },
+            {
+              responseBody: 'They made #30Under30, except it\'s because they ate 30 chicken nuggets in under 30 seconds',
+            },
+            {
+              responseBody: 'Got busted for money laundering 🤷\u200d♂️',
+            },
+          ],
+          tags: [
+            'personality',
+          ],
         },
-        responseBody: 'red',
-        responseTitle: 'red is a great color',
-        color: {
-          red: 1.0,
-          green: 0.0,
-          blue: 0.0,
-          alpha: 1.0,
-        },
-        icon: {
-          assetString: 'red-icon',
-        },
+        responseBody: 'Because they actually deserved it 😍',
       },
     ],
     vibes: [
@@ -112,16 +103,31 @@ export const CREATE_BRIAN1_DETACHED_PROFILE_VARIABLES = {
         question_id: QUESTION2_ID,
         question: {
           _id: QUESTION2_ID,
-          questionText: 'What\'s your favorite shoe??',
+          questionText: 'What\'s your friend\'s weird flex?',
+          questionTextWithName: 'What\'s {{name}}\'s weird flex?',
           questionType: 'multipleChoiceWithOther',
           suggestedResponses: [
             {
-              responseBody: 'yeezys',
-            }, {
-              responseBody: 'crocs',
-            }],
+              responseBody: 'Does homework drunk, still gets A\'s',
+            },
+            {
+              responseBody: '5.0 uber rating',
+            },
+            {
+              responseBody: 'Barry’s Bootcamp/SoulCycle/Orange Theory is an essential part of their morning routine',
+            },
+            {
+              responseBody: 'Fluent in vines',
+            },
+            {
+              responseBody: 'The best relationship advice giver even though they’ve been single af since the womb',
+            },
+          ],
+          tags: [
+            'personality',
+          ],
         },
-        responseBody: 'crocs',
+        responseBody: '5.0 uber rating',
       },
     ],
     vibes: [
@@ -156,11 +162,34 @@ export const CREATE_JOSH1_DETACHED_PROFILE_VARIABLES = {
         question_id: QUESTION3_ID,
         question: {
           _id: QUESTION3_ID,
-          questionText: 'What\'s your weird flex?',
-          questionType: 'freeResponse',
-          suggestedResponses: [],
+          questionText: 'People only want one thing, and it’s disgusting 😫. What does your friend want?',
+          questionTextWithName: 'People only want one thing, and it’s disgusting 😫. What does {{name}} want?',
+          questionType: 'multipleChoiceWithOther',
+          suggestedResponses: [
+            {
+              responseBody: '"Hey, can you endorse me on LinkedIn?"',
+            },
+            {
+              responseBody: '🍆🍑',
+            },
+            {
+              responseBody: 'To get married by 26, have kids by 30, and become the soccer parent of their dreams',
+            },
+            {
+              responseBody: '"Do you have a minute to talk about our Lord and Savior?" ⛪️🙏',
+            },
+            {
+              responseBody: '💸💸To secure the bag and get that MF BREAD 💰🤑💰',
+            },
+            {
+              responseBody: 'To meet new people, make friends, and be the social butterfly they already are 😇🦋',
+            },
+          ],
+          tags: [
+            'personality',
+          ],
         },
-        responseBody: 'he\'s a RALPH POLO LAUREN campus ambassador so hit him up for free shirts',
+        responseBody: '"Hey, can you endorse me on LinkedIn?"',
       },
     ],
     vibes: [
@@ -200,27 +229,28 @@ export const CREATE_SAMMI1_DETACHED_PROFILE_VARIABLES = {
         question_id: QUESTION1_ID,
         question: {
           _id: QUESTION1_ID,
-          questionText: 'What\'s your favorite color?',
-          questionTextWithName: 'What\'s your favorite color, *name*?',
-          questionType: 'multipleChoice',
+          questionText: 'How did they end up on the cover of Forbes?',
+          questionTextWithName: 'How did {{name}} end up on the cover of Forbes?',
+          questionType: 'multipleChoiceWithOther',
           suggestedResponses: [
             {
-              responseBody: 'blue',
-            }, {
-              responseBody: 'red',
-              responseTitle: 'red is a great color',
-              color: {
-                red: 1.0,
-                green: 0.0,
-                blue: 0.0,
-                alpha: 1.0,
-              },
-              icon: {
-                assetString: 'red-icon',
-              },
-            }],
+              responseBody: 'Because they\'re a "self-made" billionaire',
+            },
+            {
+              responseBody: 'Because they actually deserved it 😍',
+            },
+            {
+              responseBody: 'They made #30Under30, except it\'s because they ate 30 chicken nuggets in under 30 seconds',
+            },
+            {
+              responseBody: 'Got busted for money laundering 🤷\u200d♂️',
+            },
+          ],
+          tags: [
+            'personality',
+          ],
         },
-        responseBody: 'blue',
+        responseBody: 'They made #30Under30, except it\'s because they ate 30 chicken nuggets in under 30 seconds',
       },
     ],
     vibes: [],
@@ -255,37 +285,28 @@ export const CREATE_SAMMI2_DETACHED_PROFILE_VARIABLES = {
         question_id: QUESTION1_ID,
         question: {
           _id: QUESTION1_ID,
-          questionText: 'What\'s your favorite color?',
-          questionTextWithName: 'What\'s your favorite color, *name*?',
-          questionType: 'multipleChoice',
+          questionText: 'How did they end up on the cover of Forbes?',
+          questionTextWithName: 'How did {{name}} end up on the cover of Forbes?',
+          questionType: 'multipleChoiceWithOther',
           suggestedResponses: [
             {
-              responseBody: 'blue',
-            }, {
-              responseBody: 'red',
-              responseTitle: 'red is a great color',
-              color: {
-                red: 1.0,
-                green: 0.0,
-                blue: 0.0,
-                alpha: 1.0,
-              },
-              icon: {
-                assetString: 'red-icon',
-              },
-            }],
+              responseBody: 'Because they\'re a "self-made" billionaire',
+            },
+            {
+              responseBody: 'Because they actually deserved it 😍',
+            },
+            {
+              responseBody: 'They made #30Under30, except it\'s because they ate 30 chicken nuggets in under 30 seconds',
+            },
+            {
+              responseBody: 'Got busted for money laundering 🤷\u200d♂️',
+            },
+          ],
+          tags: [
+            'personality',
+          ],
         },
-        responseBody: 'red',
-        responseTitle: 'red is a great color',
-        color: {
-          red: 1.0,
-          green: 0.0,
-          blue: 0.0,
-          alpha: 1.0,
-        },
-        icon: {
-          assetString: 'red-icon',
-        },
+        responseBody: 'Got busted for money laundering 🤷\u200d♂️',
       },
       {
         author_id: BRIAN_ID,
@@ -293,16 +314,31 @@ export const CREATE_SAMMI2_DETACHED_PROFILE_VARIABLES = {
         question_id: QUESTION2_ID,
         question: {
           _id: QUESTION2_ID,
-          questionText: 'What\'s your favorite shoe??',
+          questionText: 'What\'s your friend\'s weird flex?',
+          questionTextWithName: 'What\'s {{name}}\'s weird flex?',
           questionType: 'multipleChoiceWithOther',
           suggestedResponses: [
             {
-              responseBody: 'yeezys',
-            }, {
-              responseBody: 'crocs',
-            }],
+              responseBody: 'Does homework drunk, still gets A\'s',
+            },
+            {
+              responseBody: '5.0 uber rating',
+            },
+            {
+              responseBody: 'Barry’s Bootcamp/SoulCycle/Orange Theory is an essential part of their morning routine',
+            },
+            {
+              responseBody: 'Fluent in vines',
+            },
+            {
+              responseBody: 'The best relationship advice giver even though they’ve been single af since the womb',
+            },
+          ],
+          tags: [
+            'personality',
+          ],
         },
-        responseBody: 'yeezys',
+        responseBody: 'Fluent in vines',
       },
     ],
     vibes: [],
