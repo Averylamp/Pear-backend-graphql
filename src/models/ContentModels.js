@@ -217,6 +217,7 @@ type Question {
   questionType: QuestionType!
   suggestedResponses: [QuestionSuggestedResponse!]!
   placeholderResponseText: String
+  tags: [QuestionTag!]!
   
   # shows up in questionnaire or not
   hiddenInQuestionnaire: Boolean!
@@ -233,6 +234,7 @@ input NewQuestionInput {
   questionType: QuestionType!
   suggestedResponses: [QuestionSuggestedResponseInput!]!
   placeholderResponseText: String
+  tags: [QuestionTag!]
 }
 
 type QuestionSuggestedResponse {
@@ -253,6 +255,13 @@ enum QuestionType {
   multipleChoice
   multipleChoiceWithOther
   freeResponse
+}
+
+enum QuestionTag {
+  starter
+  spicy
+  dating
+  personality
 }
 `;
 
@@ -337,6 +346,13 @@ export const QuestionSchema = new Schema({
     enum: ['multipleChoice', 'multipleChoiceWithOther', 'freeResponse'],
   },
   suggestedResponses: { type: [QuestionSuggestedResponseSchema], required: false },
+  tags: {
+    type: [String],
+    required: true,
+    default: [],
+    index: true,
+    enum: ['starter', 'spicy', 'dating', 'personality'],
+  },
   placeholderResponseText: { type: String, required: false },
   hiddenInQuestionnaire: { type: Boolean, required: true, default: false },
   hiddenInProfile: { type: Boolean, required: true, default: false },
