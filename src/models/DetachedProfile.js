@@ -92,6 +92,7 @@ input EditDetachedProfileInput {
   # The creator's User Object ID
   creatorUser_id: ID!
   
+  firstName: String
   lastName: String
   boasts: [BoastInput!]
   roasts: [RoastInput!]
