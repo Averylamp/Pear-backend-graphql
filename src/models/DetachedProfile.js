@@ -16,7 +16,7 @@ const { Schema } = mongoose;
 const queryRoutes = `
 extend type Query {
   # Queries for existing detached profiles
-  findDetachedProfiles(phoneNumber: String): [DetachedProfile!]!
+  findDetachedProfiles(phoneNumber: String!): [DetachedProfile!]!
 }
 `;
 
