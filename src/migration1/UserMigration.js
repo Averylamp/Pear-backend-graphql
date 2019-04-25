@@ -5,6 +5,115 @@ import { createUserObject } from '../models/UserModel';
 
 const debug = require('debug')('dev:MigrateUsers');
 
+export const transferrableVibes = [
+  'forbidden fruit',
+  'coco-nuts',
+  'extra like guac',
+  'cherry bomb',
+  'spicy',
+  'baddest radish',
+  'just add water',
+];
+
+export const userProfileVibeToObject = (profile, vibeContent) => {
+  const ret = {
+    author_id: profile.creatorUser_id,
+    authorFirstName: profile.creatorFirstName,
+    hidden: false,
+    updatedAt: profile.createdAt,
+    createdAt: profile.createdAt,
+  };
+  switch (vibeContent) {
+    case 'forbidden fruit':
+      ret.content = 'Forbidden Fruit';
+      ret.color = {
+        red: 0.0,
+        green: 0.7,
+        blue: 0.25,
+        alpha: 1.0,
+      };
+      ret.icon = {
+        assetString: 'vibe-icon-forbidden-fruit',
+      };
+      break;
+    case 'coco-nuts':
+      ret.content = 'Coco-NUTS';
+      ret.color = {
+        red: 0.45,
+        green: 0.29,
+        blue: 0.25,
+        alpha: 1.0,
+      };
+      ret.icon = {
+        assetString: 'vibe-icon-coconuts',
+      };
+      break;
+    case 'extra like guac':
+      ret.content = 'Extra Like Guac';
+      ret.color = {
+        red: 0.26,
+        green: 0.56,
+        blue: 0.09,
+        alpha: 1.0,
+      };
+      ret.icon = {
+        assetString: 'vibe-icon-extra-like-guac',
+      };
+      break;
+    case 'cherry bomb':
+      ret.content = 'Cherry Bomb';
+      ret.color = {
+        red: 0.9,
+        green: 0.0,
+        blue: 0.0,
+        alpha: 1.0,
+      };
+      ret.icon = {
+        assetString: 'vibe-icon-cherry-bomb',
+      };
+      break;
+    case 'spicy':
+      ret.content = 'Spicy';
+      ret.color = {
+        red: 1.0,
+        green: 0.09,
+        blue: 0.0,
+        alpha: 1.0,
+      };
+      ret.icon = {
+        assetString: 'vibe-icon-spicy',
+      };
+      break;
+    case 'baddest radish':
+      ret.content = 'Baddest Radish';
+      ret.color = {
+        red: 0.0,
+        green: 0.58,
+        blue: 0.18,
+        alpha: 1.0,
+      };
+      ret.icon = {
+        assetString: 'vibe-icon-baddest-radish',
+      };
+      break;
+    case 'just add water':
+      ret.content = 'Just Add Water';
+      ret.color = {
+        red: 1.0,
+        green: 0.0,
+        blue: 0.23,
+        alpha: 1.0,
+      };
+      ret.icon = {
+        assetString: 'vibe-icon-just-add-water',
+      };
+      break;
+    default:
+      break;
+  }
+  return ret;
+};
+
 const userProfileContentStringToObject = (profile, content) => ({
   author_id: profile.creatorUser_id,
   authorFirstName: profile.creatorFirstName,
@@ -105,6 +214,11 @@ export const migrateUser = async (user) => {
     }
     for (const interestContent of profile.interests) {
       newUser.interests.push(userProfileContentStringToObject(profile, interestContent));
+    }
+    for (const vibeContent of profile.vibes) {
+      if (transferrableVibes.includes(vibeContent)) {
+        newUser.vibes.push(userProfileVibeToObject(profile, vibeContent));
+      }
     }
     // we are not carrying over vibes
     // boasts, roasts, and questionResponses dont exist in old schema
