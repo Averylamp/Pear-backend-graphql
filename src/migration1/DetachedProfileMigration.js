@@ -2,6 +2,7 @@ import { pick } from 'lodash';
 import { DetachedProfileOld } from '../models-old/DetachedProfile';
 import { UserProfileOld } from '../models-old/UserProfileModel';
 import { createDetachedProfileObject } from '../models/DetachedProfile';
+import { transferrableVibes, userProfileVibeToObject } from './UserMigration';
 
 const debug = require('debug')('dev:MigrateUsers');
 
@@ -47,6 +48,8 @@ export const migrateDetachedProfile = async (detachedProfile) => {
     .map(dontContent => detachedProfileContentStringToObject(dpObj, dontContent));
   newDp.interests = dpObj.interests
     .map(interestContent => detachedProfileContentStringToObject(dpObj, interestContent));
+  newDp.vibes = dpObj.vibes.filter(vibe => transferrableVibes.includes(vibe))
+    .map(vibeContent => userProfileVibeToObject(dpObj, vibeContent));
   if (dpObj.status === 'accepted') {
     if (dpObj.userProfile_id) {
       const userProfile = await UserProfileOld.findById(dpObj.userProfile_id.toString());
