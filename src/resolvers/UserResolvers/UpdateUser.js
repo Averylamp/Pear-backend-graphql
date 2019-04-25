@@ -89,8 +89,10 @@ export const updateUserResolver = async ({ updateUserInput }) => {
   }
   if (updateUserInput.location) {
     userUpdateObj['matchingPreferences.location.point.coordinates'] = updateUserInput.location;
+    userUpdateObj['matchingPreferences.location.point.type'] = 'Point';
     userUpdateObj['matchingPreferences.location.point.updatedAt'] = now;
     userUpdateObj['matchingDemographics.location.point.coordinates'] = updateUserInput.location;
+    userUpdateObj['matchingDemographics.location.point.type'] = 'Point';
     userUpdateObj['matchingDemographics.location.point.updatedAt'] = now;
   }
   if (updateUserInput.locationName) {
