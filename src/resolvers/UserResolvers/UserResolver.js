@@ -147,6 +147,7 @@ export const resolvers = {
       }
     },
     updateUser: async (_source, { updateUserInput }) => {
+      functionCallConsole('Update User');
       try {
         return updateUserResolver({ updateUserInput });
       } catch (e) {
