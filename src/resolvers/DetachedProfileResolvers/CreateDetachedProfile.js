@@ -56,32 +56,34 @@ export const createDetachedProfileResolver = async ({ detachedProfileInput }) =>
   }
   try {
     const user = await User.findOne({ phoneNumber: detachedProfileInput.phoneNumber }).exec();
-    const creatorDetachedProfiles = await DetachedProfile.find({ creatorUser_id })
-      .exec();
-    const userEndorser_ids = user.endorser_ids.map(endorser_id => endorser_id.toString());
-    const dpPhoneNumbers = creatorDetachedProfiles.map(dp => dp.phoneNumber);
-    if (detachedProfileInput.phoneNumber === creator.phoneNumber) {
-      if (process.env.DB_NAME !== 'prod'
-        && canMakeProfileForSelf.includes(creator.phoneNumber)) {
-        // we ignore this check if phoneNumber is whitelisted and we aren't touching prod db
-      } else {
+    if (user) {
+      const creatorDetachedProfiles = await DetachedProfile.find({ creatorUser_id })
+        .exec();
+      const userEndorser_ids = user.endorser_ids.map(endorser_id => endorser_id.toString());
+      const dpPhoneNumbers = creatorDetachedProfiles.map(dp => dp.phoneNumber);
+      if (detachedProfileInput.phoneNumber === creator.phoneNumber) {
+        if (process.env.DB_NAME !== 'prod'
+          && canMakeProfileForSelf.includes(creator.phoneNumber)) {
+          // we ignore this check if phoneNumber is whitelisted and we aren't touching prod db
+        } else {
+          return {
+            success: false,
+            message: CANT_ENDORSE_YOURSELF,
+          };
+        }
+      }
+      if (dpPhoneNumbers.includes(detachedProfileInput.phoneNumber)) {
         return {
           success: false,
-          message: CANT_ENDORSE_YOURSELF,
+          message: ALREADY_MADE_PROFILE,
         };
       }
-    }
-    if (dpPhoneNumbers.includes(detachedProfileInput.phoneNumber)) {
-      return {
-        success: false,
-        message: ALREADY_MADE_PROFILE,
-      };
-    }
-    if (userEndorser_ids.includes(detachedProfileInput.creatorUser_id.toString())) {
-      return {
-        success: false,
-        message: ALREADY_MADE_PROFILE,
-      };
+      if (userEndorser_ids.includes(detachedProfileInput.creatorUser_id.toString())) {
+        return {
+          success: false,
+          message: ALREADY_MADE_PROFILE,
+        };
+      }
     }
   } catch (e) {
     errorLog(`An error occurred: ${e}`);
