@@ -1,4 +1,4 @@
-export const MAX_FEED_LENGTH = 18;
+export const MAX_FEED_LENGTH = 50;
 
 export const INITIALIZED_FEED_LENGTH = 5;
 
@@ -6,7 +6,7 @@ export const NEW_PROFILE_BONUS = 2;
 
 export const TICK_LENGTH_MILLIS = 1000 * 60;
 
-export const EXPECTED_TICKS_PER_NEW_PROFILE = 240;
+export const EXPECTED_TICKS_PER_NEW_PROFILE = 100;
 
 export const STAT_SNAPSHOT_GENERATION_TIME = 30 * 60 * 1000;
 
