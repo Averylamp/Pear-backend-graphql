@@ -5,6 +5,8 @@ const debug = require('debug')('dev:DiscoveryGeneration');
 const prodConsole = require('debug')('prod:DiscoveryGeneration');
 const mongoose = require('mongoose');
 
+// see https://github.com/Automattic/mongoose/issues/7150
+mongoose.Schema.Types.String.checkRequired(v => v != null);
 
 export const startDiscoveryGeneration = async () => {
   if (process.env.PERF) {
@@ -12,7 +14,7 @@ export const startDiscoveryGeneration = async () => {
   }
 
   const devMode = process.env.DEV === 'true';
-  let dbName = 'prod';
+  let dbName = 'prod2';
   if (devMode) {
     dbName = 'dev';
   }

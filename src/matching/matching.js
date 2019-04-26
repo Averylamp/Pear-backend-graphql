@@ -1,7 +1,6 @@
 import nanoid from 'nanoid';
 import { receiveRequest, sendRequest, User } from '../models/UserModel';
 import { createMatchObject, Match } from '../models/MatchModel';
-import { UserProfile } from '../models/UserProfileModel';
 import {
   createMatchChat,
   getChatDocPathFromId,
@@ -18,6 +17,7 @@ import {
   SEND_MATCH_REQUEST_ERROR, USERS_ALREADY_MATCHED_ERROR,
   WRONG_CREATOR_ERROR,
 } from '../resolvers/ResolverErrorStrings';
+import { generateSentryErrorForResolver } from '../SentryHelper';
 
 const debug = require('debug')('dev:Matching');
 const errorLogger = require('debug')('error:Matching');
@@ -124,16 +124,8 @@ export const createNewMatch = async ({
   const receivedByPromise = User.findById(receivedByUser_id)
     .exec()
     .catch(() => null);
-  let profilePromise = null;
-  if (matchmakerMade) {
-    profilePromise = UserProfile.findOne({
-      user_id: sentForUser_id,
-      creatorUser_id: sentByUser_id,
-    })
-      .catch(() => null);
-  }
-  const [sentBy, sentFor, receivedBy, profile] = await Promise
-    .all([sentByPromise, sentForPromise, receivedByPromise, profilePromise]);
+  const [sentBy, sentFor, receivedBy] = await Promise
+    .all([sentByPromise, sentForPromise, receivedByPromise]);
   if (!sentBy) {
     errorLog(`Couldn't find sentBy with id ${sentByUser_id}`);
     return {
@@ -155,13 +147,23 @@ export const createNewMatch = async ({
       message: GET_USER_ERROR,
     };
   }
-  if (matchmakerMade && !profile) {
-    errorLog(`Matchmaker ${sentByUser_id} has not made a profile
+  if (matchmakerMade && !(sentFor.endorser_ids.map(endorser_id => endorser_id.toString())
+    .includes(sentBy._id.toString()))) {
+    errorLog(`Matchmaker ${sentByUser_id} has not endorsed
         for ${sentForUser_id}`);
     return {
       success: false,
       message: WRONG_CREATOR_ERROR,
     };
+  }
+  let endorsementEdge = null;
+  if (matchmakerMade) {
+    const endorsementEdges = sentBy.endorsementEdges.filter(
+      edge => edge.otherUser_id.toString() === sentFor._id.toString(),
+    );
+    if (endorsementEdges.length > 0) {
+      [endorsementEdge] = endorsementEdges;
+    }
   }
 
   const firebaseId = nanoid(20);
@@ -262,6 +264,19 @@ export const createNewMatch = async ({
       // we don't delete the chat; we just leave it, and no mongo edges/matches reference it
     }
     errorLog(errorMessage);
+    generateSentryErrorForResolver({
+      resolverType: 'mutation',
+      routeName: 'createMatchRequest',
+      args: {
+        sentByUser_id,
+        sentForUser_id,
+        receivedByUser_id,
+        _id,
+        requestText,
+      },
+      errorMsg: errorMessage,
+      errorName: SEND_MATCH_REQUEST_ERROR,
+    });
     return {
       success: false,
       message: responseMessage,
@@ -273,13 +288,15 @@ export const createNewMatch = async ({
       sentBy,
       requestText: requestText || '',
     });
-    const endorsementChatId = profile.firebaseChatDocumentID;
-    notifyEndorsementChatNewRequest({
-      chatID: endorsementChatId,
-      sentBy,
-      sentFor,
-      receivedBy,
-    });
+    if (endorsementEdge) {
+      const endorsementChatId = endorsementEdge.firebaseChatDocumentID;
+      notifyEndorsementChatNewRequest({
+        chatID: endorsementChatId,
+        sentBy,
+        sentFor,
+        receivedBy,
+      });
+    }
     sendMatchSentForPushNotification({
       sentBy,
       sentFor,
@@ -458,16 +475,19 @@ export const decideOnMatch = async ({ user_id, match_id, decision }) => {
         sentFor = otherUser;
         receivedBy = user;
       }
-      const profile = await UserProfile.findOne({
-        user_id: match.sentForUser_id,
-        creatorUser_id: match.sentByUser_id,
-      });
-      notifyEndorsementChatAcceptedRequest({
-        chatID: profile.firebaseChatDocumentID,
-        sentBy,
-        sentFor,
-        receivedBy,
-      });
+      const endorsementEdges = sentBy.endorsementEdges.filter(
+        edge => edge.otherUser_id.toString() === sentFor._id.toString(),
+      );
+      if (endorsementEdges.length > 0) {
+        const [endorsementEdge] = endorsementEdges;
+        const endorsementChatId = endorsementEdge.firebaseChatDocumentID;
+        notifyEndorsementChatAcceptedRequest({
+          chatID: endorsementChatId,
+          sentBy,
+          sentFor,
+          receivedBy,
+        });
+      }
       sendMatchAcceptedMatchmakerPushNotification({ sentBy, sentFor });
       // increment pear points
       // call .exec() to make sure this query/update actually runs, since the result isn't used

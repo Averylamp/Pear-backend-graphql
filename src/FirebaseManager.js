@@ -1,3 +1,5 @@
+import { generateSentryError } from './SentryHelper';
+
 const debug = require('debug')('dev:FirebaseManager');
 const errorLog = require('debug')('error:FirebaseManager');
 const testLog = require('debug')('tests:FirebaseManager');
@@ -255,10 +257,20 @@ export const sendPushNotification = async ({ deviceToken, title, body }) => {
       admin.messaging()
         .send(message)
         .catch((err) => {
+          generateSentryError({
+            args: { deviceToken, title, body },
+            errorName: 'error sending push notification',
+            errorMsg: err,
+          });
           errorLog(`error occurred sending push notification: ${err}`);
         });
     }
   } catch (e) {
+    generateSentryError({
+      args: { deviceToken, title, body },
+      errorName: 'error sending push notification',
+      errorMsg: e,
+    });
     errorLog(`error occurred sending push notification: ${e}`);
   }
 };

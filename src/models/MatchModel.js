@@ -159,4 +159,5 @@ export const EdgeSummarySchema = new Schema({
 
 export const Match = mongoose.model('Match', MatchSchema);
 
-export const createMatchObject = matchInput => (new Match(matchInput)).save();
+export const createMatchObject = (matchInput, skipTimestamps) => (new Match(matchInput))
+  .save({ timestamps: !skipTimestamps });

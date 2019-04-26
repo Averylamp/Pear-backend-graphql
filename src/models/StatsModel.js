@@ -21,7 +21,7 @@ const StatSnapshotSchema = new Schema({
 
 export const StatSnapshot = mongoose.model('StatSnapshot', StatSnapshotSchema);
 
-export const createStatSnapshot = (statInput) => {
+export const createStatSnapshot = (statInput, skipTimestamps) => {
   const statSnapshotModel = new StatSnapshot(statInput);
-  statSnapshotModel.save();
+  return statSnapshotModel.save({ timestamps: !skipTimestamps });
 };
