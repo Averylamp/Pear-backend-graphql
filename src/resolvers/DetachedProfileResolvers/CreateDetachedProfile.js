@@ -62,7 +62,7 @@ export const createDetachedProfileResolver = async ({ detachedProfileInput }) =>
       const userEndorser_ids = user.endorser_ids.map(endorser_id => endorser_id.toString());
       const dpPhoneNumbers = creatorDetachedProfiles.map(dp => dp.phoneNumber);
       if (detachedProfileInput.phoneNumber === creator.phoneNumber) {
-        if (process.env.DB_NAME !== 'prod'
+        if (process.env.DB_NAME !== 'prod2'
           && canMakeProfileForSelf.includes(creator.phoneNumber)) {
           // we ignore this check if phoneNumber is whitelisted and we aren't touching prod db
         } else {
