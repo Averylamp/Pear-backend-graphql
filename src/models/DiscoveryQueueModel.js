@@ -2,7 +2,6 @@
 const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
-const debug = require('debug')('dev:DiscoveryQueue');
 
 const queryRoutes = `
 extend type Query {
@@ -67,17 +66,7 @@ export const DiscoveryItem = mongoose.model('DiscoveryItem', DiscoveryItemSchema
 
 // discovery queue object is created when user is created
 export const createDiscoveryQueueObject = function
-createDiscoveryQueueObject(discoveryInput) {
+createDiscoveryQueueObject(discoveryInput, skipTimestamps) {
   const discoveryQueueModel = new DiscoveryQueue(discoveryInput);
-
-
-  return new Promise((resolve, reject) => {
-    discoveryQueueModel.save((err) => {
-      if (err) {
-        debug(err);
-        reject(err);
-      }
-      resolve(discoveryQueueModel);
-    });
-  });
+  return discoveryQueueModel.save({ timestamps: !skipTimestamps });
 };

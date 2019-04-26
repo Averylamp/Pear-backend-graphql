@@ -1,6 +1,5 @@
 import { User } from '../models/UserModel';
 import { DetachedProfile } from '../models/DetachedProfile';
-import { UserProfile } from '../models/UserProfileModel';
 import { Match } from '../models/MatchModel';
 import { createStatSnapshot } from '../models/StatsModel';
 
@@ -28,8 +27,15 @@ const countUsersCreatedInRange = (start, end) => countDocumentsCreatedInRange(st
 const countDetachedProfilesCreatedInRange = (start, end) => countDocumentsCreatedInRange(start, end,
   DetachedProfile);
 
-const countProfilesApprovedInRange = (start, end) => countDocumentsCreatedInRange(start, end,
-  UserProfile);
+const countProfilesApprovedInRange = (start, end) => {
+  const customFilters = {
+    acceptedTime: {
+      $gte: start,
+      $lte: end,
+    },
+  };
+  return countDocumentsCreatedInRange(start, end, DetachedProfile, customFilters);
+};
 
 const countPersonalMatchRequestsSentInRange = (start, end) => {
   const customFilters = {

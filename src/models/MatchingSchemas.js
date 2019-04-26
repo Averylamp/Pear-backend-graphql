@@ -6,9 +6,9 @@ const { Schema } = mongoose;
 
 const matchingDemographicsType = `
 type MatchingDemographics{
-  gender: Gender!
-  age: Int!
-  location: Location!
+  gender: Gender
+  age: Int
+  location: Location
 }
 `;
 
@@ -18,7 +18,7 @@ type MatchingPreferences{
   maxDistance: Int!
   minAgeRange: Int!
   maxAgeRange: Int!
-  location: Location!
+  location: Location
 }
 `;
 
@@ -27,26 +27,19 @@ export const typeDef = matchingDemographicsType + matchingPreferencesType;
 export const MatchingDemographicsSchema = new Schema({
   gender: {
     type: String,
-    required: true,
+    required: false,
     enum: ['male', 'female', 'nonbinary'],
-    default: 'male',
   },
   age: {
     type: Number,
-    required: true,
+    required: false,
     min: 18,
     max: 100,
     default: 20,
   },
   location: {
     type: LocationSchema,
-    required: true,
-    default: {
-      point: {
-        type: 'Point',
-        coordinates: [-71.093609, 42.358620],
-      },
-    },
+    required: false,
   },
 }, { timestamps: true });
 
@@ -78,16 +71,10 @@ export const MatchingPreferencesSchema = new Schema({
     required: true,
     min: 18,
     max: 100,
-    default: 40,
+    default: 27,
   },
   location: {
     type: LocationSchema,
-    required: true,
-    default: {
-      point: {
-        type: 'Point',
-        coordinates: [-71.093609, 42.358620],
-      },
-    },
+    required: false,
   },
 }, { timestamps: true });

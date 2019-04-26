@@ -6,13 +6,7 @@ import {
 } from './models/UserModel';
 import {
   resolvers as UserResolvers,
-} from './resolvers/UserResolver';
-import {
-  typeDef as UserProfile,
-} from './models/UserProfileModel';
-import {
-  resolvers as UserProfileResolvers,
-} from './resolvers/UserProfileResolver';
+} from './resolvers/UserResolvers/UserResolver';
 import {
   typeDef as ImageContainer,
 } from './models/ImageSchemas';
@@ -24,7 +18,7 @@ import {
 } from './models/DetachedProfile';
 import {
   resolvers as DetachedProfileResolvers,
-} from './resolvers/DetachedProfileResolver';
+} from './resolvers/DetachedProfileResolvers/DetachedProfileResolver';
 import {
   typeDef as Match,
 } from './models/MatchModel';
@@ -52,6 +46,15 @@ import {
 import {
   resolvers as LocationResolvers,
 } from './resolvers/LocationResolver';
+import {
+  typeDef as ContentSchemas,
+} from './models/ContentModels';
+import {
+  resolvers as ContentResolvers,
+} from './resolvers/ContentResolvers';
+import {
+  typeDef as EndorsementModels,
+} from './models/EndorsementModels';
 import { deleteUser } from './deletion/UserDeletion';
 
 const { ApolloServer } = require('apollo-server-express');
@@ -72,10 +75,10 @@ if (regenTestDBMode) {
     errorLog('DB_NAME=dev-test yarn regendb');
     process.exit(1);
   }
-  if (process.env.DB_NAME === 'prod' && process.env.REGEN !== 'uwu') {
+  if (process.env.DB_NAME === 'prod2' && process.env.REGEN !== 'uwu') {
     errorLog('Are you really sure you want to regen the prod database?');
     errorLog('If you are try again with:');
-    errorLog('DB_NAME=prod REGEN=uwu yarn regendb');
+    errorLog('DB_NAME=prod2 REGEN=uwu yarn regendb');
     process.exit(1);
   }
 }
@@ -95,6 +98,9 @@ prodConsole(`Database: ${dbName}`);
 
 export const MONGO_URL = `${mongoPrefix}${dbUser}${dbPass}${dbHost}/${dbName}?retryWrites=true`;
 const mongoose = require('mongoose');
+
+// see https://github.com/Automattic/mongoose/issues/7150
+mongoose.Schema.Types.String.checkRequired(v => v != null);
 
 debug(MONGO_URL);
 prodConsole(`Mongo URL: ${MONGO_URL}`);
@@ -118,14 +124,16 @@ function createApolloServer() {
   const finalTypeDefs = [
     Query,
     User,
-    UserProfile,
     DetachedProfile,
     Match,
     DiscoveryQueue,
     TestObject,
     ImageContainer,
     MatchingSchemas,
-    LocationSchemas];
+    LocationSchemas,
+    ContentSchemas,
+    EndorsementModels,
+  ];
 
   const resolvers = {
     Query: {},
@@ -138,8 +146,8 @@ function createApolloServer() {
     DiscoveryQueueResolvers,
     TestObjectResolvers,
     ImageResolvers,
-    UserProfileResolvers,
-    LocationResolvers);
+    LocationResolvers,
+    ContentResolvers);
 
 
   const server = new ApolloServer({
