@@ -12,6 +12,8 @@ export const STAT_SNAPSHOT_GENERATION_TIME = 30 * 60 * 1000;
 
 export const LAST_ACTIVE_ARRAY_LEN = 20;
 
+export const LAST_EDITED_ARRAY_LEN = 20;
+
 export const FUZZY_SCHOOL_LIST = [
   'Harvard',
   'harvard',
