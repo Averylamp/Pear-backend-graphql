@@ -375,7 +375,7 @@ export const CREATE_UMA1_DETACHED_PROFILE_VARIABLES = {
     boasts: [
       {
         author_id: BRIAN_ID,
-        authorFirstName: 'Uma',
+        authorFirstName: 'Brian',
         content: 'Gyms religiously',
       },
       {
