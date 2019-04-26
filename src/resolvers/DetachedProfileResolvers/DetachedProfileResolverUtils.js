@@ -60,7 +60,7 @@ export const getAndValidateUsersAndDetachedProfileObjects = async ({
     }
     // check creator != user
     if (creator_id.toString() === user_id.toString()) {
-      if (process.env.DB_NAME !== 'prod'
+      if (process.env.DB_NAME !== 'prod2'
         && canMakeProfileForSelf.includes(detachedProfile.phoneNumber)) {
         // we ignore this check if phoneNumber is whitelisted and we aren't touching prod db
       } else {
