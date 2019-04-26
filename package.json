@@ -6,6 +6,8 @@
   "scripts": {
     "startdev": "nodemon --exec node -r dotenv/config -r babel-register src/index.js dotenv_config_path=.env.dev",
     "regendb": "node -r dotenv/config -r babel-register src/index.js dotenv_config_path=.env.regendb",
+    "startdrip": "TASK=discovery-generation DEBUG=dev:*,error:* node -r dotenv/config dist/index.js dotenv_config_path=.env.prod",
+    "startstats": "TASK=stats-generation DEBUG=dev:*,error:* node -r dotenv/config dist/index.js dotenv_config_path=.env.prod",
     "test": "circleci local execute --job build",
     "localregendb": "node -r dotenv/config -r babel-register src/index.js dotenv_config_path=.env.test",
     "build": "babel -d dist/ src/",
