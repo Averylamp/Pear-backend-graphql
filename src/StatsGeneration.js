@@ -14,7 +14,7 @@ export const startStatsGeneration = async () => {
   }
 
   const devMode = process.env.DEV === 'true';
-  let dbName = 'prod';
+  let dbName = 'prod2';
   if (devMode) {
     dbName = 'dev';
   }
