@@ -26,7 +26,7 @@ extend type Query {
   # send a push notification indicating new message
   notifyNewMessage(fromUser_id: ID!, toUser_id: ID!): Boolean!
   # return a sub-array of a list of phone numbers, representing users who are already on pear
-  alreadyOnPear(phoneNumbers: [String!]!): [String!]!
+  alreadyOnPear(myPhoneNumber: String!, phoneNumbers: [String!]!): [String!]!
   # get fake user count
   getUserCount: Int!
 }
