@@ -43,7 +43,7 @@ extend type Mutation{
 
   # Updates a User's photos or photo bank
   updateUserPhotos(updateUserPhotosInput: UpdateUserPhotosInput!): UserMutationResponse!
-  
+
   # an endorser can edit the things they've written for a user
   editEndorsement(editEndorsementInput: EditEndorsementInput!): UserMutationResponse!
 }
@@ -66,7 +66,7 @@ input CreationUserInput{
   # User's phone number
   phoneNumber: String!
   phoneNumberVerified: Boolean!
-  
+
   # The Firebase auth ID
   firebaseAuthID: String!
 
@@ -75,13 +75,16 @@ input CreationUserInput{
 
   # referral codes, for tracking
   referredByCode: String
+
+  # seeded?
+  seeded: Boolean
 }
 `;
 
 const updateUserInputs = `
 input UpdateUserInput {
   user_id: ID!
-  
+
   deactivated: Boolean
   email: String
   emailVerified: Boolean
@@ -93,7 +96,7 @@ input UpdateUserInput {
   gender: Gender
   age: Int
   birthdate: String
-  
+
   school: String
   schoolYear: String
   schoolEmail: String
@@ -127,12 +130,12 @@ const editEndorsementInput = `
 input EditEndorsementInput {
   endorser_id: ID!
   user_id: ID!
-  
+
   boasts: [BoastInput!]
   roasts: [RoastInput!]
   questionResponses: [QuestionUserResponseInput!]
   vibes: [VibeInput!]
-  
+
   bio: BioInput
   dos: [DoInput!]
   donts: [DontInput!]
@@ -158,14 +161,14 @@ type User {
   gender: Gender
   age: Int
   birthdate: String
-  
+
   # profile content. ordered
   bios: [Bio!]!
   boasts: [Boast!]!
   roasts: [Roast!]!
   questionResponses: [QuestionUserResponse!]!
   vibes: [Vibe!]!
-  
+
   # deprecating?
   dos: [Do!]!
   donts: [Dont!]!
@@ -189,12 +192,12 @@ type User {
   endorser_ids: [ID!]!
   endorsers: [User]!
   endorserCount: Int!
-  
+
   # All users this user has endorsed
   endorsedUser_ids: [ID!]!
   endorsedUsers: [User]!
   endorsedUsersCount: Int!
-  
+
   # All pending endorsements this user has created
   detachedProfile_ids: [ID!]!
   detachedProfiles: [DetachedProfile!]!
@@ -231,7 +234,7 @@ type User {
   # referral codes
   referredByCode: String
   referralCode: String
-  
+
   # seeded profile? null is false
   seeded: Boolean
 }
