@@ -1,6 +1,6 @@
 export const MAX_FEED_LENGTH = 50;
 
-export const INITIALIZED_FEED_LENGTH = 5;
+export const INITIALIZED_FEED_LENGTH = 20;
 
 export const NEW_PROFILE_BONUS = 2;
 
