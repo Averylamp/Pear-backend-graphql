@@ -1,0 +1,108 @@
+{
+  "newQuestions": [
+    {
+      "questionText": "The last time I hung out with them, we...",
+      "questionTextWithName": "The last time I hung out with {{name}}, we...",
+      "questionType": "freeResponse",
+      "suggestedResponses": [],
+      "placeholderResponseText": "danced until the sun came up",
+      "tags": []
+    },
+    {
+      "questionText": "The sweetest thing they've ever done for me is...",
+      "questionTextWithName": "The sweetest thing {{name}} has ever done for me is...",
+      "questionType": "freeResponse",
+      "suggestedResponses": [],
+      "placeholderResponseText": "steal me food from the dining hall",
+      "tags": []
+    },
+    {
+      "questionText": "I can't get them to stop talking about...",
+      "questionTextWithName": "I can't get {{name}} to stop talking about...",
+      "questionType": "freeResponse",
+      "suggestedResponses": [],
+      "placeholderResponseText": "how Game of Thrones will end",
+      "tags": []
+    },
+    {
+      "questionText": "Ask them about the time they...",
+      "questionTextWithName": "Ask {{name}} about the time they...",
+      "questionType": "freeResponse",
+      "suggestedResponses": [],
+      "placeholderResponseText": "tried to become YouTube famous",
+      "tags": []
+    },
+    {
+      "questionText": "One funny quirk about them is...",
+      "questionTextWithName": "One funny quirk about {{name}} is...",
+      "questionType": "freeResponse",
+      "suggestedResponses": [],
+      "placeholderResponseText": "",
+      "tags": []
+    },
+    {
+      "questionText": "An easy way to make them laugh is...",
+      "questionTextWithName": "An easy way to make {{name}} laugh is...",
+      "questionType": "freeResponse",
+      "suggestedResponses": [],
+      "placeholderResponseText": "",
+      "tags": []
+    },
+    {
+      "questionText": "They're WAY too humble about...",
+      "questionTextWithName": "{{name}} is WAY too humble about...",
+      "questionType": "freeResponse",
+      "suggestedResponses": [],
+      "placeholderResponseText": "",
+      "tags": []
+    },
+    {
+      "questionText": "They'll be into you if you...",
+      "questionTextWithName": "{{name}} will be into you if you...",
+      "questionType": "freeResponse",
+      "suggestedResponses": [],
+      "placeholderResponseText": "",
+      "tags": []
+    },
+    {
+      "questionText": "They unexpectedly have Friday off, so they're probably...",
+      "questionTextWithName": "{{name}} unexpectedly has Friday off, so they're probably...",
+      "questionType": "freeResponse",
+      "suggestedResponses": [],
+      "placeholderResponseText": "",
+      "tags": []
+    },
+    {
+      "questionText": "I'm friends with them because...",
+      "questionTextWithName": "I'm friends with {{name}} because...",
+      "questionType": "freeResponse",
+      "suggestedResponses": [],
+      "placeholderResponseText": "",
+      "tags": []
+    },
+    {
+      "questionText": "I love to call them out on...",
+      "questionTextWithName": "I love to call {{name}} out on...",
+      "questionType": "freeResponse",
+      "suggestedResponses": [],
+      "placeholderResponseText": "",
+      "tags": []
+    },
+    {
+      "questionText": "Lately they've been obsessed with...",
+      "questionTextWithName": "Lately {{name}}'s been obsessed with...",
+      "questionType": "freeResponse",
+      "suggestedResponses": [],
+      "placeholderResponseText": "",
+      "tags": []
+    },
+    {
+      "questionText": "One thing I just don't get about them is...",
+      "questionTextWithName": "One thing I just don't get about {{name}} is...",
+      "questionType": "freeResponse",
+      "suggestedResponses": [],
+      "placeholderResponseText": "",
+      "tags": []
+    }
+  ]
+}
