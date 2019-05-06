@@ -1,3 +1,4 @@
+import nanoid from 'nanoid';
 import { receiveRequest, sendRequest, User } from '../../models/UserModel';
 import {
   GET_USER_ERROR,
@@ -5,7 +6,6 @@ import {
   WRONG_CREATOR_ERROR,
 } from '../ResolverErrorStrings';
 import { DiscoveryQueue } from '../../models/DiscoveryQueueModel';
-import nanoid from 'nanoid';
 import {
   createMatchChat,
   getChatDocPathFromId,
