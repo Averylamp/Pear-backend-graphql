@@ -5,7 +5,7 @@ import { EXPECTED_TICKS_PER_NEW_PROFILE, MAX_FEED_LENGTH } from '../constants';
 const debug = require('debug')('dev:DiscoverProfile');
 const errorLog = require('debug')('error:DiscoverProfile');
 
-const getSeededUserPipeline = ({ gender, blacklist }) => {
+const seededUserPipeline = ({ gender, blacklist, sampleCount }) => {
   const matchStage = {
     isSeeking: true,
     gender,
@@ -26,7 +26,7 @@ const getSeededUserPipeline = ({ gender, blacklist }) => {
     },
     {
       $sample: {
-        size: 1,
+        size: sampleCount || 2,
       },
     },
   ];
@@ -123,7 +123,7 @@ const getUserSatisfyingConstraintsPipeline = ({ constraints, demographics, black
 };
 */
 
-const getUserSatisfyingGenderConstraintPipeline = ({ gender, blacklist }) => {
+const genderConstraintPipeline = ({ gender, blacklist, sampleCount }) => {
   const matchStage = {
     isSeeking: true,
     gender,
@@ -144,12 +144,13 @@ const getUserSatisfyingGenderConstraintPipeline = ({ gender, blacklist }) => {
     },
     {
       $sample: {
-        size: 1,
+        size: sampleCount || 2,
       },
     },
   ];
 };
 
+// get some users based on a pipeline. then return the most active
 const getUserForPipeline = async ({
   constraints, demographics, gender, blacklist, pipelineFn,
 }) => {
@@ -164,8 +165,21 @@ const getUserForPipeline = async ({
       errorLog(err);
       return null;
     });
+  // pick the most recently active user
   if (users.length > 0) {
-    return users[0];
+    let mostRecentActiveUser = users[0];
+    for (const user of users) {
+      if (user.lastActiveTimes.length === 0) {
+        continue;
+      } else if (mostRecentActiveUser.lastActiveTimes.length === 0) {
+        mostRecentActiveUser = user;
+      } else if (mostRecentActiveUser
+        .lastActiveTimes[mostRecentActiveUser.lastActiveTimes.length - 1] < user
+        .lastActiveTimes[user.lastActiveTimes.length - 1]) {
+        mostRecentActiveUser = user;
+      }
+    }
+    return mostRecentActiveUser;
   }
   errorLog('no users found in constraints');
   return null;
@@ -198,7 +212,7 @@ const getUserBlacklist = async ({ userObj }) => {
 // gets a user to put in user's discovery feed
 // returns null if we can't find a next user to put in the discovery feed
 export const nextDiscoveryItem = async ({
-  userObj, pipelineFn = getUserSatisfyingGenderConstraintPipeline, gender,
+  userObj, pipelineFn = genderConstraintPipeline, gender,
 }) => {
   // blacklist includes several types of blocked users:
   // 0. the user themselves
@@ -231,11 +245,11 @@ export const nextDiscoveryItem = async ({
 export const updateDiscoveryWithNextItem = async ({ userObj }) => {
   const discoveryQueue = await DiscoveryQueue.findOne({ user_id: userObj._id }).exec();
   let pipelineFns = [
-    getSeededUserPipeline,
-    getUserSatisfyingGenderConstraintPipeline,
+    seededUserPipeline,
+    genderConstraintPipeline,
   ];
   if (process.env.REGEN_DB === 'true') {
-    pipelineFns = [getUserSatisfyingGenderConstraintPipeline];
+    pipelineFns = [genderConstraintPipeline];
   }
   let index = 0;
   if (discoveryQueue.historyDiscoveryItems.length < 20) {
