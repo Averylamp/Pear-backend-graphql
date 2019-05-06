@@ -15,7 +15,7 @@ extend type Mutation {
   createMatchRequest(requestInput: CreateMatchRequestInput!): MatchMutationResponse!
   
   # User pressed "skip" on the discovery feed
-  skipDiscoveryItem(user_id: ID!, discoveryFeed_id: ID!, discoveryItem_id: ID!): Boolean
+  skipDiscoveryItem(user_id: ID!, discoveryFeed_id: ID!, discoveryItem_id: ID!): SkipDiscoveryItemResponse
 
   # TODO: Document
   acceptRequest(user_id: ID!, match_id: ID!): MatchMutationResponse!
@@ -51,6 +51,13 @@ type MatchMutationResponse {
   success: Boolean!
   message: String
   match: Match
+}
+`;
+
+const skipDiscoveryItemResponse = `
+type SkipDiscoveryItemResponse {
+  success: Boolean!
+  message: String
 }
 `;
 
@@ -113,6 +120,7 @@ export const typeDef = queryRoutes
   + mutationRoutes
   + createRequestMutationInputs
   + mutationResponse
+  + skipDiscoveryItemResponse
   + requestResponseEnum
   + matchType
   + edgeSummaryType;
