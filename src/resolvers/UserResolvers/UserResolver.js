@@ -115,11 +115,10 @@ export const resolvers = {
         return [];
       }
     },
-    getUserCount: async () => {
-      return 3 * (await User.find({})
-        .countDocuments()
-        .exec());
-      /*
+    getUserCount: async () => 3 * (await User.find({})
+      .countDocuments()
+      .exec())
+    /*
       const startMillis = 1555552050000;
       const nowMillis = (new Date()).getTime();
       const timeSinceStart = nowMillis - startMillis;
@@ -129,7 +128,7 @@ export const resolvers = {
       // throw some random noise in there
       return Math.floor(usersBase + 40 * Math.sin(2 * Math.PI * nowMillis / (20 * 60 * 60 * 1000)));
       */
-    },
+    ,
   },
   Mutation: {
     createUser: async (_source, { userInput }) => {
