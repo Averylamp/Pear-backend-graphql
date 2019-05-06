@@ -1,7 +1,7 @@
 import { User } from '../../models/UserModel';
 import { Match } from '../../models/MatchModel';
 import {
-  createNewMatch, getAndValidateUserAndMatchObjects, decideOnMatch, rollbackEdgeUpdates,
+  getAndValidateUserAndMatchObjects, decideOnMatch, rollbackEdgeUpdates,
 } from '../../matching/matching';
 import {
   ACCEPT_MATCH_REQUEST_ERROR, REJECT_MATCH_REQUEST_ERROR,
