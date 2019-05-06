@@ -1,13 +1,15 @@
-import { User } from '../models/UserModel';
-import { Match } from '../models/MatchModel';
+import { User } from '../../models/UserModel';
+import { Match } from '../../models/MatchModel';
 import {
   createNewMatch, getAndValidateUserAndMatchObjects, decideOnMatch, rollbackEdgeUpdates,
-} from '../matching/matching';
+} from '../../matching/matching';
 import {
   ACCEPT_MATCH_REQUEST_ERROR, REJECT_MATCH_REQUEST_ERROR,
-  SEND_MATCH_REQUEST_ERROR, UNMATCH_ERROR,
-} from './ResolverErrorStrings';
-import { generateSentryErrorForResolver } from '../SentryHelper';
+  SEND_MATCH_REQUEST_ERROR, SKIP_DISCOVERY_ITEM_ERROR, UNMATCH_ERROR,
+} from '../ResolverErrorStrings';
+import { generateSentryErrorForResolver } from '../../SentryHelper';
+import { createNewMatchResolver } from './CreateNewMatch';
+import { skipDiscoveryItemResolver } from './SkipDiscoveryItem';
 
 const debug = require('debug')('dev:MatchResolver');
 const errorLogger = require('debug')('error:MatchResolver');
@@ -26,9 +28,27 @@ export const resolvers = {
     },
   },
   Mutation: {
+    skipDiscoveryItem: async (_source, { user_id, discoveryFeed_id, discoveryItem_id }) => {
+      try {
+        return skipDiscoveryItemResolver({ user_id, discoveryFeed_id, discoveryItem_id });
+      } catch (e) {
+        generateSentryErrorForResolver({
+          resolverType: 'mutation',
+          routeName: 'skipDiscoveryItem',
+          args: { user_id, discoveryFeed_id, discoveryItem_id },
+          errorMsg: e,
+          errorName: SKIP_DISCOVERY_ITEM_ERROR,
+        });
+        errorLogger(`Error while skipping discovery item: ${e}`);
+        return {
+          success: false,
+          message: SKIP_DISCOVERY_ITEM_ERROR,
+        };
+      }
+    },
     createMatchRequest: async (_source, { requestInput }) => {
       try {
-        return createNewMatch(requestInput);
+        return createNewMatchResolver(requestInput);
       } catch (e) {
         generateSentryErrorForResolver({
           resolverType: 'mutation',

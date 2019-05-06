@@ -1,0 +1,58 @@
+import { User } from '../../models/UserModel';
+import { DiscoveryQueue } from '../../models/DiscoveryQueueModel';
+import { SKIP_DISCOVERY_ITEM_ERROR } from '../ResolverErrorStrings';
+
+const errorLogger = require('debug')('error:Matching');
+
+const chalk = require('chalk');
+
+const errorStyling = chalk.red.bold;
+
+const errorLog = log => errorLogger(errorStyling(log));
+
+export const skipDiscoveryItemResolver = async ({
+  user_id, discoveryFeed_id, discoveryItem_id,
+}) => {
+  // fetch all relevant objects and perform basic validation
+  const user = await User.findById(user_id)
+    .exec()
+    .catch(() => null);
+  if (!user) {
+    errorLog(`user with id ${user_id} not found`);
+    return {
+      success: false,
+      message: SKIP_DISCOVERY_ITEM_ERROR,
+    };
+  }
+  if (user.discoveryQueue_id.toString() !== discoveryFeed_id.toString()) {
+    errorLog(`user with id ${user_id} not linked to discovery queue ${discoveryFeed_id}`);
+    return {
+      success: false,
+      message: SKIP_DISCOVERY_ITEM_ERROR,
+    };
+  }
+  const discoveryQueue = await DiscoveryQueue.findById(discoveryFeed_id)
+    .exec()
+    .catch(() => null);
+  if (!discoveryQueue) {
+    errorLog(`discovery feed with id ${discoveryFeed_id} not found`);
+    return {
+      success: false,
+      message: SKIP_DISCOVERY_ITEM_ERROR,
+    };
+  }
+
+  discoveryQueue.currentDiscoveryItems = discoveryQueue.currentDiscoveryItems
+    .filter(discoveryItem => discoveryItem._id.toString() !== discoveryItem_id);
+  const res = await discoveryQueue.save().catch(err => err);
+  if (res instanceof Error) {
+    errorLog(res.toString());
+    return {
+      success: false,
+      message: SKIP_DISCOVERY_ITEM_ERROR,
+    };
+  }
+  return {
+    success: true,
+  };
+};
