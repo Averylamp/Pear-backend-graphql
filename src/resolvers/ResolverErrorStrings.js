@@ -16,6 +16,7 @@ export const ALREADY_MADE_PROFILE = 'Already made a profile for this person.';
 export const APPROVE_PROFILE_ERROR = 'Couldn\'t approve this profile.';
 export const ALREADY_APPROVED_PROFILE = 'This profile has already been approved.';
 export const FORCE_FEED_UPDATE_ERROR = 'Couldn\'t update feed.';
+export const SKIP_DISCOVERY_ITEM_ERROR = 'Couldn\'t perform this operation.';
 export const SEND_MATCH_REQUEST_ERROR = 'Couldn\'t send match request.';
 export const USERS_ALREADY_MATCHED_ERROR = 'These users have already been Peared!';
 export const ACCEPT_MATCH_REQUEST_ERROR = 'Couldn\'t accept match request.';

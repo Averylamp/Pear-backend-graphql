@@ -432,3 +432,30 @@ export const EDIT_USER_PROFILE = gql`
     }
   }
 `;
+
+export const ADD_TO_QUEUE = gql`
+  mutation AddToQueue($user_id: ID!, $addedUser_id: ID!, $item_id: ID) {
+    addToQueue(user_id: $user_id, addedUser_id: $addedUser_id, item_id: $item_id) {
+      success
+      message
+    }
+  }
+`;
+
+export const CLEAR_FEED = gql`
+  mutation ClearFeed($user_id: ID!) {
+    clearFeed(user_id: $user_id) {
+      success
+      message
+    }
+  }
+`;
+
+export const SKIP_DISCOVERY_ITEM = gql`
+  mutation SkipDiscoveryItem($user_id: ID!, $discoveryItem_id: ID!) {
+    skipDiscoveryItem(user_id: $user_id, discoveryItem_id: $discoveryItem_id) {
+      success
+      message
+     }
+  }
+`;
