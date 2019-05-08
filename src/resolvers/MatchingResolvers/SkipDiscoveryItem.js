@@ -37,6 +37,10 @@ export const skipDiscoveryItemResolver = async ({
 
   discoveryQueue.currentDiscoveryItems = discoveryQueue.currentDiscoveryItems
     .filter(discoveryItem => discoveryItem._id.toString() !== discoveryItem_id);
+  if (!discoveryQueue.skippedUser_ids) {
+    discoveryQueue.skippedUser_ids = [];
+  }
+  discoveryQueue.skippedUser_ids.push(user_id);
   const res = await discoveryQueue.save().catch(err => err);
   if (res instanceof Error) {
     errorLog(res.toString());

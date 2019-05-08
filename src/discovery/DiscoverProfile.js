@@ -181,6 +181,11 @@ const getUserBlacklist = async ({ userObj }) => {
     .forEach((feedUser_id) => {
       userBlacklist.add(feedUser_id);
     });
+  if (dq.skippedUser_ids) {
+    dq.skippedUser_ids.forEach((skippedUser_id) => {
+      userBlacklist.add(skippedUser_id);
+    });
+  }
   userObj.blockedUser_ids.forEach((blockedUser_id) => {
     userBlacklist.add(blockedUser_id);
   });
