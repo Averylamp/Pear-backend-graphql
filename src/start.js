@@ -24,7 +24,7 @@ import {
 } from './models/MatchModel';
 import {
   resolvers as MatchResolvers,
-} from './resolvers/MatchResolver';
+} from './resolvers/MatchingResolvers/MatchResolver';
 import {
   typeDef as DiscoveryQueue,
 } from './models/DiscoveryQueueModel';
