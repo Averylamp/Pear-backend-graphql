@@ -63,6 +63,7 @@ const DiscoveryQueueSchema = new Schema({
   user_id: { type: Schema.Types.ObjectId, required: true, index: true },
   historyDiscoveryItems: { type: [DiscoveryItemSchema], required: true, default: [] },
   currentDiscoveryItems: { type: [DiscoveryItemSchema], required: true, default: [] },
+  skippedUser_ids: { type: [Schema.Types.ObjectId], required: false, default: [], index: true },
 }, { timestamps: true });
 
 
