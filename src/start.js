@@ -55,7 +55,6 @@ import {
 import {
   typeDef as EndorsementModels,
 } from './models/EndorsementModels';
-import { deleteUser } from './deletion/UserDeletion';
 
 const { ApolloServer } = require('apollo-server-express');
 
@@ -186,20 +185,6 @@ export const start = async () => {
       const server = apolloServer;
 
       server.applyMiddleware({ app });
-
-      if (devMode) {
-        app.post('/delete-user', async (req, res) => {
-          try {
-            const { user_id } = req.body;
-            debug(`attempting to delete user ${user_id}`);
-            await deleteUser(user_id);
-            res.send(`deleted user ${user_id}`);
-          } catch (e) {
-            errorLog(e.toString());
-            res.send(`an error occurred ${e.toString()}`);
-          }
-        });
-      }
 
       app.listen({
         port: PORT,
