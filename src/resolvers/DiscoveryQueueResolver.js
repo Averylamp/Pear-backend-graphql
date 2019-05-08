@@ -106,11 +106,9 @@ export const resolvers = {
     },
     */
     // fetch all users in a single call
-    // .reverse() reverses in place, so we want to use .slice() to clone
+    // if reversing: .reverse() reverses in place, so we want to use .slice() to clone first
     currentDiscoveryItems: async ({ currentDiscoveryItems }) => {
       const returnedDiscoveryItems = currentDiscoveryItems
-        .slice()
-        .reverse()
         .map(item => item.toObject());
       const user_ids = returnedDiscoveryItems.map(discoveryItem => discoveryItem.user_id);
       const users = await User.find({ _id: { $in: user_ids } });
