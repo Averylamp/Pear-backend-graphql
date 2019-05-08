@@ -31,3 +31,13 @@ export const QUESTION3_ID = '5c82162afec46c84e0000002';
 export const SAMMI_BOAST1_ID = '5c82162afec55c55e5555500';
 export const SAMMI_BOAST2_ID = '5c82162afec55c55e5555501';
 export const SAMMI_BOAST3_ID = '5c82162afec55c55e5555502';
+
+export const EMPTY_USER_ID0 = '5c82162afec46c84e924a000';
+export const EMPTY_USER_ID1 = '5c82162afec46c84e924a001';
+export const EMPTY_USER_ID2 = '5c82162afec46c84e924a002';
+export const EMPTY_USER_ID3 = '5c82162afec46c84e924a003';
+
+export const DISCOVERY_ITEM_ID0 = '5c82162afec999555444b000';
+export const DISCOVERY_ITEM_ID1 = '5c82162afec999555444b001';
+export const DISCOVERY_ITEM_ID2 = '5c82162afec999555444b002';
+export const DISCOVERY_ITEM_ID3 = '5c82162afec999555444b003';
