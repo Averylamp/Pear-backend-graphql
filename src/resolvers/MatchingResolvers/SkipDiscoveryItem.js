@@ -11,7 +11,7 @@ const errorStyling = chalk.red.bold;
 const errorLog = log => errorLogger(errorStyling(log));
 
 export const skipDiscoveryItemResolver = async ({
-  user_id, discoveryFeed_id, discoveryItem_id,
+  user_id, discoveryItem_id,
 }) => {
   // fetch all relevant objects and perform basic validation
   const user = await User.findById(user_id)
@@ -24,18 +24,11 @@ export const skipDiscoveryItemResolver = async ({
       message: SKIP_DISCOVERY_ITEM_ERROR,
     };
   }
-  if (user.discoveryQueue_id.toString() !== discoveryFeed_id.toString()) {
-    errorLog(`user with id ${user_id} not linked to discovery queue ${discoveryFeed_id}`);
-    return {
-      success: false,
-      message: SKIP_DISCOVERY_ITEM_ERROR,
-    };
-  }
-  const discoveryQueue = await DiscoveryQueue.findById(discoveryFeed_id)
+  const discoveryQueue = await DiscoveryQueue.findOne({ user_id })
     .exec()
     .catch(() => null);
   if (!discoveryQueue) {
-    errorLog(`discovery feed with id ${discoveryFeed_id} not found`);
+    errorLog(`discovery feed for user ${user_id} not found`);
     return {
       success: false,
       message: SKIP_DISCOVERY_ITEM_ERROR,

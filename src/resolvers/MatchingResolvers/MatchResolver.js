@@ -25,14 +25,14 @@ export const resolvers = {
     },
   },
   Mutation: {
-    skipDiscoveryItem: async (_source, { user_id, discoveryFeed_id, discoveryItem_id }) => {
+    skipDiscoveryItem: async (_source, { user_id, discoveryItem_id }) => {
       try {
-        return skipDiscoveryItemResolver({ user_id, discoveryFeed_id, discoveryItem_id });
+        return skipDiscoveryItemResolver({ user_id, discoveryItem_id });
       } catch (e) {
         generateSentryErrorForResolver({
           resolverType: 'mutation',
           routeName: 'skipDiscoveryItem',
-          args: { user_id, discoveryFeed_id, discoveryItem_id },
+          args: { user_id, discoveryItem_id },
           errorMsg: e,
           errorName: SKIP_DISCOVERY_ITEM_ERROR,
         });

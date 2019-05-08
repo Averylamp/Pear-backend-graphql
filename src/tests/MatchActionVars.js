@@ -1,6 +1,19 @@
 import {
-  AVERY_ID, BRIAN_ID, JOSH_ID, SAMMI_ID, SOPHIA_ID, UMA_ID, MADE_ID,
-  MATCH1_ID, MATCH2_ID, MATCH3_ID, MATCH4_ID, MATCH5_ID, MATCH6_ID,
+  AVERY_ID,
+  BRIAN_ID,
+  JOSH_ID,
+  SAMMI_ID,
+  SOPHIA_ID,
+  UMA_ID,
+  MADE_ID,
+  MATCH1_ID,
+  MATCH2_ID,
+  MATCH3_ID,
+  MATCH4_ID,
+  MATCH5_ID,
+  MATCH6_ID,
+  EMPTY_USER_ID1,
+  EMPTY_USER_ID2,
 } from './TestsContants';
 
 export const SEND_PERSONAL_REQUEST_1_VARIABLES = {
@@ -121,4 +134,20 @@ export const UNMATCH_1_VARIABLES = {
 export const UNMATCH_2_VARIABLES = {
   user_id: SAMMI_ID,
   match_id: MATCH3_ID,
+};
+
+export const SEND_EMPTY_WAVE0 = {
+  requestInput: {
+    sentByUser_id: BRIAN_ID,
+    sentForUser_id: BRIAN_ID,
+    receivedByUser_id: EMPTY_USER_ID1,
+  },
+};
+
+export const SEND_EMPTY_PEAR0 = {
+  requestInput: {
+    sentByUser_id: BRIAN_ID,
+    sentForUser_id: SAMMI_ID,
+    receivedByUser_id: EMPTY_USER_ID2,
+  },
 };

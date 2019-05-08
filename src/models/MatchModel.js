@@ -15,7 +15,7 @@ extend type Mutation {
   createMatchRequest(requestInput: CreateMatchRequestInput!): MatchMutationResponse!
   
   # User pressed "skip" on the discovery feed
-  skipDiscoveryItem(user_id: ID!, discoveryFeed_id: ID!, discoveryItem_id: ID!): SkipDiscoveryItemResponse
+  skipDiscoveryItem(user_id: ID!, discoveryItem_id: ID!): SkipDiscoveryItemResponse!
 
   # TODO: Document
   acceptRequest(user_id: ID!, match_id: ID!): MatchMutationResponse!
