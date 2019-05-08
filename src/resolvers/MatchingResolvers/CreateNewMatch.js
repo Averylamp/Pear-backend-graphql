@@ -223,35 +223,35 @@ export const createNewMatchResolver = async ({
     if (receivedByDiscoveryUpdatePromise instanceof Error) {
       errorMessage += receivedByDiscoveryUpdatePromise.toString();
     }
-    rollbackObject({
+    await rollbackObject({
       model: User,
       object_id: sentFor._id,
       initialObject: initialSentFor,
       onSuccess: () => { debug('rolled back sentFor user object successfully'); },
       onFailure: (err) => { errorLog(`error rolling back sentFor user object: ${err}`); },
     });
-    rollbackObject({
+    await rollbackObject({
       model: User,
       object_id: receivedBy._id,
       initialObject: initialReceivedBy,
       onSuccess: () => { debug('rolled back receivedBy user object successfully'); },
       onFailure: (err) => { errorLog(`error rolling back receivedBy user object: ${err}`); },
     });
-    rollbackObject({
+    await rollbackObject({
       model: DiscoveryQueue,
       object_id: sentByDiscovery._id,
       initialObject: initialSentByDiscovery,
       onSuccess: () => { debug('rolled back sentBy discovery object successfully'); },
       onFailure: (err) => { errorLog(`error rolling back sentBy discovery object: ${err}`); },
     });
-    rollbackObject({
+    await rollbackObject({
       model: DiscoveryQueue,
       object_id: sentForDiscovery._id,
       initialObject: initialSentForDiscovery,
       onSuccess: () => { debug('rolled back sentFor discovery object successfully'); },
       onFailure: (err) => { errorLog(`error rolling back sentFor discovery object: ${err}`); },
     });
-    rollbackObject({
+    await rollbackObject({
       model: DiscoveryQueue,
       object_id: receivedByDiscovery._id,
       initialObject: initialReceivedByDiscovery,
