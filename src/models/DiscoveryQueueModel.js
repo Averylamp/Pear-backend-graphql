@@ -12,6 +12,9 @@ extend type Query {
 
 const mutationRoutes = `
 extend type Mutation {
+  # User pressed "skip" on the discovery feed
+  skipDiscoveryItem(user_id: ID!, discoveryItem_id: ID!): DiscoveryMutationResponse!
+  
   # optionally specify the id of the discovery item to add
   addToQueue(user_id: ID!, addedUser_id: ID!, item_id: ID): DiscoveryMutationResponse!
   
