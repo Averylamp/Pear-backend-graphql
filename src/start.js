@@ -30,7 +30,7 @@ import {
 } from './models/DiscoveryQueueModel';
 import {
   resolvers as DiscoveryQueueResolvers,
-} from './resolvers/DiscoveryQueueResolver';
+} from './resolvers/DiscoveryQueueResolvers/DiscoveryQueueResolver';
 import {
   typeDef as TestObject,
 } from './models/TestModel';

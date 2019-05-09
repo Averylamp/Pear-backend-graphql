@@ -2,11 +2,10 @@ import { User } from '../../models/UserModel';
 import { Match } from '../../models/MatchModel';
 import {
   ACCEPT_MATCH_REQUEST_ERROR, REJECT_MATCH_REQUEST_ERROR,
-  SEND_MATCH_REQUEST_ERROR, SKIP_DISCOVERY_ITEM_ERROR, UNMATCH_ERROR,
+  SEND_MATCH_REQUEST_ERROR, UNMATCH_ERROR,
 } from '../ResolverErrorStrings';
 import { generateSentryErrorForResolver } from '../../SentryHelper';
 import { createNewMatchResolver } from './CreateNewMatch';
-import { skipDiscoveryItemResolver } from './SkipDiscoveryItem';
 import { unmatchResolver } from './Unmatch';
 import { decideOnMatchResolver } from './DecideOnMatch';
 
@@ -25,24 +24,6 @@ export const resolvers = {
     },
   },
   Mutation: {
-    skipDiscoveryItem: async (_source, { user_id, discoveryItem_id }) => {
-      try {
-        return skipDiscoveryItemResolver({ user_id, discoveryItem_id });
-      } catch (e) {
-        generateSentryErrorForResolver({
-          resolverType: 'mutation',
-          routeName: 'skipDiscoveryItem',
-          args: { user_id, discoveryItem_id },
-          errorMsg: e,
-          errorName: SKIP_DISCOVERY_ITEM_ERROR,
-        });
-        errorLog(`Error while skipping discovery item: ${e}`);
-        return {
-          success: false,
-          message: SKIP_DISCOVERY_ITEM_ERROR,
-        };
-      }
-    },
     createMatchRequest: async (_source, { requestInput }) => {
       try {
         return createNewMatchResolver(requestInput);
