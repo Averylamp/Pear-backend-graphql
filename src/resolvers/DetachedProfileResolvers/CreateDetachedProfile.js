@@ -13,6 +13,7 @@ import {
 } from '../../discovery/DiscoverProfile';
 import { canMakeProfileForSelf } from './DetachedProfileResolverUtils';
 import { generateSentryErrorForResolver } from '../../SentryHelper';
+import { rollbackObject } from '../../../util/util';
 
 const mongoose = require('mongoose');
 const debug = require('debug')('dev:DetachedProfileResolvers');
@@ -54,6 +55,7 @@ export const createDetachedProfileResolver = async ({ detachedProfileInput }) =>
       message: GET_USER_ERROR,
     };
   }
+  const initialCreator = creator.toObject();
   try {
     const user = await User.findOne({ phoneNumber: detachedProfileInput.phoneNumber }).exec();
     if (user) {
@@ -133,19 +135,14 @@ export const createDetachedProfileResolver = async ({ detachedProfileInput }) =>
         }
         if (newUser instanceof Error) {
           errorMessage += `error adding DP to user: ${newUser.toString()}`;
-        } else {
-          User.findByIdAndUpdate(creatorUser_id, {
-            $pull: {
-              detachedProfile_ids: detachedProfileID,
-            },
-          }, { new: true }, (err) => {
-            if (err) {
-              errorLog(`Failed to roll back creator object: ${err}`);
-            } else {
-              debug('Rolled back creator object successfully');
-            }
-          }).exec();
         }
+        await rollbackObject({
+          model: User,
+          object_id: creatorUser_id,
+          initialObject: initialCreator,
+          onSuccess: () => { debug('Rolled back creator object successfully'); },
+          onFailure: (err) => { errorLog(`Failed to roll back creator object: ${err}`); },
+        });
         errorLog(errorMessage);
         generateSentryErrorForResolver({
           resolverType: 'mutation',
