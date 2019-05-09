@@ -17,6 +17,7 @@ import {
 } from '../../FirebaseManager';
 import { getAndValidateUsersAndDetachedProfileObjects } from './DetachedProfileResolverUtils';
 import { generateSentryErrorForResolver } from '../../SentryHelper';
+import { rollbackObject } from '../../../util/util';
 
 const debug = require('debug')('dev:DetachedProfileResolvers');
 const errorLog = require('debug')('error:DetachedProfileResolvers');
@@ -163,55 +164,37 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
         let errorMessage = '';
         if (updateUserObjectResult instanceof Error) {
           errorMessage += updateUserObjectResult.toString();
-        } else {
-          await User.findByIdAndUpdate(user_id, initialUser, {
-            new: true,
-            overwrite: true, // delete fields that were created for first time in the update
-          })
-            .then(() => {
-              debug('rolled back user object successfully');
-            })
-            .catch((err) => {
-              errorLog(`error rolling back user object: ${err}`);
-            });
         }
-
         if (updateCreatorObjectResult instanceof Error) {
           errorMessage += updateCreatorObjectResult.toString();
-        } else {
-          await User.findByIdAndUpdate(creatorUser_id, initialCreator, {
-            new: true,
-            overwrite: true,
-          })
-            .then(() => {
-              debug('rolled back creator object successfully');
-            })
-            .catch((err) => {
-              errorLog(`error rolling back creator object: ${err}`);
-            });
         }
-
         if (updateDetachedProfileResult instanceof Error) {
           errorMessage += updateDetachedProfileResult.toString();
-        } else {
-          await DetachedProfile.findByIdAndUpdate(detachedProfile_id, initialDetachedProfile, {
-            new: true,
-            overwrite: true,
-          })
-            .then(() => {
-              debug('rolled back detachedProfile object successfully');
-            })
-            .catch((err) => {
-              errorLog(`error rolling back detachedProfile object: ${err}`);
-            });
         }
-
         if (createChatResult instanceof Error) {
           errorMessage += createChatResult.toString();
-        } else {
-          // don't do anything
         }
-
+        await rollbackObject({
+          model: User,
+          object_id: user_id,
+          initialObject: initialUser,
+          onSuccess: () => { debug('rolled back user object successfully'); },
+          onFailure: (err) => { errorLog(`error rolling back user object: ${err}`); },
+        });
+        await rollbackObject({
+          model: User,
+          object_id: creatorUser_id,
+          initialObject: initialCreator,
+          onSuccess: () => { debug('rolled back creator object successfully'); },
+          onFailure: (err) => { errorLog(`error rolling back creator object: ${err}`); },
+        });
+        await rollbackObject({
+          model: DetachedProfile,
+          object_id: detachedProfile_id,
+          initialObject: initialDetachedProfile,
+          onSuccess: () => { debug('rolled back detachedProfile object successfully'); },
+          onFailure: (err) => { errorLog(`error rolling back detachedProfile object: ${err}`); },
+        });
         errorLog(errorMessage);
         generateSentryErrorForResolver({
           resolverType: 'mutation',
