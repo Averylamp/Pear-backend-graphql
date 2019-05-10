@@ -2,7 +2,7 @@ import { pick } from 'lodash';
 import { createUserObject } from '../../models/UserModel';
 import { createDiscoveryQueueObject } from '../../models/DiscoveryQueueModel';
 import { CREATE_USER_ERROR } from '../ResolverErrorStrings';
-import { INITIALIZED_FEED_LENGTH } from '../../constants';
+import { INITIALIZED_FEED_LENGTH, regenTestDBMode } from '../../constants';
 import {
   updateDiscoveryForUserById,
 } from '../../discovery/DiscoverProfile';
@@ -82,8 +82,6 @@ export const createUserResolver = async ({ userInput }) => {
         };
       }
       // initialize feed with some people
-      const devMode = process.env.DEV === 'true';
-      const regenTestDBMode = (process.env.REGEN_DB === 'true' && devMode);
       if (discoveryQueueObject.currentDiscoveryItems.length === 0 && !regenTestDBMode) {
         for (let i = 0; i < INITIALIZED_FEED_LENGTH; i += 1) {
           try {

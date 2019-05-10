@@ -1,3 +1,5 @@
+import { devMode } from '../constants';
+
 const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
@@ -299,7 +301,6 @@ input QuestionUserResponseInput {
 }
 `;
 
-const devMode = process.env.DEV === 'true';
 const devTypeDef = devMode ? mutationRoutes : '';
 
 export const typeDef = queryRoutes

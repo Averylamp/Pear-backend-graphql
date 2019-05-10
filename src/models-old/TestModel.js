@@ -26,7 +26,7 @@ const TestObjectSchema = new Schema({
   testField: { type: Schema.Types.String, required: true },
 });
 
-export const TestObjectOld = dbOld.model('TestObject', TestObjectSchema);
+export const TestObjectOld = dbOld ? dbOld.model('TestObject', TestObjectSchema) : null;
 
 export const createTestObjectFn = (testObjectInput, _id = mongoose.Types.ObjectId()) => {
   const testObjectModel = new TestObjectOld(testObjectInput);

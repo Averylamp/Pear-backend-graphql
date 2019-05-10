@@ -21,7 +21,7 @@ const StatSnapshotSchema = new Schema({
   nMatchmakerMatchAccepted: { type: StatTimeSummary, required: false },
 }, { timestamps: true });
 
-export const StatSnapshotOld = dbOld.model('StatSnapshot', StatSnapshotSchema);
+export const StatSnapshotOld = dbOld ? dbOld.model('StatSnapshot', StatSnapshotSchema) : null;
 
 export const createStatSnapshot = (statInput) => {
   const statSnapshotModel = new StatSnapshotOld(statInput);
