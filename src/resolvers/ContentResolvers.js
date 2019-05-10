@@ -1,11 +1,11 @@
 import { pick } from 'lodash';
 import { User } from '../models/UserModel';
 import { Question } from '../models/ContentModels';
+import { devMode } from '../constants';
 
 const mongoose = require('mongoose');
 const errorLog = require('debug')('error:ContentResolvers');
 
-const devMode = process.env.DEV === 'true';
 const mutations = devMode ? {
   addQuestions: async (_source, { newQuestions }) => {
     try {

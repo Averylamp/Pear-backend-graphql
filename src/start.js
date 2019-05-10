@@ -56,6 +56,7 @@ import {
   typeDef as EndorsementModels,
 } from './models/EndorsementModels';
 import { deleteUser } from './deletion/UserDeletion';
+import { devMode } from './constants';
 
 const { ApolloServer } = require('apollo-server-express');
 
@@ -64,24 +65,7 @@ const errorLog = require('debug')('error:Start');
 const prodConsole = require('debug')('prod:Start');
 
 
-const devMode = process.env.DEV === 'true';
-const regenTestDBMode = (process.env.REGEN_DB === 'true' && devMode);
 if (devMode) debug('Dev Mode detected');
-if (regenTestDBMode) {
-  debug('RegenDB Mode detected');
-  if (!process.env.DB_NAME) {
-    errorLog('You must set the DB_NAME of the DB you wish to regenerate');
-    errorLog('Try again with:');
-    errorLog('DB_NAME=dev-test yarn regendb');
-    process.exit(1);
-  }
-  if (process.env.DB_NAME === 'prod2' && process.env.REGEN !== 'uwu') {
-    errorLog('Are you really sure you want to regen the prod database?');
-    errorLog('If you are try again with:');
-    errorLog('DB_NAME=prod2 REGEN=uwu yarn regendb');
-    process.exit(1);
-  }
-}
 const tracing = process.env.PERF === 'true';
 if (tracing) debug('Perf mode detected');
 

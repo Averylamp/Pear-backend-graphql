@@ -1,4 +1,4 @@
-import { STAT_SNAPSHOT_GENERATION_TIME } from './constants';
+import { devMode, STAT_SNAPSHOT_GENERATION_TIME } from './constants';
 import { saveStatsSnapshot } from './stats/Stats';
 
 const debug = require('debug')('dev:StatsGeneration');
@@ -13,7 +13,6 @@ export const startStatsGeneration = async () => {
     debug('Perf mode detected');
   }
 
-  const devMode = process.env.DEV === 'true';
   let dbName = 'prod2';
   if (devMode) {
     dbName = 'dev';

@@ -147,6 +147,6 @@ export const EdgeSummarySchema = new Schema({
   match_id: { type: Schema.Types.ObjectId, required: true, index: true },
 }, { timestamps: true });
 
-export const MatchOld = dbOld.model('Match', MatchSchema);
+export const MatchOld = dbOld ? dbOld.model('Match', MatchSchema) : null;
 
 export const createMatchObject = matchInput => (new MatchOld(matchInput)).save();
