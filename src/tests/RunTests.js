@@ -95,7 +95,7 @@ export const runTests = async function runTests() {
     });
     connection.once('open', async () => {
       debug('Opened Test Mongo Connection');
-      testLog('Clearing all previous dev-test collections...');
+      testLog('Clearing all previous collections...');
       const collectionDropPromises = [];
       const collectionInfos = await connection.db.listCollections()
         .toArray();

@@ -7,7 +7,7 @@ import {
 } from '../ResolverErrorStrings';
 import { createDetachedProfileObject, DetachedProfile } from '../../models/DetachedProfile';
 import { DiscoveryQueue } from '../../models/DiscoveryQueueModel';
-import { NEW_PROFILE_BONUS } from '../../constants';
+import { NEW_PROFILE_BONUS, regenTestDBMode } from '../../constants';
 import {
   updateDiscoveryForUserById,
 } from '../../discovery/DiscoverProfile';
@@ -160,8 +160,6 @@ export const createDetachedProfileResolver = async ({ detachedProfileInput }) =>
       // populate creator's feed if feed is empty (i.e. this is the first profile they've made)
       try {
         const feed = await DiscoveryQueue.findById(creator.discoveryQueue_id);
-        const devMode = process.env.DEV === 'true';
-        const regenTestDBMode = (process.env.REGEN_DB === 'true' && devMode);
         if (feed.currentDiscoveryItems.length === 0 && !regenTestDBMode) {
           for (let i = 0; i < NEW_PROFILE_BONUS; i += 1) {
             await updateDiscoveryForUserById({ user_id: creatorUser_id });
