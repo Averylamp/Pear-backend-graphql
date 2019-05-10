@@ -6,7 +6,7 @@ import {
 } from '../ResolverErrorStrings';
 import { DetachedProfile } from '../../models/DetachedProfile';
 import { DiscoveryQueue } from '../../models/DiscoveryQueueModel';
-import { LAST_EDITED_ARRAY_LEN, NEW_PROFILE_BONUS } from '../../constants';
+import { LAST_EDITED_ARRAY_LEN, NEW_PROFILE_BONUS, regenTestDBMode } from '../../constants';
 import {
   updateDiscoveryForUserById,
 } from '../../discovery/DiscoverProfile';
@@ -211,8 +211,6 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
       // all operations succeeded; populate discovery feeds if this the endorsee's first profile
       try {
         const feed = await DiscoveryQueue.findById(user.discoveryQueue_id);
-        const devMode = process.env.DEV === 'true';
-        const regenTestDBMode = (process.env.REGEN_DB === 'true' && devMode);
         if (feed.currentDiscoveryItems.length === 0 && !regenTestDBMode) {
           for (let i = 0; i < NEW_PROFILE_BONUS; i += 1) {
             await updateDiscoveryForUserById({ user_id });

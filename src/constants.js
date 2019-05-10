@@ -40,3 +40,9 @@ export const FUZZY_SCHOOL_LIST = [
   'wellesley college',
   'Wellesley college',
 ];
+
+export const devMode = process.env.DEV === 'true';
+
+export const regenTestDBMode = (process.env.TASK === 'regen-db' && devMode);
+
+export const performingMigration1 = process.env.TASK === 'migration1';

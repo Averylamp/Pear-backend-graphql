@@ -9,12 +9,11 @@ import {
 } from '../ResolverErrorStrings';
 import { generateSentryErrorForResolver } from '../../SentryHelper';
 import { skipDiscoveryItemResolver } from './SkipDiscoveryItem';
+import { devMode } from '../../constants';
 
 const mongoose = require('mongoose');
 const debug = require('debug')('dev:DiscoveryQueueResolver');
 const errorLog = require('debug')('error:DiscoveryQueueResolver');
-
-const devMode = process.env.DEV === 'true';
 
 export const resolvers = {
   Query: {
