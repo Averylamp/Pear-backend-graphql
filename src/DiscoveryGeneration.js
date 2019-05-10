@@ -1,5 +1,5 @@
 import { updateAllDiscovery } from './discovery/DiscoverProfile';
-import { TICK_LENGTH_MILLIS } from './constants';
+import { devMode, TICK_LENGTH_MILLIS } from './constants';
 
 const debug = require('debug')('dev:DiscoveryGeneration');
 const prodConsole = require('debug')('prod:DiscoveryGeneration');
@@ -13,7 +13,6 @@ export const startDiscoveryGeneration = async () => {
     debug('Perf mode detected');
   }
 
-  const devMode = process.env.DEV === 'true';
   let dbName = 'prod2';
   if (devMode) {
     dbName = 'dev';

@@ -3,6 +3,7 @@ import { User } from '../../models/UserModel';
 import { generateSentryErrorForResolver } from '../../SentryHelper';
 import { UNMATCH_ERROR } from '../ResolverErrorStrings';
 import { getAndValidateUserAndMatchObjects } from './MatchResolverUtils';
+import { rollbackObject } from '../../../util/util';
 
 const debug = require('debug')('dev:Unmatch');
 const errorLogger = require('debug')('error:Unmatch');
@@ -62,36 +63,27 @@ export const unmatchResolver = async ({ user_id, match_id, reason }) => {
     if (edgeUpdate instanceof Error) {
       errorMessage += edgeUpdate.toString();
     }
-    await User.findByIdAndUpdate(user_id, initialUser, {
-      new: true,
-      overwrite: true,
-    }).exec()
-      .then(() => {
-        debug('rolled back me user object successfully');
-      })
-      .catch((err) => {
-        errorLog(`error rolling back me user object: ${err}`);
-      });
-    await User.findByIdAndUpdate(otherUser._id.toString(), initialOtherUser, {
-      new: true,
-      overwrite: true,
-    }).exec()
-      .then(() => {
-        debug('rolled back other user object successfully');
-      })
-      .catch((err) => {
-        errorLog(`error rolling back other user object: ${err}`);
-      });
-    await Match.findByIdAndUpdate(match_id, initialMatch, {
-      new: true,
-      overwrite: true,
-    }).exec()
-      .then(() => {
-        debug('rolled back match object successfully');
-      })
-      .catch((err) => {
-        errorLog(`error rolling back match object: ${err}`);
-      });
+    await rollbackObject({
+      model: User,
+      object_id: user_id,
+      initialObject: initialUser,
+      onSuccess: () => { debug('rolled back me user object successfully'); },
+      onFailure: (err) => { errorLog(`error rolling back me user object: ${err}`); },
+    });
+    await rollbackObject({
+      model: User,
+      object_id: otherUser._id.toString(),
+      initialObject: initialOtherUser,
+      onSuccess: () => { debug('rolled back other user object successfully'); },
+      onFailure: (err) => { errorLog(`error rolling back other user object: ${err}`); },
+    });
+    await rollbackObject({
+      model: Match,
+      object_id: match_id,
+      initialObject: initialMatch,
+      onSuccess: () => { debug('rolled back match object successfully'); },
+      onFailure: (err) => { errorLog(`error rolling back match object: ${err}`); },
+    });
     errorLog(`Error occurred unmatching: ${errorMessage}`);
     generateSentryErrorForResolver({
       resolverType: 'mutation',

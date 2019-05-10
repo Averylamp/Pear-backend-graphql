@@ -166,7 +166,7 @@ const DetachedProfileSchema = new Schema({
 }, { timestamps: true });
 
 
-export const DetachedProfileOld = dbOld.model('DetachedProfile', DetachedProfileSchema);
+export const DetachedProfileOld = dbOld ? dbOld.model('DetachedProfile', DetachedProfileSchema) : null;
 
 export const createDetachedProfileObject = function
 createUserProfileObject(detachedProfileInput) {

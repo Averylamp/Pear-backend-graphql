@@ -6,6 +6,7 @@ import { runTests } from './tests/RunTests';
 import { startStatsGeneration } from './StatsGeneration';
 import { startDiscoveryGeneration } from './DiscoveryGeneration';
 import { runMigration } from './migration1/Migration1';
+import { devMode, performingMigration1, regenTestDBMode } from './constants';
 
 const debug = require('debug')('dev:Index');
 const testsLog = require('debug')('tests:Index');
@@ -15,8 +16,6 @@ const fs = require('fs').promises;
 const init = async () => {
   debug('Starting...');
   testsLog('Starting...');
-  const devMode = process.env.DEV === 'true';
-  const regenTestDBMode = (process.env.REGEN_DB === 'true' && devMode);
 
   if (!devMode) {
     const release = await fs
@@ -33,21 +32,19 @@ const init = async () => {
     debug('sentry initialized');
   }
 
-  if (devMode && regenTestDBMode) {
+  if (regenTestDBMode) {
     testsLog('Prepared to run tests in 3 second');
     setTimeout(async () => {
       testsLog('Running Tests');
       await runTests();
     }, 3000);
-  }
-
-  if (process.env.TASK === 'stats-generation') {
+  } else if (process.env.TASK === 'stats-generation') {
     debug('starting stats generation');
     startStatsGeneration();
   } else if (process.env.TASK === 'discovery-generation') {
     debug('starting discovery generation');
     startDiscoveryGeneration();
-  } else if (process.env.TASK === 'migration1') {
+  } else if (performingMigration1) {
     debug('performing migration 1');
     runMigration();
   } else if (!process.env.TASK) {
