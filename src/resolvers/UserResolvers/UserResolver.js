@@ -6,7 +6,7 @@ import { User } from '../../models/UserModel';
 import { Match } from '../../models/MatchModel';
 import { authenticateUser, sendNewMessagePushNotification } from '../../FirebaseManager';
 import {
-  CREATE_USER_ERROR, EDIT_ENDORSEMENT_ERROR,
+  CREATE_USER_ERROR, DELETE_USER_ERROR, DELETE_USER_PERMISSION_ERROR, EDIT_ENDORSEMENT_ERROR,
   GET_USER_ERROR, UPDATE_USER_ERROR,
   UPDATE_USER_PHOTOS_ERROR,
 } from '../ResolverErrorStrings';
@@ -15,10 +15,13 @@ import { createUserResolver } from './CreateUser';
 import { updateUserResolver } from './UpdateUser';
 import { editEndorsementResolver } from './EditEndorsement';
 import { generateSentryErrorForResolver } from '../../SentryHelper';
+import { deleteUserResolver } from '../../deletion/UserDeletion';
 
 const debug = require('debug')('dev:UserResolvers');
 const errorLog = require('debug')('error:UserResolver');
 const functionCallConsole = require('debug')('dev:FunctionCalls');
+
+const devMode = process.env.DEV === 'true';
 
 export const resolvers = {
   User: {
@@ -117,18 +120,7 @@ export const resolvers = {
     },
     getUserCount: async () => 3 * (await User.find({})
       .countDocuments()
-      .exec())
-    /*
-      const startMillis = 1555552050000;
-      const nowMillis = (new Date()).getTime();
-      const timeSinceStart = nowMillis - startMillis;
-      const millisPerDay = 24 * 60 * 60 * 1000;
-      const fakeUsersPerDay = 190;
-      const usersBase = timeSinceStart * fakeUsersPerDay / millisPerDay;
-      // throw some random noise in there
-      return Math.floor(usersBase + 40 * Math.sin(2 * Math.PI * nowMillis / (20 * 60 * 60 * 1000)));
-      */
-    ,
+      .exec()),
   },
   Mutation: {
     createUser: async (_source, { userInput }) => {
@@ -256,6 +248,30 @@ export const resolvers = {
         return {
           success: false,
           message: EDIT_ENDORSEMENT_ERROR,
+        };
+      }
+    },
+    deleteUser: async (_source, { user_id }) => {
+      if (!devMode) {
+        return {
+          success: false,
+          message: DELETE_USER_PERMISSION_ERROR,
+        };
+      }
+      try {
+        return deleteUserResolver(user_id);
+      } catch (e) {
+        errorLog(`error occurred while attempting to delete user: ${e.toString()}`);
+        generateSentryErrorForResolver({
+          resolverType: 'mutation',
+          routeName: 'deleteUser',
+          args: { user_id },
+          errorMsg: e,
+          errorName: DELETE_USER_ERROR,
+        });
+        return {
+          success: false,
+          message: DELETE_USER_ERROR,
         };
       }
     },
