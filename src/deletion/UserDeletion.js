@@ -21,7 +21,7 @@ export const deleteUserResolver = async (user_id) => {
   // match objects referencing this user
   // match edge summaries referencing this user
   // endorsement edges of other users referencing this user
-  // we DON'T decrement associated endorser/endorsedUser counts
+  // discoveryItems of other user feeds referencing this user
   let message = '';
   const addErrorToMessage = (err) => { message += (`\n${err}`); };
   debug(`removing user and references for id: ${user_id}`);
@@ -73,6 +73,19 @@ export const deleteUserResolver = async (user_id) => {
     nFriendsUnlinked += 1;
   }
   debug(`unlinked ${nFriendsUnlinked} friends`);
+
+  const feedsModifiedRes = await DiscoveryQueue.updateMany({
+    currentDiscoveryItems: {
+      $elemMatch: {
+        user_id,
+      },
+    },
+  }, {
+    $pull: {
+      currentDiscoveryItems: { user_id },
+    },
+  });
+  debug(`updated ${feedsModifiedRes.nModified} discovery queues`);
 
   await user.remove().catch(addErrorToMessage);
   debug('deleted user object');
