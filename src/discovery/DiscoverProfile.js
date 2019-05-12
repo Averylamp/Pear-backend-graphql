@@ -1,6 +1,6 @@
 import { User } from '../models/UserModel';
 import { DiscoveryItem, DiscoveryQueue } from '../models/DiscoveryQueueModel';
-import { EXPECTED_TICKS_PER_NEW_PROFILE, MAX_FEED_LENGTH } from '../constants';
+import { EXPECTED_TICKS_PER_NEW_PROFILE, MAX_FEED_LENGTH, regenTestDBMode } from '../constants';
 
 const debug = require('debug')('dev:DiscoverProfile');
 const errorLog = require('debug')('error:DiscoverProfile');
@@ -253,7 +253,7 @@ export const updateDiscoveryWithNextItem = async ({ userObj }) => {
     seededUserPipeline,
     genderConstraintPipeline,
   ];
-  if (process.env.REGEN_DB === 'true') {
+  if (regenTestDBMode) {
     pipelineFns = [genderConstraintPipeline];
   }
   let index = 0;
@@ -266,7 +266,7 @@ export const updateDiscoveryWithNextItem = async ({ userObj }) => {
   debug(`Getting next discovery item and updating user feed: ${userObj._id}`);
 
   let gender = Math.random() > 0.5 ? 'male' : 'female';
-  if (Math.random() < 0.05 && !process.env.REGEN_DB === 'true') {
+  if (Math.random() < 0.05 && !regenTestDBMode) {
     gender = 'nonbinary';
   }
   if (!userObj || userObj.deactivated) {
