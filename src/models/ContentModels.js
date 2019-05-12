@@ -264,6 +264,8 @@ enum QuestionTag {
   spicy
   dating
   personality
+  dodont
+  boastroast
 }
 `;
 
@@ -346,13 +348,13 @@ export const QuestionSchema = new Schema({
     required: true,
     enum: ['multipleChoice', 'multipleChoiceWithOther', 'freeResponse'],
   },
-  suggestedResponses: { type: [QuestionSuggestedResponseSchema], required: false },
+  suggestedResponses: { type: [QuestionSuggestedResponseSchema], required: true },
   tags: {
     type: [String],
     required: true,
     default: [],
     index: true,
-    enum: ['starter', 'spicy', 'dating', 'personality'],
+    enum: ['starter', 'spicy', 'dating', 'personality', 'dodont', 'boastroast'],
   },
   placeholderResponseText: { type: String, required: false },
   hiddenInQuestionnaire: { type: Boolean, required: true, default: false },
