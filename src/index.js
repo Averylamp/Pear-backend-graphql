@@ -6,7 +6,8 @@ import { runTests } from './tests/RunTests';
 import { startStatsGeneration } from './StatsGeneration';
 import { startDiscoveryGeneration } from './DiscoveryGeneration';
 import { runMigration } from './migration1/Migration1';
-import { devMode, performingMigration1, regenTestDBMode } from './constants';
+import { devMode, performingMigration1, performingMigration2, regenTestDBMode } from './constants';
+import { runMigration2 } from './migration2/Migration2';
 
 const debug = require('debug')('dev:Index');
 const testsLog = require('debug')('tests:Index');
@@ -47,6 +48,9 @@ const init = async () => {
   } else if (performingMigration1) {
     debug('performing migration 1');
     runMigration();
+  } else if (performingMigration2) {
+    debug('performing migration 2');
+    runMigration2();
   } else if (!process.env.TASK) {
     start();
   }
