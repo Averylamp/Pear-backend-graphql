@@ -6,7 +6,9 @@ import { runTests } from './tests/RunTests';
 import { startStatsGeneration } from './StatsGeneration';
 import { startDiscoveryGeneration } from './DiscoveryGeneration';
 import { runMigration } from './migration1/Migration1';
-import { devMode, performingMigration1, performingMigration2, regenTestDBMode } from './constants';
+import {
+  devMode, performingMigration1, performingMigration2, regenTestDBMode,
+} from './constants';
 import { runMigration2 } from './migration2/Migration2';
 
 const debug = require('debug')('dev:Index');
