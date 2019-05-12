@@ -353,7 +353,7 @@ UserSchema.virtual('fullName')
     return `${this.firstName} ${this.lastName}`;
   });
 
-export const UserOld = dbOld.model('User', UserSchema);
+export const UserOld = dbOld ? dbOld.model('User', UserSchema) : null;
 
 // TODO: replace all of this with `return (new User(userinput)).save()` and handle error
 export const createUserObject = (userInput) => {

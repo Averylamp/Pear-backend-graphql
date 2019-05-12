@@ -1,19 +1,19 @@
-import { User } from '../models/UserModel';
-import { DiscoveryQueue, DiscoveryItem } from '../models/DiscoveryQueueModel';
+import { User } from '../../models/UserModel';
+import { DiscoveryQueue, DiscoveryItem } from '../../models/DiscoveryQueueModel';
 import {
   updateDiscoveryForUserById,
-} from '../discovery/DiscoverProfile';
+} from '../../discovery/DiscoverProfile';
 import {
   FORCE_FEED_UPDATE_ERROR,
-  FORCE_FEED_UPDATE_SUCCESS,
-} from './ResolverErrorStrings';
-import { generateSentryErrorForResolver } from '../SentryHelper';
+  FORCE_FEED_UPDATE_SUCCESS, SKIP_DISCOVERY_ITEM_ERROR,
+} from '../ResolverErrorStrings';
+import { generateSentryErrorForResolver } from '../../SentryHelper';
+import { skipDiscoveryItemResolver } from './SkipDiscoveryItem';
+import { devMode } from '../../constants';
 
 const mongoose = require('mongoose');
 const debug = require('debug')('dev:DiscoveryQueueResolver');
 const errorLog = require('debug')('error:DiscoveryQueueResolver');
-
-const devMode = process.env.DEV === 'true';
 
 export const resolvers = {
   Query: {
@@ -23,6 +23,24 @@ export const resolvers = {
     },
   },
   Mutation: {
+    skipDiscoveryItem: async (_source, { user_id, discoveryItem_id }) => {
+      try {
+        return skipDiscoveryItemResolver({ user_id, discoveryItem_id });
+      } catch (e) {
+        generateSentryErrorForResolver({
+          resolverType: 'mutation',
+          routeName: 'skipDiscoveryItem',
+          args: { user_id, discoveryItem_id },
+          errorMsg: e,
+          errorName: SKIP_DISCOVERY_ITEM_ERROR,
+        });
+        errorLog(`Error while skipping discovery item: ${e}`);
+        return {
+          success: false,
+          message: SKIP_DISCOVERY_ITEM_ERROR,
+        };
+      }
+    },
     addToQueue: async (_, { user_id, addedUser_id, item_id }) => {
       try {
         const discoveryItem_id = (item_id !== undefined) ? item_id : mongoose.Types.ObjectId();

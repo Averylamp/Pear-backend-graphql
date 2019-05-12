@@ -57,7 +57,7 @@ const DiscoveryQueueSchema = new Schema({
 }, { timestamps: true });
 
 
-export const DiscoveryQueueOld = dbOld.model('DiscoveryQueue', DiscoveryQueueSchema);
+export const DiscoveryQueueOld = dbOld ? dbOld.model('DiscoveryQueue', DiscoveryQueueSchema) : null;
 
 // discovery queue object is created when user is created
 export const createDiscoveryQueueObject = function
