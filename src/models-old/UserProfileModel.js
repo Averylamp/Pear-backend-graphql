@@ -108,7 +108,7 @@ export const EndorsementEdgeSchema = new Schema({
 });
 
 
-export const UserProfileOld = dbOld.model('UserProfile', UserProfileSchema);
+export const UserProfileOld = dbOld ? dbOld.model('UserProfile', UserProfileSchema) : null;
 
 export const createUserProfileObject = function createUserProfileObject(userProfileInput) {
   const userProfileModel = new UserProfileOld(userProfileInput);
