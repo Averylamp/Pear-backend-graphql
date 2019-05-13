@@ -39,13 +39,16 @@ extend type Mutation{
   createUser(userInput: CreationUserInput!): UserMutationResponse!
 
   # Updates an existing User
-  updateUser(updateUserInput: UpdateUserInput!) : UserMutationResponse!
+  updateUser(updateUserInput: UpdateUserInput!): UserMutationResponse!
 
   # Updates a User's photos or photo bank
   updateUserPhotos(updateUserPhotosInput: UpdateUserPhotosInput!): UserMutationResponse!
 
   # an endorser can edit the things they've written for a user
   editEndorsement(editEndorsementInput: EditEndorsementInput!): UserMutationResponse!
+  
+  # DEVMODE ONLY: delete a user object. when called from prod, this is no-op
+  deleteUser(user_id: ID!): UserDeletionResponse!
 }
 `;
 
@@ -246,6 +249,11 @@ type UserMutationResponse{
   success: Boolean!
   message: String
   user: User
+}
+
+type UserDeletionResponse {
+  success: Boolean!
+  message: String
 }
 `;
 

@@ -1,5 +1,14 @@
 import {
-  AVERY_ID, BRIAN_ID, JOEL_ID, JOSH_ID, MADE_ID, SAMMI_ID, SOPHIA_ID, UMA_ID,
+  AVERY_ID,
+  BRIAN_ID,
+  EMPTY_USER_ID0,
+  EMPTY_USER_ID1, EMPTY_USER_ID2, EMPTY_USER_ID3,
+  JOEL_ID,
+  JOSH_ID,
+  MADE_ID,
+  SAMMI_ID,
+  SOPHIA_ID,
+  UMA_ID,
 } from './TestsContants';
 
 export const CREATE_AVERY_USER_VARIABLES = {
@@ -75,5 +84,41 @@ export const CREATE_SOPHIA_USER_VARIABLES = {
     phoneNumberVerified: false,
     firebaseAuthID: 'PZAauXixqFZUsqf7izjbcbtdhe73',
     firebaseRemoteInstanceID: 'faBZOThoNlU:APA91bEbDB-QNxKE5aOYhvUJdwEJjsAbE1h8jih-2EgbXUEpsLbGL4e0SUO-5NATRmeXNrNKml2qirVBsc_S3bxvqGeBbIUejWAUKuffrz1QsKEDmPYZSzZzRiG4pvS-aiN7jRlndC3K',
+  },
+};
+
+export const CREATE_EMPTY_USER_0 = {
+  userInput: {
+    _id: EMPTY_USER_ID0,
+    phoneNumber: '0000000000',
+    phoneNumberVerified: true,
+    firebaseAuthID: 'FakeAuth0',
+  },
+};
+
+export const CREATE_EMPTY_USER_1 = {
+  userInput: {
+    _id: EMPTY_USER_ID1,
+    phoneNumber: '0000000001',
+    phoneNumberVerified: true,
+    firebaseAuthID: 'FakeAuth1',
+  },
+};
+
+export const CREATE_EMPTY_USER_2 = {
+  userInput: {
+    _id: EMPTY_USER_ID2,
+    phoneNumber: '0000000002',
+    phoneNumberVerified: true,
+    firebaseAuthID: 'FakeAuth2',
+  },
+};
+
+export const CREATE_EMPTY_USER_3 = {
+  userInput: {
+    _id: EMPTY_USER_ID3,
+    phoneNumber: '0000000003',
+    phoneNumberVerified: true,
+    firebaseAuthID: 'FakeAuth3',
   },
 };

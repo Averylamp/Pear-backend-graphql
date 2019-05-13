@@ -7,12 +7,13 @@ import {
 } from '../ResolverErrorStrings';
 import { createDetachedProfileObject, DetachedProfile } from '../../models/DetachedProfile';
 import { DiscoveryQueue } from '../../models/DiscoveryQueueModel';
-import { NEW_PROFILE_BONUS } from '../../constants';
+import { NEW_PROFILE_BONUS, regenTestDBMode } from '../../constants';
 import {
   updateDiscoveryForUserById,
 } from '../../discovery/DiscoverProfile';
 import { canMakeProfileForSelf } from './DetachedProfileResolverUtils';
 import { generateSentryErrorForResolver } from '../../SentryHelper';
+import { rollbackObject } from '../../../util/util';
 
 const mongoose = require('mongoose');
 const debug = require('debug')('dev:DetachedProfileResolvers');
@@ -54,6 +55,7 @@ export const createDetachedProfileResolver = async ({ detachedProfileInput }) =>
       message: GET_USER_ERROR,
     };
   }
+  const initialCreator = creator.toObject();
   try {
     const user = await User.findOne({ phoneNumber: detachedProfileInput.phoneNumber }).exec();
     if (user) {
@@ -133,19 +135,14 @@ export const createDetachedProfileResolver = async ({ detachedProfileInput }) =>
         }
         if (newUser instanceof Error) {
           errorMessage += `error adding DP to user: ${newUser.toString()}`;
-        } else {
-          User.findByIdAndUpdate(creatorUser_id, {
-            $pull: {
-              detachedProfile_ids: detachedProfileID,
-            },
-          }, { new: true }, (err) => {
-            if (err) {
-              errorLog(`Failed to roll back creator object: ${err}`);
-            } else {
-              debug('Rolled back creator object successfully');
-            }
-          }).exec();
         }
+        await rollbackObject({
+          model: User,
+          object_id: creatorUser_id,
+          initialObject: initialCreator,
+          onSuccess: () => { debug('Rolled back creator object successfully'); },
+          onFailure: (err) => { errorLog(`Failed to roll back creator object: ${err}`); },
+        });
         errorLog(errorMessage);
         generateSentryErrorForResolver({
           resolverType: 'mutation',
@@ -163,8 +160,6 @@ export const createDetachedProfileResolver = async ({ detachedProfileInput }) =>
       // populate creator's feed if feed is empty (i.e. this is the first profile they've made)
       try {
         const feed = await DiscoveryQueue.findById(creator.discoveryQueue_id);
-        const devMode = process.env.DEV === 'true';
-        const regenTestDBMode = (process.env.REGEN_DB === 'true' && devMode);
         if (feed.currentDiscoveryItems.length === 0 && !regenTestDBMode) {
           for (let i = 0; i < NEW_PROFILE_BONUS; i += 1) {
             await updateDiscoveryForUserById({ user_id: creatorUser_id });

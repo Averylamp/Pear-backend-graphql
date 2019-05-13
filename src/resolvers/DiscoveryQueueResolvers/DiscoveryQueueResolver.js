@@ -1,17 +1,19 @@
-import { User } from '../models/UserModel';
-import { DiscoveryQueue, DiscoveryItem } from '../models/DiscoveryQueueModel';
+import { User } from '../../models/UserModel';
+import { DiscoveryQueue, DiscoveryItem } from '../../models/DiscoveryQueueModel';
 import {
   updateDiscoveryForUserById,
-} from '../discovery/DiscoverProfile';
+} from '../../discovery/DiscoverProfile';
 import {
   FORCE_FEED_UPDATE_ERROR,
-  FORCE_FEED_UPDATE_SUCCESS,
-} from './ResolverErrorStrings';
-import { generateSentryErrorForResolver } from '../SentryHelper';
+  FORCE_FEED_UPDATE_SUCCESS, SKIP_DISCOVERY_ITEM_ERROR,
+} from '../ResolverErrorStrings';
+import { generateSentryErrorForResolver } from '../../SentryHelper';
+import { skipDiscoveryItemResolver } from './SkipDiscoveryItem';
+import { devMode } from '../../constants';
 
+const mongoose = require('mongoose');
 const debug = require('debug')('dev:DiscoveryQueueResolver');
 const errorLog = require('debug')('error:DiscoveryQueueResolver');
-
 
 export const resolvers = {
   Query: {
@@ -21,20 +23,48 @@ export const resolvers = {
     },
   },
   Mutation: {
-    addToQueue: async (_, { user_id, addedUser_id }) => DiscoveryQueue
-      .findOneAndUpdate({ user_id }, {
-        $push: {
-          currentDiscoveryItems: new DiscoveryItem({ user_id: addedUser_id }),
-        },
-      })
-      .then(() => ({
-        success: true,
-        message: 'Successfully added to queue.',
-      }))
-      .catch(err => ({
-        success: false,
-        message: err.toString(),
-      })),
+    skipDiscoveryItem: async (_source, { user_id, discoveryItem_id }) => {
+      try {
+        return skipDiscoveryItemResolver({ user_id, discoveryItem_id });
+      } catch (e) {
+        generateSentryErrorForResolver({
+          resolverType: 'mutation',
+          routeName: 'skipDiscoveryItem',
+          args: { user_id, discoveryItem_id },
+          errorMsg: e,
+          errorName: SKIP_DISCOVERY_ITEM_ERROR,
+        });
+        errorLog(`Error while skipping discovery item: ${e}`);
+        return {
+          success: false,
+          message: SKIP_DISCOVERY_ITEM_ERROR,
+        };
+      }
+    },
+    addToQueue: async (_, { user_id, addedUser_id, item_id }) => {
+      try {
+        const discoveryItem_id = (item_id !== undefined) ? item_id : mongoose.Types.ObjectId();
+        const discoveryItem = new DiscoveryItem({
+          _id: discoveryItem_id,
+          user_id: addedUser_id,
+        });
+        await DiscoveryQueue.findOneAndUpdate({ user_id }, {
+          $push: {
+            currentDiscoveryItems: discoveryItem,
+            historyDiscoveryItems: discoveryItem,
+          },
+        });
+        return {
+          success: true,
+          message: 'Successfully added to queue.',
+        };
+      } catch (e) {
+        return {
+          success: false,
+          message: e.toString(),
+        };
+      }
+    },
     forceUpdateFeed: async (_, { user_id, numberOfItems = 1 }) => {
       for (let i = 0; i < numberOfItems; i += 1) {
         try {
@@ -59,6 +89,28 @@ export const resolvers = {
         message: FORCE_FEED_UPDATE_SUCCESS,
       };
     },
+    clearFeed: async (_, { user_id }) => {
+      if (!devMode) {
+        return {
+          success: false,
+          message: 'Can\'t clear feed in prod mode',
+        };
+      }
+      try {
+        await DiscoveryQueue.findOneAndUpdate({ user_id }, {
+          currentDiscoveryItems: [],
+        });
+        return {
+          success: true,
+        };
+      } catch (e) {
+        errorLog(`error occurred clearing discovery feed ${e}`);
+        return {
+          success: false,
+          message: 'Error occured clearing discovery feed',
+        };
+      }
+    },
   },
   DiscoveryQueue: {
     user: async ({ user_id }) => User.findById(user_id),
@@ -72,11 +124,9 @@ export const resolvers = {
     },
     */
     // fetch all users in a single call
-    // .reverse() reverses in place, so we want to use .slice() to clone
+    // if reversing: .reverse() reverses in place, so we want to use .slice() to clone first
     currentDiscoveryItems: async ({ currentDiscoveryItems }) => {
       const returnedDiscoveryItems = currentDiscoveryItems
-        .slice()
-        .reverse()
         .map(item => item.toObject());
       const user_ids = returnedDiscoveryItems.map(discoveryItem => discoveryItem.user_id);
       const users = await User.find({ _id: { $in: user_ids } });
