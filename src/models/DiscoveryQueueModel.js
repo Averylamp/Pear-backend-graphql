@@ -12,9 +12,17 @@ extend type Query {
 
 const mutationRoutes = `
 extend type Mutation {
-  addToQueue(user_id: ID!, addedUser_id: ID!): DiscoveryMutationResponse!
+  # User pressed "skip" on the discovery feed
+  skipDiscoveryItem(user_id: ID!, discoveryItem_id: ID!): DiscoveryMutationResponse!
+  
+  # optionally specify the id of the discovery item to add
+  addToQueue(user_id: ID!, addedUser_id: ID!, item_id: ID): DiscoveryMutationResponse!
+  
   # numberOfItems defaults to 1
   forceUpdateFeed(user_id: ID!, numberOfItems: Int): DiscoveryMutationResponse!
+  
+  # devmode only
+  clearFeed(user_id: ID!): DiscoveryMutationResponse!
 }
 
 `;
@@ -58,6 +66,9 @@ const DiscoveryQueueSchema = new Schema({
   user_id: { type: Schema.Types.ObjectId, required: true, index: true },
   historyDiscoveryItems: { type: [DiscoveryItemSchema], required: true, default: [] },
   currentDiscoveryItems: { type: [DiscoveryItemSchema], required: true, default: [] },
+  skippedUser_ids: {
+    type: [Schema.Types.ObjectId], required: false, default: [], index: true,
+  },
 }, { timestamps: true });
 
 
