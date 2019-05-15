@@ -39,6 +39,23 @@ export const editDetachedProfileResolver = async ({ editDetachedProfileInput }) 
   }
 
   detachedProfile = Object.assign(detachedProfile, editDetachedProfileInput);
+  // set firstName and thumbnailURL of bio and questionResponses
+  for (const questionResponse of detachedProfile.questionResponses) {
+    if (creator.firstName) {
+      questionResponse.authorFirstName = creator.firstName;
+    }
+    if (creator.thumbnailURL) {
+      questionResponse.authorThumbnailURL = creator.thumbnailURL;
+    }
+  }
+  if (detachedProfile.bio) {
+    if (creator.firstName) {
+      detachedProfile.bio.authorFirstName = creator.firstName;
+    }
+    if (creator.thumbnailURL) {
+      detachedProfile.bio.authorThumbnailURL = creator.thumbnailURL;
+    }
+  }
   detachedProfile.status = 'waitingUnseen';
   detachedProfile = await detachedProfile.save();
   return {

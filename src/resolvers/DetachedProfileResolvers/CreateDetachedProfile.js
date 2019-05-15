@@ -101,6 +101,23 @@ export const createDetachedProfileResolver = async ({ detachedProfileInput }) =>
       message: CREATE_DETACHED_PROFILE_ERROR,
     };
   }
+  // set firstName and thumbnailURL of bio and questionResponses
+  for (const questionResponse of finalDetachedProfileInput.questionResponses) {
+    if (creator.firstName) {
+      questionResponse.authorFirstName = creator.firstName;
+    }
+    if (creator.thumbnailURL) {
+      questionResponse.authorThumbnailURL = creator.thumbnailURL;
+    }
+  }
+  if (finalDetachedProfileInput.bio) {
+    if (creator.firstName) {
+      finalDetachedProfileInput.bio.authorFirstName = creator.firstName;
+    }
+    if (creator.thumbnailURL) {
+      finalDetachedProfileInput.bio.authorThumbnailURL = creator.thumbnailURL;
+    }
+  }
 
   // update creator's user object
   const updateCreatorUserObject = User.findByIdAndUpdate(creatorUser_id, {
