@@ -28,7 +28,7 @@ export const runCreateUsersTest = async (mutate) => {
       if (verbose) {
         verboseDebug(result);
       }
-      checkForAndLogErrors(result, 'createUser');
+      checkForAndLogErrors(result, 'createUser', errorLog);
     } catch (e) {
       errorLog(`${e}`);
       process.exit(1);

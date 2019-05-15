@@ -28,7 +28,7 @@ export const runEditEndorsementsTest = async (mutate) => {
       if (verbose) {
         verboseDebug(result);
       }
-      checkForAndLogErrors(result, 'editEndorsement');
+      checkForAndLogErrors(result, 'editEndorsement', errorLog);
     } catch (e) {
       errorLog((`${e}`));
       process.exit(1);
