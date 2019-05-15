@@ -102,8 +102,13 @@ import {
   ADD_TO_BRIAN_QUEUE2,
   ADD_TO_BRIAN_QUEUE3,
 } from './AddToQueue';
+import { ADD_BRIAN_EVENT0, ADD_MADE_EVENT0, CREATE_EVENT0_VARIABLES } from './EventVars';
 
 export const addQuestions = ADD_QUESTIONS_VARIABLES;
+
+export const createEvents = [
+  CREATE_EVENT0_VARIABLES,
+];
 
 export const createUsers = [
   CREATE_AVERY_USER_VARIABLES,
@@ -137,6 +142,11 @@ export const updateUserFirstNames = [
   UPDATE_MADE_FIRSTNAME_USER_VARIABLES,
   UPDATE_UMA_FIRSTNAME_USER_VARIABLES,
   UPDATE_SOPHIA_FIRSTNAME_USER_VARIABLES,
+];
+
+export const addEventCodes = [
+  ADD_BRIAN_EVENT0,
+  ADD_MADE_EVENT0,
 ];
 
 export const editDetachedProfiles = [
