@@ -21,6 +21,8 @@ import { runRejectMatchRequestsTest } from './testFunctions/RejectMatchRequestsT
 import { runSendChatMessagesTest } from './testFunctions/SendChatMessagesTest';
 import { runUnmatchTest } from './testFunctions/UnmatchTest';
 import { runDiscoveryItemDecisionsTest } from './testFunctions/DiscoveryitemDecisionsTest';
+import { runCreateEventsTest } from './testFunctions/CreateEventsTest';
+import { runAddEventCodesTest } from './testFunctions/AddEventCodesTest';
 
 
 const debug = require('debug')('tests:RunTests');
@@ -82,6 +84,9 @@ export const runTests = async function runTests() {
       // ADD QUESTIONS
       await runAddQuestionsTest(mutate);
 
+      // ADD EVENTS
+      await runCreateEventsTest(mutate);
+
       // CREATE USERS
       await runCreateUsersTest(mutate);
 
@@ -90,6 +95,9 @@ export const runTests = async function runTests() {
 
       // UPDATE USERS' FIRST NAMES
       await runUpdateFirstNamesTest(mutate);
+
+      // ADD EVENT CODES FOR USERS
+      await runAddEventCodesTest(mutate);
 
       // VIEW DETACHED PROFILES
       await runViewDetachedProfilesTest(mutate);

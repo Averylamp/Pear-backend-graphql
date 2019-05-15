@@ -55,6 +55,12 @@ import {
 import {
   typeDef as EndorsementModels,
 } from './models/EndorsementModels';
+import {
+  typeDef as EventModels,
+} from './models/EventModel';
+import {
+  resolvers as EventResolvers,
+} from './resolvers/EventResolvers';
 import { devMode } from './constants';
 
 const { ApolloServer } = require('apollo-server-express');
@@ -115,6 +121,7 @@ function createApolloServer() {
     LocationSchemas,
     ContentSchemas,
     EndorsementModels,
+    EventModels,
   ];
 
   const resolvers = {
@@ -129,7 +136,8 @@ function createApolloServer() {
     TestObjectResolvers,
     ImageResolvers,
     LocationResolvers,
-    ContentResolvers);
+    ContentResolvers,
+    EventResolvers);
 
 
   const server = new ApolloServer({
