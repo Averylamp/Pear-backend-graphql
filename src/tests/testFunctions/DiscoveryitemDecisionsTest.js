@@ -31,7 +31,7 @@ export const runDiscoveryItemDecisionsTest = async (mutate) => {
         mutation: CREATE_USER,
         variables: createEmptyUserVars,
       }));
-      checkForAndLogErrors(result, 'createUser');
+      checkForAndLogErrors(result, 'createUser', errorLog);
     } catch (e) {
       errorLog(`Error: ${e.toString()}`);
     }
@@ -43,7 +43,7 @@ export const runDiscoveryItemDecisionsTest = async (mutate) => {
       mutation: CLEAR_FEED,
       variables: { user_id: BRIAN_ID },
     }));
-    checkForAndLogErrors(clearFeedResult, 'clearFeed');
+    checkForAndLogErrors(clearFeedResult, 'clearFeed', errorLog);
   } catch (e) {
     errorLog(`Error: ${e.toString()}`);
   }
@@ -55,7 +55,7 @@ export const runDiscoveryItemDecisionsTest = async (mutate) => {
         mutation: ADD_TO_QUEUE,
         variables: addToBrianQueueVars,
       }));
-      checkForAndLogErrors(result, 'addToQueue');
+      checkForAndLogErrors(result, 'addToQueue', errorLog);
     } catch (e) {
       errorLog(`Error: ${e.toString()}`);
     }
@@ -70,7 +70,7 @@ export const runDiscoveryItemDecisionsTest = async (mutate) => {
         discoveryItem_id: DISCOVERY_ITEM_ID0,
       },
     }));
-    checkForAndLogErrors(skipResult, 'skipDiscoveryItem');
+    checkForAndLogErrors(skipResult, 'skipDiscoveryItem', errorLog);
   } catch (e) {
     errorLog(`Error: ${e.toString()}`);
   }
@@ -81,7 +81,7 @@ export const runDiscoveryItemDecisionsTest = async (mutate) => {
       mutation: CREATE_MATCH_REQUEST,
       variables: SEND_EMPTY_WAVE0,
     }));
-    checkForAndLogErrors(waveResult, 'createMatchRequest');
+    checkForAndLogErrors(waveResult, 'createMatchRequest', errorLog);
   } catch (e) {
     errorLog(`Error: ${e.toString()}`);
   }
@@ -92,7 +92,7 @@ export const runDiscoveryItemDecisionsTest = async (mutate) => {
       mutation: CREATE_MATCH_REQUEST,
       variables: SEND_EMPTY_PEAR0,
     }));
-    checkForAndLogErrors(pearResult, 'createMatchRequest');
+    checkForAndLogErrors(pearResult, 'createMatchRequest', errorLog);
   } catch (e) {
     errorLog(`Error: ${e.toString()}`);
   }

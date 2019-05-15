@@ -81,7 +81,7 @@ export const runUpdateUserImagesTest = async (mutate) => {
       if (verbose) {
         verboseDebug(result);
       }
-      checkForAndLogErrors(result, 'updateUserPhotos');
+      checkForAndLogErrors(result, 'updateUserPhotos', errorLog);
     } catch (e) {
       errorLog((`${e}`));
       process.exit(1);

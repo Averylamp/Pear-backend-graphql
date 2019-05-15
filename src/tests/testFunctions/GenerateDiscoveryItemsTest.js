@@ -31,7 +31,7 @@ export const runGenerateDiscoveryItemsTest = async (mutate) => {
           mutation: FORCE_FEED_UPDATE,
           variables: updateFeedVars,
         }));
-        checkForAndLogErrors(result, 'forceUpdateFeed');
+        checkForAndLogErrors(result, 'forceUpdateFeed', errorLog);
       } catch (e) {
         errorLog((`Error: ${e.toString()}`));
       }
