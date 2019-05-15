@@ -9,8 +9,7 @@ import { authenticateUser, sendNewMessagePushNotification } from '../../Firebase
 import {
   ADD_EVENT_CODE_ERROR,
   CREATE_USER_ERROR, DELETE_USER_ERROR, DELETE_USER_PERMISSION_ERROR, EDIT_ENDORSEMENT_ERROR,
-  GET_USER_ERROR, UPDATE_USER_ERROR,
-  UPDATE_USER_PHOTOS_ERROR,
+  GET_USER_ERROR, UPDATE_USER_ERROR, UPDATE_USER_PHOTOS_ERROR,
 } from '../ResolverErrorStrings';
 import { LAST_ACTIVE_ARRAY_LEN, LAST_EDITED_ARRAY_LEN } from '../../constants';
 import { createUserResolver } from './CreateUser';
@@ -19,6 +18,7 @@ import { editEndorsementResolver } from './EditEndorsement';
 import { generateSentryErrorForResolver } from '../../SentryHelper';
 import { deleteUserResolver } from '../../deletion/UserDeletion';
 import { addEventCodeResolver } from './AddEventCode';
+import { updateUserPhotosResolver } from './UpdateUserPhotos';
 
 const debug = require('debug')('dev:UserResolvers');
 const errorLog = require('debug')('error:UserResolver');
@@ -167,74 +167,22 @@ export const resolvers = {
     },
     updateUserPhotos: async (_source, { updateUserPhotosInput }) => {
       functionCallConsole('Update Photos Called');
-      const { user_id, displayedImages, additionalImages } = updateUserPhotosInput;
-      const user = await User.findById(user_id);
-      if (!user) {
+      try {
+        return updateUserPhotosResolver({ updateUserPhotosInput });
+      } catch (e) {
+        errorLog(`error occurred while updating photos: ${e}`);
+        generateSentryErrorForResolver({
+          resolverType: 'mutation',
+          routeName: 'updateUserPhotos',
+          args: { updateUserPhotosInput },
+          errorMsg: e,
+          errorName: UPDATE_USER_PHOTOS_ERROR,
+        });
         return {
           success: false,
-          message: GET_USER_ERROR,
+          message: UPDATE_USER_PHOTOS_ERROR,
         };
       }
-      const toAddToImageBank = [];
-      displayedImages.forEach((createImageContainer) => {
-        let imageAlreadyInBank = false;
-        for (const userImageContainer of user.bankImages) {
-          if (userImageContainer.imageID === createImageContainer.imageID) {
-            imageAlreadyInBank = true;
-            break;
-          }
-        }
-        if (!imageAlreadyInBank) {
-          toAddToImageBank.push(createImageContainer);
-        }
-      });
-
-      additionalImages.forEach((createImageContainer) => {
-        let imageAlreadyInBank = false;
-        for (const userImageContainer of user.bankImages) {
-          if (userImageContainer.imageID === createImageContainer.imageID) {
-            imageAlreadyInBank = true;
-            break;
-          }
-        }
-        if (!imageAlreadyInBank) {
-          toAddToImageBank.push(createImageContainer);
-        }
-      });
-
-      const userUpdate = {
-        displayedImages,
-        $push: {
-          bankImages: {
-            $each: toAddToImageBank,
-          },
-        },
-      };
-      if (displayedImages.length > 0
-        && displayedImages[0]
-        && displayedImages[0].thumbnail
-        && displayedImages[0].thumbnail.imageURL) {
-        userUpdate.thumbnailURL = displayedImages[0].thumbnail.imageURL;
-      }
-      userUpdate.displayedImagesCount = displayedImages.length;
-      return User.findByIdAndUpdate(user_id, userUpdate, { new: true })
-        .then(res => ({
-          success: true,
-          user: res,
-        }))
-        .catch((e) => {
-          generateSentryErrorForResolver({
-            resolverType: 'mutation',
-            routeName: 'updateUserPhotos',
-            args: { updateUserPhotosInput },
-            errorMsg: e,
-            errorName: UPDATE_USER_PHOTOS_ERROR,
-          });
-          return {
-            success: false,
-            message: UPDATE_USER_PHOTOS_ERROR,
-          };
-        });
     },
     editEndorsement: async (_source, { editEndorsementInput }) => {
       functionCallConsole('Edit Endorsement Called');
