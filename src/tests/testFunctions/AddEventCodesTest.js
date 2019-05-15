@@ -28,7 +28,7 @@ export const runAddEventCodesTest = async (mutate) => {
       if (verbose) {
         verboseDebug(result);
       }
-      checkForAndLogErrors(result, 'addEventCode');
+      checkForAndLogErrors(result, 'addEventCode', errorLog);
     } catch (e) {
       errorLog(`${e}`);
       process.exit(1);
