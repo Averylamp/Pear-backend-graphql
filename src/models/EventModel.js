@@ -49,7 +49,7 @@ export const typeDef = eventType
 
 const EventSchema = new Schema({
   code: { type: String, required: true, unique: true },
-  name: { type: String, required: true, unique: true },
+  name: { type: String, required: true },
   icon: { type: IconAssetRefSchema, required: false },
   startTime: { type: Date, required: true },
   endTime: { type: Date, required: true },
