@@ -30,6 +30,7 @@ type Bio {
   author_id: ID!
   author: User
   authorFirstName: String!
+  authorThumbnailURL: String
   
   content: String!
   hidden: Boolean!
@@ -41,6 +42,7 @@ input BioInput {
   _id: ID
   author_id: ID!
   authorFirstName: String!
+  authorThumbnailURL: String
   content: String!
   hidden: Boolean
 }
@@ -275,6 +277,7 @@ type QuestionUserResponse {
   author_id: ID!
   author: User
   authorFirstName: String!
+  authorThumbnailURL: String
  
   question_id: ID!
   question: Question!
@@ -293,6 +296,7 @@ input QuestionUserResponseInput {
   _id: ID
   author_id: ID!
   authorFirstName: String!
+  authorThumbnailURL: String
   question_id: ID!
   question: NewQuestionInput!
   responseBody: String!
@@ -364,6 +368,7 @@ export const QuestionSchema = new Schema({
 export const QuestionUserResponseSchema = new Schema({
   author_id: { type: Schema.Types.ObjectId, required: true, index: true },
   authorFirstName: { type: String, required: true },
+  authorThumbnailURL: { type: String, required: false },
   question_id: { type: Schema.Types.ObjectId, required: true },
   question: { type: QuestionSchema, required: true },
   responseBody: { type: String, required: true },
@@ -385,6 +390,7 @@ export const VibeSchema = new Schema({
 const simpleContentSchemaObject = {
   author_id: { type: Schema.Types.ObjectId, required: true, index: true },
   authorFirstName: { type: String, required: true },
+  authorThumbnailURL: { type: String, required: false },
   content: { type: String, required: true },
   hidden: { type: Boolean, required: true, default: false },
 };
