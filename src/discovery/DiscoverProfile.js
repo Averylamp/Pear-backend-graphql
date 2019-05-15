@@ -323,7 +323,7 @@ export const updateAllDiscovery = async () => {
       if (Math.random() < (1 / EXPECTED_TICKS_PER_NEW_PROFILE)) {
         if (user.lastActiveTimes.length > 0
           && user.lastActiveTimes[user.lastActiveTimes.length - 1].getTime()
-          > now - ONE_DAY) {
+          > now - 2 * ONE_DAY) {
           updateDiscoveryWithNextItem({ userObj: user })
             .catch((err) => {
               errorLog(`An error occurred: ${err.toString()}`);
