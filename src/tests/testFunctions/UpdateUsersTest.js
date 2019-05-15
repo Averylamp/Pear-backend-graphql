@@ -28,7 +28,7 @@ export const runUpdateUsersTest = async (mutate) => {
       if (verbose) {
         verboseDebug(result);
       }
-      checkForAndLogErrors(result, 'updateUser');
+      checkForAndLogErrors(result, 'updateUser', errorLog);
     } catch (e) {
       errorLog((`${e}`));
       process.exit(1);
