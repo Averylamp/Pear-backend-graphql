@@ -185,16 +185,11 @@ const getUserForPipeline = async ({
   return null;
 };
 
-// generate the blacklist for a user who's feed we're generating, NOT a user we're suggesting for
+// generate the blacklist for a user who's feed we're generating
 const getUserBlacklist = async ({ userObj }) => {
   const userBlacklist = new Set();
   userBlacklist.add(userObj._id);
   const dq = await DiscoveryQueue.findOne({ user_id: userObj._id });
-  dq.historyDiscoveryItems
-    .map(item => item.user_id)
-    .forEach((feedUser_id) => {
-      userBlacklist.add(feedUser_id);
-    });
   if (dq.skippedUser_ids) {
     dq.skippedUser_ids.forEach((skippedUser_id) => {
       userBlacklist.add(skippedUser_id);
@@ -319,15 +314,21 @@ export const updateDiscoveryForUserById = async ({ user_id }) => {
 // if an update for any particular user fails, logs the error and continues to the next user
 // should only throw an error if the query to the Users collection fails
 export const updateAllDiscovery = async () => {
+  const now = new Date().getTime();
+  const ONE_DAY = 24 * 60 * 60 * 1000;
   // https://mongoosejs.com/docs/api.html#query_Query-cursor
   User.find({})
     .cursor()
     .on('data', (user) => {
       if (Math.random() < (1 / EXPECTED_TICKS_PER_NEW_PROFILE)) {
-        updateDiscoveryWithNextItem({ userObj: user })
-          .catch((err) => {
-            errorLog(`An error occurred: ${err.toString()}`);
-          });
+        if (user.lastActiveTimes.length > 0
+          && user.lastActiveTimes[user.lastActiveTimes.length - 1].getTime()
+          > now - 2 * ONE_DAY) {
+          updateDiscoveryWithNextItem({ userObj: user })
+            .catch((err) => {
+              errorLog(`An error occurred: ${err.toString()}`);
+            });
+        }
       }
     })
     .on('end', () => {
