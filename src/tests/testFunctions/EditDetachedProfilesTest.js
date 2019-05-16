@@ -28,7 +28,7 @@ export const runEditDetachedProfilesTest = async (mutate) => {
       if (verbose) {
         verboseDebug(result);
       }
-      checkForAndLogErrors(result, 'editDetachedProfile');
+      checkForAndLogErrors(result, 'editDetachedProfile', errorLog);
     } catch (e) {
       errorLog((`${e}`));
       process.exit(1);

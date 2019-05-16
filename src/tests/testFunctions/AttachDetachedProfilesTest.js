@@ -28,7 +28,7 @@ export const runAttachDetachedProfilesTest = async (mutate) => {
       if (verbose) {
         verboseDebug(result);
       }
-      checkForAndLogErrors(result, 'approveNewDetachedProfile');
+      checkForAndLogErrors(result, 'approveNewDetachedProfile', errorLog);
     } catch (e) {
       errorLog((`${e}`));
       process.exit(1);
