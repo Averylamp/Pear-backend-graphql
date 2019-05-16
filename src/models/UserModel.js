@@ -16,7 +16,6 @@ const debug = require('debug')('dev:UserModel');
 
 const { Schema } = mongoose;
 
-
 const queryRoutes = `
 extend type Query {
   # Get a user by an ID
@@ -49,6 +48,9 @@ extend type Mutation{
   
   # DEVMODE ONLY: delete a user object. when called from prod, this is no-op
   deleteUser(user_id: ID!): UserDeletionResponse!
+  
+  # adds an event code for the user
+  addEventCode(user_id: ID!, code: String!): UserMutationResponse!
 }
 `;
 
@@ -57,7 +59,7 @@ input GetUserInput{
   # The Firebase generated token
   firebaseToken: String!
 
-  #The UID of the Fireabse user
+  # The UID of the Firebase user
   firebaseAuthID: String!
 }
 `;
@@ -237,6 +239,10 @@ type User {
   # referral codes
   referredByCode: String
   referralCode: String
+  
+  # events the user is a part of
+  event_ids: [ID!]!
+  events: [Event!]!
 
   # seeded profile? null is false
   seeded: Boolean
@@ -396,6 +402,9 @@ const UserSchema = new Schema({
 
   seeded: {
     type: Boolean, required: false, default: false,
+  },
+  event_ids: {
+    type: [Schema.Types.ObjectId], required: false, index: true, default: [],
   },
 
   lastActiveTimes: {

@@ -130,6 +130,9 @@ export const runMigration2 = async () => {
                     count += 1;
                     debug(`${count} migrated so far: migrated ${doc.firstName}`);
                   }
+                })
+                .catch((err) => {
+                  debug(`error occurred for user ${user._id}: ${err}`);
                 }));
           })
           .on('end', async () => {

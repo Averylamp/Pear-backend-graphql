@@ -4,8 +4,10 @@ import {
 } from '../../models/DiscoveryQueueModel';
 import { User } from '../../models/UserModel';
 import { Match } from '../../models/MatchModel';
+import { EventModel } from '../../models/EventModel';
 import { authenticateUser, sendNewMessagePushNotification } from '../../FirebaseManager';
 import {
+  ADD_EVENT_CODE_ERROR,
   CREATE_USER_ERROR, DELETE_USER_ERROR, DELETE_USER_PERMISSION_ERROR, EDIT_ENDORSEMENT_ERROR,
   GET_USER_ERROR, UPDATE_USER_ERROR,
   UPDATE_USER_PHOTOS_ERROR,
@@ -16,6 +18,7 @@ import { updateUserResolver } from './UpdateUser';
 import { editEndorsementResolver } from './EditEndorsement';
 import { generateSentryErrorForResolver } from '../../SentryHelper';
 import { deleteUserResolver } from '../../deletion/UserDeletion';
+import { addEventCodeResolver } from './AddEventCode';
 
 const debug = require('debug')('dev:UserResolvers');
 const errorLog = require('debug')('error:UserResolver');
@@ -38,6 +41,7 @@ export const resolvers = {
     endorsedUsers: async ({ endorsedUser_ids }) => User.find({ _id: { $in: endorsedUser_ids } }),
     detachedProfiles: async ({ detachedProfile_ids }) => DetachedProfile
       .find({ _id: { $in: detachedProfile_ids } }),
+    events: async ({ event_ids }) => EventModel.find({ _id: { $in: event_ids } }),
   },
   Query: {
     user: async (_source, { id }) => {
@@ -275,6 +279,23 @@ export const resolvers = {
         };
       }
     },
-  }
-  ,
+    addEventCode: async (_source, { user_id, code }) => {
+      try {
+        return addEventCodeResolver({ user_id, code });
+      } catch (e) {
+        errorLog(`error occurred while attempting to add event code: ${e.toString()}`);
+        generateSentryErrorForResolver({
+          resolverType: 'mutation',
+          routeName: 'addEventCode',
+          args: { user_id, code },
+          errorMsg: e,
+          errorName: ADD_EVENT_CODE_ERROR,
+        });
+        return {
+          success: false,
+          message: ADD_EVENT_CODE_ERROR,
+        };
+      }
+    },
+  },
 };

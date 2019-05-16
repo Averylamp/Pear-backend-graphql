@@ -23,7 +23,7 @@ export const runUnmatchTest = async (mutate) => {
         mutation: UNMATCH,
         variables: unmatchVars,
       }));
-      checkForAndLogErrors(result, 'unmatch');
+      checkForAndLogErrors(result, 'unmatch', errorLog);
     } catch (e) {
       errorLog((`Error: ${e.toString()}`));
     }

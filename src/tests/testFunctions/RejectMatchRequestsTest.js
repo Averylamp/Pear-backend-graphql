@@ -23,7 +23,7 @@ export const runRejectMatchRequestsTest = async (mutate) => {
         mutation: REJECT_REQUEST,
         variables: rejectRequestVars,
       }));
-      checkForAndLogErrors(result, 'rejectRequest');
+      checkForAndLogErrors(result, 'rejectRequest', errorLog);
     } catch (e) {
       errorLog((`Error: ${e.toString()}`));
     }

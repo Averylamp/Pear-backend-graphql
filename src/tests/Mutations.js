@@ -26,6 +26,50 @@ export const ADD_QUESTIONS = gql`
   }
 `;
 
+export const CREATE_EVENT = gql`
+  mutation CreateEvent($eventInput: EventInput!) {
+    createEvent(eventInput: $eventInput) {
+      success
+      message
+      event {
+        _id
+        code
+        name
+        icon {
+          assetString
+          assetURL
+        }
+        startTime
+        endTime
+      }
+    }
+  }
+`;
+
+export const ADD_EVENT_CODE = gql`
+  mutation AddEventCode($user_id: ID!, $code: String!) {
+    addEventCode(user_id: $user_id, code: $code) {
+      success
+      message
+      user {
+        _id
+        firstName
+        events {
+          _id 
+          code
+          name
+          icon {
+            assetString
+            assetURL
+          }
+          startTime
+          endTime
+        }
+      }
+    }
+  }
+`;
+
 export const CREATE_USER = gql`
   mutation CreateUser($userInput: CreationUserInput!) {
     createUser(userInput: $userInput) {
