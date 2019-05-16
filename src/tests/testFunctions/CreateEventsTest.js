@@ -1,11 +1,11 @@
-import { CREATE_USER } from '../Mutations';
+import { createEvents } from '../CreateTestDB';
+import { CREATE_EVENT } from '../Mutations';
 import { verbose } from '../../constants';
-import { createUsers } from '../CreateTestDB';
 import { checkForAndLogErrors } from '../Utils';
 
-const testLogger = require('debug')('tests:CreateUsersTest');
-const verboseDebug = require('debug')('tests:verbose:CreateUsersTest');
-const errorLogger = require('debug')('error:CreateUsersTest');
+const testLogger = require('debug')('tests:CreateEventsTest');
+const verboseDebug = require('debug')('tests:verbose:CreateEventsTest');
+const errorLogger = require('debug')('error:CreateEventsTest');
 
 const chalk = require('chalk');
 
@@ -17,22 +17,22 @@ const errorLog = log => errorLogger(errorStyling(log));
 const testLog = log => testLogger(testCaseStyling(log));
 const successLog = log => testLogger(successStyling(log));
 
-export const runCreateUsersTest = async (mutate) => {
-  testLog('TESTING: Create Users');
-  for (const userVars of createUsers) {
+export const runCreateEventsTest = async (mutate) => {
+  testLog('TESTING: Create Events');
+  for (const eventVars of createEvents) {
     try {
       const result = await mutate({
-        mutation: CREATE_USER,
-        variables: userVars,
+        mutation: CREATE_EVENT,
+        variables: eventVars,
       });
       if (verbose) {
         verboseDebug(result);
       }
-      checkForAndLogErrors(result, 'createUser', errorLog);
+      checkForAndLogErrors(result, 'createEvent', errorLog);
     } catch (e) {
       errorLog(`${e}`);
       process.exit(1);
     }
   }
-  successLog('***** Success Creating Users *****\n');
+  successLog('***** Success Creating Events *****\n');
 };

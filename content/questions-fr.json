@@ -1,11 +1,11 @@
 {
   "newQuestions": [
     {
-      "questionText": "The last time I hung out with them, we...",
-      "questionTextWithName": "The last time I hung out with {{name}}, we...",
+      "questionText": "My favorite memory of hanging out with them is...",
+      "questionTextWithName": "My favorite memory of hanging out with {{name}} is...",
       "questionType": "freeResponse",
       "suggestedResponses": [],
-      "placeholderResponseText": "danced until the sun came up",
+      "placeholderResponseText": "getting chicken nuggets at 2am",
       "tags": []
     },
     {
@@ -99,6 +99,43 @@
     {
       "questionText": "One thing I just don't get about them is...",
       "questionTextWithName": "One thing I just don't get about {{name}} is...",
+      "questionType": "freeResponse",
+      "suggestedResponses": [],
+      "placeholderResponseText": "",
+      "tags": []
+    },
+    {
+      "questionText": "What's their weird flex?",
+      "questionTextWithName": "What's {{name}}'s weird flex",
+      "questionType": "freeResponse",
+      "suggestedResponses": [],
+      "placeholderResponseText": "",
+      "tags": []
+    },
+    {
+      "questionText": "What make them intimidating?",
+      "questionType": "freeResponse",
+      "suggestedResponses": [],
+      "placeholderResponseText": "",
+      "tags": []
+    },
+    {
+      "questionText": "Your parents will love them because...",
+      "questionType": "freeResponse",
+      "suggestedResponses": [],
+      "placeholderResponseText": "",
+      "tags": []
+    },
+    {
+      "questionText": "What do they care about?",
+      "questionType": "freeResponse",
+      "suggestedResponses": [],
+      "placeholderResponseText": "",
+      "tags": []
+    },
+    {
+      "questionText": "Write them a tagline",
+      "questionTextWithName": "Write {{name}} a tagline",
       "questionType": "freeResponse",
       "suggestedResponses": [],
       "placeholderResponseText": "",

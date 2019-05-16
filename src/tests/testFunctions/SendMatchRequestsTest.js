@@ -23,7 +23,7 @@ export const runSendMatchRequestsTest = async (mutate) => {
         mutation: CREATE_MATCH_REQUEST,
         variables: sendPersonalRequestVars,
       }));
-      checkForAndLogErrors(result, 'createMatchRequest');
+      checkForAndLogErrors(result, 'createMatchRequest', errorLog);
     } catch (e) {
       errorLog((`Error: ${e.toString()}`));
     }
@@ -34,7 +34,7 @@ export const runSendMatchRequestsTest = async (mutate) => {
         mutation: CREATE_MATCH_REQUEST,
         variables: sendMatchmakerRequestVars,
       }));
-      checkForAndLogErrors(result, 'createMatchRequest');
+      checkForAndLogErrors(result, 'createMatchRequest', errorLog);
     } catch (e) {
       errorLog((`Error: ${e.toString()}`));
     }

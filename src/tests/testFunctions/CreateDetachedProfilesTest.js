@@ -30,7 +30,7 @@ export const runCreateDetachedProfilesTest = async (mutate) => {
       if (verbose) {
         verboseDebug(result);
       }
-      checkForAndLogErrors(result, 'createDetachedProfile');
+      checkForAndLogErrors(result, 'createDetachedProfile', errorLog);
     } catch (e) {
       errorLog((`${e}`));
       process.exit(1);

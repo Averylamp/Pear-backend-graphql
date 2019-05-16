@@ -41,7 +41,7 @@ type DiscoveryItem {
   _id: ID!
   user_id: ID!
   user: User
-  timestamp: String
+  timestamp: String!
 }
 
 type DiscoveryMutationResponse {
