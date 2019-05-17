@@ -129,15 +129,15 @@ type MatchingPreferences{
 
 export const typeDef = matchingDemographicsType + matchingPreferencesType;
 
-const demographicSchemaObject = (multipleResponse, responseEnum) => ({
+const demographicSchemaObject = (responseEnum, visibleDefault) => ({
   response: {
-    type: multipleResponse ? [String] : String,
+    type: [String],
     enum: responseEnum,
     index: true,
     required: true,
-    default: multipleResponse ? [] : 'PREFER_NOT_TO_SAY',
+    default: [],
   },
-  visible: { type: Boolean, required: true, default: false },
+  visible: { type: Boolean, required: true, default: visibleDefault },
   userHasResponded: { type: Boolean, required: true, default: false },
 });
 
@@ -186,14 +186,14 @@ const habitsEnum = [
   'PREFER_NOT_TO_SAY',
 ];
 
-const EthnicityInfoSchema = new Schema(demographicSchemaObject(true, ethnicityEnum));
-const EducationLevelSchema = new Schema(demographicSchemaObject(false, educationLevelEnum));
-const ReligionInfoSchema = new Schema(demographicSchemaObject(true, religionEnum));
-const PoliticsInfoSchema = new Schema(demographicSchemaObject(false, politicalViewEnum));
-const DrinkingInfoSchema = new Schema(demographicSchemaObject(false, habitsEnum));
-const SmokingInfoSchema = new Schema(demographicSchemaObject(false, habitsEnum));
-const CannabisInfoSchema = new Schema(demographicSchemaObject(false, habitsEnum));
-const DrugsInfoSchema = new Schema(demographicSchemaObject(false, habitsEnum));
+const EthnicityInfoSchema = new Schema(demographicSchemaObject(ethnicityEnum, false));
+const EducationLevelSchema = new Schema(demographicSchemaObject(educationLevelEnum, false));
+const ReligionInfoSchema = new Schema(demographicSchemaObject(religionEnum, false));
+const PoliticsInfoSchema = new Schema(demographicSchemaObject(politicalViewEnum, false));
+const DrinkingInfoSchema = new Schema(demographicSchemaObject(habitsEnum, false));
+const SmokingInfoSchema = new Schema(demographicSchemaObject(habitsEnum, false));
+const CannabisInfoSchema = new Schema(demographicSchemaObject(habitsEnum, false));
+const DrugsInfoSchema = new Schema(demographicSchemaObject(habitsEnum, false));
 
 export const MatchingDemographicsSchema = new Schema({
   gender: {
