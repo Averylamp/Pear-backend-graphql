@@ -81,6 +81,14 @@ export const createNewMatchResolver = async ({
   }
   const initialSentFor = sentFor.toObject();
   const initialReceivedBy = receivedBy.toObject();
+  for (const matchedUser_id in sentFor.edgeSummaries.map(edge => edge.otherUser_id.toString())) {
+    if (matchedUser_id.toString() === receivedBy._id.toString()) {
+      return {
+        success: false,
+        message: USERS_ALREADY_MATCHED_ERROR,
+      };
+    }
+  }
 
   const sentForDiscoveryPromise = DiscoveryQueue.findOne({ user_id: sentForUser_id })
     .exec()
