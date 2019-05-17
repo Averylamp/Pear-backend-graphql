@@ -87,6 +87,16 @@ export const updateUserResolver = async ({ updateUserInput }) => {
   if (updateUserInput.gender) {
     userUpdateObj['matchingDemographics.gender'] = updateUserInput.gender;
   }
+  for (const demographic of ['ethnicity', 'educationLevel', 'religion', 'politicalView', 'drinking',
+    'smoking', 'cannabis', 'drugs']) {
+    if (updateUserInput[demographic]) {
+      userUpdateObj[`matchingDemographics.${demographic}.response`] = updateUserInput[demographic];
+      userUpdateObj[`matchingDemographics.${demographic}.userHasResponded`] = true;
+    }
+    if (updateUserInput[`${demographic}Visible`]) {
+      userUpdateObj[`matchingDemographics.${demographic}.visible`] = updateUserInput[`${demographic}Visible`];
+    }
+  }
   if (updateUserInput.location) {
     userUpdateObj['matchingPreferences.location.point.coordinates'] = updateUserInput.location;
     userUpdateObj['matchingPreferences.location.point.type'] = 'Point';
