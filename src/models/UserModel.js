@@ -101,6 +101,23 @@ input UpdateUserInput {
   gender: Gender
   age: Int
   birthdate: String
+  
+  ethnicity: [EthnicityEnum]
+  ethnicityVisible: Boolean
+  educationLevel: EducationLevelEnum
+  educationLevelVisible: Boolean
+  religion: [ReligionEnum]
+  religionVisible: Boolean
+  politicalView: PoliticsEnum
+  politicalViewVisible: Boolean
+  drinking: HabitsEnum
+  drinkingVisible: Boolean
+  smoking: HabitsEnum
+  smokingVisible: Boolean
+  cannabis: HabitsEnum
+  cannabisVisible: Boolean
+  drugs: HabitsEnum
+  drugsVisible: Boolean
 
   school: String
   schoolYear: String
