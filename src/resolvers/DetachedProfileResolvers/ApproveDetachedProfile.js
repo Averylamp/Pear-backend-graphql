@@ -25,8 +25,9 @@ const functionCallConsole = require('debug')('dev:FunctionCalls');
 
 export const approveDetachedProfileResolver = async ({ approveDetachedProfileInput }) => {
   functionCallConsole('Approve Profile Called');
+  const finalApproveDetachedProfileInput = approveDetachedProfileInput;
 
-  const { user_id, detachedProfile_id, creatorUser_id } = approveDetachedProfileInput;
+  const { user_id, detachedProfile_id, creatorUser_id } = finalApproveDetachedProfileInput;
   // validate that users + detached profile exist, and get the objects
   let user = null;
   let detachedProfile = null;
@@ -63,6 +64,24 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
   );
   const firebaseId = endorsementEdge ? endorsementEdge.firebaseChatDocumentID : nanoid(20);
 
+  // get thumbnails and firstName
+  for (const questionResponse of finalApproveDetachedProfileInput.questionResponses) {
+    if (creator.firstName) {
+      questionResponse.authorFirstName = creator.firstName;
+    }
+    if (creator.thumbnailURL) {
+      questionResponse.authorThumbnailURL = creator.thumbnailURL;
+    }
+  }
+  if (finalApproveDetachedProfileInput.bio) {
+    if (creator.firstName) {
+      finalApproveDetachedProfileInput.bio.authorFirstName = creator.firstName;
+    }
+    if (creator.thumbnailURL) {
+      finalApproveDetachedProfileInput.bio.authorThumbnailURL = creator.thumbnailURL;
+    }
+  }
+
   // construct user update object
   const userObjectUpdate = {
     isSeeking: true,
@@ -72,15 +91,22 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
       bankImages: {
         $each: detachedProfile.images,
       },
-      boasts: { $each: approveDetachedProfileInput.boasts },
-      roasts: { $each: approveDetachedProfileInput.roasts },
-      questionResponses: { $each: approveDetachedProfileInput.questionResponses },
-      vibes: { $each: approveDetachedProfileInput.vibes },
-      bios: { $each: approveDetachedProfileInput.bio ? [approveDetachedProfileInput.bio] : [] },
-      dos: { $each: approveDetachedProfileInput.dos ? approveDetachedProfileInput.dos : [] },
-      donts: { $each: approveDetachedProfileInput.donts ? approveDetachedProfileInput.donts : [] },
+      boasts: { $each: finalApproveDetachedProfileInput.boasts },
+      roasts: { $each: finalApproveDetachedProfileInput.roasts },
+      questionResponses: { $each: finalApproveDetachedProfileInput.questionResponses },
+      vibes: { $each: finalApproveDetachedProfileInput.vibes },
+      bios: {
+        $each: finalApproveDetachedProfileInput.bio ? [finalApproveDetachedProfileInput.bio] : [],
+      },
+      dos: {
+        $each: finalApproveDetachedProfileInput.dos ? finalApproveDetachedProfileInput.dos : [],
+      },
+      donts: {
+        $each: finalApproveDetachedProfileInput.donts ? finalApproveDetachedProfileInput.donts : [],
+      },
       interests: {
-        $each: approveDetachedProfileInput.interests ? approveDetachedProfileInput.interests : [],
+        $each: finalApproveDetachedProfileInput.interests
+          ? finalApproveDetachedProfileInput.interests : [],
       },
       lastEditedTimes: {
         $each: [new Date()],
