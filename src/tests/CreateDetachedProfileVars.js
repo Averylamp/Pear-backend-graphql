@@ -26,6 +26,7 @@ export const CREATE_AVERY1_DETACHED_PROFILE_VARIABLES = {
     creatorFirstName: 'Made',
     firstName: 'Avery',
     lastName: 'Lamp',
+    gender: 'male',
     phoneNumber: '9738738225',
     boasts: [
       {
@@ -146,6 +147,7 @@ export const CREATE_JOSH1_DETACHED_PROFILE_VARIABLES = {
     creatorUser_id: SOPHIA_ID,
     creatorFirstName: 'Sophia',
     firstName: 'Josh',
+    gender: 'male',
     phoneNumber: '7897897898',
     boasts: [
       {
@@ -214,6 +216,7 @@ export const CREATE_SAMMI1_DETACHED_PROFILE_VARIABLES = {
     creatorFirstName: 'Josh',
     firstName: 'Sammi',
     phoneNumber: '9788733736',
+    gender: 'female',
     boasts: [],
     roasts: [
       {
