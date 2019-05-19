@@ -35,12 +35,30 @@ export const skipDiscoveryItemResolver = async ({
     };
   }
 
+  let skippedUser_id = null;
+  for (const discoveryItem of discoveryQueue.currentDiscoveryItems) {
+    if (discoveryItem._id.toString() === discoveryItem_id) {
+      skippedUser_id = discoveryItem.user_id.toString();
+      break;
+    }
+  }
+  if (!skippedUser_id) {
+    errorLog(`discovery item ${discoveryItem_id} for user ${user_id} not found`);
+    return {
+      success: false,
+      message: SKIP_DISCOVERY_ITEM_ERROR,
+    };
+  }
   discoveryQueue.currentDiscoveryItems = discoveryQueue.currentDiscoveryItems
     .filter(discoveryItem => discoveryItem._id.toString() !== discoveryItem_id);
   if (!discoveryQueue.skippedUser_ids) {
     discoveryQueue.skippedUser_ids = [];
   }
-  discoveryQueue.skippedUser_ids.push(user_id);
+  discoveryQueue.skippedUser_ids.push(skippedUser_id);
+  discoveryQueue.decidedDiscoveryItems.push({
+    user_id: skippedUser_id,
+    action: 'skip',
+  });
   const res = await discoveryQueue.save().catch(err => err);
   if (res instanceof Error) {
     errorLog(res.toString());

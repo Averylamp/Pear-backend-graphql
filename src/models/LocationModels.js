@@ -10,6 +10,14 @@ type Location {
   locationName: String
   locationNameLastUpdated: String
 }
+
+input LocationInput {
+  # [longitude, latitude]
+  coords: [Float!]!
+  coordsLastUpdated: String!
+  locationName: String
+  locationNameLastUpdated: String
+}
 `;
 
 export const typeDef = locationType;

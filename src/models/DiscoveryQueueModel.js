@@ -5,8 +5,11 @@ const { Schema } = mongoose;
 
 const queryRoutes = `
 extend type Query {
-  # Retreives the discovery feed for the provided user
+  # retrieves the discovery feed for the provided user
   getDiscoveryFeed(user_id: ID!, last: Int): DiscoveryQueue
+  
+  # retrieves cards for a given set of preferences: [DiscoveryItemSchema]
+  getCards(user_id: ID!, filters: MatchingPreferencesInput, max: Int): [DiscoveryItem!]!
 }
 `;
 
@@ -61,6 +64,12 @@ const DiscoveryItemSchema = new Schema({
   timestamp: { type: Date, required: true, default: Date },
 }, { timestamps: true });
 
+const DecidedDiscoveryItemSchema = new Schema({
+  user_id: { type: Schema.Types.ObjectId, required: true },
+  timestamp: { type: Date, required: true, default: Date },
+  action: { type: String, required: true, enum: ['skip', 'match', 'pear'] },
+});
+
 const DiscoveryQueueSchema = new Schema({
   _id: { type: Schema.Types.ObjectId, required: true },
   user_id: { type: Schema.Types.ObjectId, required: true, index: true },
@@ -69,6 +78,7 @@ const DiscoveryQueueSchema = new Schema({
   skippedUser_ids: {
     type: [Schema.Types.ObjectId], required: false, default: [], index: true,
   },
+  decidedDiscoveryItems: { type: [DecidedDiscoveryItemSchema], required: true, default: [] },
 }, { timestamps: true });
 
 

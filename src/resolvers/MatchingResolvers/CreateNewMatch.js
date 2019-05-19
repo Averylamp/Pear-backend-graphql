@@ -100,7 +100,7 @@ export const createNewMatchResolver = async ({
     .exec()
     .catch(() => null);
   const [sentByDiscovery, sentForDiscovery, receivedByDiscovery] = await Promise
-    .all([sentForDiscoveryPromise, sentByDiscoveryPromise, receivedByDiscoveryPromise]);
+    .all([sentByDiscoveryPromise, sentForDiscoveryPromise, receivedByDiscoveryPromise]);
   if (!sentByDiscovery) {
     errorLog(`Couldn't find discovery queue for user with id ${sentByUser_id}`);
     return {
@@ -173,6 +173,10 @@ export const createNewMatchResolver = async ({
   // update discovery queues
   sentByDiscovery.currentDiscoveryItems = sentByDiscovery.currentDiscoveryItems
     .filter(item => item.user_id.toString() !== receivedByUser_id.toString());
+  sentByDiscovery.decidedDiscoveryItems.push({
+    user_id: receivedByUser_id.toString(),
+    action: matchmakerMade ? 'pear' : 'match',
+  });
   const sentByDiscoveryUpdatePromise = sentByDiscovery.save().catch(err => err);
   sentForDiscovery.currentDiscoveryItems = sentForDiscovery.currentDiscoveryItems
     .filter(item => item.user_id.toString() !== receivedByUser_id.toString());
