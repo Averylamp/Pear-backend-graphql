@@ -27,6 +27,7 @@ export const createDetachedProfileResolver = async ({ detachedProfileInput }) =>
     'creatorFirstName',
     'firstName',
     'lastName',
+    'gender',
     'phoneNumber',
     'boasts',
     'roasts',
@@ -39,7 +40,9 @@ export const createDetachedProfileResolver = async ({ detachedProfileInput }) =>
   ]);
   finalDetachedProfileInput._id = detachedProfileID;
 
-  finalDetachedProfileInput.matchingDemographics = {};
+  finalDetachedProfileInput.matchingDemographics = {
+    gender: detachedProfileInput.gender,
+  };
   finalDetachedProfileInput.matchingPreferences = {
     seekingGender: ['nonbinary', 'male', 'female'],
   };
