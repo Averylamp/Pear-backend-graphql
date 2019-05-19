@@ -20,7 +20,7 @@ import { runAcceptMatchRequestsTest } from './testFunctions/AcceptMatchRequestsT
 import { runRejectMatchRequestsTest } from './testFunctions/RejectMatchRequestsTest';
 import { runSendChatMessagesTest } from './testFunctions/SendChatMessagesTest';
 import { runUnmatchTest } from './testFunctions/UnmatchTest';
-import { runDiscoveryItemDecisionsTest } from './testFunctions/DiscoveryitemDecisionsTest';
+import { runDiscoveryItemDecisionsTest } from './testFunctions/DecideDiscoveryItemsTest';
 import { runCreateEventsTest } from './testFunctions/CreateEventsTest';
 import { runAddEventCodesTest } from './testFunctions/AddEventCodesTest';
 

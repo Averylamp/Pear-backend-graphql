@@ -125,6 +125,14 @@ type MatchingPreferences{
   maxAgeRange: Int!
   location: Location
 }
+
+input MatchingPreferencesInput {
+  seekingGender: [Gender!]!
+  maxDistance: Int!
+  minAgeRange: Int!
+  maxAgeRange: Int!
+  location: LocationInput
+}
 `;
 
 export const typeDef = matchingDemographicsType + matchingPreferencesType;
