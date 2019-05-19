@@ -100,7 +100,7 @@ export const createNewMatchResolver = async ({
     .exec()
     .catch(() => null);
   const [sentByDiscovery, sentForDiscovery, receivedByDiscovery] = await Promise
-    .all([sentForDiscoveryPromise, sentByDiscoveryPromise, receivedByDiscoveryPromise]);
+    .all([sentByDiscoveryPromise, sentForDiscoveryPromise, receivedByDiscoveryPromise]);
   if (!sentByDiscovery) {
     errorLog(`Couldn't find discovery queue for user with id ${sentByUser_id}`);
     return {
