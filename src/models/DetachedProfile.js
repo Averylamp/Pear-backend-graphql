@@ -49,6 +49,7 @@ input CreationDetachedProfileInput {
   firstName: String!
   lastName: String
   phoneNumber: String!
+  gender: Gender
   
   boasts: [BoastInput!]!
   roasts: [RoastInput!]!
