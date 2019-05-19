@@ -55,6 +55,9 @@ export const skipDiscoveryItemResolver = async ({
     discoveryQueue.skippedUser_ids = [];
   }
   discoveryQueue.skippedUser_ids.push(skippedUser_id);
+  if (!discoveryQueue.decidedDiscoveryItems) {
+    discoveryQueue.decidedDiscoveryItems = [];
+  }
   discoveryQueue.decidedDiscoveryItems.push({
     user_id: skippedUser_id,
     action: 'skip',
