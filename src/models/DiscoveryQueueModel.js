@@ -9,14 +9,17 @@ extend type Query {
   getDiscoveryFeed(user_id: ID!, last: Int): DiscoveryQueue
   
   # retrieves cards for a given set of preferences: [DiscoveryItemSchema]
-  getCards(user_id: ID!, filters: MatchingPreferencesInput, max: Int): [DiscoveryItem!]!
+  getDiscoveryCards(user_id: ID!, filters: MatchingPreferencesInput, max: Int): [DiscoveryItem!]!
 }
 `;
 
 const mutationRoutes = `
 extend type Mutation {
-  # User pressed "skip" on the discovery feed
+  # OLD: User pressed "skip" on the discovery feed
   skipDiscoveryItem(user_id: ID!, discoveryItem_id: ID!): DiscoveryMutationResponse!
+  
+  # NEW: User pressed "skip" on the discovery feed
+  skipDiscoveryItem2(user_id: ID!, skippedUser_id: ID!): DiscoveryMutationResponse!
   
   # optionally specify the id of the discovery item to add
   addToQueue(user_id: ID!, addedUser_id: ID!, item_id: ID): DiscoveryMutationResponse!
@@ -52,6 +55,11 @@ type DiscoveryMutationResponse {
   message: String
 }
 
+type DiscoveryItemsResponse {
+  success: Boolean!
+  message: String
+  items: [DiscoveryItem!]
+}
 
 `;
 

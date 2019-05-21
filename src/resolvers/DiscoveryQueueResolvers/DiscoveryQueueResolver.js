@@ -5,11 +5,13 @@ import {
 } from '../../discovery/DiscoverProfile';
 import {
   FORCE_FEED_UPDATE_ERROR,
-  FORCE_FEED_UPDATE_SUCCESS, SKIP_DISCOVERY_ITEM_ERROR,
+  FORCE_FEED_UPDATE_SUCCESS, GET_DISCOVERY_CARDS_ERROR, SKIP_DISCOVERY_ITEM_ERROR,
 } from '../ResolverErrorStrings';
 import { generateSentryErrorForResolver } from '../../SentryHelper';
 import { skipDiscoveryItemResolver } from './SkipDiscoveryItem';
 import { devMode } from '../../constants';
+import { getDiscoveryCards } from './GetDiscoveryCardsResolver';
+import { skipDiscoveryItem2Resolver } from './SkipDiscoveryItem2Resolver';
 
 const mongoose = require('mongoose');
 const debug = require('debug')('dev:DiscoveryQueueResolver');
@@ -21,6 +23,24 @@ export const resolvers = {
       debug(`Getting feed for user with id: ${user_id}`);
       return DiscoveryQueue.findOne({ user_id });
     },
+    getDiscoveryCards: async (_, { user_id, filters, max }) => {
+      try {
+        return getDiscoveryCards({ user_id, filters, max });
+      } catch (e) {
+        generateSentryErrorForResolver({
+          resolverType: 'mutation',
+          routeName: 'getCards',
+          args: { user_id, filters, max },
+          errorMsg: e,
+          errorName: GET_DISCOVERY_CARDS_ERROR,
+        });
+        errorLog(`Error while getting cards: ${e}`);
+        return {
+          success: false,
+          message: GET_DISCOVERY_CARDS_ERROR,
+        };
+      }
+    },
   },
   Mutation: {
     skipDiscoveryItem: async (_source, { user_id, discoveryItem_id }) => {
@@ -31,6 +51,24 @@ export const resolvers = {
           resolverType: 'mutation',
           routeName: 'skipDiscoveryItem',
           args: { user_id, discoveryItem_id },
+          errorMsg: e,
+          errorName: SKIP_DISCOVERY_ITEM_ERROR,
+        });
+        errorLog(`Error while skipping discovery item: ${e}`);
+        return {
+          success: false,
+          message: SKIP_DISCOVERY_ITEM_ERROR,
+        };
+      }
+    },
+    skipDiscoveryItem2: async (_source, { user_id, skippedUser_id }) => {
+      try {
+        return skipDiscoveryItem2Resolver({ user_id, skippedUser_id });
+      } catch (e) {
+        generateSentryErrorForResolver({
+          resolverType: 'mutation',
+          routeName: 'skipDiscoveryItem2',
+          args: { user_id, skippedUser_id },
           errorMsg: e,
           errorName: SKIP_DISCOVERY_ITEM_ERROR,
         });
