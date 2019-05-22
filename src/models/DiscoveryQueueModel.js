@@ -10,7 +10,7 @@ extend type Query {
   getDiscoveryFeed(user_id: ID!, last: Int): DiscoveryQueue
   
   # retrieves cards for a given set of preferences: [DiscoveryItemSchema]
-  getDiscoveryCards(user_id: ID!, filters: MatchingPreferencesInput, max: Int): DiscoveryItemsResponse
+  getDiscoveryCards(user_id: ID!, filters: FiltersInput, max: Int): DiscoveryItemsResponse
 }
 `;
 
