@@ -11,7 +11,6 @@ import { generateSentryErrorForResolver } from '../../SentryHelper';
 import { skipDiscoveryItemResolver } from './SkipDiscoveryItem';
 import { devMode } from '../../constants';
 import { getDiscoveryCards } from './GetDiscoveryCardsResolver';
-import { skipDiscoveryItem2Resolver } from './SkipDiscoveryItem2Resolver';
 
 const mongoose = require('mongoose');
 const debug = require('debug')('dev:DiscoveryQueueResolver');
@@ -51,24 +50,6 @@ export const resolvers = {
           resolverType: 'mutation',
           routeName: 'skipDiscoveryItem',
           args: { user_id, discoveryItem_id },
-          errorMsg: e,
-          errorName: SKIP_DISCOVERY_ITEM_ERROR,
-        });
-        errorLog(`Error while skipping discovery item: ${e}`);
-        return {
-          success: false,
-          message: SKIP_DISCOVERY_ITEM_ERROR,
-        };
-      }
-    },
-    skipDiscoveryItem2: async (_source, { user_id, skippedUser_id }) => {
-      try {
-        return skipDiscoveryItem2Resolver({ user_id, skippedUser_id });
-      } catch (e) {
-        generateSentryErrorForResolver({
-          resolverType: 'mutation',
-          routeName: 'skipDiscoveryItem2',
-          args: { user_id, skippedUser_id },
           errorMsg: e,
           errorName: SKIP_DISCOVERY_ITEM_ERROR,
         });
@@ -187,7 +168,7 @@ export const resolvers = {
   // this is normally only accessed via currentDiscoveryItems, and users are fetched in a single
   // call, so usually user will be not undefined here
   DiscoveryItem: {
-    user: async ({ user_id, user }) => ((user === undefined)
+    user: async ({ user_id, user }) => ((user !== undefined)
       ? user : User.findById(user_id).exec()),
   },
 };
