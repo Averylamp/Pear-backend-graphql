@@ -126,12 +126,12 @@ type MatchingPreferences{
   location: Location
 }
 
-input MatchingPreferencesInput {
+input FiltersInput {
   seekingGender: [Gender!]!
-  maxDistance: Int!
+  maxDistance: Int
   minAgeRange: Int!
   maxAgeRange: Int!
-  location: LocationInput
+  locationCoords: [Float!]
 }
 `;
 

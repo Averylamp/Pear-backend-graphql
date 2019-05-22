@@ -8,6 +8,7 @@ import {
   MAX_DISCOVERY_CARDS_RETRIEVE, SEEDED_PROFILES_START,
 } from '../../constants';
 import { GET_DISCOVERY_CARDS_ERROR, GET_USER_ERROR } from '../ResolverErrorStrings';
+import { shuffle } from '../../tests/Utils';
 
 const errorLog = require('debug')('error:DiscoverProfile');
 
@@ -88,7 +89,7 @@ const getSuitableUsers = async ({
     blacklist,
     skippedList,
     seededOnly,
-    nTotal: nUsers,
+    nTotal: Math.floor(1.5 * nUsers),
   });
   const users = await User
     .aggregate(pipeline)
@@ -107,7 +108,7 @@ const getSuitableUsers = async ({
     return second.lastActiveTimes[second.lastActiveTimes.length - 1]
       - first.lastActiveTimes[first.lastActiveTimes.length - 1];
   });
-  return users.slice(0, nUsers);
+  return shuffle(users.slice(0, nUsers));
 };
 
 // generate the blacklist for a user who's feed we're generating
@@ -292,7 +293,23 @@ export const getDiscoveryCards = async ({ user_id, filters, max }) => {
       items: [],
     };
   }
-  const newFilters = filters || user.matchingPreferences;
+  let newFilters = user.matchingPreferences;
+  if (filters) {
+    newFilters = pick(filters, ['seekingGender', 'minAgeRange', 'maxAgeRange']);
+    if (filters.locationCoords) {
+      if (filters.maxDistance) {
+        newFilters.maxDistance = filters.maxDistance;
+      }
+      newFilters.location = {
+        point: {
+          coordinates: filters.locationCoords,
+        },
+      };
+    }
+    if (!newFilters.maxDistance) {
+      newFilters.maxDistance = 25;
+    }
+  }
   if (filterUpdateNeeded({ discoveryQueue, newFilters })) {
     discoveryQueue.currentDiscoveryItems = [];
     discoveryQueue.currentFilters = newFilters;
