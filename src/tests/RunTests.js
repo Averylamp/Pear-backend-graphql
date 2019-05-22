@@ -14,7 +14,6 @@ import { runUpdateUserImagesTest } from './testFunctions/UpdateUserImagesTest';
 import { runAttachDetachedProfilesTest } from './testFunctions/AttachDetachedProfilesTest';
 import { runUpdateUsersTest } from './testFunctions/UpdateUsersTest';
 import { runEditEndorsementsTest } from './testFunctions/EditEndorsementsTest';
-import { runGenerateDiscoveryItemsTest } from './testFunctions/GenerateDiscoveryItemsTest';
 import { runSendMatchRequestsTest } from './testFunctions/SendMatchRequestsTest';
 import { runAcceptMatchRequestsTest } from './testFunctions/AcceptMatchRequestsTest';
 import { runRejectMatchRequestsTest } from './testFunctions/RejectMatchRequestsTest';
@@ -116,9 +115,6 @@ export const runTests = async function runTests() {
 
       // EDIT ENDORSEMENTS
       await runEditEndorsementsTest(mutate);
-
-      // GENERATE DISCOVERY ITEMS
-      await runGenerateDiscoveryItemsTest(mutate);
 
       // SEND MATCH REQUESTS
       await runSendMatchRequestsTest(mutate);

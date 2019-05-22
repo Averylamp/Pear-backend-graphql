@@ -1,3 +1,4 @@
+import { MatchingPreferencesSchema } from './MatchingSchemas';
 
 const mongoose = require('mongoose');
 
@@ -9,7 +10,7 @@ extend type Query {
   getDiscoveryFeed(user_id: ID!, last: Int): DiscoveryQueue
   
   # retrieves cards for a given set of preferences: [DiscoveryItemSchema]
-  getDiscoveryCards(user_id: ID!, filters: MatchingPreferencesInput, max: Int): [DiscoveryItem!]!
+  getDiscoveryCards(user_id: ID!, filters: MatchingPreferencesInput, max: Int): DiscoveryItemsResponse
 }
 `;
 
@@ -17,9 +18,6 @@ const mutationRoutes = `
 extend type Mutation {
   # OLD: User pressed "skip" on the discovery feed
   skipDiscoveryItem(user_id: ID!, discoveryItem_id: ID!): DiscoveryMutationResponse!
-  
-  # NEW: User pressed "skip" on the discovery feed
-  skipDiscoveryItem2(user_id: ID!, skippedUser_id: ID!): DiscoveryMutationResponse!
   
   # optionally specify the id of the discovery item to add
   addToQueue(user_id: ID!, addedUser_id: ID!, item_id: ID): DiscoveryMutationResponse!
@@ -87,6 +85,7 @@ const DiscoveryQueueSchema = new Schema({
     type: [Schema.Types.ObjectId], required: false, default: [], index: true,
   },
   decidedDiscoveryItems: { type: [DecidedDiscoveryItemSchema], required: true, default: [] },
+  currentFilters: { type: MatchingPreferencesSchema, required: false },
 }, { timestamps: true });
 
 
