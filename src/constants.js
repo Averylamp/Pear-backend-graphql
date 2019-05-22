@@ -14,6 +14,14 @@ export const DISCOVERY_RATE_LIMIT = [
   },
 ];
 
+export const SEEDED_PROFILES_START = 10;
+
+export const MAX_DISCOVERY_CARDS_RETRIEVE = 10;
+
+export const DISCOVERY_REFRESH_THRESHOLD = 20;
+
+export const DISCOVERY_CACHE_SIZE = 30;
+
 export const TICK_LENGTH_MILLIS = 1000 * 60;
 
 export const EXPECTED_TICKS_PER_NEW_PROFILE = 100;

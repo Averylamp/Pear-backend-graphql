@@ -18,9 +18,11 @@ import {
 import { createMatchObject } from '../../models/MatchModel';
 import { rollbackObject } from '../../../util/util';
 import { generateSentryErrorForResolver } from '../../SentryHelper';
+import { DISCOVERY_REFRESH_THRESHOLD } from '../../constants';
+import { refreshDiscoveryCache } from '../DiscoveryQueueResolvers/GetDiscoveryCardsResolver';
 
-const debug = require('debug')('dev:Matching');
-const errorLogger = require('debug')('error:Matching');
+const debug = require('debug')('dev:CreateNewMatch');
+const errorLogger = require('debug')('error:CreateNewMatch');
 
 const chalk = require('chalk');
 
@@ -180,22 +182,35 @@ export const createNewMatchResolver = async ({
   const sentByDiscoveryUpdatePromise = sentByDiscovery.save().catch(err => err);
   sentForDiscovery.currentDiscoveryItems = sentForDiscovery.currentDiscoveryItems
     .filter(item => item.user_id.toString() !== receivedByUser_id.toString());
-  const sentForDiscoveryUpdatePromise = sentForDiscovery.save().catch(err => err);
+  const sentForDiscoveryUpdatePromise = matchmakerMade
+    ? sentForDiscovery.save().catch(err => err)
+    : Promise.resolve(null);
   receivedByDiscovery.currentDiscoveryItems = receivedByDiscovery.currentDiscoveryItems
     .filter(item => item.user_id.toString() !== sentForUser_id.toString());
   const receivedByDiscoveryUpdatePromise = receivedByDiscovery.save().catch(err => err);
 
-  const [match, sentForEdgeResult, receivedByEdgeResult, createChatResult] = await Promise
-    .all([matchPromise, createSentForEdgePromise, createReceivedByEdgePromise, createChatPromise]);
+  const [match,
+    sentForEdgeResult,
+    receivedByEdgeResult,
+    createChatResult,
+    sentByDiscoveryResult,
+    sentForDiscoveryResult,
+    receivedByDiscoveryResult] = await Promise.all([matchPromise,
+    createSentForEdgePromise,
+    createReceivedByEdgePromise,
+    createChatPromise,
+    sentByDiscoveryUpdatePromise,
+    sentForDiscoveryUpdatePromise,
+    receivedByDiscoveryUpdatePromise]);
 
   // rollbacks if any updates failed
   if (match instanceof Error
     || sentForEdgeResult instanceof Error
     || receivedByEdgeResult instanceof Error
     || createChatResult instanceof Error
-    || sentByDiscoveryUpdatePromise instanceof Error
-    || sentForDiscoveryUpdatePromise instanceof Error
-    || receivedByDiscoveryUpdatePromise instanceof Error) {
+    || sentByDiscoveryResult instanceof Error
+    || sentForDiscoveryResult instanceof Error
+    || receivedByDiscoveryResult instanceof Error) {
     let errorMessage = '';
     let responseMessage = SEND_MATCH_REQUEST_ERROR;
     if (match instanceof Error) {
@@ -226,14 +241,17 @@ export const createNewMatchResolver = async ({
     } else {
       // we don't delete the chat; we just leave it, and no mongo edges/matches reference it
     }
-    if (sentByDiscoveryUpdatePromise instanceof Error) {
-      errorMessage += sentByDiscoveryUpdatePromise.toString();
+    if (sentByDiscoveryResult instanceof Error) {
+      errorLog(`Sent By discovery edge failure: ${sentByDiscoveryResult}`);
+      errorMessage += sentByDiscoveryResult.toString();
     }
-    if (sentForDiscoveryUpdatePromise instanceof Error) {
-      errorMessage += sentForDiscoveryUpdatePromise.toString();
+    if (sentForDiscoveryResult instanceof Error) {
+      errorLog(`Sent For discovery edge failure: ${sentForDiscoveryResult}`);
+      errorMessage += sentForDiscoveryResult.toString();
     }
-    if (receivedByDiscoveryUpdatePromise instanceof Error) {
-      errorMessage += receivedByDiscoveryUpdatePromise.toString();
+    if (receivedByDiscoveryResult instanceof Error) {
+      errorLog(`Received By discovery edge failure: ${receivedByDiscoveryResult}`);
+      errorMessage += receivedByDiscoveryResult.toString();
     }
     await rollbackObject({
       model: User,
@@ -256,13 +274,15 @@ export const createNewMatchResolver = async ({
       onSuccess: () => { debug('rolled back sentBy discovery object successfully'); },
       onFailure: (err) => { errorLog(`error rolling back sentBy discovery object: ${err}`); },
     });
-    await rollbackObject({
-      model: DiscoveryQueue,
-      object_id: sentForDiscovery._id,
-      initialObject: initialSentForDiscovery,
-      onSuccess: () => { debug('rolled back sentFor discovery object successfully'); },
-      onFailure: (err) => { errorLog(`error rolling back sentFor discovery object: ${err}`); },
-    });
+    if (matchmakerMade) {
+      await rollbackObject({
+        model: DiscoveryQueue,
+        object_id: sentForDiscovery._id,
+        initialObject: initialSentForDiscovery,
+        onSuccess: () => { debug('rolled back sentFor discovery object successfully'); },
+        onFailure: (err) => { errorLog(`error rolling back sentFor discovery object: ${err}`); },
+      });
+    }
     await rollbackObject({
       model: DiscoveryQueue,
       object_id: receivedByDiscovery._id,
@@ -289,6 +309,18 @@ export const createNewMatchResolver = async ({
       message: responseMessage,
     };
   }
+  // refresh cache if needed
+  try {
+    if (sentByDiscovery.currentDiscoveryItems.length < DISCOVERY_REFRESH_THRESHOLD) {
+      await refreshDiscoveryCache({
+        user: sentBy,
+        discoveryQueue: sentByDiscoveryResult,
+      });
+    }
+  } catch (e) {
+    errorLog(`error occurred trying to refresh discovery cache: ${e}`);
+  }
+  // send push notifications
   if (matchmakerMade) {
     sendMatchmakerRequestMessage({
       chatID: firebaseId,
