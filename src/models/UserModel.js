@@ -329,11 +329,15 @@ const UserSchema = new Schema({
   birthdate: { type: Date, required: false },
 
   bios: { type: [BioSchema], required: true, default: [] },
-  biosCount: { type: Number, required: true, index: true, default: 0 },
+  biosCount: {
+    type: Number, required: true, index: true, default: 0,
+  },
   boasts: { type: [BoastSchema], required: true, default: [] },
   roasts: { type: [RoastSchema], required: true, default: [] },
   questionResponses: { type: [QuestionUserResponseSchema], required: true, default: [] },
-  questionResponsesCount: { type: Number, required: true, index: true, default: 0 },
+  questionResponsesCount: {
+    type: Number, required: true, index: true, default: 0,
+  },
   vibes: { type: [VibeSchema], required: true, default: [] },
 
   // dos, donts, interests are not used currently
