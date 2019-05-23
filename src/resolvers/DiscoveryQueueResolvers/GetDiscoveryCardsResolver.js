@@ -220,14 +220,12 @@ const filterUpdateNeeded = ({ discoveryQueue, newFilters }) => {
   return false;
 };
 
-export const refreshDiscoveryCache = async ({ user, discoveryQueue }) => {
+export const addCardsToCache = async ({ user, discoveryQueue, nCardsToAdd }) => {
   const modifiedDiscoveryQueue = discoveryQueue; // because of no-param-reassign
-  const nCardsToGenerate = DISCOVERY_CACHE_SIZE
-    - modifiedDiscoveryQueue.currentDiscoveryItems.length;
   const filters = discoveryQueue.currentFilters || user.matchingPreferences;
   let userBlacklist = getUserBlacklist({ user, discoveryQueue });
   const userSkippedList = getUserSkippedList({ discoveryQueue });
-  let cardsRemaining = nCardsToGenerate;
+  let cardsRemaining = nCardsToAdd;
   let cardsToPush = [];
   for (const ignoreSkipList of [false, true]) {
     for (const includeLocation of [true, false]) {
@@ -293,9 +291,11 @@ export const getDiscoveryCards = async ({ user_id, filters, max }) => {
       items: [],
     };
   }
-  let newFilters = user.matchingPreferences;
+  const newFilters = user.matchingPreferences;
   if (filters) {
-    newFilters = pick(filters, ['seekingGender', 'minAgeRange', 'maxAgeRange']);
+    newFilters.seekingGender = filters.seekingGender;
+    newFilters.minAgeRange = filters.minAgeRange;
+    newFilters.maxAgeRange = filters.maxAgeRange;
     if (filters.locationCoords) {
       if (filters.maxDistance) {
         newFilters.maxDistance = filters.maxDistance;
@@ -306,14 +306,15 @@ export const getDiscoveryCards = async ({ user_id, filters, max }) => {
         },
       };
     }
-    if (!newFilters.maxDistance) {
-      newFilters.maxDistance = 25;
-    }
   }
   if (filterUpdateNeeded({ discoveryQueue, newFilters })) {
     discoveryQueue.currentDiscoveryItems = [];
     discoveryQueue.currentFilters = newFilters;
-    await refreshDiscoveryCache({ user, discoveryQueue, filters: newFilters });
+    await addCardsToCache({
+      user,
+      discoveryQueue,
+      nCardsToAdd: DISCOVERY_CACHE_SIZE,
+    });
   }
   return {
     success: true,
