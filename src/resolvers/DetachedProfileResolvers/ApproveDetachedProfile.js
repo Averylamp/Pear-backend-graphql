@@ -25,9 +25,7 @@ const functionCallConsole = require('debug')('dev:FunctionCalls');
 
 export const approveDetachedProfileResolver = async ({ approveDetachedProfileInput }) => {
   functionCallConsole('Approve Profile Called');
-  const finalApproveDetachedProfileInput = approveDetachedProfileInput;
-
-  const { user_id, detachedProfile_id, creatorUser_id } = finalApproveDetachedProfileInput;
+  const { user_id, detachedProfile_id, creatorUser_id } = approveDetachedProfileInput;
   // validate that users + detached profile exist, and get the objects
   let user = null;
   let detachedProfile = null;
@@ -90,9 +88,9 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
   // construct user update object
   const userObjectUpdate = {
     isSeeking: true,
-    biosCount: user.bios.length + (finalApproveDetachedProfileInput.bio ? 1 : 0),
+    biosCount: user.bios.length + (detachedProfile.bio ? 1 : 0),
     questionResponsesCount: user.questionResponses.length
-      + finalApproveDetachedProfileInput.questionResponses.length,
+      + detachedProfile.questionResponses.length,
     $inc: { endorserCount: 1 },
     $push: {
       endorser_ids: creatorUser_id,
@@ -155,6 +153,9 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
         oppositeDetachedProfile.bio.authorThumbnailURL = user.thumbnailURL;
       }
     }
+    creatorObjectUpdate.biosCount = creator.bios.length + (oppositeDetachedProfile.bio ? 1 : 0);
+    creatorObjectUpdate.questionResponsesCount = creator.questionResponses.length
+      + oppositeDetachedProfile.questionResponses.length;
     creatorObjectUpdate.$push.endorser_ids = user_id;
     creatorObjectUpdate.$push.bios = {
       $each: oppositeDetachedProfile.bio ? [oppositeDetachedProfile.bio] : [],
