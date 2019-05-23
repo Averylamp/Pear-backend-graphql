@@ -49,7 +49,6 @@ type DiscoveryMutationResponse {
   message: String
 }
 
-
 `;
 
 export const typeDef = queryRoutes

@@ -54,13 +54,14 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
       message: ALREADY_APPROVED_PROFILE,
     };
   }
-  // const oppositeDetachedProfile = DetachedProfile
-  // .findOne({ creatorUser_id: user._id, phoneNumber: creator.phoneNumber });
+  const oppositeDetachedProfile = await DetachedProfile
+    .findOne({ creatorUser_id: user._id, phoneNumber: creator.phoneNumber });
 
   const initialUser = user.toObject();
   const initialCreator = creator.toObject();
   const initialDetachedProfile = detachedProfile.toObject();
-  // const initialOppositeDetachedProfile = oppositeDetachedProfile.toObject();
+  const initialOppositeDetachedProfile = oppositeDetachedProfile
+    ? oppositeDetachedProfile.toObject() : null;
 
   // determine whether or not these users are already friends, and get or generate firebase chat id
   const endorsementEdge = user.endorsementEdges.find(
@@ -69,7 +70,7 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
   const firebaseId = endorsementEdge ? endorsementEdge.firebaseChatDocumentID : nanoid(20);
 
   // get thumbnails and firstName
-  for (const questionResponse of finalApproveDetachedProfileInput.questionResponses) {
+  for (const questionResponse of detachedProfile.questionResponses) {
     if (creator.firstName) {
       questionResponse.authorFirstName = creator.firstName;
     }
@@ -77,12 +78,12 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
       questionResponse.authorThumbnailURL = creator.thumbnailURL;
     }
   }
-  if (finalApproveDetachedProfileInput.bio) {
+  if (detachedProfile.bio) {
     if (creator.firstName) {
-      finalApproveDetachedProfileInput.bio.authorFirstName = creator.firstName;
+      detachedProfile.bio.authorFirstName = creator.firstName;
     }
     if (creator.thumbnailURL) {
-      finalApproveDetachedProfileInput.bio.authorThumbnailURL = creator.thumbnailURL;
+      detachedProfile.bio.authorThumbnailURL = creator.thumbnailURL;
     }
   }
 
@@ -92,25 +93,9 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
     $inc: { endorserCount: 1 },
     $push: {
       endorser_ids: creatorUser_id,
-      bankImages: {
-        $each: detachedProfile.images,
-      },
-      boasts: { $each: finalApproveDetachedProfileInput.boasts },
-      roasts: { $each: finalApproveDetachedProfileInput.roasts },
-      questionResponses: { $each: finalApproveDetachedProfileInput.questionResponses },
-      vibes: { $each: finalApproveDetachedProfileInput.vibes },
+      questionResponses: { $each: detachedProfile.questionResponses },
       bios: {
-        $each: finalApproveDetachedProfileInput.bio ? [finalApproveDetachedProfileInput.bio] : [],
-      },
-      dos: {
-        $each: finalApproveDetachedProfileInput.dos ? finalApproveDetachedProfileInput.dos : [],
-      },
-      donts: {
-        $each: finalApproveDetachedProfileInput.donts ? finalApproveDetachedProfileInput.donts : [],
-      },
-      interests: {
-        $each: finalApproveDetachedProfileInput.interests
-          ? finalApproveDetachedProfileInput.interests : [],
+        $each: detachedProfile.bio ? [detachedProfile.bio] : [],
       },
       lastEditedTimes: {
         $each: [new Date()],
@@ -147,6 +132,50 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
     };
   }
 
+  // approve the opposite detached profile, if it exists
+  if (oppositeDetachedProfile) {
+    // creator object updates
+    // get thumbnails and firstName
+    for (const questionResponse of oppositeDetachedProfile.questionResponses) {
+      if (user.firstName) {
+        questionResponse.authorFirstName = user.firstName;
+      }
+      if (user.thumbnailURL) {
+        questionResponse.authorThumbnailURL = user.thumbnailURL;
+      }
+    }
+    if (oppositeDetachedProfile.bio) {
+      if (user.firstName) {
+        oppositeDetachedProfile.bio.authorFirstName = user.firstName;
+      }
+      if (creator.thumbnailURL) {
+        oppositeDetachedProfile.bio.authorThumbnailURL = user.thumbnailURL;
+      }
+    }
+    creatorObjectUpdate.$push.endorser_ids = user_id;
+    creatorObjectUpdate.$push.bios = {
+      $each: oppositeDetachedProfile.bio ? [oppositeDetachedProfile.bio] : [],
+    };
+    creatorObjectUpdate.$push.questionResponses = {
+      $each: oppositeDetachedProfile.questionResponses,
+    };
+    creatorObjectUpdate.$push.lastEditedTimes = {
+      $each: [new Date()],
+      $slice: -1 * LAST_EDITED_ARRAY_LEN,
+    };
+    creatorObjectUpdate.$inc.endorserCount = 1;
+
+    // user object updates
+    userObjectUpdate.$push.endorsedUser_ids = creatorUser_id;
+    userObjectUpdate.$inc.endorserCount = 1;
+    userObjectUpdate.$inc.detachedProfileCount = -1;
+
+    // opposite detached profile updates
+    oppositeDetachedProfile.status = 'accepted';
+    oppositeDetachedProfile.endorsedUser_id = creatorUser_id;
+    oppositeDetachedProfile.acceptedTime = new Date();
+  }
+
   // construct the detached profile update object
   const detachedProfileUpdate = {
     status: 'accepted',
@@ -172,6 +201,11 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
     .exec()
     .catch(err => err);
 
+  let oppositeDetachedProfilePromise = null;
+  if (oppositeDetachedProfile) {
+    oppositeDetachedProfilePromise = oppositeDetachedProfile.save().catch(err => err);
+  }
+
   // create chat object
   const createChatPromise = endorsementEdge ? null : createEndorsementChat({
     documentID: firebaseId,
@@ -182,14 +216,15 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
 
   return Promise.all([
     updateUserObjectPromise, updateCreatorObjectPromise,
-    updateDetachedProfilePromise, createChatPromise])
+    updateDetachedProfilePromise, createChatPromise, oppositeDetachedProfilePromise])
     .then(async ([
       updateUserObjectResult, updateCreatorObjectResult,
-      updateDetachedProfileResult, createChatResult]) => {
+      updateDetachedProfileResult, createChatResult, oppositeDetachedProfileResult]) => {
       if (updateUserObjectResult instanceof Error
         || updateCreatorObjectResult instanceof Error
         || updateDetachedProfileResult instanceof Error
-        || createChatResult instanceof Error) {
+        || createChatResult instanceof Error
+        || oppositeDetachedProfileResult instanceof Error) {
         errorLog('error attaching profile, rolling back');
         let errorMessage = '';
         if (updateUserObjectResult instanceof Error) {
@@ -203,6 +238,9 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
         }
         if (createChatResult instanceof Error) {
           errorMessage += createChatResult.toString();
+        }
+        if (oppositeDetachedProfileResult instanceof Error) {
+          errorMessage += oppositeDetachedProfileResult.toString();
         }
         await rollbackObject({
           model: User,
@@ -225,6 +263,17 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
           onSuccess: () => { debug('rolled back detachedProfile object successfully'); },
           onFailure: (err) => { errorLog(`error rolling back detachedProfile object: ${err}`); },
         });
+        if (oppositeDetachedProfile) {
+          await rollbackObject({
+            model: DetachedProfile,
+            object_id: oppositeDetachedProfile._id.toString(),
+            initialObject: initialOppositeDetachedProfile,
+            onSuccess: () => { debug('rolled back opposite detachedProfile object successfully'); },
+            onFailure: (err) => {
+              errorLog(`error rolling back opposite detachedProfile object: ${err}`);
+            },
+          });
+        }
         errorLog(errorMessage);
         generateSentryErrorForResolver({
           resolverType: 'mutation',
