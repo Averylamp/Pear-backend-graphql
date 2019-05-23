@@ -55,7 +55,7 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
     };
   }
   // const oppositeDetachedProfile = DetachedProfile
-    // .findOne({ creatorUser_id: user._id, phoneNumber: creator.phoneNumber });
+  // .findOne({ creatorUser_id: user._id, phoneNumber: creator.phoneNumber });
 
   const initialUser = user.toObject();
   const initialCreator = creator.toObject();
