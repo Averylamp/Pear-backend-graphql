@@ -85,29 +85,16 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
   // construct user update object
   const userObjectUpdate = {
     isSeeking: true,
+    biosCount: user.bios.length + (finalApproveDetachedProfileInput.bio ? 1 : 0),
+    questionResponsesCount: user.questionResponses.length
+      + finalApproveDetachedProfileInput.questionResponses.length,
     $inc: { endorserCount: 1 },
     $push: {
       endorser_ids: creatorUser_id,
       bankImages: {
         $each: detachedProfile.images,
       },
-      boasts: { $each: finalApproveDetachedProfileInput.boasts },
-      roasts: { $each: finalApproveDetachedProfileInput.roasts },
       questionResponses: { $each: finalApproveDetachedProfileInput.questionResponses },
-      vibes: { $each: finalApproveDetachedProfileInput.vibes },
-      bios: {
-        $each: finalApproveDetachedProfileInput.bio ? [finalApproveDetachedProfileInput.bio] : [],
-      },
-      dos: {
-        $each: finalApproveDetachedProfileInput.dos ? finalApproveDetachedProfileInput.dos : [],
-      },
-      donts: {
-        $each: finalApproveDetachedProfileInput.donts ? finalApproveDetachedProfileInput.donts : [],
-      },
-      interests: {
-        $each: finalApproveDetachedProfileInput.interests
-          ? finalApproveDetachedProfileInput.interests : [],
-      },
       lastEditedTimes: {
         $each: [new Date()],
         $slice: -1 * LAST_EDITED_ARRAY_LEN,
