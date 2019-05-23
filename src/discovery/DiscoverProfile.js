@@ -19,6 +19,17 @@ const seededUserPipeline = ({ gender, blacklist, sampleCount }) => {
     displayedImagesCount: {
       $gte: 1,
     },
+    $or: [
+      {
+        biosCount: {
+          $gte: 1,
+        },
+      }, {
+        questionResponsesCount: {
+          $gte: 1,
+        },
+      },
+    ],
   };
   return [
     {
@@ -136,6 +147,17 @@ const genderConstraintPipeline = ({ gender, blacklist, sampleCount }) => {
     displayedImagesCount: {
       $gte: 1,
     },
+    $or: [
+      {
+        biosCount: {
+          $gte: 1,
+        },
+      }, {
+        questionResponsesCount: {
+          $gte: 1,
+        },
+      },
+    ],
   };
 
   return [
