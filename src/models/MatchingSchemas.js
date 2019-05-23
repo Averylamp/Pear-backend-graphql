@@ -9,14 +9,14 @@ type MatchingDemographics {
   gender: Gender
   age: Int
   location: Location
-  ethnicity: EthnicityInfo
-  educationLevel: EducationLevelInfo
-  religion: ReligionInfo
-  politicalView: PoliticsInfo
-  drinking: DrinkingInfo
-  smoking: SmokingInfo
-  cannabis: CannabisInfo
-  drugs: DrugsInfo
+  ethnicity: EthnicityInfo!
+  educationLevel: EducationLevelInfo!
+  religion: ReligionInfo!
+  politicalView: PoliticsInfo!
+  drinking: DrinkingInfo!
+  smoking: SmokingInfo!
+  cannabis: CannabisInfo!
+  drugs: DrugsInfo!
 }
 
 enum EthnicityEnum {
@@ -124,6 +124,14 @@ type MatchingPreferences{
   minAgeRange: Int!
   maxAgeRange: Int!
   location: Location
+}
+
+input FiltersInput {
+  seekingGender: [Gender!]!
+  maxDistance: Int
+  minAgeRange: Int!
+  maxAgeRange: Int!
+  locationCoords: [Float!]
 }
 `;
 

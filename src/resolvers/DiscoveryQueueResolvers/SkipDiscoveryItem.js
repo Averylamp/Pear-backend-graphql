@@ -1,6 +1,8 @@
 import { User } from '../../models/UserModel';
 import { DiscoveryQueue } from '../../models/DiscoveryQueueModel';
 import { SKIP_DISCOVERY_ITEM_ERROR } from '../ResolverErrorStrings';
+import { refreshDiscoveryCache } from './GetDiscoveryCardsResolver';
+import { DISCOVERY_REFRESH_THRESHOLD } from '../../constants';
 
 const errorLogger = require('debug')('error:Matching');
 
@@ -55,7 +57,24 @@ export const skipDiscoveryItemResolver = async ({
     discoveryQueue.skippedUser_ids = [];
   }
   discoveryQueue.skippedUser_ids.push(skippedUser_id);
+  if (!discoveryQueue.decidedDiscoveryItems) {
+    discoveryQueue.decidedDiscoveryItems = [];
+  }
+  discoveryQueue.decidedDiscoveryItems.push({
+    user_id: skippedUser_id,
+    action: 'skip',
+  });
   const res = await discoveryQueue.save().catch(err => err);
+  try {
+    if (discoveryQueue.currentDiscoveryItems.length < DISCOVERY_REFRESH_THRESHOLD) {
+      await refreshDiscoveryCache({
+        user,
+        discoveryQueue: res,
+      });
+    }
+  } catch (e) {
+    errorLog(`error occurred trying to refresh discovery cache: ${e}`);
+  }
   if (res instanceof Error) {
     errorLog(res.toString());
     return {
