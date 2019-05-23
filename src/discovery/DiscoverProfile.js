@@ -244,9 +244,6 @@ export const nextDiscoveryItem = async ({
 // TODO: Send a push notification to user through firebase
 export const updateDiscoveryWithNextItem = async ({ userObj }) => {
   const discoveryQueue = await DiscoveryQueue.findOne({ user_id: userObj._id }).exec();
-  if (discoveryQueue.currentFilters) {
-    return undefined;
-  }
   let pipelineFns = [
     seededUserPipeline,
     genderConstraintPipeline,
