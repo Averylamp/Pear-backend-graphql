@@ -5,11 +5,12 @@ import {
 } from '../../discovery/DiscoverProfile';
 import {
   FORCE_FEED_UPDATE_ERROR,
-  FORCE_FEED_UPDATE_SUCCESS, SKIP_DISCOVERY_ITEM_ERROR,
+  FORCE_FEED_UPDATE_SUCCESS, GET_DISCOVERY_CARDS_ERROR, SKIP_DISCOVERY_ITEM_ERROR,
 } from '../ResolverErrorStrings';
 import { generateSentryErrorForResolver } from '../../SentryHelper';
 import { skipDiscoveryItemResolver } from './SkipDiscoveryItem';
 import { devMode } from '../../constants';
+import { getDiscoveryCards } from './GetDiscoveryCardsResolver';
 
 const mongoose = require('mongoose');
 const debug = require('debug')('dev:DiscoveryQueueResolver');
@@ -19,7 +20,31 @@ export const resolvers = {
   Query: {
     getDiscoveryFeed: async (_, { user_id }) => {
       debug(`Getting feed for user with id: ${user_id}`);
-      return DiscoveryQueue.findOne({ user_id });
+      const feed = await DiscoveryQueue.findOne({ user_id });
+      const cardsResponse = await getDiscoveryCards({ user_id });
+      if (cardsResponse && cardsResponse.items) {
+        feed.currentDiscoveryItems = cardsResponse.items;
+        return feed;
+      }
+      return null;
+    },
+    getDiscoveryCards: async (_, { user_id, filters, max }) => {
+      try {
+        return getDiscoveryCards({ user_id, filters, max });
+      } catch (e) {
+        generateSentryErrorForResolver({
+          resolverType: 'mutation',
+          routeName: 'getCards',
+          args: { user_id, filters, max },
+          errorMsg: e,
+          errorName: GET_DISCOVERY_CARDS_ERROR,
+        });
+        errorLog(`Error while getting cards: ${e}`);
+        return {
+          success: false,
+          message: GET_DISCOVERY_CARDS_ERROR,
+        };
+      }
     },
   },
   Mutation: {
@@ -149,7 +174,7 @@ export const resolvers = {
   // this is normally only accessed via currentDiscoveryItems, and users are fetched in a single
   // call, so usually user will be not undefined here
   DiscoveryItem: {
-    user: async ({ user_id, user }) => ((user === undefined)
+    user: async ({ user_id, user }) => ((user !== undefined)
       ? user : User.findById(user_id).exec()),
   },
 };
