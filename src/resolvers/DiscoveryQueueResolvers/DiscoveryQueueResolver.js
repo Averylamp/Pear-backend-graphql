@@ -20,7 +20,13 @@ export const resolvers = {
   Query: {
     getDiscoveryFeed: async (_, { user_id }) => {
       debug(`Getting feed for user with id: ${user_id}`);
-      return DiscoveryQueue.findOne({ user_id });
+      const feed = await DiscoveryQueue.findOne({ user_id });
+      const cardsResponse = await getDiscoveryCards({ user_id });
+      if (cardsResponse && cardsResponse.items) {
+        feed.currentDiscoveryItems = cardsResponse.items;
+        return feed;
+      }
+      return null;
     },
     getDiscoveryCards: async (_, { user_id, filters, max }) => {
       try {
