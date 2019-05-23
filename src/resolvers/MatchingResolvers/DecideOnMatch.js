@@ -8,8 +8,8 @@ import {
 import { getAndValidateUserAndMatchObjects } from './MatchResolverUtils';
 import { rollbackObject } from '../../../util/util';
 
-const debug = require('debug')('dev:Matching');
-const errorLogger = require('debug')('error:Matching');
+const debug = require('debug')('dev:DecideOnMatch');
+const errorLogger = require('debug')('error:DecideOnMatch');
 
 const chalk = require('chalk');
 

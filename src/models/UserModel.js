@@ -123,6 +123,9 @@ input UpdateUserInput {
   schoolYear: String
   schoolEmail: String
   schoolEmailVerified: Boolean
+  work: String
+  jobTitle: String
+  hometown: String
   isSeeking: Boolean
 
   seekingGender: [Gender!]
@@ -200,6 +203,9 @@ type User {
   schoolYear: String
   schoolEmail: String
   schoolEmailVerified: Boolean
+  work: String
+  jobTitle: String
+  hometown: String
   isSeeking: Boolean!
 
   # The ordered images that currently make up the User's Profile
@@ -329,9 +335,15 @@ const UserSchema = new Schema({
   birthdate: { type: Date, required: false },
 
   bios: { type: [BioSchema], required: true, default: [] },
+  biosCount: {
+    type: Number, required: true, index: true, default: 0,
+  },
   boasts: { type: [BoastSchema], required: true, default: [] },
   roasts: { type: [RoastSchema], required: true, default: [] },
   questionResponses: { type: [QuestionUserResponseSchema], required: true, default: [] },
+  questionResponsesCount: {
+    type: Number, required: true, index: true, default: 0,
+  },
   vibes: { type: [VibeSchema], required: true, default: [] },
 
   // dos, donts, interests are not used currently
@@ -343,6 +355,9 @@ const UserSchema = new Schema({
   schoolYear: { type: String, required: false },
   schoolEmail: { type: String, required: false },
   schoolEmailVerified: { type: Boolean, required: false, default: false },
+  work: { type: String, required: false },
+  jobTitle: { type: String, required: false },
+  hometown: { type: String, required: false },
   isSeeking: { type: Boolean, required: true, default: true },
 
   pearPoints: {
