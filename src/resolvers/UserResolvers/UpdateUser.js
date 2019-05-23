@@ -44,6 +44,9 @@ export const updateUserResolver = async ({ updateUserInput }) => {
     'gender',
     'school',
     'schoolYear',
+    'work',
+    'jobTitle',
+    'hometown',
     'isSeeking',
     'deactivated',
     'thumbnailURL',
@@ -106,15 +109,19 @@ export const updateUserResolver = async ({ updateUserInput }) => {
     userUpdateObj['matchingDemographics.location.point.updatedAt'] = now;
   }
   if (updateUserInput.locationName) {
-    // note that if locationName has never been set, it won't have a createdAt field
-    // TODO either rewrite all of this resolver's logic to use model.save, or else do a check
-    // and set createdAt here if necessary.
-    // TODO actually we gotta do this for pretty much any object we're using the driver to
-    // update that has mongoose timestamps :(
-    userUpdateObj['matchingPreferences.location.locationName.name'] = updateUserInput.locationName;
-    userUpdateObj['matchingPreferences.location.locationName.updatedAt'] = now;
-    userUpdateObj['matchingDemographics.location.locationName.name'] = updateUserInput.locationName;
-    userUpdateObj['matchingDemographics.location.locationName.updatedAt'] = now;
+    // can't update location name unless the user has location coordinates
+    if ((user.matchingPreferences.location && user.matchingPreferences.location.point)
+      || updateUserInput.location) {
+      // note that if locationName has never been set, it won't have a createdAt field
+      // TODO either rewrite all of this resolver's logic to use model.save, or else do a check
+      // and set createdAt here if necessary.
+      // TODO actually we gotta do this for pretty much any object we're using the driver to
+      // update that has mongoose timestamps :(
+      userUpdateObj['matchingPreferences.location.locationName.name'] = updateUserInput.locationName;
+      userUpdateObj['matchingPreferences.location.locationName.updatedAt'] = now;
+      userUpdateObj['matchingDemographics.location.locationName.name'] = updateUserInput.locationName;
+      userUpdateObj['matchingDemographics.location.locationName.updatedAt'] = now;
+    }
   }
 
   const updatedUser = await User

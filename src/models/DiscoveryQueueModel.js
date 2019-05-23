@@ -1,3 +1,4 @@
+import { MatchingPreferencesSchema } from './MatchingSchemas';
 
 const mongoose = require('mongoose');
 
@@ -5,8 +6,11 @@ const { Schema } = mongoose;
 
 const queryRoutes = `
 extend type Query {
-  # Retreives the discovery feed for the provided user
+  # retrieves the discovery feed for the provided user
   getDiscoveryFeed(user_id: ID!, last: Int): DiscoveryQueue
+  
+  # retrieves cards for a given set of preferences: [DiscoveryItemSchema]
+  getDiscoveryCards(user_id: ID!, filters: FiltersInput, max: Int): DiscoveryItemsResponse
 }
 `;
 
@@ -49,6 +53,11 @@ type DiscoveryMutationResponse {
   message: String
 }
 
+type DiscoveryItemsResponse {
+  success: Boolean!
+  message: String
+  items: [DiscoveryItem!]
+}
 `;
 
 export const typeDef = queryRoutes
@@ -60,6 +69,12 @@ const DiscoveryItemSchema = new Schema({
   timestamp: { type: Date, required: true, default: Date },
 }, { timestamps: true });
 
+const DecidedDiscoveryItemSchema = new Schema({
+  user_id: { type: Schema.Types.ObjectId, required: true },
+  timestamp: { type: Date, required: true, default: Date },
+  action: { type: String, required: true, enum: ['skip', 'match', 'pear'] },
+});
+
 const DiscoveryQueueSchema = new Schema({
   _id: { type: Schema.Types.ObjectId, required: true },
   user_id: { type: Schema.Types.ObjectId, required: true, index: true },
@@ -68,6 +83,8 @@ const DiscoveryQueueSchema = new Schema({
   skippedUser_ids: {
     type: [Schema.Types.ObjectId], required: false, default: [], index: true,
   },
+  decidedDiscoveryItems: { type: [DecidedDiscoveryItemSchema], required: true, default: [] },
+  currentFilters: { type: MatchingPreferencesSchema, required: false },
 }, { timestamps: true });
 
 

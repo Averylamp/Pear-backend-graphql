@@ -123,6 +123,7 @@ export const editEndorsementResolver = async ({ editEndorsementInput }) => {
       user.bios.push(editEndorsementInput.bio);
     }
   }
+  user.biosCount = user.bios.length;
   user.lastEditedTimes.push(now);
   user.lastEditedTimes = user.lastEditedTimes.slice(-1 * LAST_EDITED_ARRAY_LEN);
   try {

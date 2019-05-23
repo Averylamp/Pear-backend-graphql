@@ -90,6 +90,9 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
   // construct user update object
   const userObjectUpdate = {
     isSeeking: true,
+    biosCount: user.bios.length + (finalApproveDetachedProfileInput.bio ? 1 : 0),
+    questionResponsesCount: user.questionResponses.length
+      + finalApproveDetachedProfileInput.questionResponses.length,
     $inc: { endorserCount: 1 },
     $push: {
       endorser_ids: creatorUser_id,
