@@ -18,8 +18,10 @@ import {
 import { createMatchObject } from '../../models/MatchModel';
 import { rollbackObject } from '../../../util/util';
 import { generateSentryErrorForResolver } from '../../SentryHelper';
-import { DISCOVERY_REFRESH_THRESHOLD } from '../../constants';
-import { refreshDiscoveryCache } from '../DiscoveryQueueResolvers/GetDiscoveryCardsResolver';
+import { DISCOVERY_CACHE_SIZE, DISCOVERY_REFRESH_THRESHOLD } from '../../constants';
+import {
+  addCardsToCache,
+} from '../DiscoveryQueueResolvers/GetDiscoveryCardsResolver';
 
 const debug = require('debug')('dev:CreateNewMatch');
 const errorLogger = require('debug')('error:CreateNewMatch');
@@ -312,9 +314,10 @@ export const createNewMatchResolver = async ({
   // refresh cache if needed
   try {
     if (sentByDiscovery.currentDiscoveryItems.length < DISCOVERY_REFRESH_THRESHOLD) {
-      await refreshDiscoveryCache({
+      await addCardsToCache({
         user: sentBy,
         discoveryQueue: sentByDiscoveryResult,
+        nCardsToAdd: DISCOVERY_CACHE_SIZE - sentByDiscoveryResult.currentDiscoveryItems.length,
       });
     }
   } catch (e) {
