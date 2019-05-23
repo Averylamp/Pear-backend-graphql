@@ -123,6 +123,9 @@ input UpdateUserInput {
   schoolYear: String
   schoolEmail: String
   schoolEmailVerified: Boolean
+  work: String
+  jobTitle: String
+  hometown: String
   isSeeking: Boolean
 
   seekingGender: [Gender!]
@@ -200,6 +203,9 @@ type User {
   schoolYear: String
   schoolEmail: String
   schoolEmailVerified: Boolean
+  work: String
+  jobTitle: String
+  hometown: String
   isSeeking: Boolean!
 
   # The ordered images that currently make up the User's Profile
@@ -349,6 +355,9 @@ const UserSchema = new Schema({
   schoolYear: { type: String, required: false },
   schoolEmail: { type: String, required: false },
   schoolEmailVerified: { type: Boolean, required: false, default: false },
+  work: { type: String, required: false },
+  jobTitle: { type: String, required: false },
+  hometown: { type: String, required: false },
   isSeeking: { type: Boolean, required: true, default: true },
 
   pearPoints: {
