@@ -26,12 +26,20 @@ const getPipeline = ({
     _id: {
       $nin: disallowed_ids,
     },
-    endorserCount: {
-      $gte: 1,
-    },
     displayedImagesCount: {
       $gte: 1,
     },
+    $or: [
+      {
+        biosCount: {
+          $gte: 1,
+        },
+      }, {
+        questionResponsesCount: {
+          $gte: 1,
+        },
+      },
+    ],
   };
   if (matchingPreferences) {
     if (matchingPreferences.seekingGender) {
