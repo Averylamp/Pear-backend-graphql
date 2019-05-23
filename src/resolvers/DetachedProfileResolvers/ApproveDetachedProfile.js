@@ -54,9 +54,13 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
       message: ALREADY_APPROVED_PROFILE,
     };
   }
+  // const oppositeDetachedProfile = DetachedProfile
+    // .findOne({ creatorUser_id: user._id, phoneNumber: creator.phoneNumber });
+
   const initialUser = user.toObject();
   const initialCreator = creator.toObject();
   const initialDetachedProfile = detachedProfile.toObject();
+  // const initialOppositeDetachedProfile = oppositeDetachedProfile.toObject();
 
   // determine whether or not these users are already friends, and get or generate firebase chat id
   const endorsementEdge = user.endorsementEdges.find(
