@@ -104,7 +104,13 @@ export const createDetachedProfileResolver = async ({ detachedProfileInput }) =>
       message: CREATE_DETACHED_PROFILE_ERROR,
     };
   }
-  // set firstName and thumbnailURL of bio and questionResponses
+  // set firstName and thumbnailURL of bio and questionResponses and profile
+  if (creator.firstName) {
+    finalDetachedProfileInput.firstName = creator.firstName;
+  }
+  if (creator.thumbnailURL) {
+    finalDetachedProfileInput.creatorThumbnailURL = creator.thumbnailURL;
+  }
   for (const questionResponse of finalDetachedProfileInput.questionResponses) {
     if (creator.firstName) {
       questionResponse.authorFirstName = creator.firstName;
