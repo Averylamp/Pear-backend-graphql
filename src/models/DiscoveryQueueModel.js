@@ -58,7 +58,6 @@ type DiscoveryItemsResponse {
   message: String
   items: [DiscoveryItem!]
 }
-
 `;
 
 export const typeDef = queryRoutes
