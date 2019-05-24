@@ -13,6 +13,7 @@ import { runMigration2 } from './migration2/Migration2';
 
 const debug = require('debug')('dev:Index');
 const testsLog = require('debug')('tests:Index');
+const errorLog = require('debug')('error:Index');
 
 const fs = require('fs').promises;
 
@@ -36,11 +37,15 @@ const init = async () => {
   }
 
   if (regenTestDBMode) {
-    testsLog('Prepared to run tests in 3 second');
-    setTimeout(async () => {
-      testsLog('Running Tests');
-      await runTests();
-    }, 3000);
+    if (process.env.DB_NAME === 'prod2') {
+      errorLog('ERROR: CAN\'T REGENDB PROD DATABASE');
+    } else {
+      testsLog('Prepared to run tests in 3 second');
+      setTimeout(async () => {
+        testsLog('Running Tests');
+        await runTests();
+      }, 3000);
+    }
   } else if (process.env.TASK === 'stats-generation') {
     debug('starting stats generation');
     startStatsGeneration();
