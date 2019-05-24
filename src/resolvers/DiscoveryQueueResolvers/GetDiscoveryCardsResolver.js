@@ -4,7 +4,7 @@ import { User } from '../../models/UserModel';
 import { DiscoveryQueue } from '../../models/DiscoveryQueueModel';
 import {
   DISCOVERY_CACHE_SIZE,
-  DISCOVERY_RATE_LIMIT,
+  DISCOVERY_RATE_LIMIT, DISCOVERY_REFRESH_THRESHOLD,
   MAX_DISCOVERY_CARDS_RETRIEVE, SEEDED_PROFILES_START,
 } from '../../constants';
 import { GET_DISCOVERY_CARDS_ERROR, GET_USER_ERROR } from '../ResolverErrorStrings';
@@ -322,6 +322,12 @@ export const getDiscoveryCards = async ({ user_id, filters, max }) => {
       user,
       discoveryQueue,
       nCardsToAdd: DISCOVERY_CACHE_SIZE,
+    });
+  } else if (discoveryQueue.currentDiscoveryItems.length < DISCOVERY_REFRESH_THRESHOLD) {
+    await addCardsToCache({
+      user,
+      discoveryQueue,
+      nCardsToAdd: DISCOVERY_CACHE_SIZE - discoveryQueue.currentDiscoveryItems.length,
     });
   }
   return {
