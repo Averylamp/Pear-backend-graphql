@@ -25,9 +25,7 @@ const functionCallConsole = require('debug')('dev:FunctionCalls');
 
 export const approveDetachedProfileResolver = async ({ approveDetachedProfileInput }) => {
   functionCallConsole('Approve Profile Called');
-  const finalApproveDetachedProfileInput = approveDetachedProfileInput;
-
-  const { user_id, detachedProfile_id, creatorUser_id } = finalApproveDetachedProfileInput;
+  const { user_id, detachedProfile_id, creatorUser_id } = approveDetachedProfileInput;
   // validate that users + detached profile exist, and get the objects
   let user = null;
   let detachedProfile = null;
@@ -54,9 +52,14 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
       message: ALREADY_APPROVED_PROFILE,
     };
   }
+  const oppositeDetachedProfile = await DetachedProfile
+    .findOne({ creatorUser_id: user._id, phoneNumber: creator.phoneNumber });
+
   const initialUser = user.toObject();
   const initialCreator = creator.toObject();
   const initialDetachedProfile = detachedProfile.toObject();
+  const initialOppositeDetachedProfile = oppositeDetachedProfile
+    ? oppositeDetachedProfile.toObject() : null;
 
   // determine whether or not these users are already friends, and get or generate firebase chat id
   const endorsementEdge = user.endorsementEdges.find(
@@ -65,7 +68,7 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
   const firebaseId = endorsementEdge ? endorsementEdge.firebaseChatDocumentID : nanoid(20);
 
   // get thumbnails and firstName
-  for (const questionResponse of finalApproveDetachedProfileInput.questionResponses) {
+  for (const questionResponse of detachedProfile.questionResponses) {
     if (creator.firstName) {
       questionResponse.authorFirstName = creator.firstName;
     }
@@ -73,28 +76,32 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
       questionResponse.authorThumbnailURL = creator.thumbnailURL;
     }
   }
-  if (finalApproveDetachedProfileInput.bio) {
+  if (detachedProfile.bio) {
     if (creator.firstName) {
-      finalApproveDetachedProfileInput.bio.authorFirstName = creator.firstName;
+      detachedProfile.bio.authorFirstName = creator.firstName;
     }
     if (creator.thumbnailURL) {
-      finalApproveDetachedProfileInput.bio.authorThumbnailURL = creator.thumbnailURL;
+      detachedProfile.bio.authorThumbnailURL = creator.thumbnailURL;
     }
   }
 
   // construct user update object
   const userObjectUpdate = {
     isSeeking: true,
-    biosCount: user.bios.length + (finalApproveDetachedProfileInput.bio ? 1 : 0),
+    biosCount: user.bios.length + (detachedProfile.bio ? 1 : 0),
     questionResponsesCount: user.questionResponses.length
-      + finalApproveDetachedProfileInput.questionResponses.length,
-    $inc: { endorserCount: 1 },
+      + detachedProfile.questionResponses.length,
+    $inc: {
+      endorserCount: 1,
+      endorsedUsersCount: 1,
+    },
     $push: {
       endorser_ids: creatorUser_id,
-      bankImages: {
-        $each: detachedProfile.images,
+      endorsedUser_ids: creatorUser_id,
+      questionResponses: { $each: detachedProfile.questionResponses },
+      bios: {
+        $each: detachedProfile.bio ? [detachedProfile.bio] : [],
       },
-      questionResponses: { $each: finalApproveDetachedProfileInput.questionResponses },
       lastEditedTimes: {
         $each: [new Date()],
         $slice: -1 * LAST_EDITED_ARRAY_LEN,
@@ -116,10 +123,12 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
     },
     $push: {
       endorsedUser_ids: user_id,
+      endorser_ids: user_id,
     },
     $inc: {
       detachedProfilesCount: -1,
       endorsedUsersCount: 1,
+      endorserCount: 1,
     },
   };
   if (!endorsementEdge) {
@@ -128,6 +137,49 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
       firebaseChatDocumentID: firebaseId,
       firebaseChatDocumentPath: getChatDocPathFromId(firebaseId),
     };
+  }
+
+  // approve the opposite detached profile, if it exists
+  if (oppositeDetachedProfile) {
+    // creator object updates
+    // get thumbnails and firstName
+    for (const questionResponse of oppositeDetachedProfile.questionResponses) {
+      if (user.firstName) {
+        questionResponse.authorFirstName = user.firstName;
+      }
+      if (user.thumbnailURL) {
+        questionResponse.authorThumbnailURL = user.thumbnailURL;
+      }
+    }
+    if (oppositeDetachedProfile.bio) {
+      if (user.firstName) {
+        oppositeDetachedProfile.bio.authorFirstName = user.firstName;
+      }
+      if (creator.thumbnailURL) {
+        oppositeDetachedProfile.bio.authorThumbnailURL = user.thumbnailURL;
+      }
+    }
+    creatorObjectUpdate.biosCount = creator.bios.length + (oppositeDetachedProfile.bio ? 1 : 0);
+    creatorObjectUpdate.questionResponsesCount = creator.questionResponses.length
+      + oppositeDetachedProfile.questionResponses.length;
+    creatorObjectUpdate.$push.bios = {
+      $each: oppositeDetachedProfile.bio ? [oppositeDetachedProfile.bio] : [],
+    };
+    creatorObjectUpdate.$push.questionResponses = {
+      $each: oppositeDetachedProfile.questionResponses,
+    };
+    creatorObjectUpdate.$push.lastEditedTimes = {
+      $each: [new Date()],
+      $slice: -1 * LAST_EDITED_ARRAY_LEN,
+    };
+
+    // user object updates
+    userObjectUpdate.$inc.detachedProfileCount = -1;
+
+    // opposite detached profile updates
+    oppositeDetachedProfile.status = 'accepted';
+    oppositeDetachedProfile.endorsedUser_id = creatorUser_id;
+    oppositeDetachedProfile.acceptedTime = new Date();
   }
 
   // construct the detached profile update object
@@ -155,6 +207,11 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
     .exec()
     .catch(err => err);
 
+  let oppositeDetachedProfilePromise = null;
+  if (oppositeDetachedProfile) {
+    oppositeDetachedProfilePromise = oppositeDetachedProfile.save().catch(err => err);
+  }
+
   // create chat object
   const createChatPromise = endorsementEdge ? null : createEndorsementChat({
     documentID: firebaseId,
@@ -165,14 +222,15 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
 
   return Promise.all([
     updateUserObjectPromise, updateCreatorObjectPromise,
-    updateDetachedProfilePromise, createChatPromise])
+    updateDetachedProfilePromise, createChatPromise, oppositeDetachedProfilePromise])
     .then(async ([
       updateUserObjectResult, updateCreatorObjectResult,
-      updateDetachedProfileResult, createChatResult]) => {
+      updateDetachedProfileResult, createChatResult, oppositeDetachedProfileResult]) => {
       if (updateUserObjectResult instanceof Error
         || updateCreatorObjectResult instanceof Error
         || updateDetachedProfileResult instanceof Error
-        || createChatResult instanceof Error) {
+        || createChatResult instanceof Error
+        || oppositeDetachedProfileResult instanceof Error) {
         errorLog('error attaching profile, rolling back');
         let errorMessage = '';
         if (updateUserObjectResult instanceof Error) {
@@ -186,6 +244,9 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
         }
         if (createChatResult instanceof Error) {
           errorMessage += createChatResult.toString();
+        }
+        if (oppositeDetachedProfileResult instanceof Error) {
+          errorMessage += oppositeDetachedProfileResult.toString();
         }
         await rollbackObject({
           model: User,
@@ -208,6 +269,17 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
           onSuccess: () => { debug('rolled back detachedProfile object successfully'); },
           onFailure: (err) => { errorLog(`error rolling back detachedProfile object: ${err}`); },
         });
+        if (oppositeDetachedProfile) {
+          await rollbackObject({
+            model: DetachedProfile,
+            object_id: oppositeDetachedProfile._id.toString(),
+            initialObject: initialOppositeDetachedProfile,
+            onSuccess: () => { debug('rolled back opposite detachedProfile object successfully'); },
+            onFailure: (err) => {
+              errorLog(`error rolling back opposite detachedProfile object: ${err}`);
+            },
+          });
+        }
         errorLog(errorMessage);
         generateSentryErrorForResolver({
           resolverType: 'mutation',
