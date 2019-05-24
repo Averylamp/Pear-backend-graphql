@@ -58,7 +58,7 @@ extend type Mutation{
   # mark a profile as low quality
   markLowQuality(user_id: ID!): UserMutationResponse!
   
-  # mark a profile as low quality
+  # mark a profile as regular quality
   markRegularQuality(user_id: ID!): UserMutationResponse!
 }
 `;
