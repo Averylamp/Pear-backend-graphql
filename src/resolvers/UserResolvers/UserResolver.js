@@ -245,5 +245,100 @@ export const resolvers = {
         };
       }
     },
+    markHighQuality: async (_source, { user_id }) => {
+      try {
+        const user = await User.findById(user_id).exec();
+        if (!user) {
+          return {
+            success: false,
+            message: GET_USER_ERROR,
+          };
+        }
+        user.seeded = true;
+        user.lowQuality = false;
+        const updatedUser = await user.save();
+        return {
+          success: true,
+          user: updatedUser,
+        };
+      } catch (e) {
+        errorLog(`error occurred while attempting to mark high quality: ${e.toString()}`);
+        generateSentryErrorForResolver({
+          resolverType: 'mutation',
+          routeName: 'markHighQuality',
+          args: { user_id },
+          errorMsg: e,
+          errorName: 'error marking high quality user',
+        });
+        return {
+          success: false,
+          message: 'error marking high quality user',
+        };
+      }
+    },
+    markLowQuality: async (_source, { user_id }) => {
+      try {
+        const user = await User.findById(user_id)
+          .exec();
+        if (!user) {
+          return {
+            success: false,
+            message: GET_USER_ERROR,
+          };
+        }
+        user.lowQuality = true;
+        user.seeded = false;
+        const updatedUser = await user.save();
+        return {
+          success: true,
+          user: updatedUser,
+        };
+      } catch (e) {
+        errorLog(`error occurred while attempting to mark low quality: ${e.toString()}`);
+        generateSentryErrorForResolver({
+          resolverType: 'mutation',
+          routeName: 'markLowQuality',
+          args: { user_id },
+          errorMsg: e,
+          errorName: 'error marking low quality user',
+        });
+        return {
+          success: false,
+          message: 'error marking low quality user',
+        };
+      }
+    },
+    markRegularQuality: async (_source, { user_id }) => {
+      try {
+        const user = await User.findById(user_id)
+          .exec();
+        if (!user) {
+          return {
+            success: false,
+            message: GET_USER_ERROR,
+          };
+        }
+        user.lowQuality = false;
+        user.seeded = false;
+        const updatedUser = await user.save();
+        return {
+          success: true,
+          user: updatedUser,
+        };
+      } catch (e) {
+        errorLog(`error occurred while attempting to mark regular quality: ${e.toString()}`);
+        generateSentryErrorForResolver({
+          resolverType: 'mutation',
+          routeName: 'markRegularQuality',
+          args: { user_id },
+          errorMsg: e,
+          errorName: 'error marking regular quality user',
+        });
+        return {
+          success: false,
+          message: 'error marking regular quality user',
+        };
+      }
+    },
   },
 };
