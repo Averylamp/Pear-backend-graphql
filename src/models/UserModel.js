@@ -51,6 +51,15 @@ extend type Mutation{
   
   # adds an event code for the user
   addEventCode(user_id: ID!, code: String!): UserMutationResponse!
+  
+  # mark a profile as high quality
+  markHighQuality(user_id: ID!): UserMutationResponse!
+  
+  # mark a profile as low quality
+  markLowQuality(user_id: ID!): UserMutationResponse!
+  
+  # mark a profile as regular quality
+  markRegularQuality(user_id: ID!): UserMutationResponse!
 }
 `;
 
@@ -433,6 +442,9 @@ const UserSchema = new Schema({
   },
 
   seeded: {
+    type: Boolean, required: false, default: false,
+  },
+  lowQuality: {
     type: Boolean, required: false, default: false,
   },
   event_ids: {
