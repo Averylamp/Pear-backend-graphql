@@ -10,7 +10,10 @@ const updateAllThumbnails = async ({ user, thumbnailURL }) => {
   const detachedProfiles = await DetachedProfile.find({ _id: { $in: user.detachedProfile_ids } });
   const endorsees = await User.find({ _id: { $in: user.endorsedUser_ids } });
   for (const detachedProfile of detachedProfiles) {
-    // set firstName and thumbnailURL of bio and questionResponses
+    // set thumbnailURL of bio and questionResponses and dp
+    if (thumbnailURL) {
+      detachedProfile.creatorThumbnailURL = thumbnailURL;
+    }
     for (const questionResponse of detachedProfile.questionResponses) {
       if (thumbnailURL) {
         questionResponse.authorThumbnailURL = thumbnailURL;
