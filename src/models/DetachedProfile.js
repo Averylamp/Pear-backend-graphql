@@ -118,6 +118,7 @@ type DetachedProfile {
   creatorUser_id: ID!
   creatorUser: User
   creatorFirstName: String!
+  creatorThumbnailURL: String
   firstName: String!
   lastName: String
   phoneNumber: String!
@@ -174,6 +175,7 @@ const DetachedProfileSchema = new Schema({
   },
   creatorUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
   creatorFirstName: { type: String, required: true },
+  creatorThumbnailURL: { type: String, required: false },
   firstName: { type: String, required: true },
   lastName: { type: String, required: false },
   phoneNumber: {
