@@ -106,7 +106,7 @@ export const createDetachedProfileResolver = async ({ detachedProfileInput }) =>
   }
   // set firstName and thumbnailURL of bio and questionResponses and profile
   if (creator.firstName) {
-    finalDetachedProfileInput.firstName = creator.firstName;
+    finalDetachedProfileInput.creatorFirstName = creator.firstName;
   }
   if (creator.thumbnailURL) {
     finalDetachedProfileInput.creatorThumbnailURL = creator.thumbnailURL;
