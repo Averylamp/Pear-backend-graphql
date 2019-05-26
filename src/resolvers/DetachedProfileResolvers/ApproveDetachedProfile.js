@@ -5,11 +5,7 @@ import {
   APPROVE_PROFILE_ERROR,
 } from '../ResolverErrorStrings';
 import { DetachedProfile } from '../../models/DetachedProfile';
-import { DiscoveryQueue } from '../../models/DiscoveryQueueModel';
-import { LAST_EDITED_ARRAY_LEN, NEW_PROFILE_BONUS, regenTestDBMode } from '../../constants';
-import {
-  updateDiscoveryForUserById,
-} from '../../discovery/DiscoverProfile';
+import { LAST_EDITED_ARRAY_LEN } from '../../constants';
 import {
   createEndorsementChat,
   getChatDocPathFromId,
@@ -292,18 +288,6 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
           success: false,
           message: APPROVE_PROFILE_ERROR,
         };
-      }
-      // all operations succeeded; populate discovery feeds if this the endorsee's first profile
-      try {
-        const feed = await DiscoveryQueue.findById(user.discoveryQueue_id);
-        if (feed.currentDiscoveryItems.length === 0 && !regenTestDBMode) {
-          for (let i = 0; i < NEW_PROFILE_BONUS; i += 1) {
-            await updateDiscoveryForUserById({ user_id });
-          }
-        }
-      } catch (e) {
-        errorLog(`error occurred when trying to populate discovery feed: ${e}`);
-        debug(`error occurred when trying to populate discovery feed: ${e}`);
       }
       // send the server message to the endorsement chat. it's mostly ok if this silent fails
       // so we don't do the whole rollback thing
