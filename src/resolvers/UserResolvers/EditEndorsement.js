@@ -27,6 +27,12 @@ const updateQuestionResponses = ({ newQuestionResponses, user, author }) => {
   // for each snippet in the edit object, either edit an existing snippet with matching id, or
   // this is a new snippet so append it
   for (const questionResponse of newQuestionResponses) {
+    if (author.firstName) {
+      questionResponse.authorFirstName = author.firstName;
+    }
+    if (author.thumbnailURL) {
+      questionResponse.authorThumbnailURL = author.thumbnailURL;
+    }
     let shouldAppend = true;
     for (const oldQuestionResponse of updatedUser.questionResponses) {
       if (oldQuestionResponse.author_id.toString() === author._id.toString()
