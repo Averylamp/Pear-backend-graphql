@@ -268,6 +268,7 @@ enum QuestionTag {
   personality
   dodont
   boastroast
+  bio
 }
 `;
 
@@ -358,7 +359,7 @@ export const QuestionSchema = new Schema({
     required: true,
     default: [],
     index: true,
-    enum: ['starter', 'spicy', 'dating', 'personality', 'dodont', 'boastroast'],
+    enum: ['starter', 'spicy', 'dating', 'personality', 'dodont', 'boastroast', 'bio'],
   },
   placeholderResponseText: { type: String, required: false },
   hiddenInQuestionnaire: { type: Boolean, required: true, default: false },
