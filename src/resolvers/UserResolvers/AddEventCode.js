@@ -17,7 +17,9 @@ export const addEventCodeResolver = async ({ user_id, code }) => {
       message: GET_USER_ERROR,
     };
   }
-  user.event_ids.push(event._id.toString());
+  if (!user.event_ids.map(event_id => event_id.toString()).includes(event._id.toString())) {
+    user.event_ids.push(event._id.toString());
+  }
   const updatedUser = await user.save();
   return {
     success: true,

@@ -10,6 +10,15 @@ export const CREATE_EVENT0_VARIABLES = {
   },
 };
 
+export const CREATE_EVENT1_VARIABLES = {
+  eventInput: {
+    code: 'SUMMERLOVE',
+    name: 'DateMyFriend.ppt 6/2',
+    startTime: '1557935220000',
+    endTime: '1559935220000',
+  },
+};
+
 export const ADD_BRIAN_EVENT0 = {
   user_id: BRIAN_ID,
   code: 'TESTCODE',
