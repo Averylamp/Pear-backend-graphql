@@ -2,10 +2,6 @@ import { pick } from 'lodash';
 import { createUserObject } from '../../models/UserModel';
 import { createDiscoveryQueueObject } from '../../models/DiscoveryQueueModel';
 import { CREATE_USER_ERROR } from '../ResolverErrorStrings';
-import { INITIALIZED_FEED_LENGTH, regenTestDBMode } from '../../constants';
-import {
-  updateDiscoveryForUserById,
-} from '../../discovery/DiscoverProfile';
 import { generateSentryErrorForResolver } from '../../SentryHelper';
 
 const mongoose = require('mongoose');
@@ -80,16 +76,6 @@ export const createUserResolver = async ({ userInput }) => {
           success: false,
           message: CREATE_USER_ERROR,
         };
-      }
-      // initialize feed with some people
-      if (discoveryQueueObject.currentDiscoveryItems.length === 0 && !regenTestDBMode) {
-        for (let i = 0; i < INITIALIZED_FEED_LENGTH; i += 1) {
-          try {
-            await updateDiscoveryForUserById({ user_id: userObjectID });
-          } catch (e) {
-            errorLog(`Error updating discovery: ${e}`);
-          }
-        }
       }
       return {
         success: true,
