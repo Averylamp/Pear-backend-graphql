@@ -98,12 +98,18 @@ import {
   ADD_TO_BRIAN_QUEUE2,
   ADD_TO_BRIAN_QUEUE3,
 } from './AddToQueue';
-import { ADD_BRIAN_EVENT0, ADD_MADE_EVENT0, CREATE_EVENT0_VARIABLES } from './EventVars';
+import {
+  ADD_BRIAN_EVENT0,
+  ADD_MADE_EVENT0,
+  CREATE_EVENT0_VARIABLES,
+  CREATE_EVENT1_VARIABLES,
+} from './EventVars';
 
 export const addQuestions = ADD_QUESTIONS_VARIABLES;
 
 export const createEvents = [
   CREATE_EVENT0_VARIABLES,
+  CREATE_EVENT1_VARIABLES,
 ];
 
 export const createUsers = [
