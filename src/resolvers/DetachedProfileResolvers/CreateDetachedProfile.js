@@ -29,14 +29,7 @@ export const createDetachedProfileResolver = async ({ detachedProfileInput }) =>
     'lastName',
     'gender',
     'phoneNumber',
-    'boasts',
-    'roasts',
     'questionResponses',
-    'vibes',
-    'bio',
-    'dos',
-    'donts',
-    'interests',
   ]);
   finalDetachedProfileInput._id = detachedProfileID;
 
