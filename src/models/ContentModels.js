@@ -279,7 +279,7 @@ type QuestionUserResponse {
   authorFirstName: String!
   authorThumbnailURL: String
  
-  question_id: ID!
+  question_id: ID!  
   question: Question!
   
   responseBody: String!
@@ -352,7 +352,7 @@ export const QuestionSchema = new Schema({
     required: true,
     enum: ['multipleChoice', 'multipleChoiceWithOther', 'freeResponse'],
   },
-  suggestedResponses: { type: [QuestionSuggestedResponseSchema], required: true },
+  suggestedResponses: { type: [QuestionSuggestedResponseSchema], required: true, default: [] },
   tags: {
     type: [String],
     required: true,
