@@ -73,10 +73,10 @@ input ApproveDetachedProfileInput {
   # id of the creator user
   creatorUser_id: ID!
   
-  boasts: [BoastInput!]!
-  roasts: [RoastInput!]!
-  questionResponses: [QuestionUserResponseInput!]!
-  vibes: [VibeInput!]!
+  boasts: [BoastInput!]
+  roasts: [RoastInput!]
+  questionResponses: [QuestionUserResponseInput!]
+  vibes: [VibeInput!]
   
   # non-required
   bio: BioInput
