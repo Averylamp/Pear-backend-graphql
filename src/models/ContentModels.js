@@ -279,7 +279,7 @@ type QuestionUserResponse {
   authorFirstName: String!
   authorThumbnailURL: String
  
-  question_id: ID!  
+  question_id: ID!
   question: Question!
   
   responseBody: String!
