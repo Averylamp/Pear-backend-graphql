@@ -19,23 +19,15 @@ const updateAllThumbnails = async ({ user, thumbnailURL }) => {
         questionResponse.authorThumbnailURL = thumbnailURL;
       }
     }
-    if (detachedProfile.bio) {
-      if (thumbnailURL) {
-        detachedProfile.bio.authorThumbnailURL = thumbnailURL;
-      }
-    }
     detachedProfile.save();
   }
   for (const endorsee of endorsees) {
-    // set firstName and thumbnailURL of bio and questionResponses
+    // set thumbnailURL of bio and questionResponses
     for (const questionResponse of endorsee.questionResponses) {
-      if (thumbnailURL) {
-        questionResponse.authorThumbnailURL = thumbnailURL;
-      }
-    }
-    if (endorsee.bio) {
-      if (thumbnailURL) {
-        endorsee.bio.authorThumbnailURL = thumbnailURL;
+      if (questionResponse.author_id.toString() === user._id.toString()) {
+        if (thumbnailURL) {
+          questionResponse.authorThumbnailURL = thumbnailURL;
+        }
       }
     }
     endorsee.save();
