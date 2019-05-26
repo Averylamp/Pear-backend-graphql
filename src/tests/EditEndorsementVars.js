@@ -67,7 +67,7 @@ export const EDIT_SAMMI2_ENDORSEMENT_VARIABLES = {
       },
       {
         _id: SAMMI_QR5_ID,
-        author_id: JOSH_ID,
+        author_id: BRIAN_ID,
         question_id: QUESTION2_ID,
         question: {
           _id: QUESTION3_ID,
