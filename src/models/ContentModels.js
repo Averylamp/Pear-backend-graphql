@@ -353,7 +353,7 @@ export const QuestionSchema = new Schema({
     required: true,
     enum: ['multipleChoice', 'multipleChoiceWithOther', 'freeResponse'],
   },
-  suggestedResponses: { type: [QuestionSuggestedResponseSchema], required: true },
+  suggestedResponses: { type: [QuestionSuggestedResponseSchema], required: true, default: [] },
   tags: {
     type: [String],
     required: true,
