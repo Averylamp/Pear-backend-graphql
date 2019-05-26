@@ -1,67 +1,86 @@
 import {
   BRIAN_ID,
-  JOSH_ID,
-  SAMMI_BOAST1_ID, SAMMI_BOAST2_ID,
-  SAMMI_ID, SOPHIA_ID, UMA_ID,
+  JOSH_ID, QUESTION1_ID, QUESTION2_ID, QUESTION3_ID,
+  SAMMI_ID, SAMMI_QR1_ID, SAMMI_QR3_ID, SAMMI_QR4_ID, SAMMI_QR5_ID,
 } from './TestsContants';
-
-export const EDIT_BRIAN1_ENDORSEMENT_VARIABLES = {
-  editEndorsementInput: {
-    endorser_id: SAMMI_ID,
-    user_id: BRIAN_ID,
-    bio: {
-      author_id: SAMMI_ID,
-      authorFirstName: 'Sammi',
-      content: 'He sells a lot of tshirts',
-    },
-  },
-};
 
 export const EDIT_SAMMI1_ENDORSEMENT_VARIABLES = {
   editEndorsementInput: {
     endorser_id: JOSH_ID,
     user_id: SAMMI_ID,
-    boasts: [
+    questionResponses: [
       {
-        _id: SAMMI_BOAST1_ID,
+        _id: SAMMI_QR1_ID,
         author_id: JOSH_ID,
         authorFirstName: 'Josh',
-        content: 'Sammi boast 1 EDITED',
+        question_id: QUESTION1_ID,
+        question: {
+          _id: QUESTION1_ID,
+          questionText: 'How did they end up on the cover of Forbes?',
+          questionTextWithName: 'How did {{name}} end up on the cover of Forbes?',
+          questionType: 'freeResponse',
+          suggestedResponses: [],
+          tags: [],
+        },
+        responseBody: 'sammi response 1-1 edit 2',
       },
       {
-        _id: SAMMI_BOAST2_ID,
+        _id: SAMMI_QR4_ID,
         author_id: JOSH_ID,
         authorFirstName: 'Josh',
-        content: 'Sammi boast 2',
-      },
-      {
-        author_id: JOSH_ID,
-        authorFirstName: 'Josh',
-        content: 'Sammi boast 4',
+        question_id: QUESTION3_ID,
+        question: {
+          _id: QUESTION3_ID,
+          questionText: 'People only want one thing, and it’s disgusting 😫. What does your friend want?',
+          questionTextWithName: 'People only want one thing, and it’s disgusting 😫. What does {{name}} want?',
+          questionType: 'freeResponse',
+          suggestedResponses: [],
+          tags: [
+            'personality',
+          ],
+        },
+        responseBody: 'sammi response 1-2',
       },
     ],
   },
 };
 
-export const EDIT_SOPHIA2_ENDORSEMENT_VARIABLES = {
+export const EDIT_SAMMI2_ENDORSEMENT_VARIABLES = {
   editEndorsementInput: {
-    endorser_id: UMA_ID,
-    user_id: SOPHIA_ID,
-    bio: {
-      author_id: UMA_ID,
-      authorFirstName: 'Uma',
-      content: 'She loves to dance!!',
-    },
-    vibes: [
+    endorser_id: BRIAN_ID,
+    user_id: SAMMI_ID,
+    questionResponses: [
       {
-        author_id: UMA_ID,
-        authorFirstName: 'Uma',
-        content: 'Zesty',
+        _id: SAMMI_QR3_ID,
+        author_id: BRIAN_ID,
+        question_id: QUESTION2_ID,
+        question: {
+          _id: QUESTION2_ID,
+          questionText: 'What\'s your friend\'s weird flex?',
+          questionTextWithName: 'What\'s {{name}}\'s weird flex?',
+          questionType: 'freeResponse',
+          suggestedResponses: [],
+          tags: [],
+        },
+        authorFirstName: 'Brian',
+        responseBody: 'sammi response 2-2 edit 1',
       },
       {
-        author_id: UMA_ID,
-        authorFirstName: 'Uma',
-        content: 'BANANAS',
+        _id: SAMMI_QR5_ID,
+        author_id: JOSH_ID,
+        question_id: QUESTION2_ID,
+        question: {
+          _id: QUESTION3_ID,
+          questionText: 'People only want one thing, and it’s disgusting 😫. What does your friend want?',
+          questionTextWithName: 'People only want one thing, and it’s disgusting 😫. What does {{name}} want?',
+          questionType: 'freeResponse',
+          suggestedResponses: [],
+          tags: [
+            'personality',
+          ],
+        },
+        authorFirstName: 'Brian',
+        responseBody: 'sammi response 2-3',
       },
     ],
   },
