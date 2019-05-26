@@ -28,9 +28,11 @@ export const QUESTION1_ID = '5c82162afec46c84e0000000';
 export const QUESTION2_ID = '5c82162afec46c84e0000001';
 export const QUESTION3_ID = '5c82162afec46c84e0000002';
 
-export const SAMMI_BOAST1_ID = '5c82162afec55c55e5555500';
-export const SAMMI_BOAST2_ID = '5c82162afec55c55e5555501';
-export const SAMMI_BOAST3_ID = '5c82162afec55c55e5555502';
+export const SAMMI_QR1_ID = '5c82162afec55c55e5555510';
+export const SAMMI_QR2_ID = '5c82162afec55c55e5555511';
+export const SAMMI_QR3_ID = '5c82162afec55c55e5555512';
+export const SAMMI_QR4_ID = '5c82162afec55c55e5555513';
+export const SAMMI_QR5_ID = '5c82162afec55c55e5555514';
 
 export const EMPTY_USER_ID0 = '5c82162afec46c84e924a000';
 export const EMPTY_USER_ID1 = '5c82162afec46c84e924a001';
