@@ -4,7 +4,6 @@ import * as Sentry from '@sentry/node';
 import { start } from './start';
 import { runTests } from './tests/RunTests';
 import { startStatsGeneration } from './StatsGeneration';
-import { startDiscoveryGeneration } from './DiscoveryGeneration';
 import { runMigration } from './migration1/Migration1';
 import {
   devMode, performingMigration1, performingMigration2, regenTestDBMode,
@@ -49,9 +48,6 @@ const init = async () => {
   } else if (process.env.TASK === 'stats-generation') {
     debug('starting stats generation');
     startStatsGeneration();
-  } else if (process.env.TASK === 'discovery-generation') {
-    debug('starting discovery generation');
-    startDiscoveryGeneration();
   } else if (performingMigration1) {
     debug('performing migration 1');
     runMigration();
