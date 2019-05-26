@@ -6,21 +6,8 @@ export const ADD_QUESTIONS_VARIABLES = {
       _id: QUESTION1_ID,
       questionText: 'How did they end up on the cover of Forbes?',
       questionTextWithName: 'How did {{name}} end up on the cover of Forbes?',
-      questionType: 'multipleChoiceWithOther',
-      suggestedResponses: [
-        {
-          responseBody: 'Because they\'re a "self-made" billionaire',
-        },
-        {
-          responseBody: 'Because they actually deserved it 😍',
-        },
-        {
-          responseBody: 'They made #30Under30, except it\'s because they ate 30 chicken nuggets in under 30 seconds',
-        },
-        {
-          responseBody: 'Got busted for money laundering 🤷\u200d♂️',
-        },
-      ],
+      questionType: 'freeResponse',
+      suggestedResponses: [],
       tags: [
         'personality',
       ],
@@ -29,24 +16,8 @@ export const ADD_QUESTIONS_VARIABLES = {
       _id: QUESTION2_ID,
       questionText: 'What\'s your friend\'s weird flex?',
       questionTextWithName: 'What\'s {{name}}\'s weird flex?',
-      questionType: 'multipleChoiceWithOther',
-      suggestedResponses: [
-        {
-          responseBody: 'Does homework drunk, still gets A\'s',
-        },
-        {
-          responseBody: '5.0 uber rating',
-        },
-        {
-          responseBody: 'Barry’s Bootcamp/SoulCycle/Orange Theory is an essential part of their morning routine',
-        },
-        {
-          responseBody: 'Fluent in vines',
-        },
-        {
-          responseBody: 'The best relationship advice giver even though they’ve been single af since the womb',
-        },
-      ],
+      questionType: 'freeResponse',
+      suggestedResponses: [],
       tags: [
         'personality',
       ],
@@ -55,27 +26,8 @@ export const ADD_QUESTIONS_VARIABLES = {
       _id: QUESTION3_ID,
       questionText: 'People only want one thing, and it’s disgusting 😫. What does your friend want?',
       questionTextWithName: 'People only want one thing, and it’s disgusting 😫. What does {{name}} want?',
-      questionType: 'multipleChoiceWithOther',
-      suggestedResponses: [
-        {
-          responseBody: '"Hey, can you endorse me on LinkedIn?"',
-        },
-        {
-          responseBody: '🍆🍑',
-        },
-        {
-          responseBody: 'To get married by 26, have kids by 30, and become the soccer parent of their dreams',
-        },
-        {
-          responseBody: '"Do you have a minute to talk about our Lord and Savior?" ⛪️🙏',
-        },
-        {
-          responseBody: '💸💸To secure the bag and get that MF BREAD 💰🤑💰',
-        },
-        {
-          responseBody: 'To meet new people, make friends, and be the social butterfly they already are 😇🦋',
-        },
-      ],
+      questionType: 'freeResponse',
+      suggestedResponses: [],
       tags: [
         'personality',
       ],

@@ -8,10 +8,10 @@ import {
   MADE_PROFILE_JOSH_D_ID,
   QUESTION1_ID,
   QUESTION2_ID,
-  QUESTION3_ID, SAMMI_BOAST3_ID,
+  QUESTION3_ID,
   SAMMI_ID,
   SAMMI_PROFILE_BRIAN_D_ID,
-  SAMMI_PROFILE_JOSH_D_ID,
+  SAMMI_PROFILE_JOSH_D_ID, SAMMI_QR1_ID, SAMMI_QR2_ID, SAMMI_QR3_ID,
   SOPHIA_ID,
   SOPHIA_PROFILE_SAMMI_D_ID,
   SOPHIA_PROFILE_UMA_D_ID,
@@ -28,13 +28,7 @@ export const CREATE_AVERY1_DETACHED_PROFILE_VARIABLES = {
     lastName: 'Lamp',
     gender: 'male',
     phoneNumber: '9738738225',
-    boasts: [
-      {
-        author_id: MADE_ID,
-        authorFirstName: 'Made',
-        content: 'Makes amazing pesto',
-      },
-    ],
+    boasts: [],
     roasts: [],
     questionResponses: [
       {
@@ -45,40 +39,16 @@ export const CREATE_AVERY1_DETACHED_PROFILE_VARIABLES = {
           _id: QUESTION1_ID,
           questionText: 'How did they end up on the cover of Forbes?',
           questionTextWithName: 'How did {{name}} end up on the cover of Forbes?',
-          questionType: 'multipleChoiceWithOther',
-          suggestedResponses: [
-            {
-              responseBody: 'Because they\'re a "self-made" billionaire',
-            },
-            {
-              responseBody: 'Because they actually deserved it 😍',
-            },
-            {
-              responseBody: 'They made #30Under30, except it\'s because they ate 30 chicken nuggets in under 30 seconds',
-            },
-            {
-              responseBody: 'Got busted for money laundering 🤷\u200d♂️',
-            },
-          ],
+          questionType: 'freeResponse',
+          suggestedResponses: [],
           tags: [
             'personality',
           ],
         },
-        responseBody: 'Because they actually deserved it 😍',
+        responseBody: 'avery response 1-1',
       },
     ],
-    vibes: [
-      {
-        author_id: MADE_ID,
-        authorFirstName: 'Made',
-        content: 'Fruity Cutie',
-      },
-      {
-        author_id: MADE_ID,
-        authorFirstName: 'Made',
-        content: 'Just Add Water',
-      },
-    ],
+    vibes: [],
   },
 };
 
@@ -90,13 +60,7 @@ export const CREATE_BRIAN1_DETACHED_PROFILE_VARIABLES = {
     firstName: 'Brian',
     phoneNumber: '2067789236',
     boasts: [],
-    roasts: [
-      {
-        author_id: SAMMI_ID,
-        authorFirstName: 'Sammi',
-        content: 'The kind of guy who would make a dating app',
-      },
-    ],
+    roasts: [],
     questionResponses: [
       {
         author_id: SAMMI_ID,
@@ -106,38 +70,16 @@ export const CREATE_BRIAN1_DETACHED_PROFILE_VARIABLES = {
           _id: QUESTION2_ID,
           questionText: 'What\'s your friend\'s weird flex?',
           questionTextWithName: 'What\'s {{name}}\'s weird flex?',
-          questionType: 'multipleChoiceWithOther',
-          suggestedResponses: [
-            {
-              responseBody: 'Does homework drunk, still gets A\'s',
-            },
-            {
-              responseBody: '5.0 uber rating',
-            },
-            {
-              responseBody: 'Barry’s Bootcamp/SoulCycle/Orange Theory is an essential part of their morning routine',
-            },
-            {
-              responseBody: 'Fluent in vines',
-            },
-            {
-              responseBody: 'The best relationship advice giver even though they’ve been single af since the womb',
-            },
-          ],
+          questionType: 'freeResponse',
+          suggestedResponses: [],
           tags: [
             'personality',
           ],
         },
-        responseBody: '5.0 uber rating',
+        responseBody: 'brian response 1-1',
       },
     ],
-    vibes: [
-      {
-        author_id: SAMMI_ID,
-        authorFirstName: 'Sammi',
-        content: 'Extra Like Guac',
-      },
-    ],
+    vibes: [],
   },
 };
 
@@ -149,13 +91,7 @@ export const CREATE_JOSH1_DETACHED_PROFILE_VARIABLES = {
     firstName: 'Josh',
     gender: 'male',
     phoneNumber: '7897897898',
-    boasts: [
-      {
-        author_id: SOPHIA_ID,
-        authorFirstName: 'Sophia',
-        content: 'IG Clout King',
-      },
-    ],
+    boasts: [],
     roasts: [],
     questionResponses: [
       {
@@ -166,46 +102,14 @@ export const CREATE_JOSH1_DETACHED_PROFILE_VARIABLES = {
           _id: QUESTION3_ID,
           questionText: 'People only want one thing, and it’s disgusting 😫. What does your friend want?',
           questionTextWithName: 'People only want one thing, and it’s disgusting 😫. What does {{name}} want?',
-          questionType: 'multipleChoiceWithOther',
-          suggestedResponses: [
-            {
-              responseBody: '"Hey, can you endorse me on LinkedIn?"',
-            },
-            {
-              responseBody: '🍆🍑',
-            },
-            {
-              responseBody: 'To get married by 26, have kids by 30, and become the soccer parent of their dreams',
-            },
-            {
-              responseBody: '"Do you have a minute to talk about our Lord and Savior?" ⛪️🙏',
-            },
-            {
-              responseBody: '💸💸To secure the bag and get that MF BREAD 💰🤑💰',
-            },
-            {
-              responseBody: 'To meet new people, make friends, and be the social butterfly they already are 😇🦋',
-            },
-          ],
-          tags: [
-            'personality',
-          ],
+          questionType: 'freeResponse',
+          suggestedResponses: [],
+          tags: [],
         },
-        responseBody: '"Hey, can you endorse me on LinkedIn?"',
+        responseBody: 'josh response 1-1',
       },
     ],
-    vibes: [
-      {
-        author_id: SOPHIA_ID,
-        authorFirstName: 'Sophia',
-        content: 'Kiki Kiwi',
-      },
-      {
-        author_id: SOPHIA_ID,
-        authorFirstName: 'Sophia',
-        content: 'Zesty',
-      },
-    ],
+    vibes: [],
   },
 };
 
@@ -218,15 +122,10 @@ export const CREATE_SAMMI1_DETACHED_PROFILE_VARIABLES = {
     phoneNumber: '9788733736',
     gender: 'female',
     boasts: [],
-    roasts: [
-      {
-        author_id: JOSH_ID,
-        authorFirstName: 'Josh',
-        content: 'Red as a tomato after one drink',
-      },
-    ],
+    roasts: [],
     questionResponses: [
       {
+        _id: SAMMI_QR1_ID,
         author_id: JOSH_ID,
         authorFirstName: 'Josh',
         question_id: QUESTION1_ID,
@@ -234,26 +133,11 @@ export const CREATE_SAMMI1_DETACHED_PROFILE_VARIABLES = {
           _id: QUESTION1_ID,
           questionText: 'How did they end up on the cover of Forbes?',
           questionTextWithName: 'How did {{name}} end up on the cover of Forbes?',
-          questionType: 'multipleChoiceWithOther',
-          suggestedResponses: [
-            {
-              responseBody: 'Because they\'re a "self-made" billionaire',
-            },
-            {
-              responseBody: 'Because they actually deserved it 😍',
-            },
-            {
-              responseBody: 'They made #30Under30, except it\'s because they ate 30 chicken nuggets in under 30 seconds',
-            },
-            {
-              responseBody: 'Got busted for money laundering 🤷\u200d♂️',
-            },
-          ],
-          tags: [
-            'personality',
-          ],
+          questionType: 'freeResponse',
+          suggestedResponses: [],
+          tags: [],
         },
-        responseBody: 'They made #30Under30, except it\'s because they ate 30 chicken nuggets in under 30 seconds',
+        responseBody: 'sammi response 1-1',
       },
     ],
     vibes: [],
@@ -267,22 +151,11 @@ export const CREATE_SAMMI2_DETACHED_PROFILE_VARIABLES = {
     creatorFirstName: 'Brian',
     firstName: 'Sammi',
     phoneNumber: '9788733736',
-    boasts: [
-      {
-        _id: SAMMI_BOAST3_ID,
-        author_id: BRIAN_ID,
-        authorFirstName: 'Brian',
-        content: 'MIT girl who u can trust to make you the Big Bux',
-      },
-      {
-        author_id: BRIAN_ID,
-        authorFirstName: 'Brian',
-        content: 'Throwaway boast',
-      },
-    ],
+    boasts: [],
     roasts: [],
     questionResponses: [
       {
+        _id: SAMMI_QR2_ID,
         author_id: BRIAN_ID,
         authorFirstName: 'Brian',
         question_id: QUESTION1_ID,
@@ -290,28 +163,14 @@ export const CREATE_SAMMI2_DETACHED_PROFILE_VARIABLES = {
           _id: QUESTION1_ID,
           questionText: 'How did they end up on the cover of Forbes?',
           questionTextWithName: 'How did {{name}} end up on the cover of Forbes?',
-          questionType: 'multipleChoiceWithOther',
-          suggestedResponses: [
-            {
-              responseBody: 'Because they\'re a "self-made" billionaire',
-            },
-            {
-              responseBody: 'Because they actually deserved it 😍',
-            },
-            {
-              responseBody: 'They made #30Under30, except it\'s because they ate 30 chicken nuggets in under 30 seconds',
-            },
-            {
-              responseBody: 'Got busted for money laundering 🤷\u200d♂️',
-            },
-          ],
-          tags: [
-            'personality',
-          ],
+          questionType: 'freeResponse',
+          suggestedResponses: [],
+          tags: [],
         },
-        responseBody: 'Got busted for money laundering 🤷\u200d♂️',
+        responseBody: 'sammi response 2-1',
       },
       {
+        _id: SAMMI_QR3_ID,
         author_id: BRIAN_ID,
         authorFirstName: 'Brian',
         question_id: QUESTION2_ID,
@@ -319,29 +178,11 @@ export const CREATE_SAMMI2_DETACHED_PROFILE_VARIABLES = {
           _id: QUESTION2_ID,
           questionText: 'What\'s your friend\'s weird flex?',
           questionTextWithName: 'What\'s {{name}}\'s weird flex?',
-          questionType: 'multipleChoiceWithOther',
-          suggestedResponses: [
-            {
-              responseBody: 'Does homework drunk, still gets A\'s',
-            },
-            {
-              responseBody: '5.0 uber rating',
-            },
-            {
-              responseBody: 'Barry’s Bootcamp/SoulCycle/Orange Theory is an essential part of their morning routine',
-            },
-            {
-              responseBody: 'Fluent in vines',
-            },
-            {
-              responseBody: 'The best relationship advice giver even though they’ve been single af since the womb',
-            },
-          ],
-          tags: [
-            'personality',
-          ],
+          questionType: 'freeResponse',
+          suggestedResponses: [],
+          tags: [],
         },
-        responseBody: 'Fluent in vines',
+        responseBody: 'sammi response 2-2',
       },
     ],
     vibes: [],
@@ -356,13 +197,7 @@ export const CREATE_MADE1_DETACHED_PROFILE_VARIABLES = {
     firstName: 'Made',
     phoneNumber: '6092402838',
     boasts: [],
-    roasts: [
-      {
-        author_id: JOSH_ID,
-        authorFirstName: 'Josh',
-        content: 'if you hang out with her she will feed you 10000 snacks',
-      },
-    ],
+    roasts: [],
     questionResponses: [],
     vibes: [],
   },
@@ -375,19 +210,7 @@ export const CREATE_UMA1_DETACHED_PROFILE_VARIABLES = {
     creatorFirstName: 'Brian',
     firstName: 'Uma',
     phoneNumber: '9784296614',
-    boasts: [
-      {
-        author_id: BRIAN_ID,
-        authorFirstName: 'Brian',
-        content: 'Gyms religiously',
-      },
-      {
-        author_id: BRIAN_ID,
-        authorFirstName: 'Brian',
-        content: 'Casually gets onsite tech interviews when she wants to visit the Bay',
-      },
-
-    ],
+    boasts: [],
     roasts: [],
     questionResponses: [],
     vibes: [],
@@ -401,27 +224,10 @@ export const CREATE_SOPHIA1_DETACHED_PROFILE_VARIABLES = {
     creatorFirstName: 'Sammi',
     firstName: 'Sophia',
     phoneNumber: '9165189165',
-    boasts: [
-      {
-        author_id: SAMMI_ID,
-        authorFirstName: 'Sammi',
-        content: 'dance queen',
-      },
-    ],
+    boasts: [],
     roasts: [],
     questionResponses: [],
-    vibes: [
-      {
-        author_id: SAMMI_ID,
-        authorFirstName: 'Sammi',
-        content: 'BANANAS',
-      },
-      {
-        author_id: SAMMI_ID,
-        authorFirstName: 'Sammi',
-        content: 'Coco-NUTS',
-      },
-    ],
+    vibes: [],
   },
 };
 
@@ -432,37 +238,9 @@ export const CREATE_SOPHIA2_DETACHED_PROFILE_VARIABLES = {
     creatorFirstName: 'Uma',
     firstName: 'Sophia',
     phoneNumber: '9165189165',
-    boasts: [
-      {
-        author_id: UMA_ID,
-        authorFirstName: 'Uma',
-        content: 'This girl can juggle!!',
-      },
-    ],
-    roasts: [
-      {
-        author_id: UMA_ID,
-        authorFirstName: 'Uma',
-        content: 'Likes sleep more than she\'ll like you',
-      },
-    ],
+    boasts: [],
+    roasts: [],
     questionResponses: [],
-    vibes: [
-      {
-        author_id: UMA_ID,
-        authorFirstName: 'Uma',
-        content: 'Zesty',
-      },
-      {
-        author_id: UMA_ID,
-        authorFirstName: 'Uma',
-        content: 'BANANAS',
-      },
-      {
-        author_id: UMA_ID,
-        authorFirstName: 'Uma',
-        content: 'Spicy',
-      },
-    ],
+    vibes: [],
   },
 };
