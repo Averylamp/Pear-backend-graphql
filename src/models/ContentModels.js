@@ -21,6 +21,9 @@ extend type Mutation {
   
   # add single question
   addQuestion(newQuestion: NewQuestionInput!): Question
+  
+  # add multiple FR questions, with just questionText and questionTextWithName
+  addFreeResponseQuestions(newQuestionsPartial: [NewQuestionPartialInput!]!): [Question!]!
 }
 `;
 
@@ -241,6 +244,11 @@ input NewQuestionInput {
   tags: [QuestionTag!]
 }
 
+input NewQuestionPartialInput {
+  questionText: String!
+  questionTextWithName: String
+}
+
 type QuestionSuggestedResponse {
   responseBody: String!
   responseTitle: String
@@ -352,6 +360,7 @@ export const QuestionSchema = new Schema({
     type: String,
     required: true,
     enum: ['multipleChoice', 'multipleChoiceWithOther', 'freeResponse'],
+    default: 'freeResponse',
   },
   suggestedResponses: { type: [QuestionSuggestedResponseSchema], required: true, default: [] },
   tags: {
@@ -361,7 +370,7 @@ export const QuestionSchema = new Schema({
     index: true,
     enum: ['starter', 'spicy', 'dating', 'personality', 'dodont', 'boastroast', 'bio'],
   },
-  placeholderResponseText: { type: String, required: false },
+  placeholderResponseText: { type: String, required: false, default: '' },
   hiddenInQuestionnaire: { type: Boolean, required: true, default: false },
   hiddenInProfile: { type: Boolean, required: true, default: false },
 }, { timestamps: true });
