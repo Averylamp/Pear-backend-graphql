@@ -1,0 +1,51 @@
+{
+  "newQuestions": [
+    {
+      "questionText": "If you're hanging out with them, don't be surprised if they...",
+      "questionTextWithName": "If you're hanging out with {{name}}, don't be surprised if they..."
+    },
+    {
+      "questionText": "The pro(s) of dating them \uD83D\uDE07",
+      "questionTextWithName": "The pro(s) of dating {{name}} \uD83D\uDE07"
+    },
+    {
+      "questionText": "Roast them a little \uD83D\uDE08"
+    },
+    {
+      "questionText": "Tips for dating them: DO...",
+      "questionTextWithName": "Tips for dating {{name}}: DO..."
+    },
+    {
+      "questionText": "Tips for dating them: DON'T...",
+      "questionTextWithName": "Tips for dating {{name}}: DON'T..."
+    },
+    {
+      "questionText": "What are they TOO proud of?",
+      "questionTextWithName": "What is {{name}} TOO proud of?"
+    },
+    {
+      "questionText": "One thing that might surprise you about them is...",
+      "questionTextWithName": "One thing that might surprise you about {{name}} is..."
+    },
+    {
+      "questionText": "A unique but endearing thing about them is...",
+      "questionTextWithName": "A unique but endearing thing about {{name}} is..."
+    },
+    {
+      "questionText": "Their fatal weakness is...",
+      "questionTextWithName": "{{name}}'s fatal weakness is..."
+    },
+    {
+      "questionText": "What's their secret talent?",
+      "questionTextWithName": "What's {{name}}'s secret talent?"
+    },
+    {
+      "questionText": "The fastest way to their heart is...",
+      "questionTextWithName": "The fastest way to {{name}}'s heart is..."
+    },
+    {
+      "questionText": "They're looking for someone who...",
+      "questionTextWithName": "{{name}} is looking for someone who..."
+    }
+  ]
+}

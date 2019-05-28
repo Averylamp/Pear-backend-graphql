@@ -54,6 +54,26 @@ const mutations = devMode ? {
       return null;
     }
   },
+  addFreeResponseQuestions: async (_source, { newQuestionsPartial }) => {
+    try {
+      const newQuestionPromises = [];
+      for (const newQuestionPartial of newQuestionsPartial) {
+        const questionInput = newQuestionPartial;
+        questionInput._id = mongoose.Types.ObjectId();
+        const questionModel = new Question(questionInput);
+        newQuestionPromises.push(questionModel.save().catch((err) => {
+          errorLog(questionInput);
+          errorLog(err);
+        }));
+      }
+      return Promise.all(newQuestionPromises).catch((err) => {
+        errorLog(err);
+      });
+    } catch (e) {
+      errorLog(`An error occurred: ${e}`);
+      return [];
+    }
+  },
 } : {};
 
 export const resolvers = {
