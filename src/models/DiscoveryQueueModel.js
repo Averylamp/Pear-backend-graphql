@@ -82,6 +82,8 @@ const DiscoveryQueueSchema = new Schema({
   },
   decidedDiscoveryItems: { type: [DecidedDiscoveryItemSchema], required: true, default: [] },
   currentFilters: { type: MatchingPreferencesSchema, required: false },
+  currentGender: { type: String, required: false, enum: ['male', 'female', 'nonbinary'] },
+  currentEvent_id: { type: Schema.Types.ObjectId, required: false },
 }, { timestamps: true });
 
 
