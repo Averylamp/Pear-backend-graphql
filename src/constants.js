@@ -14,6 +14,16 @@ export const DISCOVERY_RATE_LIMIT = [
   },
 ];
 
+export const DISCOVERY_EVENT_RATE_LIMIT = [
+  {
+    intervalLengthMillis: 24 * 60 * 60 * 1000,
+    limit: 60,
+  }, {
+    intervalLengthMillis: 3 * 60 * 60 * 1000,
+    limit: 30,
+  },
+];
+
 export const SEEDED_PROFILES_START = 10;
 
 export const MAX_DISCOVERY_CARDS_RETRIEVE = 10;
