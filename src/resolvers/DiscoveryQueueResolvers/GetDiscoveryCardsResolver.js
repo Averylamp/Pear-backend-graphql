@@ -3,7 +3,7 @@ import geolib from 'geolib';
 import { User } from '../../models/UserModel';
 import { DiscoveryQueue } from '../../models/DiscoveryQueueModel';
 import {
-  DISCOVERY_CACHE_SIZE,
+  DISCOVERY_CACHE_SIZE, DISCOVERY_EVENT_RATE_LIMIT,
   DISCOVERY_RATE_LIMIT, DISCOVERY_REFRESH_THRESHOLD,
   MAX_DISCOVERY_CARDS_RETRIEVE, SEEDED_PROFILES_START,
 } from '../../constants';
@@ -18,6 +18,7 @@ const getPipeline = ({
   blacklist,
   skippedList,
   seededOnly,
+  event_id,
   nTotal,
 }) => {
   const disallowed_ids = blacklist.concat(skippedList);
@@ -41,6 +42,9 @@ const getPipeline = ({
       },
     ],
   };
+  if (event_id) {
+    matchStage.event_ids = event_id;
+  }
   if (matchingPreferences) {
     if (matchingPreferences.seekingGender) {
       matchStage['matchingDemographics.gender'] = { $in: matchingPreferences.seekingGender };
@@ -55,7 +59,7 @@ const getPipeline = ({
       }
     }
     if (matchingPreferences.location && matchingPreferences.maxDistance) {
-      matchStage['matchingDemographics.location.point'] = {
+      matchStage['matchingDemographics.location'] = {
         $geoWithin: {
           $centerSphere: [
             matchingPreferences.location.point.coordinates,
@@ -89,6 +93,7 @@ const getSuitableUsers = async ({
   blacklist,
   skippedList,
   seededOnly,
+  event_id,
   nUsers,
 }) => {
   const pipeline = getPipeline({
@@ -97,6 +102,7 @@ const getSuitableUsers = async ({
     blacklist,
     skippedList,
     seededOnly,
+    event_id,
     nTotal: Math.floor(1.5 * nUsers),
   });
   const users = await User
@@ -147,13 +153,13 @@ const getUserBlacklist = ({ user, discoveryQueue }) => {
 
 const getUserSkippedList = ({ discoveryQueue }) => discoveryQueue.skippedUser_ids;
 
-const getDiscoveryItemsMaxNumber = ({ discoveryQueue, max }) => {
+const getDiscoveryItemsMaxNumber = ({ discoveryQueue, max, eventMode }) => {
   let maxNCards = MAX_DISCOVERY_CARDS_RETRIEVE;
   const now = new Date();
   if (max && max < maxNCards) {
     maxNCards = max;
   }
-  for (const rateLimitObj of DISCOVERY_RATE_LIMIT) {
+  for (const rateLimitObj of (eventMode ? DISCOVERY_EVENT_RATE_LIMIT : DISCOVERY_RATE_LIMIT)) {
     const nDecidedInInterval = discoveryQueue.decidedDiscoveryItems
       .filter(item => item.timestamp.getTime()
         > now.getTime() - rateLimitObj.intervalLengthMillis).length;
@@ -161,6 +167,9 @@ const getDiscoveryItemsMaxNumber = ({ discoveryQueue, max }) => {
     if (maxThisInterval < maxNCards) {
       maxNCards = maxThisInterval;
     }
+  }
+  if (maxNCards < 0) {
+    maxNCards = 0;
   }
   return maxNCards;
 };
@@ -225,6 +234,13 @@ const filterUpdateNeeded = ({ discoveryQueue, newFilters }) => {
   })) {
     return true;
   }
+  if (discoveryQueue.currentGender !== newFilters.currentGender) {
+    return true;
+  }
+  if ((discoveryQueue.currentEvent_id || '').toString()
+    !== (newFilters.event_id || '').toString()) {
+    return true;
+  }
   return false;
 };
 
@@ -237,27 +253,48 @@ export const addCardsToCache = async ({ user, discoveryQueue, nCardsToAdd }) => 
   let cardsToPush = [];
   for (const ignoreSkipList of [false, true]) {
     for (const includeLocation of [true, false]) {
-      for (const seededOnly of [true, false]) {
-        let seededOnlyFinal = seededOnly;
-        if (discoveryQueue.decidedDiscoveryItems
-          && discoveryQueue.decidedDiscoveryItems.length > SEEDED_PROFILES_START) {
-          seededOnlyFinal = false;
-        }
-        const params = {
-          matchingPreferences: includeLocation
-            ? filters : pick(filters, ['seekingGender', 'minAgeRange', 'maxAgeRange']),
-          matchingDemographics: { gender: user.gender },
-          blacklist: userBlacklist,
-          skippedList: ignoreSkipList ? [] : userSkippedList,
-          seededOnly: seededOnlyFinal,
-          nUsers: cardsRemaining,
-        };
-        const usersToAdd = await getSuitableUsers(params);
-        userBlacklist = userBlacklist.concat(usersToAdd.map(userToAdd => userToAdd._id));
-        cardsToPush = cardsToPush.concat(usersToAdd);
-        cardsRemaining -= usersToAdd.length;
-        if (cardsRemaining === 0) {
-          break;
+      for (const widerAge of [false, true]) {
+        for (const seededOnly of [true, false]) {
+          let seededOnlyFinal = seededOnly;
+          if (discoveryQueue.decidedDiscoveryItems
+            && discoveryQueue.decidedDiscoveryItems.length > SEEDED_PROFILES_START) {
+            seededOnlyFinal = false;
+          }
+          const preferencesFields = ['seekingGender', 'minAgeRange', 'maxAgeRange'];
+          if (includeLocation) {
+            preferencesFields.push('location');
+            preferencesFields.push('maxDistance');
+          }
+          const matchingPreferences = pick(filters, preferencesFields);
+          if (widerAge) {
+            if (matchingPreferences.minAgeRange) {
+              matchingPreferences.minAgeRange -= 3;
+              if (matchingPreferences.minAgeRange < 18) {
+                matchingPreferences.minAgeRange = 18;
+              }
+            }
+            if (matchingPreferences.maxAgeRange) {
+              matchingPreferences.maxAgeRange += 4;
+            }
+          }
+          const params = {
+            matchingPreferences,
+            matchingDemographics: { gender: discoveryQueue.currentGender },
+            blacklist: userBlacklist,
+            skippedList: ignoreSkipList ? [] : userSkippedList,
+            seededOnly: seededOnlyFinal,
+            nUsers: cardsRemaining,
+          };
+          if (discoveryQueue.currentEvent_id) {
+            params.event_id = discoveryQueue.currentEvent_id;
+          }
+          const usersToAdd = await getSuitableUsers(params);
+          userBlacklist = userBlacklist.concat(usersToAdd.map(userToAdd => userToAdd._id));
+          cardsToPush = cardsToPush.concat(usersToAdd);
+          cardsRemaining -= usersToAdd.length;
+          if (cardsRemaining === 0) {
+            break;
+          }
         }
       }
       if (cardsRemaining === 0) {
@@ -292,14 +329,16 @@ export const getDiscoveryCards = async ({ user_id, filters, max }) => {
       message: GET_DISCOVERY_CARDS_ERROR,
     };
   }
-  const maxNCards = getDiscoveryItemsMaxNumber({ discoveryQueue, max });
-  if (maxNCards === 0) {
-    return {
-      success: true,
-      items: [],
-    };
-  }
+  // this is an intermediate object with the following properties:
+  // seekingGender (reqd)
+  // maxDistance (reqd)
+  // minAgeRange (reqd)
+  // maxAgeRange (reqd)
+  // location (reqd, LocationSchema)
+  // myGender (not required, i.e. if user.gender is not set and filters.myGender isn't either)
+  // event_id (not required)
   const newFilters = user.matchingPreferences;
+  newFilters.currentGender = user.gender;
   if (filters) {
     newFilters.seekingGender = filters.seekingGender;
     newFilters.minAgeRange = filters.minAgeRange;
@@ -314,10 +353,40 @@ export const getDiscoveryCards = async ({ user_id, filters, max }) => {
         },
       };
     }
+    if (filters.myGender) {
+      newFilters.currentGender = filters.myGender;
+    }
+    if (filters.event_id) {
+      newFilters.event_id = filters.event_id;
+      // note that event_id is always cleared if it's not included in newFilters
+    }
+  }
+  // TODO: set event stuff here, update getDiscoveryItemsMaxNumber to handle
+  // the case where an event is set. maybe pass in a parameter isEventMode boolean?
+  const maxNCards = getDiscoveryItemsMaxNumber({ discoveryQueue, max });
+  if (maxNCards === 0) {
+    return {
+      success: true,
+      items: [],
+    };
   }
   if (filterUpdateNeeded({ discoveryQueue, newFilters })) {
+    errorLog(newFilters);
     discoveryQueue.currentDiscoveryItems = [];
-    discoveryQueue.currentFilters = newFilters;
+    discoveryQueue.currentFilters = pick(newFilters, ['seekingGender', 'minAgeRange',
+      'maxAgeRange', 'maxDistance', 'location']);
+
+    if (newFilters.currentGender) {
+      discoveryQueue.currentGender = newFilters.currentGender;
+    } else {
+      delete discoveryQueue.currentGender;
+    }
+    if (newFilters.event_id) {
+      errorLog(newFilters.event_id);
+      discoveryQueue.currentEvent_id = newFilters.event_id;
+    } else {
+      discoveryQueue.currentEvent_id = undefined;
+    }
     await addCardsToCache({
       user,
       discoveryQueue,
