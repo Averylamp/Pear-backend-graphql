@@ -33,7 +33,9 @@ type EventMutationResponse {
 
 const queryRoutes = `
 extend type Query {
-  getEventByCode(code: String!): Event 
+  getEventByCode(code: String!): Event
+  
+  getEventById(event_id: ID!): Event
 }
 `;
 
