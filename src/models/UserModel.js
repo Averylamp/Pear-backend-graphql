@@ -19,7 +19,7 @@ const { Schema } = mongoose;
 const queryRoutes = `
 extend type Query {
   # Get a user by an ID
-  user(id: ID): User
+  user(id: ID!): User
   # Get a user by firebase tokens
   getUser(userInput: GetUserInput!): UserMutationResponse!
   # send a push notification indicating new message
