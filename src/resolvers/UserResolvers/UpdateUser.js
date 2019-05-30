@@ -4,6 +4,7 @@ import {
   GET_USER_ERROR,
 } from '../ResolverErrorStrings';
 import { LAST_ACTIVE_ARRAY_LEN, LAST_EDITED_ARRAY_LEN } from '../../constants';
+import { DetachedProfile } from '../../models/DetachedProfile';
 
 // const errorLog = require('debug')('error:UpdateUserResolver');
 
@@ -21,6 +22,34 @@ const generateReferralCode = async (firstName, maxIters = 20) => {
     }
   }
   return code;
+};
+
+const updateEndorsedContentFirstNames = async ({ user, firstName }) => {
+  const detachedProfiles = await DetachedProfile.find({ _id: { $in: user.detachedProfile_ids } });
+  const endorsees = await User.find({ _id: { $in: user.endorsedUser_ids } });
+  for (const detachedProfile of detachedProfiles) {
+    // set authorFirstName of questionResponses and dp
+    if (firstName) {
+      detachedProfile.creatorFirstName = firstName;
+    }
+    for (const questionResponse of detachedProfile.questionResponses) {
+      if (firstName) {
+        questionResponse.authorFirstName = firstName;
+      }
+    }
+    detachedProfile.save();
+  }
+  for (const endorsee of endorsees) {
+    // set authorFirstName of questionResponses
+    for (const questionResponse of endorsee.questionResponses) {
+      if (questionResponse.author_id.toString() === user._id.toString()) {
+        if (firstName) {
+          questionResponse.authorFirstName = firstName;
+        }
+      }
+    }
+    endorsee.save();
+  }
 };
 
 export const updateUserResolver = async ({ updateUserInput }) => {
@@ -68,6 +97,10 @@ export const updateUserResolver = async ({ updateUserInput }) => {
     if (referralCode) {
       userUpdateObj.referralCode = referralCode;
     }
+  }
+  // update firstNames on all endorsees if firstName updated
+  if (updateUserInput.firstName) {
+    updateEndorsedContentFirstNames({ user, firstName: updateUserInput.firstName });
   }
   // mongo dot notation for updates
   if (updateUserInput.seekingGender) {
