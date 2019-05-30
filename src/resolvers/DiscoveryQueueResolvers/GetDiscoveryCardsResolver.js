@@ -10,7 +10,7 @@ import {
 import { GET_DISCOVERY_CARDS_ERROR, GET_USER_ERROR } from '../ResolverErrorStrings';
 import { shuffle } from '../../tests/Utils';
 
-const errorLog = require('debug')('error:DiscoverProfile');
+const errorLog = require('debug')('error:GetDiscoveryCardsResolver');
 
 const getPipeline = ({
   matchingPreferences,
@@ -296,6 +296,9 @@ export const addCardsToCache = async ({ user, discoveryQueue, nCardsToAdd }) => 
             break;
           }
         }
+        if (cardsRemaining === 0) {
+          break;
+        }
       }
       if (cardsRemaining === 0) {
         break;
@@ -361,9 +364,11 @@ export const getDiscoveryCards = async ({ user_id, filters, max }) => {
       // note that event_id is always cleared if it's not included in newFilters
     }
   }
-  // TODO: set event stuff here, update getDiscoveryItemsMaxNumber to handle
-  // the case where an event is set. maybe pass in a parameter isEventMode boolean?
-  const maxNCards = getDiscoveryItemsMaxNumber({ discoveryQueue, max });
+  const maxNCards = getDiscoveryItemsMaxNumber({
+    discoveryQueue,
+    max,
+    eventMode: !!newFilters.event_id,
+  });
   if (maxNCards === 0) {
     return {
       success: true,
@@ -371,7 +376,6 @@ export const getDiscoveryCards = async ({ user_id, filters, max }) => {
     };
   }
   if (filterUpdateNeeded({ discoveryQueue, newFilters })) {
-    errorLog(newFilters);
     discoveryQueue.currentDiscoveryItems = [];
     discoveryQueue.currentFilters = pick(newFilters, ['seekingGender', 'minAgeRange',
       'maxAgeRange', 'maxDistance', 'location']);
@@ -382,7 +386,6 @@ export const getDiscoveryCards = async ({ user_id, filters, max }) => {
       delete discoveryQueue.currentGender;
     }
     if (newFilters.event_id) {
-      errorLog(newFilters.event_id);
       discoveryQueue.currentEvent_id = newFilters.event_id;
     } else {
       discoveryQueue.currentEvent_id = undefined;
