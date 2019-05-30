@@ -26,6 +26,7 @@ export const resolvers = {
     },
     getDiscoveryCards: async (_, { user_id, filters, max }) => {
       try {
+        debug('getDiscoveryCards called');
         return getDiscoveryCards({ user_id, filters, max });
       } catch (e) {
         generateSentryErrorForResolver({
