@@ -111,6 +111,8 @@ input UpdateUserInput {
   age: Int
   birthdate: String
   
+  questionResponses: [QuestionUserResponseInput!]
+  
   ethnicity: [EthnicityEnum]
   ethnicityVisible: Boolean
   educationLevel: EducationLevelEnum
