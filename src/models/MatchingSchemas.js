@@ -128,10 +128,12 @@ type MatchingPreferences{
 
 input FiltersInput {
   seekingGender: [Gender!]!
+  myGender: Gender
   maxDistance: Int
   minAgeRange: Int!
   maxAgeRange: Int!
   locationCoords: [Float!]
+  event_id: ID
 }
 `;
 

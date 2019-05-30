@@ -23,7 +23,7 @@ export const CREATE_AVERY1_DETACHED_PROFILE_VARIABLES = {
   detachedProfileInput: {
     _id: AVERY_PROFILE_MADE_D_ID,
     creatorUser_id: MADE_ID,
-    creatorFirstName: 'Made',
+    creatorFirstName: '',
     firstName: 'Avery',
     lastName: 'Lamp',
     gender: 'male',
@@ -33,7 +33,7 @@ export const CREATE_AVERY1_DETACHED_PROFILE_VARIABLES = {
     questionResponses: [
       {
         author_id: MADE_ID,
-        authorFirstName: 'Made',
+        authorFirstName: '',
         question_id: QUESTION1_ID,
         question: {
           _id: QUESTION1_ID,
@@ -56,7 +56,7 @@ export const CREATE_BRIAN1_DETACHED_PROFILE_VARIABLES = {
   detachedProfileInput: {
     _id: BRIAN_PROFILE_SAMMI_D_ID,
     creatorUser_id: SAMMI_ID,
-    creatorFirstName: 'Sammi',
+    creatorFirstName: '',
     firstName: 'Brian',
     phoneNumber: '2067789236',
     boasts: [],
@@ -64,7 +64,7 @@ export const CREATE_BRIAN1_DETACHED_PROFILE_VARIABLES = {
     questionResponses: [
       {
         author_id: SAMMI_ID,
-        authorFirstName: 'Sammi',
+        authorFirstName: '',
         question_id: QUESTION2_ID,
         question: {
           _id: QUESTION2_ID,
@@ -87,7 +87,7 @@ export const CREATE_JOSH1_DETACHED_PROFILE_VARIABLES = {
   detachedProfileInput: {
     _id: JOSH_PROFILE_SOPHIA_D_ID,
     creatorUser_id: SOPHIA_ID,
-    creatorFirstName: 'Sophia',
+    creatorFirstName: '',
     firstName: 'Josh',
     gender: 'male',
     phoneNumber: '7897897898',
@@ -96,7 +96,7 @@ export const CREATE_JOSH1_DETACHED_PROFILE_VARIABLES = {
     questionResponses: [
       {
         author_id: SOPHIA_ID,
-        authorFirstName: 'Made',
+        authorFirstName: '',
         question_id: QUESTION3_ID,
         question: {
           _id: QUESTION3_ID,
@@ -117,7 +117,7 @@ export const CREATE_SAMMI1_DETACHED_PROFILE_VARIABLES = {
   detachedProfileInput: {
     _id: SAMMI_PROFILE_JOSH_D_ID,
     creatorUser_id: JOSH_ID,
-    creatorFirstName: 'Josh',
+    creatorFirstName: '',
     firstName: 'Sammi',
     phoneNumber: '9788733736',
     gender: 'female',
@@ -127,7 +127,7 @@ export const CREATE_SAMMI1_DETACHED_PROFILE_VARIABLES = {
       {
         _id: SAMMI_QR1_ID,
         author_id: JOSH_ID,
-        authorFirstName: 'Josh',
+        authorFirstName: '',
         question_id: QUESTION1_ID,
         question: {
           _id: QUESTION1_ID,
@@ -148,7 +148,7 @@ export const CREATE_SAMMI2_DETACHED_PROFILE_VARIABLES = {
   detachedProfileInput: {
     _id: SAMMI_PROFILE_BRIAN_D_ID,
     creatorUser_id: BRIAN_ID,
-    creatorFirstName: 'Brian',
+    creatorFirstName: '',
     firstName: 'Sammi',
     phoneNumber: '9788733736',
     boasts: [],
@@ -157,7 +157,7 @@ export const CREATE_SAMMI2_DETACHED_PROFILE_VARIABLES = {
       {
         _id: SAMMI_QR2_ID,
         author_id: BRIAN_ID,
-        authorFirstName: 'Brian',
+        authorFirstName: '',
         question_id: QUESTION1_ID,
         question: {
           _id: QUESTION1_ID,
@@ -172,7 +172,7 @@ export const CREATE_SAMMI2_DETACHED_PROFILE_VARIABLES = {
       {
         _id: SAMMI_QR3_ID,
         author_id: BRIAN_ID,
-        authorFirstName: 'Brian',
+        authorFirstName: '',
         question_id: QUESTION2_ID,
         question: {
           _id: QUESTION2_ID,
@@ -193,7 +193,7 @@ export const CREATE_MADE1_DETACHED_PROFILE_VARIABLES = {
   detachedProfileInput: {
     _id: MADE_PROFILE_JOSH_D_ID,
     creatorUser_id: JOSH_ID,
-    creatorFirstName: 'Josh',
+    creatorFirstName: '',
     firstName: 'Made',
     phoneNumber: '6092402838',
     boasts: [],
@@ -207,7 +207,7 @@ export const CREATE_UMA1_DETACHED_PROFILE_VARIABLES = {
   detachedProfileInput: {
     _id: UMA_PROFILE_BRIAN_D_ID,
     creatorUser_id: BRIAN_ID,
-    creatorFirstName: 'Brian',
+    creatorFirstName: '',
     firstName: 'Uma',
     phoneNumber: '9784296614',
     boasts: [],
@@ -221,7 +221,7 @@ export const CREATE_SOPHIA1_DETACHED_PROFILE_VARIABLES = {
   detachedProfileInput: {
     _id: SOPHIA_PROFILE_SAMMI_D_ID,
     creatorUser_id: SAMMI_ID,
-    creatorFirstName: 'Sammi',
+    creatorFirstName: '',
     firstName: 'Sophia',
     phoneNumber: '9165189165',
     boasts: [],
@@ -235,7 +235,7 @@ export const CREATE_SOPHIA2_DETACHED_PROFILE_VARIABLES = {
   detachedProfileInput: {
     _id: SOPHIA_PROFILE_UMA_D_ID,
     creatorUser_id: UMA_ID,
-    creatorFirstName: 'Uma',
+    creatorFirstName: '',
     firstName: 'Sophia',
     phoneNumber: '9165189165',
     boasts: [],

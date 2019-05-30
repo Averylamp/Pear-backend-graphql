@@ -8,7 +8,8 @@ const errorLog = require('debug')('error:EventResolvers');
 
 export const resolvers = {
   Query: {
-    getEventByCode: async (_source, { code }) => EventModel.findOne({ code }),
+    getEventByCode: async (_source, { code }) => EventModel.findOne({ code }).exec(),
+    getEventById: async (_source, { event_id }) => EventModel.findById(event_id).exec(),
   },
   Mutation: {
     createEvent: async (_source, { eventInput }) => {
