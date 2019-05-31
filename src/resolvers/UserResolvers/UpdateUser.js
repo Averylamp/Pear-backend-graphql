@@ -88,6 +88,14 @@ export const updateUserResolver = async ({ updateUserInput }) => {
       userUpdateObj[field] = userUpdateObj[field].trim();
     }
   }
+
+  for (const field of ['firstName', 'lastName', 'school', 'work', 'jobTitle', 'hometown']) {
+    if (userUpdateObj[field]) {
+      userUpdateObj[field] = userUpdateObj[field].trim();
+      userUpdateObj[field] = userUpdateObj[field].charAt(0).toUpperCase()
+        + userUpdateObj[field].slice(1);
+    }
+  }
   userUpdateObj.$push = {
     lastActiveTimes: {
       $each: [new Date()],
