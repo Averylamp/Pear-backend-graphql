@@ -80,6 +80,7 @@ export const updateUserResolver = async ({ updateUserInput }) => {
     'deactivated',
     'thumbnailURL',
     'firebaseRemoteInstanceID',
+    'questionResponses',
   ]);
   userUpdateObj.$push = {
     lastActiveTimes: {
@@ -91,6 +92,18 @@ export const updateUserResolver = async ({ updateUserInput }) => {
       $slice: -1 * LAST_EDITED_ARRAY_LEN,
     },
   };
+  if (userUpdateObj.questionResponses) {
+    let visibleCounter = 0;
+    for (const questionResponse of userUpdateObj.questionResponses) {
+      if (!questionResponse.hidden) {
+        if (visibleCounter >= 5) {
+          questionResponse.hidden = true;
+        } else {
+          visibleCounter += 1;
+        }
+      }
+    }
+  }
   // set referral code if this is the first time setting firstName
   if (!user.firstName && updateUserInput.firstName) {
     const referralCode = await generateReferralCode(updateUserInput.firstName);
