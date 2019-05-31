@@ -82,6 +82,12 @@ export const updateUserResolver = async ({ updateUserInput }) => {
     'firebaseRemoteInstanceID',
     'questionResponses',
   ]);
+  for (const field of ['firstName', 'email', 'lastName', 'school', 'work', 'jobTitle',
+    'hometown']) {
+    if (userUpdateObj[field]) {
+      userUpdateObj[field] = userUpdateObj[field].trim();
+    }
+  }
   userUpdateObj.$push = {
     lastActiveTimes: {
       $each: [new Date()],
