@@ -72,19 +72,26 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
       questionResponse.authorThumbnailURL = creator.thumbnailURL;
     }
   }
-  if (detachedProfile.bio) {
-    if (creator.firstName) {
-      detachedProfile.bio.authorFirstName = creator.firstName;
+  // user should have max 5 visible prompts
+  let visibleCount = 0;
+  for (const questionResponse of user.questionResponses) {
+    if (!questionResponse.hidden) {
+      visibleCount += 1;
     }
-    if (creator.thumbnailURL) {
-      detachedProfile.bio.authorThumbnailURL = creator.thumbnailURL;
+  }
+  for (const questionResponse of detachedProfile.questionResponses) {
+    if (!questionResponse.hidden) {
+      if (visibleCount >= 5) {
+        questionResponse.hidden = true;
+      } else {
+        visibleCount += 1;
+      }
     }
   }
 
   // construct user update object
   const userObjectUpdate = {
     isSeeking: true,
-    biosCount: user.bios.length + (detachedProfile.bio ? 1 : 0),
     questionResponsesCount: user.questionResponses.length
       + detachedProfile.questionResponses.length,
     $inc: {
@@ -95,9 +102,6 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
       endorser_ids: creatorUser_id,
       endorsedUser_ids: creatorUser_id,
       questionResponses: { $each: detachedProfile.questionResponses },
-      bios: {
-        $each: detachedProfile.bio ? [detachedProfile.bio] : [],
-      },
       lastEditedTimes: {
         $each: [new Date()],
         $slice: -1 * LAST_EDITED_ARRAY_LEN,
@@ -147,20 +151,8 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
         questionResponse.authorThumbnailURL = user.thumbnailURL;
       }
     }
-    if (oppositeDetachedProfile.bio) {
-      if (user.firstName) {
-        oppositeDetachedProfile.bio.authorFirstName = user.firstName;
-      }
-      if (creator.thumbnailURL) {
-        oppositeDetachedProfile.bio.authorThumbnailURL = user.thumbnailURL;
-      }
-    }
-    creatorObjectUpdate.biosCount = creator.bios.length + (oppositeDetachedProfile.bio ? 1 : 0);
     creatorObjectUpdate.questionResponsesCount = creator.questionResponses.length
       + oppositeDetachedProfile.questionResponses.length;
-    creatorObjectUpdate.$push.bios = {
-      $each: oppositeDetachedProfile.bio ? [oppositeDetachedProfile.bio] : [],
-    };
     creatorObjectUpdate.$push.questionResponses = {
       $each: oppositeDetachedProfile.questionResponses,
     };
