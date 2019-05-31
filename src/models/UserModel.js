@@ -60,6 +60,9 @@ extend type Mutation{
   
   # mark a profile as regular quality
   markRegularQuality(user_id: ID!): UserMutationResponse!
+  
+  # trim stuff
+  trimWhitespaces(user_id: ID!): UserMutationResponse!
 }
 `;
 
