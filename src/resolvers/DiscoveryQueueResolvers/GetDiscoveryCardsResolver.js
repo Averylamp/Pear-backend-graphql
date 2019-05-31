@@ -159,13 +159,15 @@ const getDiscoveryItemsMaxNumber = ({ discoveryQueue, max, eventMode }) => {
   if (max && max < maxNCards) {
     maxNCards = max;
   }
-  for (const rateLimitObj of (eventMode ? DISCOVERY_EVENT_RATE_LIMIT : DISCOVERY_RATE_LIMIT)) {
-    const nDecidedInInterval = discoveryQueue.decidedDiscoveryItems
-      .filter(item => item.timestamp.getTime()
-        > now.getTime() - rateLimitObj.intervalLengthMillis).length;
-    const maxThisInterval = rateLimitObj.limit - nDecidedInInterval;
-    if (maxThisInterval < maxNCards) {
-      maxNCards = maxThisInterval;
+  if (discoveryQueue.decidedDiscoveryItems.length > 20) {
+    for (const rateLimitObj of (eventMode ? DISCOVERY_EVENT_RATE_LIMIT : DISCOVERY_RATE_LIMIT)) {
+      const nDecidedInInterval = discoveryQueue.decidedDiscoveryItems
+        .filter(item => item.timestamp.getTime()
+          > now.getTime() - rateLimitObj.intervalLengthMillis).length;
+      const maxThisInterval = rateLimitObj.limit - nDecidedInInterval;
+      if (maxThisInterval < maxNCards) {
+        maxNCards = maxThisInterval;
+      }
     }
   }
   if (maxNCards < 0) {
@@ -245,10 +247,14 @@ const filterUpdateNeeded = ({ discoveryQueue, newFilters }) => {
 };
 
 export const addCardsToCache = async ({ user, discoveryQueue, nCardsToAdd }) => {
+  const now = new Date();
   const modifiedDiscoveryQueue = discoveryQueue; // because of no-param-reassign
   const filters = discoveryQueue.currentFilters || user.matchingPreferences;
   let userBlacklist = getUserBlacklist({ user, discoveryQueue });
-  const userSkippedList = getUserSkippedList({ discoveryQueue });
+  const allSkippedList = getUserSkippedList({ discoveryQueue });
+  const lastDaySkippedList = discoveryQueue.decidedDiscoveryItems.filter(item => (
+    item.action === 'skip' && item.timestamp.getTime() > now.getTime() - 24 * 60 * 60 * 1000
+  )).map(item => item.user_id);
   let cardsRemaining = nCardsToAdd;
   let cardsToPush = [];
   for (const ignoreSkipList of [false, true]) {
@@ -281,7 +287,7 @@ export const addCardsToCache = async ({ user, discoveryQueue, nCardsToAdd }) => 
             matchingPreferences,
             matchingDemographics: { gender: discoveryQueue.currentGender },
             blacklist: userBlacklist,
-            skippedList: ignoreSkipList ? [] : userSkippedList,
+            skippedList: ignoreSkipList ? lastDaySkippedList : allSkippedList,
             seededOnly: seededOnlyFinal,
             nUsers: cardsRemaining,
           };
