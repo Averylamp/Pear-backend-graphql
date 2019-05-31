@@ -38,12 +38,17 @@ const updateQuestionResponses = ({ newQuestionResponses, user, author }) => {
       if (oldQuestionResponse.author_id.toString() === author._id.toString()
         && questionResponse._id
         && oldQuestionResponse._id.toString() === questionResponse._id.toString()) {
+        // users shouldn't be able to edit the hidden property of QRs they've written for others
+        const shouldHide = oldQuestionResponse.hidden;
         Object.assign(oldQuestionResponse, questionResponse);
+        oldQuestionResponse.hidden = shouldHide;
         shouldAppend = false;
         break;
       }
     }
     if (shouldAppend) {
+      // automatically set as hidden iff < 5 responses
+      questionResponse.hidden = updatedUser.questionResponses.filter(qr => !qr.hidden).length >= 5;
       updatedUser.questionResponses.push(questionResponse);
     }
   }
