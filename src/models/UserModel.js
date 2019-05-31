@@ -444,10 +444,10 @@ const UserSchema = new Schema({
   },
 
   seeded: {
-    type: Boolean, required: false, default: false,
+    type: Boolean, required: true, default: false,
   },
   lowQuality: {
-    type: Boolean, required: false, default: false,
+    type: Boolean, required: true, default: false,
   },
   event_ids: {
     type: [Schema.Types.ObjectId], required: false, index: true, default: [],
