@@ -259,7 +259,7 @@ export const addCardsToCache = async ({ user, discoveryQueue, nCardsToAdd }) => 
   let cardsToPush = [];
   for (const ignoreSkipList of [false, true]) {
     for (const includeLocation of [true, false]) {
-      for (const widerAge of [false, true]) {
+      for (const widerAge of [0, 3, 5, 10]) {
         for (const seededOnly of [true, false]) {
           let seededOnlyFinal = seededOnly;
           if (discoveryQueue.decidedDiscoveryItems
@@ -272,16 +272,14 @@ export const addCardsToCache = async ({ user, discoveryQueue, nCardsToAdd }) => 
             preferencesFields.push('maxDistance');
           }
           const matchingPreferences = pick(filters, preferencesFields);
-          if (widerAge) {
-            if (matchingPreferences.minAgeRange) {
-              matchingPreferences.minAgeRange -= 5;
-              if (matchingPreferences.minAgeRange < 18) {
-                matchingPreferences.minAgeRange = 18;
-              }
+          if (matchingPreferences.minAgeRange) {
+            matchingPreferences.minAgeRange -= widerAge;
+            if (matchingPreferences.minAgeRange < 18) {
+              matchingPreferences.minAgeRange = 18;
             }
-            if (matchingPreferences.maxAgeRange) {
-              matchingPreferences.maxAgeRange += 6;
-            }
+          }
+          if (matchingPreferences.maxAgeRange) {
+            matchingPreferences.maxAgeRange += widerAge;
           }
           const params = {
             matchingPreferences,
