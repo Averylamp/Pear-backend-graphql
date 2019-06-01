@@ -2,7 +2,7 @@
   "apps" : [{
     "name"        : "GraphQL Backend",
     "script"      : "./dist/index.js",
-    "instances"   : 0,
+    "instances"   : 8,
     "watch"       : false,
     "autorestart" : true,
     "env" : {
