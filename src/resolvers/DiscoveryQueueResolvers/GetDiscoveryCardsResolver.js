@@ -24,6 +24,7 @@ const getPipeline = ({
   const disallowed_ids = blacklist.concat(skippedList);
   const matchStage = {
     isSeeking: true,
+    lowQuality: false,
     _id: {
       $nin: disallowed_ids,
     },
