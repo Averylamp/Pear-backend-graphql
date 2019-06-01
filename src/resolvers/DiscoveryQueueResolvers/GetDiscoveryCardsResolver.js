@@ -274,13 +274,13 @@ export const addCardsToCache = async ({ user, discoveryQueue, nCardsToAdd }) => 
           const matchingPreferences = pick(filters, preferencesFields);
           if (widerAge) {
             if (matchingPreferences.minAgeRange) {
-              matchingPreferences.minAgeRange -= 3;
+              matchingPreferences.minAgeRange -= 5;
               if (matchingPreferences.minAgeRange < 18) {
                 matchingPreferences.minAgeRange = 18;
               }
             }
             if (matchingPreferences.maxAgeRange) {
-              matchingPreferences.maxAgeRange += 4;
+              matchingPreferences.maxAgeRange += 6;
             }
           }
           const params = {
