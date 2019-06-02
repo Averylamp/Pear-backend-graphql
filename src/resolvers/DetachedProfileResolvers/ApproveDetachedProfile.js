@@ -228,7 +228,7 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
       if (updateUserObjectResult instanceof Error
         || updateCreatorObjectResult instanceof Error
         || updateDetachedProfileResult instanceof Error
-        || createChatResult instanceof Error
+        // || createChatResult instanceof Error
         || oppositeDetachedProfileResult instanceof Error) {
         errorLog('error attaching profile, rolling back');
         let errorMessage = '';
