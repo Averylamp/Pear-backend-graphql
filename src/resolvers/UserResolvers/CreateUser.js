@@ -3,6 +3,7 @@ import { createUserObject } from '../../models/UserModel';
 import { createDiscoveryQueueObject } from '../../models/DiscoveryQueueModel';
 import { CREATE_USER_ERROR } from '../ResolverErrorStrings';
 import { generateSentryErrorForResolver } from '../../SentryHelper';
+import { postCreateUser } from '../../SlackHelper';
 
 const mongoose = require('mongoose');
 const errorLog = require('debug')('error:CreateUserResolver');
@@ -76,6 +77,13 @@ export const createUserResolver = async ({ userInput }) => {
           success: false,
           message: CREATE_USER_ERROR,
         };
+      }
+      try {
+        postCreateUser({
+          userPhone: userObject.phoneNumber,
+        });
+      } catch (err) {
+        errorLog(err);
       }
       return {
         success: true,
