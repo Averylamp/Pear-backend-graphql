@@ -9,6 +9,7 @@ import { createDetachedProfileObject, DetachedProfile } from '../../models/Detac
 import { canMakeProfileForSelf } from './DetachedProfileResolverUtils';
 import { generateSentryErrorForResolver } from '../../SentryHelper';
 import { rollbackObject } from '../../../util/util';
+import { postProfileCreation } from '../../SlackHelper';
 
 const mongoose = require('mongoose');
 const debug = require('debug')('dev:DetachedProfileResolvers');
@@ -170,6 +171,17 @@ export const createDetachedProfileResolver = async ({ detachedProfileInput }) =>
           message: CREATE_DETACHED_PROFILE_ERROR,
         };
       }
+
+      try {
+        postProfileCreation({
+          userName: detachedProfileObject.creatorFirstName,
+          detachedUserName: detachedProfileObject.firstName,
+          contentItems: finalDetachedProfileInput.questionResponses,
+        });
+      } catch (err) {
+        errorLog(err);
+      }
+
       debug('Completed successfully');
       return {
         success: true,

@@ -205,7 +205,7 @@ export const createNewMatchResolver = async ({
   if (match instanceof Error
     || sentForEdgeResult instanceof Error
     || receivedByEdgeResult instanceof Error
-    || createChatResult instanceof Error
+    // || createChatResult instanceof Error
     || sentByDiscoveryResult instanceof Error
     || sentForDiscoveryResult instanceof Error
     || receivedByDiscoveryResult instanceof Error) {

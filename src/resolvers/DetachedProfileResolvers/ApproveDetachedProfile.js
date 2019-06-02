@@ -14,6 +14,7 @@ import {
 import { getAndValidateUsersAndDetachedProfileObjects } from './DetachedProfileResolverUtils';
 import { generateSentryErrorForResolver } from '../../SentryHelper';
 import { rollbackObject } from '../../../util/util';
+import { postProfileApproval } from '../../SlackHelper';
 
 const debug = require('debug')('dev:DetachedProfileResolvers');
 const errorLog = require('debug')('error:DetachedProfileResolvers');
@@ -88,6 +89,16 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
       }
     }
   }
+  try {
+    postProfileApproval({
+      userName: user.firstName,
+      creatorName: creator.firstName,
+      contentItems: detachedProfile.questionResponses,
+    });
+  } catch (err) {
+    errorLog(err);
+  }
+
 
   // construct user update object
   const userObjectUpdate = {
@@ -217,7 +228,7 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
       if (updateUserObjectResult instanceof Error
         || updateCreatorObjectResult instanceof Error
         || updateDetachedProfileResult instanceof Error
-        || createChatResult instanceof Error
+        // || createChatResult instanceof Error
         || oppositeDetachedProfileResult instanceof Error) {
         errorLog('error attaching profile, rolling back');
         let errorMessage = '';
