@@ -152,6 +152,10 @@ function createApolloServer() {
   return server;
 }
 
+const pre = async() => {
+  debug('pre-express');
+};
+
 export const apolloServer = createApolloServer();
 
 export const start = async () => {
@@ -164,10 +168,11 @@ export const start = async () => {
     mongoose.set('useFindAndModify', false);
     const db = mongoose.connection;
     db.on('error', debug.bind(console, 'MongoDB connection error:'));
-    db.once('open', () => {
+    db.once('open', async () => {
       debug('Mongo connected');
       prodConsole('Mongo connected');
 
+      await pre();
 
       const app = express();
       app.use(bodyParser.json());
