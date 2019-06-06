@@ -152,7 +152,7 @@ function createApolloServer() {
   return server;
 }
 
-const pre = async() => {
+const pre = async () => {
   debug('pre-express');
 };
 
