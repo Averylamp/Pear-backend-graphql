@@ -143,8 +143,6 @@ function createApolloServer() {
   const server = new ApolloServer({
     typeDefs: finalTypeDefs,
     resolvers: finalResolvers,
-    // engine must be null if creating test DB
-    engine: (process.env.ENGINE_API_KEY) ? process.env.ENGINE_API_KEY : null,
     tracing,
     playground: devMode,
     introspection: devMode,
