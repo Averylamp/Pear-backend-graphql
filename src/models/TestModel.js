@@ -7,6 +7,7 @@ export const typeDef = `
 extend type Query {
   testObject(id: ID!): TestObject
   testObjects: [TestObject!]!
+  echo(message: String!): String!
 }
 
 extend type Mutation {
