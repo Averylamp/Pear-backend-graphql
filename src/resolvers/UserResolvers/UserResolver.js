@@ -100,6 +100,20 @@ export const resolvers = {
         };
       }
     },
+    getAllUsers: async () => {
+      if (!devMode) {
+        errorLog('can\'t call get all users from prod mode');
+        return [];
+      }
+      try {
+        const users = await User.find({});
+        debug('got all users');
+        return users.filter(user => !!user);
+      } catch (e) {
+        errorLog(`An error occurred getting users: ${e}`);
+        return [];
+      }
+    },
     notifyNewMessage: async (_source, { fromUser_id, toUser_id }) => {
       const from = await User.findById(fromUser_id)
         .exec();
