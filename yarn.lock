@@ -5122,6 +5122,11 @@ no-case@^2.2.0, no-case@^2.3.2:
   dependencies:
     lower-case "^1.1.1"
 
+node-dogstatsd@^0.0.7:
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/node-dogstatsd/-/node-dogstatsd-0.0.7.tgz#544d274c91a413426a2f3c40ff7b8e8813cfd930"
+  integrity sha1-VE0nTJGkE0JqLzxA/3uOiBPP2TA=
+
 node-fetch@^2.1.2, node-fetch@^2.2.0, node-fetch@^2.3.0:
   version "2.6.0"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.0.tgz#e633456386d4aa55863f676a7ab0daa8fdecb0fd"

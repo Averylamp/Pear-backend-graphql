@@ -19,6 +19,7 @@ import { generateSentryErrorForResolver } from '../../SentryHelper';
 import { deleteUserResolver } from '../../deletion/UserDeletion';
 import { addEventCodeResolver } from './AddEventCode';
 import { updateUserPhotosResolver } from './UpdateUserPhotos';
+import { datadogStats } from '../../DatadogHelper';
 
 const debug = require('debug')('dev:UserResolvers');
 const errorLog = require('debug')('error:UserResolver');
@@ -51,6 +52,7 @@ export const resolvers = {
     getUser: async (_source, args) => {
       const { userInput } = args;
       functionCallConsole('Get User Called');
+      datadogStats.increment('server.call.get_user');
       const token = userInput.firebaseToken;
       const uid = userInput.firebaseAuthID;
       try {
