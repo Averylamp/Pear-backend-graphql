@@ -12,6 +12,7 @@ export const resolvers = {
       debug('Getting all test objects.');
       return TestObject.find();
     },
+    echo: async (_, { message }) => message,
   },
   Mutation: {
     createTestObject: async (_source, { testField }) => {
