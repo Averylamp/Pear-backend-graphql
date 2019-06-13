@@ -7,10 +7,10 @@ export const NEW_PROFILE_BONUS = 2;
 export const DISCOVERY_RATE_LIMIT = [
   {
     intervalLengthMillis: 24 * 60 * 60 * 1000,
-    limit: 10,
+    limit: 50,
   }, {
     intervalLengthMillis: 3 * 60 * 60 * 1000,
-    limit: 5,
+    limit: 20,
   },
 ];
 
@@ -20,7 +20,7 @@ export const DISCOVERY_EVENT_RATE_LIMIT = [
 
 export const SEEDED_PROFILES_START = 10;
 
-export const MAX_DISCOVERY_CARDS_RETRIEVE = 10;
+export const MAX_DISCOVERY_CARDS_RETRIEVE = 30;
 
 export const DISCOVERY_REFRESH_THRESHOLD = 20;
 
