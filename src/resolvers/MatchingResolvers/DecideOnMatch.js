@@ -1,5 +1,6 @@
 import { Match } from '../../models/MatchModel';
 import { User } from '../../models/UserModel';
+import { datadogStats } from '../../DatadogHelper';
 import {
   notifyEndorsementChatAcceptedRequest, sendMatchAcceptedMatchmakerPushNotification,
   sendMatchAcceptedPushNotification,
@@ -21,7 +22,13 @@ export const decideOnMatchResolver = async ({ user_id, match_id, decision }) => 
   if (!['reject', 'accept'].includes(decision)) {
     throw new Error(`Unknown match action: ${decision}`);
   }
+  datadogStats.increment('server.stats.match_decision_made');
   const acceptedMatch = decision === 'accept';
+  if (acceptedMatch) {
+    datadogStats.increment('server.stats.user_accepted_match');
+  } else {
+    datadogStats.increment('server.stats.user_rejected_match');
+  }
   // verifies that user exists, match exists, user is part of match, user hasn't yet taken
   // accept/reject action on match
   const promisesResult = await getAndValidateUserAndMatchObjects(
@@ -138,11 +145,13 @@ export const decideOnMatchResolver = async ({ user_id, match_id, decision }) => 
     };
   }
   if (isAMatch) {
+    datadogStats.increment('server.stats.match_double_accepted');
     sendMatchAcceptedServerMessage({ chatID: match.firebaseChatDocumentID });
     sendMatchAcceptedPushNotification({ user, otherUser });
     sendMatchAcceptedPushNotification({ otherUser, user });
     const matchmakerMade = match.sentForUser_id.toString() !== match.sentByUser_id.toString();
     if (matchmakerMade) {
+      datadogStats.increment('server.stats.match_double_accepted_matchmaker');
       const sentBy = await User.findById(match.sentByUser_id);
       let sentFor;
       let receivedBy;
@@ -176,6 +185,8 @@ export const decideOnMatchResolver = async ({ user_id, match_id, decision }) => 
           pearPoints: 1,
         },
       }).exec();
+    } else {
+      datadogStats.increment('server.stats.match_double_accepted_personal');
     }
   }
   return {
