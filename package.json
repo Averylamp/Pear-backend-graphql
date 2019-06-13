@@ -47,6 +47,7 @@
     "mongo-dot-notation": "^1.2.0",
     "mongoose": "^5.4.13",
     "nanoid": "^2.0.1",
+    "node-dogstatsd": "^0.0.7",
     "request": "^2.88.0",
     "twilio": "^3.29.0"
   }

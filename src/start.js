@@ -2,61 +2,61 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import { merge } from 'lodash';
 import {
-  typeDef as User,
+  typeDef as UserTypeDef,
 } from './models/UserModel';
 import {
   resolvers as UserResolvers,
 } from './resolvers/UserResolvers/UserResolver';
 import {
-  typeDef as ImageContainer,
+  typeDef as ImageContainerTypeDef,
 } from './models/ImageSchemas';
 import {
   resolvers as ImageResolvers,
 } from './resolvers/ImageResolver';
 import {
-  typeDef as DetachedProfile,
+  typeDef as DetachedProfileTypeDef,
 } from './models/DetachedProfile';
 import {
   resolvers as DetachedProfileResolvers,
 } from './resolvers/DetachedProfileResolvers/DetachedProfileResolver';
 import {
-  typeDef as Match,
+  typeDef as MatchTypeDef,
 } from './models/MatchModel';
 import {
   resolvers as MatchResolvers,
 } from './resolvers/MatchingResolvers/MatchResolver';
 import {
-  typeDef as DiscoveryQueue,
+  typeDef as DiscoveryQueueTypeDef,
 } from './models/DiscoveryQueueModel';
 import {
   resolvers as DiscoveryQueueResolvers,
 } from './resolvers/DiscoveryQueueResolvers/DiscoveryQueueResolver';
 import {
-  typeDef as TestObject,
+  typeDef as TestObjectTypeDef,
 } from './models/TestModel';
 import {
   resolvers as TestObjectResolvers,
 } from './resolvers/TestObjectResolver';
 import {
-  typeDef as MatchingSchemas,
+  typeDef as MatchingSchemasTypeDef,
 } from './models/MatchingSchemas';
 import {
-  typeDef as LocationSchemas,
+  typeDef as LocationSchemasTypeDef,
 } from './models/LocationModels';
 import {
   resolvers as LocationResolvers,
 } from './resolvers/LocationResolver';
 import {
-  typeDef as ContentSchemas,
+  typeDef as ContentSchemasTypeDef,
 } from './models/ContentModels';
 import {
   resolvers as ContentResolvers,
 } from './resolvers/ContentResolvers';
 import {
-  typeDef as EndorsementModels,
+  typeDef as EndorsementModelsTypeDef,
 } from './models/EndorsementModels';
 import {
-  typeDef as EventModels,
+  typeDef as EventModelsTypeDef,
 } from './models/EventModel';
 import {
   resolvers as EventResolvers,
@@ -111,17 +111,17 @@ function createApolloServer() {
   `;
   const finalTypeDefs = [
     Query,
-    User,
-    DetachedProfile,
-    Match,
-    DiscoveryQueue,
-    TestObject,
-    ImageContainer,
-    MatchingSchemas,
-    LocationSchemas,
-    ContentSchemas,
-    EndorsementModels,
-    EventModels,
+    UserTypeDef,
+    DetachedProfileTypeDef,
+    MatchTypeDef,
+    DiscoveryQueueTypeDef,
+    TestObjectTypeDef,
+    ImageContainerTypeDef,
+    MatchingSchemasTypeDef,
+    LocationSchemasTypeDef,
+    ContentSchemasTypeDef,
+    EndorsementModelsTypeDef,
+    EventModelsTypeDef,
   ];
 
   const resolvers = {
@@ -143,14 +143,16 @@ function createApolloServer() {
   const server = new ApolloServer({
     typeDefs: finalTypeDefs,
     resolvers: finalResolvers,
-    // engine must be null if creating test DB
-    engine: (process.env.ENGINE_API_KEY) ? process.env.ENGINE_API_KEY : null,
     tracing,
     playground: devMode,
     introspection: devMode,
   });
   return server;
 }
+
+const pre = async () => {
+  debug('pre-express');
+};
 
 export const apolloServer = createApolloServer();
 
@@ -164,10 +166,11 @@ export const start = async () => {
     mongoose.set('useFindAndModify', false);
     const db = mongoose.connection;
     db.on('error', debug.bind(console, 'MongoDB connection error:'));
-    db.once('open', () => {
+    db.once('open', async () => {
       debug('Mongo connected');
       prodConsole('Mongo connected');
 
+      await pre();
 
       const app = express();
       app.use(bodyParser.json());
