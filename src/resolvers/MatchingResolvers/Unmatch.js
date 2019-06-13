@@ -4,6 +4,7 @@ import { generateSentryErrorForResolver } from '../../SentryHelper';
 import { UNMATCH_ERROR } from '../ResolverErrorStrings';
 import { getAndValidateUserAndMatchObjects } from './MatchResolverUtils';
 import { rollbackObject } from '../../../util/util';
+import { datadogStats } from '../../DatadogHelper';
 
 const debug = require('debug')('dev:Unmatch');
 const errorLogger = require('debug')('error:Unmatch');
@@ -19,6 +20,8 @@ export const unmatchResolver = async ({ user_id, match_id, reason }) => {
     match_id,
     validationType: 'unmatch',
   });
+  datadogStats.increment('server.stats.user_unmatched');
+
   const user = promisesResult[0];
   const match = promisesResult[1];
   const otherUser = promisesResult[2];
