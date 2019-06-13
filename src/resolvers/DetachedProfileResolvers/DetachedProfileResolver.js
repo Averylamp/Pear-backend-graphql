@@ -15,6 +15,7 @@ import { approveDetachedProfileResolver } from './ApproveDetachedProfile';
 import { getAndValidateUsersAndDetachedProfileObjects } from './DetachedProfileResolverUtils';
 import { editDetachedProfileResolver } from './EditDetachedProfile';
 import { generateSentryErrorForResolver } from '../../SentryHelper';
+import { datadogStats } from '../../DatadogHelper';
 
 const debug = require('debug')('dev:DetachedProfileResolvers');
 const errorLog = require('debug')('error:DetachedProfileResolvers');
@@ -38,6 +39,7 @@ export const resolvers = {
   },
   Mutation: {
     createDetachedProfile: async (_, { detachedProfileInput }) => {
+      datadogStats.increment('server.stats.detached_profile_created');
       functionCallConsole('Create Detached Profile Called');
       try {
         return createDetachedProfileResolver({ detachedProfileInput });
@@ -58,7 +60,6 @@ export const resolvers = {
     },
     viewDetachedProfile: async (_source, { user_id, detachedProfile_id }) => {
       functionCallConsole('View Detached Profile Called');
-
       try {
         await getAndValidateUsersAndDetachedProfileObjects({
           user_id,
@@ -91,7 +92,7 @@ export const resolvers = {
     },
     editDetachedProfile: async (_source, { editDetachedProfileInput }) => {
       functionCallConsole('Edit Detached Profile Called');
-
+      datadogStats.increment('server.stats.detached_profile_edited');
       try {
         return editDetachedProfileResolver({ editDetachedProfileInput });
       } catch (e) {
@@ -111,6 +112,7 @@ export const resolvers = {
     },
     approveNewDetachedProfile: async (_source, { approveDetachedProfileInput }) => {
       functionCallConsole('Approve Profile Called');
+      datadogStats.increment('server.stats.detached_profile_approved');
       try {
         return approveDetachedProfileResolver({ approveDetachedProfileInput });
       } catch (e) {
