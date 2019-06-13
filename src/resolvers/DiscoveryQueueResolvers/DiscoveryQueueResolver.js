@@ -7,6 +7,7 @@ import { generateSentryErrorForResolver } from '../../SentryHelper';
 import { skipDiscoveryItemResolver } from './SkipDiscoveryItem';
 import { devMode } from '../../constants';
 import { getDiscoveryCards } from './GetDiscoveryCardsResolver';
+import { datadogStats } from '../../DatadogHelper';
 
 const mongoose = require('mongoose');
 const debug = require('debug')('dev:DiscoveryQueueResolver');
@@ -46,6 +47,7 @@ export const resolvers = {
   },
   Mutation: {
     skipDiscoveryItem: async (_source, { user_id, discoveryItem_id }) => {
+      datadogStats.increment('server.stats.discovery_user_skipped');
       try {
         return skipDiscoveryItemResolver({ user_id, discoveryItem_id });
       } catch (e) {
