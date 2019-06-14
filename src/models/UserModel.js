@@ -28,6 +28,9 @@ extend type Query {
   alreadyOnPear(myPhoneNumber: String!, phoneNumbers: [String!]!): [String!]!
   # get fake user count
   getUserCount: Int!
+  
+  # admin
+  getAllUsers: [User!]!
 }
 
 `;
@@ -204,6 +207,8 @@ type User {
   roasts: [Roast!]!
   questionResponses: [QuestionUserResponse!]!
   vibes: [Vibe!]!
+  
+  questionResponsesCount: Int!
 
   # deprecating?
   dos: [Do!]!
@@ -278,8 +283,13 @@ type User {
   event_ids: [ID!]!
   events: [Event!]!
 
-  # seeded profile? null is false
-  seeded: Boolean
+  # seeded / lowQuality profile?
+  seeded: Boolean!
+  lowQuality: Boolean!
+  
+  lastActiveTimes: [String!]!
+  lastEditedTimes: [String!]!
+  createdAt: String!
 }
 
 `;
