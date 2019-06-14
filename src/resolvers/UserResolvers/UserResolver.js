@@ -19,6 +19,7 @@ import { generateSentryErrorForResolver } from '../../SentryHelper';
 import { deleteUserResolver } from '../../deletion/UserDeletion';
 import { addEventCodeResolver } from './AddEventCode';
 import { updateUserPhotosResolver } from './UpdateUserPhotos';
+import { datadogStats } from '../../DatadogHelper';
 
 const debug = require('debug')('dev:UserResolvers');
 const errorLog = require('debug')('error:UserResolver');
@@ -51,6 +52,7 @@ export const resolvers = {
     getUser: async (_source, args) => {
       const { userInput } = args;
       functionCallConsole('Get User Called');
+      datadogStats.increment('server.call.get_user');
       const token = userInput.firebaseToken;
       const uid = userInput.firebaseAuthID;
       try {
@@ -115,6 +117,7 @@ export const resolvers = {
       }
     },
     notifyNewMessage: async (_source, { fromUser_id, toUser_id }) => {
+      datadogStats.increment('server.stats.notification_user_received_new_message');
       const from = await User.findById(fromUser_id)
         .exec();
       const to = await User.findById(toUser_id)
@@ -143,6 +146,7 @@ export const resolvers = {
   Mutation: {
     createUser: async (_source, { userInput }) => {
       functionCallConsole('Create User');
+      datadogStats.increment('server.stats.new_user_created');
       try {
         return createUserResolver({ userInput });
       } catch (e) {
@@ -162,6 +166,7 @@ export const resolvers = {
     },
     updateUser: async (_source, { updateUserInput }) => {
       functionCallConsole('Update User');
+      datadogStats.increment('server.stats.user_updated_information');
       try {
         return updateUserResolver({ updateUserInput });
       } catch (e) {
@@ -181,6 +186,7 @@ export const resolvers = {
     },
     updateUserPhotos: async (_source, { updateUserPhotosInput }) => {
       functionCallConsole('Update Photos Called');
+      datadogStats.increment('server.stats.user_updated_photos');
       try {
         return updateUserPhotosResolver({ updateUserPhotosInput });
       } catch (e) {
@@ -200,6 +206,7 @@ export const resolvers = {
     },
     editEndorsement: async (_source, { editEndorsementInput }) => {
       functionCallConsole('Edit Endorsement Called');
+      datadogStats.increment('server.stats.user_updated_endorsement');
       try {
         return editEndorsementResolver({ editEndorsementInput });
       } catch (e) {
