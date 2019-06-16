@@ -252,6 +252,9 @@ type User {
 
   discoveryQueue_id: ID!
   discoveryQueueObj: DiscoveryQueue!
+  
+  actionSummary_id: ID!
+  actionSummaryObj: UserActionSummary!
 
   matchingPreferences: MatchingPreferences!
   matchingDemographics: MatchingDemographics!
@@ -421,6 +424,7 @@ const UserSchema = new Schema({
   },
 
   discoveryQueue_id: { type: Schema.Types.ObjectId, required: true },
+  actionSummary_id: { type: Schema.Types.ObjectId, required: true },
 
   matchingDemographics: {
     type: MatchingDemographicsSchema,

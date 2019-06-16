@@ -230,6 +230,10 @@ type Question {
   hiddenInQuestionnaire: Boolean!
   # shows up in profiles or not
   hiddenInProfile: Boolean!
+  
+  # admin
+  createdAt: String
+  updatedAt: String
 }
 
 input NewQuestionInput {

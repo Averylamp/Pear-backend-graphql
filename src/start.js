@@ -61,6 +61,9 @@ import {
 import {
   resolvers as EventResolvers,
 } from './resolvers/EventResolvers';
+import {
+  typeDef as UserActionSummaryTypeDef,
+} from './models/UserActionModel';
 import { devMode } from './constants';
 
 const { ApolloServer } = require('apollo-server-express');
@@ -122,6 +125,7 @@ function createApolloServer() {
     ContentSchemasTypeDef,
     EndorsementModelsTypeDef,
     EventModelsTypeDef,
+    UserActionSummaryTypeDef,
   ];
 
   const resolvers = {

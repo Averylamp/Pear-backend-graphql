@@ -4,6 +4,7 @@ import { createDiscoveryQueueObject } from '../../models/DiscoveryQueueModel';
 import { CREATE_USER_ERROR } from '../ResolverErrorStrings';
 import { generateSentryErrorForResolver } from '../../SentryHelper';
 import { postCreateUser } from '../../SlackHelper';
+import { createActionSummaryObject } from '../../models/UserActionModel';
 
 const mongoose = require('mongoose');
 const errorLog = require('debug')('error:CreateUserResolver');
@@ -12,6 +13,7 @@ const debug = require('debug')('dev:CreateUserResolver');
 export const createUserResolver = async ({ userInput }) => {
   const userObjectID = '_id' in userInput ? userInput._id : mongoose.Types.ObjectId();
   const discoveryQueueObjectID = mongoose.Types.ObjectId();
+  const userActionSummaryObjectID = mongoose.Types.ObjectId();
 
   const finalUserInput = pick(userInput, [
     'phoneNumber',
@@ -24,6 +26,7 @@ export const createUserResolver = async ({ userInput }) => {
   finalUserInput.lastActiveTimes = [new Date()];
   finalUserInput._id = userObjectID;
   finalUserInput.discoveryQueue_id = discoveryQueueObjectID;
+  finalUserInput.actionSummary_id = userActionSummaryObjectID;
   finalUserInput.matchingPreferences = {};
   finalUserInput.matchingDemographics = {};
   const createUserObj = createUserObject(finalUserInput)
@@ -37,10 +40,17 @@ export const createUserResolver = async ({ userInput }) => {
   )
     .catch(err => err);
 
-  return Promise.all([createUserObj, createDiscoveryQueueObj])
-    .then(async ([userObject, discoveryQueueObject]) => {
+  const createUserActionSummaryObj = createActionSummaryObject({
+    user_id: userObjectID,
+    _id: userActionSummaryObjectID,
+  })
+    .catch(err => err);
+
+  return Promise.all([createUserObj, createDiscoveryQueueObj, createUserActionSummaryObj])
+    .then(async ([userObject, discoveryQueueObject, userActionSummaryObject]) => {
       if (userObject instanceof Error
-        || discoveryQueueObject instanceof Error) {
+        || discoveryQueueObject instanceof Error
+        || userActionSummaryObject instanceof Error) {
         debug('error occurred while creating user');
         let errorMessage = '';
         if (userObject instanceof Error) {
@@ -62,6 +72,17 @@ export const createUserResolver = async ({ userInput }) => {
               debug(`Failed to remove discovery object${err}`);
             } else {
               debug('Removed created discovery object successfully');
+            }
+          });
+        }
+        if (userActionSummaryObject instanceof Error) {
+          errorMessage += userActionSummaryObject.toString();
+        } else {
+          userActionSummaryObject.remove((err) => {
+            if (err) {
+              debug(`Failed to remove user action summary object ${err}`);
+            } else {
+              debug('Removed user action summary object successfully');
             }
           });
         }
