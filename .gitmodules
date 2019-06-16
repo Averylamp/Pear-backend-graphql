@@ -1,0 +1,3 @@
+[submodule "admin-panel"]
+	path = admin-panel
+	url = git@github.com:pear-matchmaking/admin-panel.git

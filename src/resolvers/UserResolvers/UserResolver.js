@@ -102,6 +102,35 @@ export const resolvers = {
         };
       }
     },
+    getAllUsers: async () => {
+      if (!devMode) {
+        errorLog('can\'t call get all users from prod mode');
+        return [];
+      }
+      try {
+        const users = [];
+        let count = 0;
+        return new Promise((resolve) => {
+          debug('Return all user promise');
+          User.find({})
+            .cursor()
+            .on('data', (user) => {
+              users.push(user);
+              count += 1;
+              if (count % 10 === 0) {
+                debug(`Found: ${count} users`);
+              }
+            })
+            .on('end', async () => {
+              debug('got all users');
+              resolve(users.filter(user => !!user));
+            });
+        });
+      } catch (e) {
+        errorLog(`An error occurred getting users: ${e}`);
+        return [];
+      }
+    },
     notifyNewMessage: async (_source, { fromUser_id, toUser_id }) => {
       datadogStats.increment('server.stats.notification_user_received_new_message');
       const from = await User.findById(fromUser_id)
