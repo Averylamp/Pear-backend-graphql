@@ -1,0 +1,31 @@
+{
+  "apps" : [{
+    "name"        : "Admin Backend",
+    "script"      : "./dist/index.js",
+    "instances"   : 1,
+    "watch"       : false,
+    "autorestart" : true,
+    "env" : {
+       "NODE_ENV": "production",
+       "APP_NAME":"Admin GraphQL Server",
+       "APP_ENV":"dev",
+       "DEBUG":"prod*,error*,develop*",
+       "DEV":"true",
+       "PERF":"false",
+       "DB_NAME":"prod2",
+       "DB_HOST":"cluster0-w4ecv.mongodb.net",
+       "DB_USER":"avery:",
+       "DB_PASS":"0bz8M0eMEtyXlj2aZodIPpJpy@",
+       "PORT":"1235"
+    },
+  },{
+    "name"      : "Admin Server",
+    "script"    : "serve",
+    "instances" : 1,
+    "env" : {
+      "PM2_SERVE_PATH": 'admin-panel/build',
+      "PM2_SERVE_PORT": 8080,
+      "ADMIN_SERVER_URL" : "localhost:1235/graphql"
+    }
+  }]
+}
