@@ -25,7 +25,7 @@
     "env" : {
       "PM2_SERVE_PATH": 'admin-panel/build',
       "PM2_SERVE_PORT": 8080,
-      "ADMIN_SERVER_URL" : "localhost:1235/graphql"
+      "ADMIN_SERVER_URL" : "http://127.0.0.1:1235/graphql"
     }
   }]
 }
