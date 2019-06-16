@@ -113,16 +113,7 @@ const getSuitableUsers = async ({
       return null;
     });
   // pick the most recently active users
-  users.sort((first, second) => {
-    if (second.lastActiveTimes.length === 0) {
-      return -1;
-    }
-    if (first.lastActiveTimes.length === 0) {
-      return 1;
-    }
-    return second.lastActiveTimes[second.lastActiveTimes.length - 1]
-      - first.lastActiveTimes[first.lastActiveTimes.length - 1];
-  });
+  users.sort((first, second) => second.lastActive - first.lastActive);
   return shuffle(users.slice(0, nUsers));
 };
 
