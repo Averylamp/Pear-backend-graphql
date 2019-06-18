@@ -8,6 +8,11 @@ import {
 } from '../../FirebaseManager';
 import { getAndValidateUserAndMatchObjects } from './MatchResolverUtils';
 import { rollbackObject } from '../../../util/util';
+import {
+  recordAcceptMatchRequest,
+  recordMatchOpened,
+  recordRejectMatchRequest,
+} from '../../models/UserActionModel';
 
 const debug = require('debug')('dev:DecideOnMatch');
 const errorLogger = require('debug')('error:DecideOnMatch');
@@ -144,6 +149,11 @@ export const decideOnMatchResolver = async ({ user_id, match_id, decision }) => 
       message,
     };
   }
+  if (acceptedMatch) {
+    recordAcceptMatchRequest({ user, match, otherUser });
+  } else {
+    recordRejectMatchRequest({ user, match, otherUser });
+  }
   if (isAMatch) {
     datadogStats.increment('server.stats.match_double_accepted');
     sendMatchAcceptedServerMessage({ chatID: match.firebaseChatDocumentID });
@@ -185,8 +195,10 @@ export const decideOnMatchResolver = async ({ user_id, match_id, decision }) => 
           pearPoints: 1,
         },
       }).exec();
+      recordMatchOpened({ user, match, otherUser, sentBy });
     } else {
       datadogStats.increment('server.stats.match_double_accepted_personal');
+      recordMatchOpened({ user, match, otherUser });
     }
   }
   return {

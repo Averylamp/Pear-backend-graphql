@@ -20,7 +20,7 @@ import { deleteUserResolver } from '../../deletion/UserDeletion';
 import { addEventCodeResolver } from './AddEventCode';
 import { updateUserPhotosResolver } from './UpdateUserPhotos';
 import { datadogStats } from '../../DatadogHelper';
-import { UserActionSummary } from '../../models/UserActionModel';
+import { recordActivity, recordSentMessage, UserActionSummary } from '../../models/UserActionModel';
 
 const debug = require('debug')('dev:UserResolvers');
 const errorLog = require('debug')('error:UserResolver');
@@ -75,6 +75,7 @@ export const resolvers = {
             },
           };
           User.findByIdAndUpdate(user._id, userUpdateObj).exec();
+          recordActivity({ user });
           return {
             success: true,
             user,
@@ -147,6 +148,7 @@ export const resolvers = {
         from,
         to,
       });
+      recordSentMessage({ fromUser_id, toUser_id });
       return true;
     },
     alreadyOnPear: async (_source, { phoneNumbers }) => {

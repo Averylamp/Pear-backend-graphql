@@ -1,3 +1,9 @@
+import { devMode } from './constants';
+
 const { StatsD } = require('node-dogstatsd');
 
-export const datadogStats = new StatsD();
+class StatsDDev {
+  increment() {}
+}
+
+export const datadogStats = devMode ? new StatsD() : new StatsDDev();

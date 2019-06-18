@@ -4,7 +4,7 @@ import { createDiscoveryQueueObject } from '../../models/DiscoveryQueueModel';
 import { CREATE_USER_ERROR } from '../ResolverErrorStrings';
 import { generateSentryErrorForResolver } from '../../SentryHelper';
 import { postCreateUser } from '../../SlackHelper';
-import { createActionSummaryObject } from '../../models/UserActionModel';
+import { createActionSummaryObject, recordCreateUser } from '../../models/UserActionModel';
 
 const mongoose = require('mongoose');
 const errorLog = require('debug')('error:CreateUserResolver');
@@ -106,6 +106,7 @@ export const createUserResolver = async ({ userInput }) => {
       } catch (err) {
         errorLog(err);
       }
+      recordCreateUser({ user: userObject });
       return {
         success: true,
         user: userObject,
