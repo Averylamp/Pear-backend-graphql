@@ -230,10 +230,6 @@ type Question {
   hiddenInQuestionnaire: Boolean!
   # shows up in profiles or not
   hiddenInProfile: Boolean!
-  
-  # admin
-  createdAt: String
-  updatedAt: String
 }
 
 input NewQuestionInput {
@@ -301,6 +297,9 @@ type QuestionUserResponse {
   icon: IconAssetRef
   
   hidden: Boolean!
+  
+  createdAt: String
+  updatedAt: String
 }
 
 input QuestionUserResponseInput {
@@ -390,7 +389,7 @@ export const QuestionUserResponseSchema = new Schema({
   color: { type: ColorSchema, required: false },
   icon: { type: IconAssetRefSchema, required: false },
   hidden: { type: Boolean, required: true, default: false },
-});
+}, { timestamps: true });
 
 export const VibeSchema = new Schema({
   author_id: { type: Schema.Types.ObjectId, required: true, index: true },

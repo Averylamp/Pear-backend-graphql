@@ -5,6 +5,7 @@ import {
 } from '../ResolverErrorStrings';
 import { LAST_EDITED_ARRAY_LEN } from '../../constants';
 import { generateSentryErrorForResolver } from '../../SentryHelper';
+import { recordEditEndorsement } from '../../models/UserActionModel';
 
 const errorLog = require('debug')('error:EditEndorsement');
 
@@ -85,6 +86,7 @@ export const editEndorsementResolver = async ({ editEndorsementInput }) => {
   try {
     const updatedUser = await user.save();
     // errorLog(updatedUser);
+    recordEditEndorsement({ editEndorsementInput });
     return {
       success: true,
       user: updatedUser,
