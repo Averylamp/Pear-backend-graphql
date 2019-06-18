@@ -104,9 +104,24 @@ export const resolvers = {
         return [];
       }
       try {
-        const users = await User.find({});
-        debug('got all users');
-        return users.filter(user => !!user);
+        const users = [];
+        let count = 0;
+        return new Promise((resolve) => {
+          debug('Return all user promise');
+          User.find({})
+            .cursor()
+            .on('data', (user) => {
+              users.push(user);
+              count += 1;
+              if (count % 10 === 0) {
+                debug(`Found: ${count} users`);
+              }
+            })
+            .on('end', async () => {
+              debug('got all users');
+              resolve(users.filter(user => !!user));
+            });
+        });
       } catch (e) {
         errorLog(`An error occurred getting users: ${e}`);
         return [];
