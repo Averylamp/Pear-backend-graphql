@@ -28,7 +28,7 @@ extend type Query {
   alreadyOnPear(myPhoneNumber: String!, phoneNumbers: [String!]!): [String!]!
   # get fake user count
   getUserCount: Int!
-  
+
   # admin
   getAllUsers: [User!]!
 }
@@ -48,19 +48,19 @@ extend type Mutation{
 
   # an endorser can edit the things they've written for a user
   editEndorsement(editEndorsementInput: EditEndorsementInput!): UserMutationResponse!
-  
+
   # DEVMODE ONLY: delete a user object. when called from prod, this is no-op
   deleteUser(user_id: ID!): UserDeletionResponse!
-  
+
   # adds an event code for the user
   addEventCode(user_id: ID!, code: String!): UserMutationResponse!
-  
+
   # mark a profile as high quality
   markHighQuality(user_id: ID!): UserMutationResponse!
-  
+
   # mark a profile as low quality
   markLowQuality(user_id: ID!): UserMutationResponse!
-  
+
   # mark a profile as regular quality
   markRegularQuality(user_id: ID!): UserMutationResponse!
 }
@@ -113,9 +113,9 @@ input UpdateUserInput {
   gender: Gender
   age: Int
   birthdate: String
-  
+
   questionResponses: [QuestionUserResponseInput!]
-  
+
   ethnicity: [EthnicityEnum]
   ethnicityVisible: Boolean
   educationLevel: EducationLevelEnum
@@ -207,7 +207,7 @@ type User {
   roasts: [Roast!]!
   questionResponses: [QuestionUserResponse!]!
   vibes: [Vibe!]!
-  
+
   questionResponsesCount: Int!
 
   # deprecating?
@@ -278,7 +278,7 @@ type User {
   # referral codes
   referredByCode: String
   referralCode: String
-  
+
   # events the user is a part of
   event_ids: [ID!]!
   events: [Event!]!
@@ -286,8 +286,9 @@ type User {
   # seeded / lowQuality profile?
   seeded: Boolean!
   lowQuality: Boolean!
-  
+
   lastActiveTimes: [String!]!
+  lastActiveTime: String
   lastEditedTimes: [String!]!
   createdAt: String!
 }
@@ -486,6 +487,10 @@ UserSchema.virtual('fullName')
       return this.firstName;
     }
     return `${this.firstName} ${this.lastName}`;
+  });
+UserSchema.virtual('lastActiveTime')
+  .get(function lastActiveTime() {
+    return this.lastActiveTimes.slice(-1)[0];
   });
 
 export const User = mongoose.model('User', UserSchema);
