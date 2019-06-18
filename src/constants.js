@@ -1,9 +1,3 @@
-export const MAX_FEED_LENGTH = 50;
-
-export const INITIALIZED_FEED_LENGTH = 20;
-
-export const NEW_PROFILE_BONUS = 2;
-
 export const DISCOVERY_RATE_LIMIT = [
   {
     intervalLengthMillis: 24 * 60 * 60 * 1000,
@@ -26,13 +20,9 @@ export const DISCOVERY_REFRESH_THRESHOLD = 20;
 
 export const DISCOVERY_CACHE_SIZE = 30;
 
-export const TICK_LENGTH_MILLIS = 1000 * 60;
-
-export const EXPECTED_TICKS_PER_NEW_PROFILE = 100;
-
 export const STAT_SNAPSHOT_GENERATION_TIME = 30 * 60 * 1000;
 
-export const LAST_ACTIVE_ARRAY_LEN = 20;
+export const LAST_ACTIVE_ARRAY_LEN = 50;
 
 export const LAST_EDITED_ARRAY_LEN = 20;
 
