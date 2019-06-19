@@ -195,7 +195,9 @@ export const decideOnMatchResolver = async ({ user_id, match_id, decision }) => 
           pearPoints: 1,
         },
       }).exec();
-      recordMatchOpened({ user, match, otherUser, sentBy });
+      recordMatchOpened({
+        user, match, otherUser, sentBy,
+      });
     } else {
       datadogStats.increment('server.stats.match_double_accepted_personal');
       recordMatchOpened({ user, match, otherUser });

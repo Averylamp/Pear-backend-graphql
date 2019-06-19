@@ -38,7 +38,6 @@ const UserActionSchema = new Schema({
 });
 
 const UserActionSummarySchema = new Schema({
-  _id: { type: Schema.Types.ObjectId, required: true, index: true },
   user_id: { type: Schema.Types.ObjectId, required: true, index: true },
   actions: { type: [UserActionSchema], required: true, default: [] },
 });
