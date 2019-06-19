@@ -292,6 +292,7 @@ type User {
   
   lastActiveTimes: [String!]!
   lastEditedTimes: [String!]!
+  lastActive: String!
   createdAt: String!
 }
 
@@ -478,6 +479,12 @@ const UserSchema = new Schema({
     required: true,
     index: true,
     default: [new Date()],
+  },
+  lastActive: {
+    type: Date,
+    required: true,
+    index: true,
+    default: new Date(),
   },
 }, { timestamps: true });
 
