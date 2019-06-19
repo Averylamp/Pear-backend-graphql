@@ -11,7 +11,7 @@ import {
   CREATE_USER_ERROR, DELETE_USER_ERROR, DELETE_USER_PERMISSION_ERROR, EDIT_ENDORSEMENT_ERROR,
   GET_USER_ERROR, UPDATE_USER_ERROR, UPDATE_USER_PHOTOS_ERROR,
 } from '../ResolverErrorStrings';
-import { LAST_ACTIVE_ARRAY_LEN, LAST_EDITED_ARRAY_LEN } from '../../constants';
+import { LAST_ACTIVE_ARRAY_LEN } from '../../constants';
 import { createUserResolver } from './CreateUser';
 import { updateUserResolver } from './UpdateUser';
 import { editEndorsementResolver } from './EditEndorsement';
@@ -63,18 +63,14 @@ export const resolvers = {
         const user = await User.findOne({ firebaseAuthID: authenticatedUID })
           .exec();
         if (user) {
-          const userUpdateObj = {};
-          userUpdateObj.$push = {
-            lastActiveTimes: {
-              $each: [new Date()],
-              $slice: -1 * LAST_ACTIVE_ARRAY_LEN,
-            },
-            lastEditedTimes: {
-              $each: [new Date()],
-              $slice: -1 * LAST_EDITED_ARRAY_LEN,
-            },
-          };
-          User.findByIdAndUpdate(user._id, userUpdateObj).exec();
+          const now = new Date();
+          user.lastActive = now;
+          if (now.getTime() - user.lastActiveTimes[user.lastActiveTimes.length - 1].getTime()
+            > 60 * 60 * 1000) {
+            user.lastActiveTimes.push(now);
+            user.lastActiveTimes.slice(-1 * LAST_ACTIVE_ARRAY_LEN);
+          }
+          user.save();
           recordActivity({ user });
           return {
             success: true,
