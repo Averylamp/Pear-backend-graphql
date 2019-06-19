@@ -10,6 +10,10 @@ export const resolvers = {
   },
   UserActionSummary: {
     user: async ({ user_id }) => User.findById(user_id),
+    actions: async ({ actions }) => {
+      actions.sort((a, b) => b.timestamp - a.timestamp);
+      return actions;
+    },
   },
   UserAction: {
     actor: async ({ actor_id }) => User.findById(actor_id),
