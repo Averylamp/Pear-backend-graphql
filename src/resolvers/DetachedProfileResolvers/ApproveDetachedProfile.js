@@ -15,6 +15,7 @@ import { getAndValidateUsersAndDetachedProfileObjects } from './DetachedProfileR
 import { generateSentryErrorForResolver } from '../../SentryHelper';
 import { rollbackObject } from '../../../util/util';
 import { postProfileApproval } from '../../SlackHelper';
+import { recordAcceptFR } from '../../models/UserActionModel';
 
 const debug = require('debug')('dev:DetachedProfileResolvers');
 const errorLog = require('debug')('error:DetachedProfileResolvers');
@@ -304,6 +305,7 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
         creator,
         user,
       });
+      recordAcceptFR({ approveDetachedProfileInput, detachedProfile });
       return {
         success: true,
         user: updateUserObjectResult,
