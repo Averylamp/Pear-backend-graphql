@@ -41,6 +41,7 @@ enum UserActionType {
   ACCEPT_FR
   EDIT_DP
   UNKNOWN
+  JOIN_EVENT
 }
 `;
 
