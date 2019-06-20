@@ -5,6 +5,10 @@ const errorLog = require('debug')('error:UserActionModel');
 const { Schema } = mongoose;
 
 const actionType = `
+extend type Mutation {
+  recordCustomAction(userActionInput: UserActionInput!): RecordActionResponse!
+}
+
 type UserActionSummary {
   _id: ID!
   user_id: ID!
@@ -21,6 +25,20 @@ type UserAction {
   description: String!
   actionType: UserActionType!
   timestamp: String!
+}
+
+input UserActionInput {
+  user_id: ID!
+  actor_id: ID!
+  user_ids: [ID!]!
+  description: String!
+  actionType: UserActionType!
+}
+
+type RecordActionResponse {
+  success: Boolean!
+  message: String
+  action: UserAction
 }
 
 enum UserActionType {
@@ -42,6 +60,7 @@ enum UserActionType {
   EDIT_DP
   UNKNOWN
   JOIN_EVENT
+  CUSTOM_ACTION
 }
 `;
 
@@ -66,6 +85,7 @@ const ActionTypes = {
   EDIT_DP: 'EDIT_DP',
   JOIN_EVENT: 'JOIN_EVENT',
   UNKNOWN: 'UNKNOWN',
+  CUSTOM_ACTION: 'CUSTOM_ACTION',
 };
 
 const UserActionSchema = new Schema({
@@ -109,12 +129,17 @@ export const recordAction = ({ user_id, action }) => {
     $push: {
       actions: actionReassign,
     },
-  })
+  }, { new: true })
     .exec()
-    .then(() => true)
+    .then((res) => {
+      if (res.actions.length > 0) {
+        return res.actions[res.actions.length - 1];
+      }
+      return null;
+    })
     .catch((err) => {
       errorLog(`error occurred recording action: ${err}`);
-      return false;
+      return null;
     });
 };
 
