@@ -69,9 +69,9 @@ export const resolvers = {
             > 60 * 60 * 1000) {
             user.lastActiveTimes.push(now);
             user.lastActiveTimes.slice(-1 * LAST_ACTIVE_ARRAY_LEN);
+            recordActivity({ user });
           }
           user.save();
-          recordActivity({ user });
           return {
             success: true,
             user,
