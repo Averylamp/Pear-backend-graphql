@@ -20,6 +20,7 @@ import { deleteUserResolver } from '../../deletion/UserDeletion';
 import { addEventCodeResolver } from './AddEventCode';
 import { updateUserPhotosResolver } from './UpdateUserPhotos';
 import { datadogStats } from '../../DatadogHelper';
+import { recordActivity, recordSentMessage, UserActionSummary } from '../../models/UserActionModel';
 
 const debug = require('debug')('dev:UserResolvers');
 const errorLog = require('debug')('error:UserResolver');
@@ -30,6 +31,8 @@ const devMode = process.env.DEV === 'true';
 export const resolvers = {
   User: {
     discoveryQueueObj: async ({ discoveryQueue_id }) => DiscoveryQueue.findById(discoveryQueue_id),
+    actionSummaryObj: async ({ actionSummary_id }) => UserActionSummary
+      .findById(actionSummary_id),
     blockedUsers: async ({ blockedUser_ids }) => User.find({ _id: { $in: blockedUser_ids } }),
     requestedMatches: async ({ requestedMatch_ids }) => Match
       .find({ _id: { $in: requestedMatch_ids } }),
@@ -68,6 +71,7 @@ export const resolvers = {
             user.lastActiveTimes.slice(-1 * LAST_ACTIVE_ARRAY_LEN);
           }
           user.save();
+          recordActivity({ user });
           return {
             success: true,
             user,
@@ -140,6 +144,7 @@ export const resolvers = {
         from,
         to,
       });
+      recordSentMessage({ fromUser_id, toUser_id });
       return true;
     },
     alreadyOnPear: async (_source, { phoneNumbers }) => {

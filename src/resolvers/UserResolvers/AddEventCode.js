@@ -1,6 +1,7 @@
 import { EventModel } from '../../models/EventModel';
 import { EVENT_NOT_FOUND, GET_USER_ERROR } from '../ResolverErrorStrings';
 import { User } from '../../models/UserModel';
+import { recordJoinEvent } from '../../models/UserActionModel';
 
 export const addEventCodeResolver = async ({ user_id, code }) => {
   const event = await EventModel.findOne({ code });
@@ -21,6 +22,7 @@ export const addEventCodeResolver = async ({ user_id, code }) => {
     user.event_ids.push(event._id.toString());
   }
   const updatedUser = await user.save();
+  recordJoinEvent({ user, event });
   return {
     success: true,
     user: updatedUser,

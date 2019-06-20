@@ -3,6 +3,7 @@ import {
   GET_USER_ERROR,
 } from '../ResolverErrorStrings';
 import { DetachedProfile } from '../../models/DetachedProfile';
+import { recordUpdateUserPhotos } from '../../models/UserActionModel';
 
 // const errorLog = require('debug')('error:UpdateUserResolver');
 
@@ -88,6 +89,7 @@ export const updateUserPhotosResolver = async ({ updateUserPhotosInput }) => {
   userUpdate.displayedImagesCount = displayedImages.length;
 
   const updated = await User.findByIdAndUpdate(user_id, userUpdate, { new: true });
+  recordUpdateUserPhotos({ updateUserPhotosInput });
   return {
     success: true,
     user: updated,
