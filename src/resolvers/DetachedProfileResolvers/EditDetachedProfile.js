@@ -4,6 +4,7 @@ import {
   GET_USER_ERROR, WRONG_CREATOR_ERROR,
 } from '../ResolverErrorStrings';
 import { DetachedProfile } from '../../models/DetachedProfile';
+import { recordEditDP } from '../../models/UserActionModel';
 
 export const editDetachedProfileResolver = async ({ editDetachedProfileInput }) => {
   const creator = await User.findById(editDetachedProfileInput.creatorUser_id)
@@ -58,6 +59,7 @@ export const editDetachedProfileResolver = async ({ editDetachedProfileInput }) 
   }
   detachedProfile.status = 'waitingUnseen';
   detachedProfile = await detachedProfile.save();
+  recordEditDP({ creator, detachedProfile });
   return {
     success: true,
     detachedProfile,

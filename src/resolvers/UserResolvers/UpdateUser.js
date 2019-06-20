@@ -5,6 +5,7 @@ import {
 } from '../ResolverErrorStrings';
 import { LAST_ACTIVE_ARRAY_LEN, LAST_EDITED_ARRAY_LEN } from '../../constants';
 import { DetachedProfile } from '../../models/DetachedProfile';
+import { recordUpdateUser } from '../../models/UserActionModel';
 
 // const errorLog = require('debug')('error:UpdateUserResolver');
 
@@ -186,6 +187,7 @@ export const updateUserResolver = async ({ updateUserInput }) => {
 
   const updatedUser = await User
     .findByIdAndUpdate(updateUserInput.user_id, userUpdateObj, { new: true });
+  recordUpdateUser({ updateUserInput });
   return {
     success: true,
     user: updatedUser,
