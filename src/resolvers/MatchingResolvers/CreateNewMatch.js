@@ -160,10 +160,18 @@ export const createNewMatchResolver = async ({
     .catch(err => err);
 
   // add edges and push to requestedMatch_ids via operations on the user model
-  const sentForUserModelUpdateFn = matchmakerMade ? receiveRequest : sendRequest;
-  const createSentForEdgePromise = sentForUserModelUpdateFn(sentFor, receivedBy, matchID)
-    .catch(err => err);
-  const createReceivedByEdgePromise = receiveRequest(receivedBy, sentFor, matchID)
+  // also increment the pearsSentCount of matchmaker if there is one
+  let createSentForEdgePromise = null;
+  if (matchmakerMade) {
+    createSentForEdgePromise = receiveRequest(sentFor, receivedBy, matchID, true)
+      .catch(err => err);
+    sentBy.pearsSentCount += 1;
+    sentBy.save();
+  } else {
+    createSentForEdgePromise = sendRequest(sentFor, receivedBy, matchID)
+      .catch(err => err);
+  }
+  const createReceivedByEdgePromise = receiveRequest(receivedBy, sentFor, matchID, false)
     .catch(err => err);
 
   // create the firebase chat object
@@ -210,7 +218,7 @@ export const createNewMatchResolver = async ({
   if (match instanceof Error
     || sentForEdgeResult instanceof Error
     || receivedByEdgeResult instanceof Error
-    // || createChatResult instanceof Error
+    || createChatResult instanceof Error
     || sentByDiscoveryResult instanceof Error
     || sentForDiscoveryResult instanceof Error
     || receivedByDiscoveryResult instanceof Error) {
