@@ -61,4 +61,6 @@ export const performingMigration1 = process.env.TASK === 'migration1';
 
 export const performingMigration2 = process.env.TASK === 'migration2';
 
+export const performingMigration0621192 = process.env.TASK === 'migration062119-2';
+
 export const verbose = process.env.VERBOSE ? process.env.VERBOSE : false;

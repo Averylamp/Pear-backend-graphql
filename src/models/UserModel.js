@@ -370,6 +370,33 @@ const UserSchema = new Schema({
     type: Number, required: true, index: true, default: 0,
   },
   vibes: { type: [VibeSchema], required: true, default: [] },
+  personalMatchesSentCount: { // total number of personal match requests sent
+    type: Number, required: true, index: true, default: 0,
+  },
+  matchRequestsReceivedCount: { // total number of matches they're receivedByUser
+    type: Number, required: true, index: true, default: 0,
+  },
+  matchRequestsRejectedCount: { // personal requests received they've rejected
+    type: Number, required: true, index: true, default: 0,
+  },
+  matchRequestsAcceptedCount: { // personal requests received they've accepted
+    type: Number, required: true, index: true, default: 0,
+  },
+  pearsSentCount: { // number of times they've sent a request for a friend
+    type: Number, required: true, index: true, default: 0,
+  },
+  pearsReceivedCount: { // number of times a friend has sent a request for them
+    type: Number, required: true, index: true, default: 0,
+  },
+  pearsRejectedCount: { // number of times they've rejected a friend-sent request
+    type: Number, required: true, index: true, default: 0,
+  },
+  pearsAcceptedCount: { // number of times they've accepted a friend-sent request
+    type: Number, required: true, index: true, default: 0,
+  },
+  matchesCount: { // number of doubly-accepted matches they're a part of
+    type: Number, required: true, index: true, default: 0,
+  },
 
   // dos, donts, interests are not used currently
   dos: { type: [DoSchema], required: true, default: [] },
@@ -510,7 +537,7 @@ export const createUserObject = (userInput, skipTimestamps) => {
     });
 };
 
-export const receiveRequest = (me, otherUser, match_id) => {
+export const receiveRequest = (me, otherUser, match_id, isFromFriend) => {
   const alreadyExists = me.edgeSummaries.find(
     edgeSummary => (edgeSummary.otherUser_id.toString() === otherUser._id.toString()),
   );
@@ -523,6 +550,11 @@ export const receiveRequest = (me, otherUser, match_id) => {
     otherUser_id: otherUser._id,
     match_id,
   });
+  if (isFromFriend) {
+    me.pearsReceivedCount += 1;
+  } else {
+    me.matchRequestsReceivedCount += 1;
+  }
   me.requestedMatch_ids.push(match_id);
   return me.save();
 };
@@ -536,6 +568,7 @@ export const sendRequest = (me, otherUser, match_id) => {
       new Error(USERS_ALREADY_MATCHED_ERROR),
     );
   }
+  me.personalMatchesSentCount += 1;
   me.edgeSummaries.push({
     otherUser_id: otherUser._id,
     match_id,

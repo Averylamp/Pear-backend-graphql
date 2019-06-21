@@ -70,11 +70,26 @@ export const decideOnMatchResolver = async ({ user_id, match_id, decision }) => 
     .catch(err => err);
 
   // remove the match_id reference in my requestedMatch_ids array
-  const mePullRequestUpdate = await User.findByIdAndUpdate(user_id, {
+  // also update counts
+  const meUpdateObj = {
     $pull: {
       requestedMatch_ids: match_id,
     },
-  }, { new: true })
+  };
+  if (match.isMatchmakerMade && user._id.toString() === match.sentForUser_id.toString()) {
+    if (acceptedMatch) {
+      meUpdateObj.$inc = { pearsAcceptedCount: 1 };
+    } else {
+      meUpdateObj.$inc = { pearsRejectedCount: 1 };
+    }
+  } else {
+    if (acceptedMatch) {
+      meUpdateObj.$inc = { matchRequestsAcceptedCount: 1 };
+    } else {
+      meUpdateObj.$inc = { matchRequestsRejectedCount: 1 };
+    }
+  }
+  const meUpdate = await User.findByIdAndUpdate(user_id, meUpdateObj, { new: true })
     .exec()
     .catch(err => err);
 
@@ -114,11 +129,11 @@ export const decideOnMatchResolver = async ({ user_id, match_id, decision }) => 
   }
 
   // roll back if any update failed
-  if (mePullRequestUpdate instanceof Error || edgeUpdate instanceof Error) {
+  if (meUpdate instanceof Error || edgeUpdate instanceof Error) {
     debug('match decision failed, rolling back');
     let message = '';
-    if (mePullRequestUpdate instanceof Error) {
-      message += mePullRequestUpdate.toString();
+    if (meUpdate instanceof Error) {
+      message += meUpdate.toString();
     }
     if (edgeUpdate instanceof Error) {
       message += edgeUpdate.toString();
@@ -160,6 +175,18 @@ export const decideOnMatchResolver = async ({ user_id, match_id, decision }) => 
     sendMatchAcceptedPushNotification({ user, otherUser });
     sendMatchAcceptedPushNotification({ otherUser, user });
     const matchmakerMade = match.sentForUser_id.toString() !== match.sentByUser_id.toString();
+    // increment match counts
+    // it's not a huge deal if this fails, so not included in rollback
+    User.findByIdAndUpdate(match.sentForUser_id, {
+      $inc: {
+        matchesCount: 1,
+      },
+    }).exec();
+    User.findByIdAndUpdate(match.receivedByUser_id, {
+      $inc: {
+        matchesCount: 1,
+      },
+    }).exec();
     if (matchmakerMade) {
       datadogStats.increment('server.stats.match_double_accepted_matchmaker');
       const sentBy = await User.findById(match.sentByUser_id);
