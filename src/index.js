@@ -10,6 +10,9 @@ import {
 } from './constants';
 import { runMigration2 } from './migration2/Migration2';
 import { addMatchCounts } from './migration062119-2/Migration062119-2';
+import { addProfileCompletedTime } from './migration062119/AddProfileCompletedTime';
+import { addNotificationsEnabled } from './migrations-small/AddNotificationsEnabled';
+
 
 const debug = require('debug')('dev:Index');
 const testsLog = require('debug')('tests:Index');
@@ -55,10 +58,15 @@ const init = async () => {
   } else if (performingMigration2) {
     debug('performing migration 2');
     runMigration2();
+  } else if (performingMigration062019) {
+    debug('performing migratin 06-20-19');
+    addNotificationsEnabled();
   } else if (!process.env.TASK) {
     start();
   } else if (performingMigration0621192) {
     addMatchCounts();
+  } else if (performingMigration062119) {
+    addProfileCompletedTime();
   }
 };
 
