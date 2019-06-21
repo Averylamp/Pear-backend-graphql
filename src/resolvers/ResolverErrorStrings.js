@@ -26,6 +26,7 @@ export const UNMATCH_ERROR = 'Couldn\'t perform action on match.';
 export const CREATE_EVENT_ERROR = 'Couldn\'t create event.';
 export const EVENT_NOT_FOUND = 'Event not found.';
 export const ADD_EVENT_CODE_ERROR = 'An error occurred: couldn\'t add event code.';
+export const COULDNT_RECORD_ACTION = 'Couldn\'t record action.';
 
 export const FORCE_FEED_UPDATE_SUCCESS = 'Updated feed successfully.';
 export const DELETE_DETACHED_PROFILE_SUCCESS = 'Deleted profile successfully.';
