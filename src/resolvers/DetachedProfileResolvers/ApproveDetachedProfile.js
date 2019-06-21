@@ -127,6 +127,9 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
       firebaseChatDocumentPath: getChatDocPathFromId(firebaseId),
     };
   }
+  if (user.questionResponses.length === 0 && detachedProfile.questionResponses.length > 0) {
+    userObjectUpdate.profileCompletedTime = new Date();
+  }
 
   // construct creator update object
   const creatorObjectUpdate = {
@@ -172,6 +175,10 @@ export const approveDetachedProfileResolver = async ({ approveDetachedProfileInp
       $each: [new Date()],
       $slice: -1 * LAST_EDITED_ARRAY_LEN,
     };
+    if (creator.questionResponses.length === 0
+      && oppositeDetachedProfile.questionResponses.length > 0) {
+      creatorObjectUpdate.profileCompletedTime = new Date();
+    }
 
     // user object updates
     userObjectUpdate.$inc.detachedProfileCount = -1;

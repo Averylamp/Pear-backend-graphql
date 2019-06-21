@@ -73,6 +73,9 @@ export const editEndorsementResolver = async ({ editEndorsementInput }) => {
       message: WRONG_CREATOR_ERROR,
     };
   }
+  if (user.questionResponses.length === 0 && editEndorsementInput.questionResponses.length > 0) {
+    user.profileCompletedTime = new Date();
+  }
   if (editEndorsementInput.questionResponses) {
     updateQuestionResponses({
       newQuestionResponses: editEndorsementInput.questionResponses,
