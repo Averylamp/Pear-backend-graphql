@@ -6,9 +6,10 @@ import { runTests } from './tests/RunTests';
 import { startStatsGeneration } from './StatsGeneration';
 import { runMigration } from './migration1/Migration1';
 import {
-  devMode, performingMigration1, performingMigration2, regenTestDBMode,
+  devMode, performingMigration0621192, performingMigration1, performingMigration2, regenTestDBMode,
 } from './constants';
 import { runMigration2 } from './migration2/Migration2';
+import { addMatchCounts } from './migration062119-2/Migration062119-2';
 
 const debug = require('debug')('dev:Index');
 const testsLog = require('debug')('tests:Index');
@@ -56,6 +57,8 @@ const init = async () => {
     runMigration2();
   } else if (!process.env.TASK) {
     start();
+  } else if (performingMigration0621192) {
+    addMatchCounts();
   }
 };
 
