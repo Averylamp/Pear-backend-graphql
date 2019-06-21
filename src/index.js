@@ -6,7 +6,12 @@ import { runTests } from './tests/RunTests';
 import { startStatsGeneration } from './StatsGeneration';
 import { runMigration } from './migration1/Migration1';
 import {
-  devMode, performingMigration0621192, performingMigration1, performingMigration2, regenTestDBMode,
+  devMode,
+  performingMigration062019, performingMigration062119,
+  performingMigration0621192,
+  performingMigration1,
+  performingMigration2,
+  regenTestDBMode,
 } from './constants';
 import { runMigration2 } from './migration2/Migration2';
 import { addMatchCounts } from './migration062119-2/Migration062119-2';
