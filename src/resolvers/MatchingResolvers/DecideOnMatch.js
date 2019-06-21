@@ -82,12 +82,10 @@ export const decideOnMatchResolver = async ({ user_id, match_id, decision }) => 
     } else {
       meUpdateObj.$inc = { pearsRejectedCount: 1 };
     }
+  } else if (acceptedMatch) {
+    meUpdateObj.$inc = { matchRequestsAcceptedCount: 1 };
   } else {
-    if (acceptedMatch) {
-      meUpdateObj.$inc = { matchRequestsAcceptedCount: 1 };
-    } else {
-      meUpdateObj.$inc = { matchRequestsRejectedCount: 1 };
-    }
+    meUpdateObj.$inc = { matchRequestsRejectedCount: 1 };
   }
   const meUpdate = await User.findByIdAndUpdate(user_id, meUpdateObj, { new: true })
     .exec()

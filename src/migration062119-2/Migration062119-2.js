@@ -60,10 +60,8 @@ export const addMatchCounts = async () => {
               sentForUser.pearsRejectedCount += 1;
             }
           }
-        } else {
-          if (sentForUser) {
-            sentForUser.personalMatchesSentCount += 1;
-          }
+        } else if (sentForUser) {
+          sentForUser.personalMatchesSentCount += 1;
         }
         if (receivedByUser) {
           receivedByUser.matchRequestsReceivedCount += 1;
