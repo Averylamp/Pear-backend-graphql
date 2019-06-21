@@ -370,6 +370,7 @@ const UserSchema = new Schema({
     type: Number, required: true, index: true, default: 0,
   },
   vibes: { type: [VibeSchema], required: true, default: [] },
+  profileCompletedTime: { type: Date, required: false },
 
   // dos, donts, interests are not used currently
   dos: { type: [DoSchema], required: true, default: [] },
