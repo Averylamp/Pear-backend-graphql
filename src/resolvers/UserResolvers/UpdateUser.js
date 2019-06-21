@@ -3,7 +3,7 @@ import { User } from '../../models/UserModel';
 import {
   GET_USER_ERROR,
 } from '../ResolverErrorStrings';
-import { LAST_ACTIVE_ARRAY_LEN, LAST_EDITED_ARRAY_LEN } from '../../constants';
+import { LAST_EDITED_ARRAY_LEN } from '../../constants';
 import { DetachedProfile } from '../../models/DetachedProfile';
 import { recordUpdateUser } from '../../models/UserActionModel';
 
@@ -69,6 +69,7 @@ export const updateUserResolver = async ({ updateUserInput }) => {
     'emailVerified',
     'phoneNumber',
     'phoneNumberVerified',
+    'notificationsEnabled',
     'firstName',
     'lastName',
     'gender',
@@ -98,10 +99,6 @@ export const updateUserResolver = async ({ updateUserInput }) => {
     }
   }
   userUpdateObj.$push = {
-    lastActiveTimes: {
-      $each: [new Date()],
-      $slice: -1 * LAST_ACTIVE_ARRAY_LEN,
-    },
     lastEditedTimes: {
       $each: [new Date()],
       $slice: -1 * LAST_EDITED_ARRAY_LEN,
