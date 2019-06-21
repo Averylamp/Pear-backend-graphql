@@ -6,10 +6,12 @@ import { runTests } from './tests/RunTests';
 import { startStatsGeneration } from './StatsGeneration';
 import { runMigration } from './migration1/Migration1';
 import {
-  devMode, performingMigration062019, performingMigration1, performingMigration2, regenTestDBMode,
+  devMode, performingMigration062119, performingMigration1, performingMigration2, regenTestDBMode,
 } from './constants';
 import { runMigration2 } from './migration2/Migration2';
+import { addProfileCompletedTime } from './migration062119/AddProfileCompletedTime';
 import { addNotificationsEnabled } from './migrations-small/AddNotificationsEnabled';
+
 
 const debug = require('debug')('dev:Index');
 const testsLog = require('debug')('tests:Index');
@@ -60,6 +62,8 @@ const init = async () => {
     addNotificationsEnabled();
   } else if (!process.env.TASK) {
     start();
+  } else if (performingMigration062119) {
+    addProfileCompletedTime();
   }
 };
 
