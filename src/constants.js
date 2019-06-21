@@ -61,6 +61,7 @@ export const performingMigration1 = process.env.TASK === 'migration1';
 
 export const performingMigration2 = process.env.TASK === 'migration2';
 
+export const performingMigration0621192 = process.env.TASK === 'migration062119-2';
 export const performingMigration062119 = process.env.TASK === 'migration062119';
 export const performingMigration062019 = process.env.TASK === 'migration062019';
 
