@@ -107,6 +107,7 @@ input UpdateUserInput {
   emailVerified: Boolean
   phoneNumber: String
   phoneNumberVerified: Boolean
+  notificationsEnabled: Boolean
   firstName: String
   lastName: String
   thumbnailURL: String
@@ -350,6 +351,7 @@ const UserSchema = new Schema({
     index: true,
   },
   phoneNumberVerified: { type: Boolean, required: true, default: false },
+  notificationsEnabled: { type: Boolean, required: true, default: false },
   firstName: { type: String, required: false },
   lastName: { type: String, required: false },
   thumbnailURL: { type: String, required: false },
@@ -397,6 +399,7 @@ const UserSchema = new Schema({
   matchesCount: { // number of doubly-accepted matches they're a part of
     type: Number, required: true, index: true, default: 0,
   },
+  profileCompletedTime: { type: Date, required: false },
 
   // dos, donts, interests are not used currently
   dos: { type: [DoSchema], required: true, default: [] },
