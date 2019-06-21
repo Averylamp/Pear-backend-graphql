@@ -3,6 +3,7 @@ import { User } from '../models/UserModel';
 import { recordAction } from '../models/UserActionModel';
 import { COULDNT_RECORD_ACTION } from './ResolverErrorStrings';
 import { generateSentryErrorForResolver } from '../SentryHelper';
+import { devMode } from '../constants';
 
 const errorLog = require('debug')('error:UserActionResolvers');
 
@@ -61,8 +62,11 @@ export const resolvers = {
   UserActionSummary: {
     user: async ({ user_id }) => User.findById(user_id),
     actions: async ({ actions }) => {
-      actions.sort((a, b) => b.timestamp - a.timestamp);
-      return actions;
+      if (devMode) {
+        actions.sort((a, b) => b.timestamp - a.timestamp);
+        return actions;
+      }
+      return [];
     },
   },
   UserAction: {
