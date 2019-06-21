@@ -355,7 +355,6 @@ export const QuestionSuggestedResponseSchema = new Schema({
 });
 
 export const QuestionSchema = new Schema({
-  _id: { type: Schema.Types.ObjectId, required: true },
   questionText: { type: String, required: true },
   questionSubtext: { type: String, required: false },
   questionTextWithName: { type: String, required: false },
