@@ -19,6 +19,7 @@ export const FORCE_FEED_UPDATE_ERROR = 'Couldn\'t update feed.';
 export const SKIP_DISCOVERY_ITEM_ERROR = 'Couldn\'t perform this operation.';
 export const GET_DISCOVERY_CARDS_ERROR = 'Couldn\t retrieve new profiles.';
 export const SEND_MATCH_REQUEST_ERROR = 'Couldn\'t send match request.';
+export const SEND_MATCH_PREFERENCES_SILENT_FAIL = 'Users outside each others\'s preferences: silent fail';
 export const USERS_ALREADY_MATCHED_ERROR = 'These users have already been Peared!';
 export const ACCEPT_MATCH_REQUEST_ERROR = 'Couldn\'t accept match request.';
 export const REJECT_MATCH_REQUEST_ERROR = 'Couldn\'t perform action on match request.';
