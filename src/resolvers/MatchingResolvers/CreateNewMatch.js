@@ -37,16 +37,17 @@ const verifyPreferencesMatch = ({
   sentForPreferences,
   receivedByDemographics,
   receivedByPreferences,
-}) => (
-  sentForPreferences.seekingGender.includes(receivedByDemographics.gender)
+}) => {
+  const ret = sentForPreferences.seekingGender.includes(receivedByDemographics.gender)
     && receivedByPreferences.seekingGender.includes(sentForDemographics.gender)
     && sentForDemographics.age
     && receivedByDemographics.age
     && sentForDemographics.age >= receivedByPreferences.minAgeRange - 2
     && sentForDemographics.age <= receivedByPreferences.maxAgeRange + 2
-    && receivedByDemographics.age >= sentForDemographics.minAgeRange - 2
-    && receivedByDemographics.age <= sentForDemographics.maxAgeRange + 2
-);
+    && receivedByDemographics.age >= sentForPreferences.minAgeRange - 2
+    && receivedByDemographics.age <= sentForPreferences.maxAgeRange + 2;
+  return ret;
+};
 
 export const createNewMatchResolver = async ({
   sentByUser_id, sentForUser_id, receivedByUser_id, _id = mongoose.Types.ObjectId(), requestText,
