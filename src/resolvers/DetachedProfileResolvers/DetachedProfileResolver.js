@@ -5,7 +5,7 @@ import {
   CREATE_DETACHED_PROFILE_ERROR,
   DELETE_DETACHED_PROFILE_ERROR,
   EDIT_DETACHED_PROFILE_ERROR,
-  GET_USER_ERROR,
+  GET_USER_ERROR, REJECT_PROFILE_ERROR,
   VIEW_DETACHED_PROFILE_ERROR,
   WRONG_CREATOR_ERROR,
 } from '../ResolverErrorStrings';
@@ -16,6 +16,7 @@ import { getAndValidateUsersAndDetachedProfileObjects } from './DetachedProfileR
 import { editDetachedProfileResolver } from './EditDetachedProfile';
 import { generateSentryErrorForResolver } from '../../SentryHelper';
 import { datadogStats } from '../../DatadogHelper';
+import { rejectDetachedProfileResolver } from './RejectDetachedProfile';
 
 const debug = require('debug')('dev:DetachedProfileResolvers');
 const errorLog = require('debug')('error:DetachedProfileResolvers');
@@ -99,7 +100,7 @@ export const resolvers = {
         errorLog(`error occurred editing detached profile: ${e}`);
         generateSentryErrorForResolver({
           resolverType: 'mutation',
-          routeName: 'editDetachedProfileInput',
+          routeName: 'editDetachedProfile',
           args: { editDetachedProfileInput },
           errorMsg: e,
           errorName: EDIT_DETACHED_PROFILE_ERROR,
@@ -119,7 +120,7 @@ export const resolvers = {
         errorLog(`error occurred approving detached profile: ${e}`);
         generateSentryErrorForResolver({
           resolverType: 'mutation',
-          routeName: 'approveDetachedProfileInput',
+          routeName: 'approveDetachedProfile',
           args: { approveDetachedProfileInput },
           errorMsg: e,
           errorName: APPROVE_PROFILE_ERROR,
@@ -127,6 +128,26 @@ export const resolvers = {
         return {
           success: false,
           message: APPROVE_PROFILE_ERROR,
+        };
+      }
+    },
+    rejectDetachedProfile: async (_source, { rejectDetachedProfileInput }) => {
+      functionCallConsole('Reject Profile Called');
+      datadogStats.increment('server.stats.detached_profile_rejected');
+      try {
+        return rejectDetachedProfileResolver({ rejectDetachedProfileInput });
+      } catch (e) {
+        errorLog(`error occurred rejecting detached profile :${e}`);
+        generateSentryErrorForResolver({
+          resolverType: 'mutation',
+          routeName: 'rejectDetachedProfile',
+          args: { rejectDetachedProfileInput },
+          errorMsg: e,
+          errorName: REJECT_PROFILE_ERROR,
+        });
+        return {
+          success: false,
+          message: REJECT_PROFILE_ERROR,
         };
       }
     },
