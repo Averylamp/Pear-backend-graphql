@@ -14,8 +14,8 @@ export const DELETE_DETACHED_PROFILE_ERROR = 'Couldn\'t delete this profile.';
 export const CANT_ENDORSE_YOURSELF = 'Can\'t create a profile for yourself.';
 export const ALREADY_MADE_PROFILE = 'Already made a profile for this person.';
 export const APPROVE_PROFILE_ERROR = 'Couldn\'t approve this profile.';
+export const REJECT_PROFILE_ERROR = 'Couldn\'t decline this friend request.';
 export const ALREADY_APPROVED_PROFILE = 'This profile has already been approved.';
-export const FORCE_FEED_UPDATE_ERROR = 'Couldn\'t update feed.';
 export const SKIP_DISCOVERY_ITEM_ERROR = 'Couldn\'t perform this operation.';
 export const GET_DISCOVERY_CARDS_ERROR = 'Couldn\t retrieve new profiles.';
 export const SEND_MATCH_REQUEST_ERROR = 'Couldn\'t send match request.';
@@ -28,5 +28,4 @@ export const EVENT_NOT_FOUND = 'Event not found.';
 export const ADD_EVENT_CODE_ERROR = 'An error occurred: couldn\'t add event code.';
 export const COULDNT_RECORD_ACTION = 'Couldn\'t record action.';
 
-export const FORCE_FEED_UPDATE_SUCCESS = 'Updated feed successfully.';
 export const DELETE_DETACHED_PROFILE_SUCCESS = 'Deleted profile successfully.';
