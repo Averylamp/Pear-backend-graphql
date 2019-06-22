@@ -27,7 +27,7 @@ extend type Mutation{
   
   # Changes the status of the detached profile from waitingSeen to waitingUnseen
   viewDetachedProfile(user_id: ID! detachedProfile_id: ID!): DetachedProfileMutationResponse!
-  
+
   # updates status of existing detached profile, converts it into a User Profile and attaches the user profile to both the creator's and user's User Object
   # ID is optional, for testing only
   approveNewDetachedProfile(approveDetachedProfileInput: ApproveDetachedProfileInput!): UserMutationResponse!
