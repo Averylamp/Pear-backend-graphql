@@ -2,7 +2,7 @@ import {
   AVERY_ID,
   AVERY_PROFILE_MADE_D_ID,
   BRIAN_ID,
-  BRIAN_PROFILE_SAMMI_D_ID,
+  BRIAN_PROFILE_SAMMI_D_ID, JOEL_ID, JOEL_PROFILE_BRIAN_D_ID,
   JOSH_ID,
   JOSH_PROFILE_SOPHIA_D_ID,
   MADE_ID,
@@ -127,5 +127,12 @@ export const ATTACH_SOPHIA2_PROFILE_VARIABLES = {
     roasts: [],
     questionResponses: [],
     vibes: [],
+  },
+};
+
+export const REJECT_JOEL1_PROFILE_VARIABLES = {
+  rejectDetachedProfileInput: {
+    user_id: JOEL_ID,
+    detachedProfile_id: JOEL_PROFILE_BRIAN_D_ID,
   },
 };

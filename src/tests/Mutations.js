@@ -222,26 +222,21 @@ export const ATTACH_DETACHED_PROFILE = gql`
         _id
         fullName
         endorser_ids
-        boasts {
-          _id
-          authorFirstName
-          content
-        }
-        roasts {
-          _id
-          authorFirstName
-          content
-        }
-        vibes {
-          _id
-          authorFirstName
-          content
-        }
-        bios {
-          _id
-          authorFirstName
-          content
-        }
+      }
+    }
+  }
+`;
+
+export const REJECT_DETACHED_PROFILE = gql`
+  mutation RejectDetachedProfile($rejectDetachedProfileInput: RejectDetachedProfileInput!) {
+    rejectDetachedProfile(rejectDetachedProfileInput: $rejectDetachedProfileInput) {
+      success
+      message
+      detachedProfile {
+        _id
+        creatorFirstName
+        firstName
+        status
       }
     }
   }
