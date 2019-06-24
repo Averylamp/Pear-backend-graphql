@@ -1,7 +1,7 @@
 import nanoid from 'nanoid';
 import { receiveRequest, sendRequest, User } from '../../models/UserModel';
 import {
-  GET_USER_ERROR,
+  GET_USER_ERROR, SEND_MATCH_PREFERENCES_SILENT_FAIL,
   SEND_MATCH_REQUEST_ERROR, USERS_ALREADY_MATCHED_ERROR,
   WRONG_CREATOR_ERROR,
 } from '../ResolverErrorStrings';
@@ -31,6 +31,23 @@ const errorStyling = chalk.red.bold;
 const errorLog = log => errorLogger(errorStyling(log));
 
 const mongoose = require('mongoose');
+
+const verifyPreferencesMatch = ({
+  sentForDemographics,
+  sentForPreferences,
+  receivedByDemographics,
+  receivedByPreferences,
+}) => {
+  const ret = sentForPreferences.seekingGender.includes(receivedByDemographics.gender)
+    && receivedByPreferences.seekingGender.includes(sentForDemographics.gender)
+    && sentForDemographics.age
+    && receivedByDemographics.age
+    && sentForDemographics.age >= receivedByPreferences.minAgeRange - 2
+    && sentForDemographics.age <= receivedByPreferences.maxAgeRange + 2
+    && receivedByDemographics.age >= sentForPreferences.minAgeRange - 2
+    && receivedByDemographics.age <= sentForPreferences.maxAgeRange + 2;
+  return ret;
+};
 
 export const createNewMatchResolver = async ({
   sentByUser_id, sentForUser_id, receivedByUser_id, _id = mongoose.Types.ObjectId(), requestText,
@@ -72,6 +89,7 @@ export const createNewMatchResolver = async ({
       message: GET_USER_ERROR,
     };
   }
+
   if (matchmakerMade && !(sentFor.endorser_ids.map(endorser_id => endorser_id.toString())
     .includes(sentBy._id.toString()))) {
     errorLog(`Matchmaker ${sentByUser_id} has not endorsed
@@ -90,6 +108,21 @@ export const createNewMatchResolver = async ({
         message: USERS_ALREADY_MATCHED_ERROR,
       };
     }
+  }
+  const sentForDemographics = sentFor.matchingDemographics;
+  const sentForPreferences = sentFor.matchingPreferences;
+  const receivedByDemographics = receivedBy.matchingDemographics;
+  const receivedByPreferences = receivedBy.matchingPreferences;
+  if (!verifyPreferencesMatch({
+    sentForDemographics,
+    sentForPreferences,
+    receivedByDemographics,
+    receivedByPreferences,
+  })) {
+    return {
+      success: true,
+      message: SEND_MATCH_PREFERENCES_SILENT_FAIL,
+    };
   }
 
   const sentForDiscoveryPromise = DiscoveryQueue.findOne({ user_id: sentForUser_id })
