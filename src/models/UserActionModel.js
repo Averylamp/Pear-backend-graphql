@@ -57,6 +57,7 @@ enum UserActionType {
   SKIP_CARD
   SEND_FR
   ACCEPT_FR
+  REJECT_FR
   EDIT_DP
   UNKNOWN
   JOIN_EVENT
@@ -82,6 +83,7 @@ const ActionTypes = {
   SKIP_CARD: 'SKIP_CARD',
   SEND_FR: 'SEND_FR',
   ACCEPT_FR: 'ACCEPT_FR',
+  REJECT_FR: 'REJECT_FR',
   EDIT_DP: 'EDIT_DP',
   JOIN_EVENT: 'JOIN_EVENT',
   UNKNOWN: 'UNKNOWN',
@@ -327,6 +329,17 @@ export const recordEditDP = ({ creator, detachedProfile }) => {
     actionType: ActionTypes.EDIT_DP,
   };
   recordAction({ user_id: creator._id, action });
+};
+
+export const recordRejectFR = ({ rejectDetachedProfileInput, detachedProfile }) => {
+  const action = {
+    actor_id: rejectDetachedProfileInput.user_id,
+    user_ids: [rejectDetachedProfileInput.user_id, detachedProfile.creatorUser_id],
+    description: `$0 rejected profile from $1 with ${detachedProfile.questionResponses.length} promtps`,
+    actionType: ActionTypes.REJECT_FR,
+  };
+  recordAction({ user_id: rejectDetachedProfileInput.user_id, action });
+  recordAction({ user_id: detachedProfile.creatorUser_id, action });
 };
 
 export const recordJoinEvent = ({ user, event }) => {

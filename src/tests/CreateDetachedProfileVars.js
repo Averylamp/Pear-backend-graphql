@@ -1,7 +1,7 @@
 import {
   AVERY_PROFILE_MADE_D_ID,
   BRIAN_ID,
-  BRIAN_PROFILE_SAMMI_D_ID,
+  BRIAN_PROFILE_SAMMI_D_ID, JOEL_PROFILE_BRIAN_D_ID,
   JOSH_ID,
   JOSH_PROFILE_SOPHIA_D_ID,
   MADE_ID,
@@ -91,8 +91,6 @@ export const CREATE_JOSH1_DETACHED_PROFILE_VARIABLES = {
     firstName: 'Josh',
     gender: 'male',
     phoneNumber: '7897897898',
-    boasts: [],
-    roasts: [],
     questionResponses: [
       {
         author_id: SOPHIA_ID,
@@ -109,7 +107,6 @@ export const CREATE_JOSH1_DETACHED_PROFILE_VARIABLES = {
         responseBody: 'josh response 1-1',
       },
     ],
-    vibes: [],
   },
 };
 
@@ -121,8 +118,6 @@ export const CREATE_SAMMI1_DETACHED_PROFILE_VARIABLES = {
     firstName: 'Sammi',
     phoneNumber: '9788733736',
     gender: 'female',
-    boasts: [],
-    roasts: [],
     questionResponses: [
       {
         _id: SAMMI_QR1_ID,
@@ -140,7 +135,6 @@ export const CREATE_SAMMI1_DETACHED_PROFILE_VARIABLES = {
         responseBody: 'sammi response 1-1',
       },
     ],
-    vibes: [],
   },
 };
 
@@ -151,8 +145,6 @@ export const CREATE_SAMMI2_DETACHED_PROFILE_VARIABLES = {
     creatorFirstName: '',
     firstName: 'Sammi',
     phoneNumber: '9788733736',
-    boasts: [],
-    roasts: [],
     questionResponses: [
       {
         _id: SAMMI_QR2_ID,
@@ -185,7 +177,6 @@ export const CREATE_SAMMI2_DETACHED_PROFILE_VARIABLES = {
         responseBody: 'sammi response 2-2',
       },
     ],
-    vibes: [],
   },
 };
 
@@ -196,10 +187,7 @@ export const CREATE_MADE1_DETACHED_PROFILE_VARIABLES = {
     creatorFirstName: '',
     firstName: 'Made',
     phoneNumber: '6092402838',
-    boasts: [],
-    roasts: [],
     questionResponses: [],
-    vibes: [],
   },
 };
 
@@ -210,10 +198,7 @@ export const CREATE_UMA1_DETACHED_PROFILE_VARIABLES = {
     creatorFirstName: '',
     firstName: 'Uma',
     phoneNumber: '9784296614',
-    boasts: [],
-    roasts: [],
     questionResponses: [],
-    vibes: [],
   },
 };
 
@@ -224,10 +209,7 @@ export const CREATE_SOPHIA1_DETACHED_PROFILE_VARIABLES = {
     creatorFirstName: '',
     firstName: 'Sophia',
     phoneNumber: '9165189165',
-    boasts: [],
-    roasts: [],
     questionResponses: [],
-    vibes: [],
   },
 };
 
@@ -238,9 +220,17 @@ export const CREATE_SOPHIA2_DETACHED_PROFILE_VARIABLES = {
     creatorFirstName: '',
     firstName: 'Sophia',
     phoneNumber: '9165189165',
-    boasts: [],
-    roasts: [],
     questionResponses: [],
-    vibes: [],
+  },
+};
+
+export const CREATE_JOEL1_DETACHED_PROFILE_VARIABLES = {
+  detachedProfileInput: {
+    _id: JOEL_PROFILE_BRIAN_D_ID,
+    creatorUser_id: BRIAN_ID,
+    creatorFirstName: 'Brian',
+    firstName: 'Joel',
+    phoneNumber: '7777777777',
+    questionResponses: [],
   },
 };
