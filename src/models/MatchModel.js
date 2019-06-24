@@ -1,3 +1,6 @@
+import { ImageContainerSchema } from './ImageSchemas';
+import { QuestionUserResponseSchema } from './ContentModels';
+
 const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
@@ -38,8 +41,10 @@ input CreateMatchRequestInput {
   # Discovered user receiving the request
   receivedByUser_id: ID!
   
-  # Optional text that goes along with the chat request
+  # Optional text that goes along with the like
   requestText: String
+  likedPhoto: CreateImageContainer
+  likedPrompt: QuestionUserResponseInput
 }
 `;
 
@@ -70,6 +75,10 @@ type Match{
   receivedByUser_id: ID!
   receivedByUser: User
   isMatchmakerMade: Boolean!
+  
+  requestText: String
+  likedPhoto: ImageContainer
+  likedPrompt: QuestionUserResponse
 
   sentForUserStatus: RequestResponse!
   sentForUserStatusLastUpdated: String!
@@ -120,6 +129,10 @@ const MatchSchema = new Schema({
   sentForUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
   receivedByUser_id: { type: Schema.Types.ObjectId, required: true, index: true },
   isMatchmakerMade: { type: Boolean, required: true },
+
+  requestText: { type: String, required: false },
+  likedPhoto: { type: ImageContainerSchema, required: false },
+  likedPrompt: { type: QuestionUserResponseSchema, required: false },
 
   sentForUserStatus: {
     type: String,

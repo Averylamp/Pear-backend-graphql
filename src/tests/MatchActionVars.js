@@ -14,6 +14,12 @@ import {
   MATCH6_ID,
   EMPTY_USER_ID1,
   EMPTY_USER_ID2,
+  SAMMI_PHOTO2,
+  QUESTION1_ID,
+  QUESTION2_ID,
+  QUESTION3_ID,
+  AVERY_PHOTO1,
+  SAMMI_QR5_ID,
 } from './TestsContants';
 
 export const SEND_PERSONAL_REQUEST_1_VARIABLES = {
@@ -23,6 +29,7 @@ export const SEND_PERSONAL_REQUEST_1_VARIABLES = {
     sentForUser_id: JOSH_ID,
     receivedByUser_id: SAMMI_ID,
     requestText: 'I\'d like to match with you!',
+    likedPhoto: SAMMI_PHOTO2,
   },
 };
 
@@ -32,6 +39,22 @@ export const SEND_PERSONAL_REQUEST_2_VARIABLES = {
     sentByUser_id: SOPHIA_ID,
     sentForUser_id: SOPHIA_ID,
     receivedByUser_id: AVERY_ID,
+    likedPrompt: {
+      author_id: MADE_ID,
+      authorFirstName: '',
+      question_id: QUESTION1_ID,
+      question: {
+        _id: QUESTION1_ID,
+        questionText: 'How did they end up on the cover of Forbes?',
+        questionTextWithName: 'How did {{name}} end up on the cover of Forbes?',
+        questionType: 'freeResponse',
+        suggestedResponses: [],
+        tags: [
+          'personality',
+        ],
+      },
+      responseBody: 'avery response 1-1',
+    },
   },
 };
 
@@ -42,6 +65,20 @@ export const SEND_MATCHMAKER_REQUEST_3_VARIABLES = {
     sentForUser_id: SAMMI_ID,
     receivedByUser_id: UMA_ID,
     requestText: 'You two would make a great Pear!',
+    likedPrompt: {
+      author_id: BRIAN_ID,
+      authorFirstName: 'Brian',
+      question_id: QUESTION2_ID,
+      question: {
+        _id: QUESTION2_ID,
+        questionText: 'What\'s your friend\'s weird flex?',
+        questionTextWithName: 'What\'s {{name}}\'s weird flex?',
+        questionType: 'freeResponse',
+        suggestedResponses: [],
+        tags: [],
+      },
+      responseBody: 'uma response 1-1',
+    },
   },
 };
 
@@ -51,6 +88,7 @@ export const SEND_MATCHMAKER_REQUEST_4_VARIABLES = {
     sentByUser_id: BRIAN_ID,
     sentForUser_id: UMA_ID,
     receivedByUser_id: AVERY_ID,
+    likedPhoto: AVERY_PHOTO1,
   },
 };
 
@@ -60,6 +98,23 @@ export const SEND_MATCHMAKER_REQUEST_5_VARIABLES = {
     sentByUser_id: MADE_ID,
     sentForUser_id: AVERY_ID,
     receivedByUser_id: SAMMI_ID,
+    likedPrompt: {
+      _id: SAMMI_QR5_ID,
+      author_id: BRIAN_ID,
+      question_id: QUESTION2_ID,
+      question: {
+        _id: QUESTION3_ID,
+        questionText: 'People only want one thing, and it’s disgusting 😫. What does your friend want?',
+        questionTextWithName: 'People only want one thing, and it’s disgusting 😫. What does {{name}} want?',
+        questionType: 'freeResponse',
+        suggestedResponses: [],
+        tags: [
+          'personality',
+        ],
+      },
+      authorFirstName: 'Brian',
+      responseBody: 'sammi response 2-3',
+    },
   },
 };
 

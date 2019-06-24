@@ -138,7 +138,7 @@ export const createMatchChat = ({
 
 // does not throw
 export const sendMessage = async ({
-  chatID, messageType, content, sender_id,
+  chatID, messageType, content, sender_id, contentType,
 }) => {
   try {
     const db = getFirebaseDb();
@@ -151,7 +151,7 @@ export const sendMessage = async ({
     const messageSetObj = {
       documentID: newMessageRef.id,
       type: messageType,
-      contentType: 'TEXT',
+      contentType: contentType || 'TEXT',
       content,
       timestamp: now,
     };
@@ -221,19 +221,61 @@ export const notifyEndorsementChatAcceptedRequest = async ({
   });
 };
 
-export const sendMatchmakerRequestMessage = async ({ chatID, sentBy, requestText }) => sendMessage({
+export const sendMatchmakerRequestMessage = async ({
   chatID,
-  messageType: 'MATCHMAKER_REQUEST',
-  content: requestText,
-  sender_id: sentBy._id.toString(),
-});
+  sentBy,
+  requestText,
+  likedPhoto,
+  likedPrompt,
+}) => {
+  const contentObj = {};
+  let contentType = 'TEXT';
+  if (requestText) {
+    contentObj.message = requestText;
+  }
+  if (likedPhoto) {
+    contentObj.likedPhoto = likedPhoto;
+    contentType = 'PHOTO_LIKE';
+  } else if (likedPrompt) {
+    contentObj.likedPrompt = likedPrompt;
+    contentType = 'PROMPT_LIKE';
+  }
+  sendMessage({
+    chatID,
+    messageType: 'MATCHMAKER_REQUEST',
+    content: contentType === 'TEXT' ? (requestText || '') : JSON.stringify(contentObj),
+    contentType,
+    sender_id: sentBy._id.toString(),
+  });
+};
 
-export const sendPersonalRequestMessage = async ({ chatID, sentBy, requestText }) => sendMessage({
+export const sendPersonalRequestMessage = async ({
   chatID,
-  messageType: 'PERSONAL_REQUEST',
-  content: requestText,
-  sender_id: sentBy._id.toString(),
-});
+  sentBy,
+  requestText,
+  likedPhoto,
+  likedPrompt,
+}) => {
+  const contentObj = {};
+  let contentType = 'TEXT';
+  if (requestText) {
+    contentObj.message = requestText;
+  }
+  if (likedPhoto) {
+    contentObj.likedPhoto = likedPhoto;
+    contentType = 'PHOTO_LIKE';
+  } else if (likedPrompt) {
+    contentObj.likedPrompt = likedPrompt;
+    contentType = 'PROMPT_LIKE';
+  }
+  sendMessage({
+    chatID,
+    messageType: 'PERSONAL_REQUEST',
+    content: contentType === 'TEXT' ? (requestText || '') : JSON.stringify(contentObj),
+    contentType,
+    sender_id: sentBy._id.toString(),
+  });
+};
 
 export const sendPushNotification = async ({ deviceToken, title, body }) => {
   try {
