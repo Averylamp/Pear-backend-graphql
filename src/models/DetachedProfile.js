@@ -54,10 +54,10 @@ input CreationDetachedProfileInput {
   phoneNumber: String!
   gender: Gender
   
-  boasts: [BoastInput!]!
-  roasts: [RoastInput!]!
+  boasts: [BoastInput!]
+  roasts: [RoastInput!]
   questionResponses: [QuestionUserResponseInput!]!
-  vibes: [VibeInput!]!
+  vibes: [VibeInput!]
   
   # non-required
   bio: BioInput

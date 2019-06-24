@@ -9,6 +9,7 @@ export const CREATE_DETACHED_PROFILE_ERROR = 'Failed to create profile.';
 export const EDIT_DETACHED_PROFILE_ERROR = 'Couldn\'t edit profile.';
 export const EDIT_ENDORSEMENT_ERROR = 'Couldn\'t complete this operation.';
 export const WRONG_CREATOR_ERROR = 'Matchmaker did not endorse this user.';
+export const WRONG_USER_ERROR = 'User is not authorized to take this action';
 export const VIEW_DETACHED_PROFILE_ERROR = 'Failed to perform this operation.';
 export const DELETE_DETACHED_PROFILE_ERROR = 'Couldn\'t delete this profile.';
 export const CANT_ENDORSE_YOURSELF = 'Can\'t create a profile for yourself.';
