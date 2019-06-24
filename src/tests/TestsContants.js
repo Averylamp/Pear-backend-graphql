@@ -46,3 +46,73 @@ export const DISCOVERY_ITEM_ID2 = '5c82162afec999555444b002';
 export const DISCOVERY_ITEM_ID3 = '5c82162afec999555444b003';
 
 export const EVENT0_ID = '5c88862bbbb46c84e9241400';
+
+export const AVERY_PHOTO1 = {// this is a copy of the object generated in ImageUploads.js
+  imageID: 'd7b9ac2dbcd39aeb6a5ff6c33eae1d9f',
+  original: {
+    imageURL: 'https://s3.amazonaws.com/pear-images/dev-images/d7b9ac2dbcd39aeb6a5ff6c33eae1d9f/original/d7b9ac2dbcd39aeb6a5ff6c33eae1d9f.jpg',
+    width: 2048,
+    height: 1367,
+    imageType: 'original',
+  },
+  large: {
+    imageURL: 'hhttps://s3.amazonaws.com/pear-images/dev-images/d7b9ac2dbcd39aeb6a5ff6c33eae1d9f/large/d7b9ac2dbcd39aeb6a5ff6c33eae1d9f.jpg',
+    width: 1498,
+    height: 1000,
+    imageType: 'large',
+  },
+  medium: {
+    imageURL: 'https://s3.amazonaws.com/pear-images/dev-images/d7b9ac2dbcd39aeb6a5ff6c33eae1d9f/medium/d7b9ac2dbcd39aeb6a5ff6c33eae1d9f.jpg',
+    width: 898,
+    height: 600,
+    imageType: 'medium',
+  },
+  small: {
+    imageURL: 'https://s3.amazonaws.com/pear-images/dev-images/d7b9ac2dbcd39aeb6a5ff6c33eae1d9f/small/d7b9ac2dbcd39aeb6a5ff6c33eae1d9f.jpg',
+    width: 449,
+    height: 300,
+    imageType: 'small',
+  },
+  thumbnail: {
+    imageURL: 'https://s3.amazonaws.com/pear-images/dev-images/d7b9ac2dbcd39aeb6a5ff6c33eae1d9f/thumb/d7b9ac2dbcd39aeb6a5ff6c33eae1d9f.jpg',
+    width: 224,
+    height: 150,
+    imageType: 'thumbnail',
+  },
+  uploadedByUser_id: MADE_ID,
+};
+
+export const SAMMI_PHOTO2 = { // this is a copy of the object generated in ImageUploads.js
+  imageID: 'aa6a1db8a2ea3eb11726021816348cd6',
+  original: {
+    imageURL: 'https://s3.amazonaws.com/pear-images/dev-images/aa6a1db8a2ea3eb11726021816348cd6/original/aa6a1db8a2ea3eb11726021816348cd6.jpg',
+    width: 1500,
+    height: 2250,
+    imageType: 'original',
+  },
+  large: {
+    imageURL: 'https://s3.amazonaws.com/pear-images/dev-images/aa6a1db8a2ea3eb11726021816348cd6/large/aa6a1db8a2ea3eb11726021816348cd6.jpg',
+    width: 1000,
+    height: 1500,
+    imageType: 'large',
+  },
+  medium: {
+    imageURL: 'https://s3.amazonaws.com/pear-images/dev-images/aa6a1db8a2ea3eb11726021816348cd6/medium/aa6a1db8a2ea3eb11726021816348cd6.jpg',
+    width: 600,
+    height: 900,
+    imageType: 'medium',
+  },
+  small: {
+    imageURL: 'https://s3.amazonaws.com/pear-images/dev-images/aa6a1db8a2ea3eb11726021816348cd6/small/aa6a1db8a2ea3eb11726021816348cd6.jpg',
+    width: 300,
+    height: 450,
+    imageType: 'small',
+  },
+  thumbnail: {
+    imageURL: 'https://s3.amazonaws.com/pear-images/dev-images/aa6a1db8a2ea3eb11726021816348cd6/thumb/aa6a1db8a2ea3eb11726021816348cd6.jpg',
+    width: 150,
+    height: 225,
+    imageType: 'thumbnail',
+  },
+  uploadedByUser_id: BRIAN_ID,
+};

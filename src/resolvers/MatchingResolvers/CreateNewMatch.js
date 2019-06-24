@@ -50,7 +50,13 @@ const verifyPreferencesMatch = ({
 };
 
 export const createNewMatchResolver = async ({
-  sentByUser_id, sentForUser_id, receivedByUser_id, _id = mongoose.Types.ObjectId(), requestText,
+  sentByUser_id,
+  sentForUser_id,
+  receivedByUser_id,
+  _id = mongoose.Types.ObjectId(),
+  requestText,
+  likedPhoto,
+  likedPrompt,
 }) => {
   const matchID = _id;
   // determine whether this is a matchmaker request or a personal request
@@ -186,6 +192,15 @@ export const createNewMatchResolver = async ({
     firebaseChatDocumentID: firebaseId,
     firebaseChatDocumentPath: getChatDocPathFromId(firebaseId),
   };
+  if (likedPhoto) {
+    matchInput.likedPhoto = likedPhoto;
+  }
+  if (likedPrompt) {
+    matchInput.likedPrompt = likedPrompt;
+  }
+  if (requestText) {
+    matchInput.requestText = requestText;
+  }
   if (!matchmakerMade) {
     matchInput.sentForUserStatus = 'accepted';
   }
@@ -353,12 +368,14 @@ export const createNewMatchResolver = async ({
       message: responseMessage,
     };
   }
-  // send push notifications
+  // send push notifications and chat messages
   if (matchmakerMade) {
     sendMatchmakerRequestMessage({
       chatID: firebaseId,
       sentBy,
       requestText: requestText || '',
+      likedPhoto,
+      likedPrompt,
     });
     if (endorsementEdge) {
       const endorsementChatId = endorsementEdge.firebaseChatDocumentID;
@@ -378,6 +395,8 @@ export const createNewMatchResolver = async ({
       chatID: firebaseId,
       sentBy,
       requestText: requestText || '',
+      likedPhoto,
+      likedPrompt,
     });
   }
   sendMatchReceivedByPushNotification({ receivedBy });
