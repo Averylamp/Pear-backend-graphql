@@ -32,6 +32,9 @@ extend type Mutation{
   # ID is optional, for testing only
   approveNewDetachedProfile(approveDetachedProfileInput: ApproveDetachedProfileInput!): UserMutationResponse!
   
+  # rejects the detached profile
+  rejectDetachedProfile(rejectDetachedProfileInput: RejectDetachedProfileInput!): DetachedProfileMutationResponse!
+  
   # creator can edit the detached profile
   editDetachedProfile(editDetachedProfileInput: EditDetachedProfileInput!): DetachedProfileMutationResponse!
   
@@ -84,6 +87,15 @@ input ApproveDetachedProfileInput {
   donts: [DontInput!]
   interests: [InterestInput!]
 }
+`;
+
+const rejectDetachedProfileInput = `
+input RejectDetachedProfileInput {
+  # id of the user rejecting
+  user_id: ID!
+  # id of the detached profile
+  detachedProfile_id: ID!
+} 
 `;
 
 const editDetachedProfileInput = `
@@ -163,6 +175,7 @@ export const typeDef = queryRoutes
   + mutationRoutes
   + createDetachedProfileInput
   + approveDetachedProfileInput
+  + rejectDetachedProfileInput
   + editDetachedProfileInput
   + detachedProfileType
   + detachedProfileMutationResponse;
