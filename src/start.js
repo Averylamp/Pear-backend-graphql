@@ -68,7 +68,7 @@ import {
   resolvers as UserActionSummaryResolvers,
 } from './resolvers/UserActionResolvers';
 import {
-  typeDef as StatSnapshotTypeDef
+  typeDef as StatSnapshotTypeDef,
 } from './models/StatsModel';
 import {
   resolvers as StatSnapshotResolvers,
