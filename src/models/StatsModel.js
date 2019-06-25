@@ -2,6 +2,35 @@ const mongoose = require('mongoose');
 
 const { Schema } = mongoose;
 
+const queryRoutes = `
+extend type Query {
+  getStatsSince(timestamp: String!): [StatSnapshot!]!
+}
+`;
+
+const statTypes = `
+type StatSnapshot {
+  nUsers: StatTimeSummary
+  nDetachedProfiles: StatTimeSummary
+  nProfileApprovals: StatTimeSummary
+  nPersonalMatchReqs: StatTimeSummary
+  nMatchmakerMatchReqs: StatTimeSummary
+  nPersonalMatchAccepted: StatTimeSummary
+  nMatchmakerMatchAccepted: StatTimeSummary
+  createdAt: String!
+}
+
+type StatTimeSummary {
+  lastDay: Int
+  lastWeek: Int
+  lastMonth: Int
+  allTime: Int
+}
+`;
+
+export const typeDef = queryRoutes
+  + statTypes;
+
 const StatTimeSummary = new Schema({
   lastDay: { type: Number, required: false },
   lastWeek: { type: Number, required: false },

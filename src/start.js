@@ -67,6 +67,12 @@ import {
 import {
   resolvers as UserActionSummaryResolvers,
 } from './resolvers/UserActionResolvers';
+import {
+  typeDef as StatSnapshotTypeDef
+} from './models/StatsModel';
+import {
+  resolvers as StatSnapshotResolvers,
+} from './resolvers/StatsResolver';
 import { devMode } from './constants';
 
 const { ApolloServer } = require('apollo-server-express');
@@ -129,6 +135,7 @@ function createApolloServer() {
     EndorsementModelsTypeDef,
     EventModelsTypeDef,
     UserActionSummaryTypeDef,
+    StatSnapshotTypeDef,
   ];
 
   const resolvers = {
@@ -145,7 +152,8 @@ function createApolloServer() {
     LocationResolvers,
     ContentResolvers,
     EventResolvers,
-    UserActionSummaryResolvers);
+    UserActionSummaryResolvers,
+    StatSnapshotResolvers);
 
 
   const server = new ApolloServer({
