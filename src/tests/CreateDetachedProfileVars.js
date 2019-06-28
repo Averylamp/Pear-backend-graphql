@@ -33,7 +33,7 @@ export const CREATE_AVERY1_DETACHED_PROFILE_VARIABLES = {
     questionResponses: [
       {
         author_id: MADE_ID,
-        authorFirstName: '',
+        authorFirstName: 'Made',
         question_id: QUESTION1_ID,
         question: {
           _id: QUESTION1_ID,
@@ -64,7 +64,7 @@ export const CREATE_BRIAN1_DETACHED_PROFILE_VARIABLES = {
     questionResponses: [
       {
         author_id: SAMMI_ID,
-        authorFirstName: '',
+        authorFirstName: 'Sammi',
         question_id: QUESTION2_ID,
         question: {
           _id: QUESTION2_ID,
@@ -94,7 +94,7 @@ export const CREATE_JOSH1_DETACHED_PROFILE_VARIABLES = {
     questionResponses: [
       {
         author_id: SOPHIA_ID,
-        authorFirstName: '',
+        authorFirstName: 'Sophia',
         question_id: QUESTION3_ID,
         question: {
           _id: QUESTION3_ID,
@@ -122,7 +122,7 @@ export const CREATE_SAMMI1_DETACHED_PROFILE_VARIABLES = {
       {
         _id: SAMMI_QR1_ID,
         author_id: JOSH_ID,
-        authorFirstName: '',
+        authorFirstName: 'Josh',
         question_id: QUESTION1_ID,
         question: {
           _id: QUESTION1_ID,
@@ -149,7 +149,7 @@ export const CREATE_SAMMI2_DETACHED_PROFILE_VARIABLES = {
       {
         _id: SAMMI_QR2_ID,
         author_id: BRIAN_ID,
-        authorFirstName: '',
+        authorFirstName: 'Brian',
         question_id: QUESTION1_ID,
         question: {
           _id: QUESTION1_ID,
@@ -164,7 +164,7 @@ export const CREATE_SAMMI2_DETACHED_PROFILE_VARIABLES = {
       {
         _id: SAMMI_QR3_ID,
         author_id: BRIAN_ID,
-        authorFirstName: '',
+        authorFirstName: 'Brian',
         question_id: QUESTION2_ID,
         question: {
           _id: QUESTION2_ID,
@@ -198,7 +198,22 @@ export const CREATE_UMA1_DETACHED_PROFILE_VARIABLES = {
     creatorFirstName: '',
     firstName: 'Uma',
     phoneNumber: '9784296614',
-    questionResponses: [],
+    questionResponses: [
+      {
+        author_id: BRIAN_ID,
+        authorFirstName: 'Brian',
+        question_id: QUESTION2_ID,
+        question: {
+          _id: QUESTION2_ID,
+          questionText: 'What\'s your friend\'s weird flex?',
+          questionTextWithName: 'What\'s {{name}}\'s weird flex?',
+          questionType: 'freeResponse',
+          suggestedResponses: [],
+          tags: [],
+        },
+        responseBody: 'uma response 1-1',
+      },
+    ],
   },
 };
 
