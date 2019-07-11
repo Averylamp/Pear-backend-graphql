@@ -2,7 +2,7 @@ import nanoid from 'nanoid';
 import { receiveRequest, sendRequest, User } from '../../models/UserModel';
 import {
   GET_USER_ERROR, SEND_MATCH_PREFERENCES_SILENT_FAIL,
-  SEND_MATCH_REQUEST_ERROR, USERS_ALREADY_MATCHED_ERROR,
+  SEND_MATCH_REQUEST_ERROR, USERS_ALREADY_MATCHED_SILENT_FAIL,
   WRONG_CREATOR_ERROR,
 } from '../ResolverErrorStrings';
 import { DiscoveryQueue } from '../../models/DiscoveryQueueModel';
@@ -107,29 +107,6 @@ export const createNewMatchResolver = async ({
   }
   const initialSentFor = sentFor.toObject();
   const initialReceivedBy = receivedBy.toObject();
-  for (const matchedUser_id in sentFor.edgeSummaries.map(edge => edge.otherUser_id.toString())) {
-    if (matchedUser_id.toString() === receivedBy._id.toString()) {
-      return {
-        success: false,
-        message: USERS_ALREADY_MATCHED_ERROR,
-      };
-    }
-  }
-  const sentForDemographics = sentFor.matchingDemographics;
-  const sentForPreferences = sentFor.matchingPreferences;
-  const receivedByDemographics = receivedBy.matchingDemographics;
-  const receivedByPreferences = receivedBy.matchingPreferences;
-  if (!verifyPreferencesMatch({
-    sentForDemographics,
-    sentForPreferences,
-    receivedByDemographics,
-    receivedByPreferences,
-  })) {
-    return {
-      success: true,
-      message: SEND_MATCH_PREFERENCES_SILENT_FAIL,
-    };
-  }
 
   const sentForDiscoveryPromise = DiscoveryQueue.findOne({ user_id: sentForUser_id })
     .exec()
@@ -167,6 +144,63 @@ export const createNewMatchResolver = async ({
   const initialSentForDiscovery = sentForDiscovery.toObject();
   const initialReceivedByDiscovery = receivedByDiscovery.toObject();
 
+  // update discovery queues - this happens whether or not the match fails
+  sentForDiscovery.currentDiscoveryItems = sentForDiscovery.currentDiscoveryItems
+    .filter(item => item.user_id.toString() !== receivedByUser_id.toString());
+  const sentForDiscoveryUpdatePromise = matchmakerMade
+    ? sentForDiscovery.save().catch(err => err)
+    : Promise.resolve(null);
+  receivedByDiscovery.currentDiscoveryItems = receivedByDiscovery.currentDiscoveryItems
+    .filter(item => item.user_id.toString() !== sentForUser_id.toString());
+  const receivedByDiscoveryUpdatePromise = receivedByDiscovery.save().catch(err => err);
+
+  // fail and return if users already matched, or if preferences aren't lined up
+  // also record a skip action in sentBy's decidedDiscoveryItems
+  for (const matchedUser_id in sentFor.edgeSummaries.map(edge => edge.otherUser_id.toString())) {
+    if (matchedUser_id.toString() === receivedBy._id.toString()) {
+      sentByDiscovery.decidedDiscoveryItems.push({
+        user_id: receivedByUser_id.toString(),
+        action: 'skip',
+      });
+      sentByDiscovery.save().catch(err => err);
+      return {
+        success: true,
+        message: USERS_ALREADY_MATCHED_SILENT_FAIL,
+      };
+    }
+  }
+  const sentForDemographics = sentFor.matchingDemographics;
+  const sentForPreferences = sentFor.matchingPreferences;
+  const receivedByDemographics = receivedBy.matchingDemographics;
+  const receivedByPreferences = receivedBy.matchingPreferences;
+  if (!verifyPreferencesMatch({
+    sentForDemographics,
+    sentForPreferences,
+    receivedByDemographics,
+    receivedByPreferences,
+  })) {
+    sentByDiscovery.decidedDiscoveryItems.push({
+      user_id: receivedByUser_id.toString(),
+      action: 'skip',
+    });
+    sentByDiscovery.save().catch(err => err);
+    return {
+      success: true,
+      message: SEND_MATCH_PREFERENCES_SILENT_FAIL,
+    };
+  }
+
+  // if users haven't already been peared, and preferences line up, record pear/match
+  // in decidedDiscoveryItems
+  sentByDiscovery.currentDiscoveryItems = sentByDiscovery.currentDiscoveryItems
+    .filter(item => item.user_id.toString() !== receivedByUser_id.toString());
+  sentByDiscovery.decidedDiscoveryItems.push({
+    user_id: receivedByUser_id.toString(),
+    action: matchmakerMade ? 'pear' : 'match',
+  });
+  const sentByDiscoveryUpdatePromise = sentByDiscovery.save().catch(err => err);
+
+  // create the match object
   let endorsementEdge = null;
   if (matchmakerMade) {
     datadogStats.increment('server.stats.match_request_matchmaker_sent');
@@ -182,7 +216,6 @@ export const createNewMatchResolver = async ({
 
   const firebaseId = nanoid(20);
 
-  // create the match object
   const matchInput = {
     _id: matchID,
     sentByUser_id,
@@ -231,23 +264,6 @@ export const createNewMatchResolver = async ({
   })
     .catch(err => err);
 
-  // update discovery queues
-  sentByDiscovery.currentDiscoveryItems = sentByDiscovery.currentDiscoveryItems
-    .filter(item => item.user_id.toString() !== receivedByUser_id.toString());
-  sentByDiscovery.decidedDiscoveryItems.push({
-    user_id: receivedByUser_id.toString(),
-    action: matchmakerMade ? 'pear' : 'match',
-  });
-  const sentByDiscoveryUpdatePromise = sentByDiscovery.save().catch(err => err);
-  sentForDiscovery.currentDiscoveryItems = sentForDiscovery.currentDiscoveryItems
-    .filter(item => item.user_id.toString() !== receivedByUser_id.toString());
-  const sentForDiscoveryUpdatePromise = matchmakerMade
-    ? sentForDiscovery.save().catch(err => err)
-    : Promise.resolve(null);
-  receivedByDiscovery.currentDiscoveryItems = receivedByDiscovery.currentDiscoveryItems
-    .filter(item => item.user_id.toString() !== sentForUser_id.toString());
-  const receivedByDiscoveryUpdatePromise = receivedByDiscovery.save().catch(err => err);
-
   const [match,
     sentForEdgeResult,
     receivedByEdgeResult,
@@ -271,7 +287,6 @@ export const createNewMatchResolver = async ({
     || sentForDiscoveryResult instanceof Error
     || receivedByDiscoveryResult instanceof Error) {
     let errorMessage = '';
-    let responseMessage = SEND_MATCH_REQUEST_ERROR;
     if (match instanceof Error) {
       errorLog(`Failed to create match Object: ${match.toString()}`);
       errorMessage += match.toString();
@@ -284,16 +299,10 @@ export const createNewMatchResolver = async ({
     if (sentForEdgeResult instanceof Error) {
       errorLog(`Sent For Edge Failure:${sentForEdgeResult.toString()}`);
       errorMessage += sentForEdgeResult.toString();
-      if (sentForEdgeResult.toString() === (new Error(USERS_ALREADY_MATCHED_ERROR)).toString()) {
-        responseMessage = USERS_ALREADY_MATCHED_ERROR;
-      }
     }
     if (receivedByEdgeResult instanceof Error) {
       errorLog(`Received By Edge Failure:${receivedByEdgeResult.toString()}`);
       errorMessage += receivedByEdgeResult.toString();
-      if (receivedByEdgeResult.toString() === (new Error(USERS_ALREADY_MATCHED_ERROR)).toString()) {
-        responseMessage = USERS_ALREADY_MATCHED_ERROR;
-      }
     }
     if (createChatResult instanceof Error) {
       errorMessage += createChatResult.toString();
@@ -365,7 +374,7 @@ export const createNewMatchResolver = async ({
     });
     return {
       success: false,
-      message: responseMessage,
+      message: SEND_MATCH_REQUEST_ERROR,
     };
   }
   // send push notifications and chat messages
