@@ -43,6 +43,7 @@
     "geolib": "^2.0.24",
     "graphql": "^14.1.1",
     "graphql-tag": "^2.10.1",
+    "grpc": "^1.22.2",
     "lodash": "^4.17.11",
     "mongo-dot-notation": "^1.2.0",
     "mongoose": "^5.4.13",
