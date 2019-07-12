@@ -22,6 +22,7 @@ export const GET_DISCOVERY_CARDS_ERROR = 'Couldn\t retrieve new profiles.';
 export const SEND_MATCH_REQUEST_ERROR = 'Couldn\'t send match request.';
 export const SEND_MATCH_PREFERENCES_SILENT_FAIL = 'Users outside each others\'s preferences: silent fail';
 export const USERS_ALREADY_MATCHED_ERROR = 'These users have already been Peared!';
+export const USERS_ALREADY_MATCHED_SILENT_FAIL = 'Users have already been Peared: silent fail';
 export const ACCEPT_MATCH_REQUEST_ERROR = 'Couldn\'t accept match request.';
 export const REJECT_MATCH_REQUEST_ERROR = 'Couldn\'t perform action on match request.';
 export const UNMATCH_ERROR = 'Couldn\'t perform action on match.';

@@ -2,7 +2,6 @@ import { MatchingDemographicsSchema, MatchingPreferencesSchema } from './Matchin
 import { ImageContainerSchema } from './ImageSchemas';
 import { EdgeSummarySchema } from './MatchModel';
 import { EndorsementEdgeSchema } from './EndorsementModels';
-import { USERS_ALREADY_MATCHED_ERROR } from '../resolvers/ResolverErrorStrings';
 import {
   BioSchema,
   BoastSchema, DontSchema, DoSchema, InterestSchema,
@@ -541,14 +540,6 @@ export const createUserObject = (userInput, skipTimestamps) => {
 };
 
 export const receiveRequest = (me, otherUser, match_id, isFromFriend) => {
-  const alreadyExists = me.edgeSummaries.find(
-    edgeSummary => (edgeSummary.otherUser_id.toString() === otherUser._id.toString()),
-  );
-  if (alreadyExists !== undefined) {
-    return Promise.reject(
-      new Error(USERS_ALREADY_MATCHED_ERROR),
-    );
-  }
   me.edgeSummaries.push({
     otherUser_id: otherUser._id,
     match_id,
@@ -563,14 +554,6 @@ export const receiveRequest = (me, otherUser, match_id, isFromFriend) => {
 };
 
 export const sendRequest = (me, otherUser, match_id) => {
-  const alreadyExists = me.edgeSummaries.find(
-    edgeSummary => (edgeSummary.otherUser_id.toString() === otherUser._id.toString()),
-  );
-  if (alreadyExists !== undefined) {
-    return Promise.reject(
-      new Error(USERS_ALREADY_MATCHED_ERROR),
-    );
-  }
   me.personalMatchesSentCount += 1;
   me.edgeSummaries.push({
     otherUser_id: otherUser._id,
