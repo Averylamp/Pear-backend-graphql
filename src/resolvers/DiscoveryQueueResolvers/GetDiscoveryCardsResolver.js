@@ -251,7 +251,7 @@ export const addCardsToCache = async ({ user, discoveryQueue, nCardsToAdd }) => 
   let cardsToPush = [];
   for (const ignoreSkipList of [false, true]) {
     for (const includeLocation of [true, false]) {
-      for (const widerAge of [0, 3, 5, 10]) {
+      for (const widerAge of [0, 2]) {
         for (const seededOnly of [true, false]) {
           let seededOnlyFinal = seededOnly;
           if (discoveryQueue.decidedDiscoveryItems
