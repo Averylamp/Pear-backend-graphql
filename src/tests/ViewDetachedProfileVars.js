@@ -1,3 +1,5 @@
+import { JOEL_ID, JOEL_PROFILE_BRIAN_D_ID } from './TestsContants';
+
 export const VIEW_AVERY1_PROFILE_VARIABLES = {
   user_id: '5c82162afec46c84e924a332',
   detachedProfile_id: '5c82162afec46c84e9241112',
@@ -41,4 +43,9 @@ export const VIEW_SOPHIA1_PROFILE_VARIABLES = {
 export const VIEW_SOPHIA2_PROFILE_VARIABLES = {
   user_id: '5c82162afec46c84e924a338',
   detachedProfile_id: '5c82162afec46c84e9241120',
+};
+
+export const VIEW_JOEL1_PROFILE_VARIABLES = {
+  user_id: JOEL_ID,
+  detachedProfile_id: JOEL_PROFILE_BRIAN_D_ID,
 };
