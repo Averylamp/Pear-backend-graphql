@@ -1,6 +1,6 @@
-import { ATTACH_DETACHED_PROFILE } from '../Mutations';
+import { ATTACH_DETACHED_PROFILE, REJECT_DETACHED_PROFILE } from '../Mutations';
 import { verbose } from '../../constants';
-import { attachProfiles } from '../CreateTestDB';
+import { attachProfiles, rejectProfiles } from '../CreateTestDB';
 import { checkForAndLogErrors } from '../Utils';
 
 const testLogger = require('debug')('tests:AttachDetachedProfilesTest');
@@ -29,6 +29,21 @@ export const runAttachDetachedProfilesTest = async (mutate) => {
         verboseDebug(result);
       }
       checkForAndLogErrors(result, 'approveNewDetachedProfile', errorLog);
+    } catch (e) {
+      errorLog((`${e}`));
+      process.exit(1);
+    }
+  }
+  for (const rejectProfileVars of rejectProfiles) {
+    try {
+      const result = await mutate({
+        mutation: REJECT_DETACHED_PROFILE,
+        variables: rejectProfileVars,
+      });
+      if (verbose) {
+        verboseDebug(result);
+      }
+      checkForAndLogErrors(result, 'rejectDetachedProfile', errorLog);
     } catch (e) {
       errorLog((`${e}`));
       process.exit(1);
