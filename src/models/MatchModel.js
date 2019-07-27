@@ -43,7 +43,9 @@ input CreateMatchRequestInput {
   
   # Optional text that goes along with the like
   requestText: String
+  reaction: Reaction
   likedPhoto: CreateImageContainer
+  likedSlice: SliceInput
   likedPrompt: QuestionUserResponseInput
 }
 `;
@@ -77,7 +79,10 @@ type Match{
   isMatchmakerMade: Boolean!
   
   requestText: String
+  reaction: Reaction
   likedPhoto: ImageContainer
+  likedSlice: Slice
+  # DEPRECATED
   likedPrompt: QuestionUserResponse
 
   sentForUserStatus: RequestResponse!
@@ -92,6 +97,14 @@ type Match{
 
   firebaseChatDocumentID: String!
   firebaseChatDocumentPath: String!
+}
+
+enum Reaction {
+  like
+  haha
+  wow
+  hmm
+  angry
 }
 `;
 

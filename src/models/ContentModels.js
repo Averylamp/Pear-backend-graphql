@@ -280,6 +280,157 @@ enum QuestionTag {
 }
 `;
 
+const slicesType = `
+interface Slice {
+  type: SliceType!
+}
+
+# inputs can't inherit, so we have to copy a bunch of fields
+input SliceInput {
+  type: SliceType!
+  tagline: String
+  shows: [ShowSummaryInput!]
+  songs: [SongSummaryInput!]
+  books: [BookSummaryInput!]
+  tags: [TagInput!]
+  prompt: PromptSliceInput
+  skills: [SkillInput!]
+  testimonial: TestimonialSliceInput
+}
+
+enum SliceType {
+  tagline
+  shows
+  songs
+  books
+  tags
+  prompt
+  skills
+  testimonials
+}
+
+type TaglineSlice {
+  type: SliceType!
+  content: String!
+}
+
+type ShowsSlice {
+  type: SliceType!
+  content: [ShowSummary!]!
+}
+
+type ShowSummary {
+  title: SliceType!
+  thumbnailURL: String!
+  mediaType: ShowMediaType!
+}
+
+input ShowSummaryInput {
+  title: SliceType!
+  thumbnailURL: String!
+  mediaType: ShowMediaType!
+}
+
+enum ShowMediaType {
+  movie
+  series
+}
+
+type SongsSlice {
+  type: SliceType!
+  content: [SongSummary!]!
+}
+
+type SongSummary {
+  title: String!
+  thumbnailURL: String!
+}
+
+input SongSummaryInput {
+  title: String!
+  thumbnailURL: String!
+}
+
+type BooksSlice {
+  type: SliceType!
+  content: [BookSummary!]!
+}
+
+type BookSummary {
+  title: String!
+}
+
+input BookSummaryInput {
+  title: String!
+}
+
+type TagsSlice {
+  type: SliceType!
+  tags: [Tag!]!
+}
+
+type Tag {
+  text: String!
+}
+
+input TagInput {
+  text: String!
+}
+
+type PromptSlice {
+  type: SliceType!
+  question: String!
+  response: String!
+}
+
+input PromptSliceInput {
+  question: String!
+  response: String!
+}
+
+type EndorsementsSlice {
+  type: SliceType!
+  skills: [Skill!]!
+}
+
+type Skill {
+  text: String!
+  author_id: ID!
+  author: User
+  authorFirstName: String!
+  authorThumbnailURL: String
+}
+
+input SkillInput {
+  text: String!
+  author_id: ID!
+  authorFirstName: String!
+  authorThumbnailURL: String
+}
+
+type TestimonialSlice {
+  type: SliceType!
+  _id: ID!
+  author_id: ID!
+  author: User
+  authorFirstName: String!
+  authorThumbnailURL: String
+  question_id: ID!
+  question: Question!
+  responseBody: String!
+}
+
+input TestimonialSliceInput {
+  _id: ID
+  author_id: ID!
+  authorFirstName: String!
+  authorThumbnailURL: String
+  question_id: ID!
+  question: NewQuestionPartialInput!
+  responseBody: String!
+}
+`;
+
 const questionUserResponseType = `
 type QuestionUserResponse {
   _id: ID!
@@ -322,6 +473,7 @@ input QuestionUserResponseInput {
 const devTypeDef = devMode ? mutationRoutes : '';
 
 export const typeDef = queryRoutes
++ slicesType
 + bioType
 + boastType
 + roastType

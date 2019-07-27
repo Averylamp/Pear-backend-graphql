@@ -115,6 +115,8 @@ input UpdateUserInput {
   birthdate: String
   
   questionResponses: [QuestionUserResponseInput!]
+  slices: [SliceInput!]
+  displayedSlices: [SliceInput!]
   
   ethnicity: [EthnicityEnum]
   ethnicityVisible: Boolean
@@ -170,6 +172,10 @@ input EditEndorsementInput {
   endorser_id: ID!
   user_id: ID!
 
+  skills: [SkillInput!]
+  testimonials: [TestimonialInput!]
+  
+  # DEPRECATED
   boasts: [BoastInput!]
   roasts: [RoastInput!]
   questionResponses: [QuestionUserResponseInput!]
@@ -200,8 +206,14 @@ type User {
   gender: Gender
   age: Int
   birthdate: String
+  
+  # slices
+  slices: [Slice!]!
+  slicesCount: Int!
+  displayedSlices: [Slice!]!
+  displayedSlicesCount: Int!
 
-  # profile content. ordered
+  # DEPRECATED profile content. ordered
   bios: [Bio!]!
   boasts: [Boast!]!
   roasts: [Roast!]!
@@ -227,17 +239,20 @@ type User {
   # The ordered images that currently make up the User's Profile
   displayedImages: [ImageContainer!]!
   displayedImagesCount: Int!
-  # All images uploaded for a user
-  bankImages: [ImageContainer!]!
-
+  
+  # DEPRECATED
   pearPoints: Int!
+  
+  friend_ids: [ID!]!
+  friends: [User!]!
+  friendCount: Int!
 
-  # All users who have endorsed this user
+  # DEPRECATED All users who have endorsed this user
   endorser_ids: [ID!]!
   endorsers: [User]!
   endorserCount: Int!
 
-  # All users this user has endorsed
+  # DEPRECATED All users this user has endorsed
   endorsedUser_ids: [ID!]!
   endorsedUsers: [User]!
   endorsedUsersCount: Int!
