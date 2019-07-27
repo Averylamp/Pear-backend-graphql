@@ -173,7 +173,7 @@ input EditEndorsementInput {
   user_id: ID!
 
   skills: [SkillInput!]
-  testimonials: [TestimonialInput!]
+  testimonials: [TestimonialSliceInput!]
   
   # DEPRECATED
   boasts: [BoastInput!]
