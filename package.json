@@ -46,7 +46,7 @@
     "grpc": "^1.22.2",
     "lodash": "^4.17.11",
     "mongo-dot-notation": "^1.2.0",
-    "mongoose": "^5.4.13",
+    "mongoose": "^5.7.5",
     "nanoid": "^2.0.1",
     "node-dogstatsd": "^0.0.7",
     "request": "^2.88.0",
