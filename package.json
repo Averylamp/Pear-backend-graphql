@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@sentry/node": "5.1.0",
-    "apollo-server": "^2.4.2",
+    "apollo-server": "^2.14.2",
     "apollo-server-express": "^2.4.2",
     "apollo-server-testing": "^2.4.8",
     "babel-core": "^6.20.0",
