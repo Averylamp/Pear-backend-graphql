@@ -80,7 +80,10 @@ yarn add --dev package
 
 Upload schema to Apollo:
 ```
-apollo service:push --key="service:pear-matchmaking-8936:V43kf4Urhi-63wQycK_yoA" --endpoint=host/graphql  --tags="Optional tags"
+# For Dev
+npx apollo service:push     --graph=My-Graph-l48m5d     --key=service:My-Graph-l48m5d:NSid82IGnwQjlXpyTVEy9w     --variant=current     --endpoint=http://localhost:1233
+# For Prod
+npx apollo service:push     --graph=My-Graph-l48m5d     --key=service:My-Graph-l48m5d:NSid82IGnwQjlXpyTVEy9w     --variant=current     --endpoint=http://localhost:1234
 ```
 
 

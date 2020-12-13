@@ -217,12 +217,12 @@ const DetachedProfileSchema = new Schema({
   matchingDemographics: {
     type: MatchingDemographicsSchema,
     required: true,
-    default: MatchingDemographicsSchema,
+    default: () => ({}),
   },
   matchingPreferences: {
     type: MatchingPreferencesSchema,
     required: true,
-    default: MatchingPreferencesSchema,
+    default: () => ({}),
   },
 
   // not in graphql schema because once this is set, the DP should never be queried for

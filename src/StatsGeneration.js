@@ -23,7 +23,7 @@ export const startStatsGeneration = async () => {
   debug(`Database: ${dbName}`);
   prodConsole('Running in Prod');
   prodConsole(`Database: ${dbName}`);
-  const MONGO_URL = `mongodb+srv://avery:0bz8M0eMEtyXlj2aZodIPpJpy@cluster0-w4ecv.mongodb.net/${dbName}?retryWrites=true`;
+  const MONGO_URL = `mongodb+srv://avery:e5nkGl40nt02kZXk@cluster0.29rmo.mongodb.net/${dbName}?retryWrites=true`;
   debug(MONGO_URL);
 
   const name = 'Stats Generation';

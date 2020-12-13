@@ -79,10 +79,10 @@ if (devMode) debug('Dev Mode detected');
 const tracing = process.env.PERF === 'true';
 if (tracing) debug('Perf mode detected');
 
-const URL = 'http://localhost';
+const URL = 'http://0.0.0.0';
 const PORT = process.env.PORT ? process.env.PORT : 1234;
-const dbHost = process.env.DB_HOST ? process.env.DB_HOST : 'localhost';
-const mongoPrefix = dbHost.includes('localhost') ? 'mongodb://' : 'mongodb+srv://';
+const dbHost = process.env.DB_HOST ? process.env.DB_HOST : '0.0.0.0';
+const mongoPrefix = dbHost.includes('0.0.0.0') ? 'mongodb://' : 'mongodb+srv://';
 const dbName = process.env.DB_NAME ? process.env.DB_NAME : 'dev';
 const dbUser = process.env.DB_USER ? process.env.DB_USER : '';
 const dbPass = process.env.DB_PASS ? process.env.DB_PASS : '';
@@ -90,7 +90,7 @@ debug(`Database: ${dbName}`);
 prodConsole('Running in Prod');
 prodConsole(`Database: ${dbName}`);
 
-export const MONGO_URL = `${mongoPrefix}${dbUser}${dbPass}${dbHost}/${dbName}?retryWrites=true`;
+export const MONGO_URL = `${mongoPrefix}${dbUser}${dbPass}@${dbHost}/${dbName}?retryWrites=true`;
 const mongoose = require('mongoose');
 
 // see https://github.com/Automattic/mongoose/issues/7150

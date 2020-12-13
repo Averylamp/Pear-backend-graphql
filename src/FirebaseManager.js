@@ -4,7 +4,7 @@ const debug = require('debug')('dev:FirebaseManager');
 const errorLog = require('debug')('error:FirebaseManager');
 const testLog = require('debug')('tests:FirebaseManager');
 const firebaseAdmin = require('firebase-admin');
-const serviceAccount = require('../pear-firebase-adminsdk.json');
+const serviceAccount = require('../lifestyle-5991f-firebase-adminsdk-qw4ou-542edad9db.json');
 
 // if DB_NAME specified, hit chats-$DB_NAME
 // if CHAT_COLLECTION env variable specified, override and use that collection
@@ -20,7 +20,7 @@ let initialized = false;
 const initialize = () => {
   firebaseAdmin.initializeApp({
     credential: firebaseAdmin.credential.cert(serviceAccount),
-    databaseURL: 'https://pear-59123.firebaseio.com',
+    // databaseURL: 'https://pear-59123.firebaseio.com',
   });
 };
 

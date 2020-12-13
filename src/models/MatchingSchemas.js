@@ -225,42 +225,42 @@ export const MatchingDemographicsSchema = new Schema({
   ethnicity: {
     type: EthnicityInfoSchema,
     required: true,
-    default: EthnicityInfoSchema,
+    default: () => ({}),
   },
   educationLevel: {
     type: EducationLevelSchema,
     required: true,
-    default: EducationLevelSchema,
+    default: () => ({}),
   },
   religion: {
     type: ReligionInfoSchema,
     required: true,
-    default: ReligionInfoSchema,
+    default: () => ({}),
   },
   politicalView: {
     type: PoliticsInfoSchema,
     required: true,
-    default: PoliticsInfoSchema,
+    default: () => ({}),
   },
   drinking: {
     type: DrinkingInfoSchema,
     required: true,
-    default: DrinkingInfoSchema,
+    default: () => ({}),
   },
   smoking: {
     type: SmokingInfoSchema,
     required: true,
-    default: SmokingInfoSchema,
+    default: () => ({}),
   },
   cannabis: {
     type: CannabisInfoSchema,
     required: true,
-    default: CannabisInfoSchema,
+    default: () => ({}),
   },
   drugs: {
     type: DrugsInfoSchema,
     required: true,
-    default: DrugsInfoSchema,
+    default: () => ({}),
   },
 }, { timestamps: true });
 

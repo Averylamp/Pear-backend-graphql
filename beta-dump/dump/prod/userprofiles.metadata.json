@@ -1,1 +1,0 @@
-{"options":{},"indexes":[{"v":2,"key":{"_id":1},"name":"_id_","ns":"prod.userprofiles"},{"v":2,"key":{"creatorUser_id":1},"name":"creatorUser_id_1","background":true,"ns":"prod.userprofiles"},{"v":2,"key":{"user_id":1},"name":"user_id_1","background":true,"ns":"prod.userprofiles"}],"uuid":"43727908e41d4871b86792d28a45db78"}

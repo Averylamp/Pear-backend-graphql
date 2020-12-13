@@ -459,12 +459,12 @@ const UserSchema = new Schema({
   matchingDemographics: {
     type: MatchingDemographicsSchema,
     required: true,
-    default: MatchingDemographicsSchema,
+    default: () => ({}),
   },
   matchingPreferences: {
     type: MatchingPreferencesSchema,
     required: true,
-    default: MatchingPreferencesSchema,
+    default: () => ({}),
   },
 
   blockedUser_ids: {
