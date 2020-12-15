@@ -1,7 +1,6 @@
 import { User } from '../../models/UserModel';
 import { DiscoveryQueue } from '../../models/DiscoveryQueueModel';
 import { SKIP_DISCOVERY_ITEM_ERROR } from '../ResolverErrorStrings';
-import { recordSkipCard } from '../../models/UserActionModel';
 
 const errorLogger = require('debug')('error:Matching');
 
@@ -71,7 +70,6 @@ export const skipDiscoveryItemResolver = async ({
       message: SKIP_DISCOVERY_ITEM_ERROR,
     };
   }
-  recordSkipCard({ user, skippedUser_id });
   return {
     success: true,
   };

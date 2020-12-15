@@ -1,5 +1,4 @@
 import { User } from '../models/UserModel';
-import { DetachedProfile } from '../models/DetachedProfile';
 import { DiscoveryQueue } from '../models/DiscoveryQueueModel';
 import { Match } from '../models/MatchModel';
 
@@ -32,9 +31,6 @@ export const deleteUserResolver = async (user_id) => {
 
   await DiscoveryQueue.deleteMany({ user_id }).exec().catch(addErrorToMessage);
   debug('deleted associated discovery queue');
-
-  await DetachedProfile.deleteMany({ creatorUser_id: user_id }).exec().catch(addErrorToMessage);
-  debug('deleted detached profiles made by user');
 
   const matchedUser_ids = user.edgeSummaries.map(edge => edge.otherUser_id.toString());
   await User.updateMany({ _id: { $in: matchedUser_ids } }, {

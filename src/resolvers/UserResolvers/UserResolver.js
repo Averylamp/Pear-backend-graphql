@@ -1,10 +1,8 @@
-import { DetachedProfile } from '../../models/DetachedProfile';
 import {
   DiscoveryQueue,
 } from '../../models/DiscoveryQueueModel';
 import { User } from '../../models/UserModel';
 import { Match } from '../../models/MatchModel';
-import { EventModel } from '../../models/EventModel';
 import { authenticateUser, sendNewMessagePushNotification } from '../../FirebaseManager';
 import {
   ADD_EVENT_CODE_ERROR,
@@ -14,13 +12,9 @@ import {
 import { LAST_ACTIVE_ARRAY_LEN } from '../../constants';
 import { createUserResolver } from './CreateUser';
 import { updateUserResolver } from './UpdateUser';
-import { editEndorsementResolver } from './EditEndorsement';
 import { generateSentryErrorForResolver } from '../../SentryHelper';
 import { deleteUserResolver } from '../../deletion/UserDeletion';
-import { addEventCodeResolver } from './AddEventCode';
 import { updateUserPhotosResolver } from './UpdateUserPhotos';
-import { datadogStats } from '../../DatadogHelper';
-import { recordActivity, recordSentMessage, UserActionSummary } from '../../models/UserActionModel';
 
 const debug = require('debug')('dev:UserResolvers');
 const errorLog = require('debug')('error:UserResolver');
@@ -31,21 +25,11 @@ const devMode = process.env.DEV === 'true';
 export const resolvers = {
   User: {
     discoveryQueueObj: async ({ discoveryQueue_id }) => DiscoveryQueue.findById(discoveryQueue_id),
-    actionSummaryObj: async ({ actionSummary_id }) => UserActionSummary
-      .findById(actionSummary_id),
     blockedUsers: async ({ blockedUser_ids }) => User.find({ _id: { $in: blockedUser_ids } }),
     requestedMatches: async ({ requestedMatch_ids }) => Match
       .find({ _id: { $in: requestedMatch_ids } }),
     currentMatches: async ({ currentMatch_ids }) => Match
       .find({ _id: { $in: currentMatch_ids } }),
-    edgeUser_ids: async ({ edgeSummaries }) => [
-      ...new Set(edgeSummaries.map(summary => summary.otherUser_id)),
-    ],
-    endorsers: async ({ endorser_ids }) => User.find({ _id: { $in: endorser_ids } }),
-    endorsedUsers: async ({ endorsedUser_ids }) => User.find({ _id: { $in: endorsedUser_ids } }),
-    detachedProfiles: async ({ detachedProfile_ids }) => DetachedProfile
-      .find({ _id: { $in: detachedProfile_ids } }),
-    events: async ({ event_ids }) => EventModel.find({ _id: { $in: event_ids } }),
   },
   Query: {
     user: async (_source, { id }) => {
@@ -55,7 +39,6 @@ export const resolvers = {
     getUser: async (_source, args) => {
       const { userInput } = args;
       functionCallConsole('Get User Called');
-      datadogStats.increment('server.call.get_user');
       const token = userInput.firebaseToken;
       const uid = userInput.firebaseAuthID;
       try {
@@ -69,7 +52,6 @@ export const resolvers = {
             > 60 * 60 * 1000) {
             user.lastActiveTimes.push(now);
             user.lastActiveTimes.slice(-1 * LAST_ACTIVE_ARRAY_LEN);
-            recordActivity({ user });
           }
           user.save();
           return {
@@ -132,7 +114,6 @@ export const resolvers = {
       }
     },
     notifyNewMessage: async (_source, { fromUser_id, toUser_id }) => {
-      datadogStats.increment('server.stats.notification_user_received_new_message');
       const from = await User.findById(fromUser_id)
         .exec();
       const to = await User.findById(toUser_id)
@@ -144,10 +125,9 @@ export const resolvers = {
         from,
         to,
       });
-      recordSentMessage({ fromUser_id, toUser_id });
       return true;
     },
-    alreadyOnPear: async (_source, { phoneNumbers }) => {
+    alreadyOnPlatform: async (_source, { phoneNumbers }) => {
       try {
         const users = await User.find({ phoneNumber: { $in: phoneNumbers } }).exec();
         return users.map(user => user.phoneNumber);
@@ -162,7 +142,6 @@ export const resolvers = {
   Mutation: {
     createUser: async (_source, { userInput }) => {
       functionCallConsole('Create User');
-      datadogStats.increment('server.stats.new_user_created');
       try {
         return createUserResolver({ userInput });
       } catch (e) {
@@ -182,7 +161,6 @@ export const resolvers = {
     },
     updateUser: async (_source, { updateUserInput }) => {
       functionCallConsole('Update User');
-      datadogStats.increment('server.stats.user_updated_information');
       try {
         return updateUserResolver({ updateUserInput });
       } catch (e) {
@@ -202,7 +180,6 @@ export const resolvers = {
     },
     updateUserPhotos: async (_source, { updateUserPhotosInput }) => {
       functionCallConsole('Update Photos Called');
-      datadogStats.increment('server.stats.user_updated_photos');
       try {
         return updateUserPhotosResolver({ updateUserPhotosInput });
       } catch (e) {
@@ -217,26 +194,6 @@ export const resolvers = {
         return {
           success: false,
           message: UPDATE_USER_PHOTOS_ERROR,
-        };
-      }
-    },
-    editEndorsement: async (_source, { editEndorsementInput }) => {
-      functionCallConsole('Edit Endorsement Called');
-      datadogStats.increment('server.stats.user_updated_endorsement');
-      try {
-        return editEndorsementResolver({ editEndorsementInput });
-      } catch (e) {
-        errorLog(`error occurred while editing endorsement: ${e}`);
-        generateSentryErrorForResolver({
-          resolverType: 'mutation',
-          routeName: 'editEndorsement',
-          args: { editEndorsementInput },
-          errorMsg: e,
-          errorName: EDIT_ENDORSEMENT_ERROR,
-        });
-        return {
-          success: false,
-          message: EDIT_ENDORSEMENT_ERROR,
         };
       }
     },
@@ -261,24 +218,6 @@ export const resolvers = {
         return {
           success: false,
           message: DELETE_USER_ERROR,
-        };
-      }
-    },
-    addEventCode: async (_source, { user_id, code }) => {
-      try {
-        return addEventCodeResolver({ user_id, code });
-      } catch (e) {
-        errorLog(`error occurred while attempting to add event code: ${e.toString()}`);
-        generateSentryErrorForResolver({
-          resolverType: 'mutation',
-          routeName: 'addEventCode',
-          args: { user_id, code },
-          errorMsg: e,
-          errorName: ADD_EVENT_CODE_ERROR,
-        });
-        return {
-          success: false,
-          message: ADD_EVENT_CODE_ERROR,
         };
       }
     },

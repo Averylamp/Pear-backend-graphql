@@ -1,6 +1,5 @@
 import { Match } from '../../models/MatchModel';
 import { User } from '../../models/UserModel';
-import { datadogStats } from '../../DatadogHelper';
 import {
   notifyEndorsementChatAcceptedRequest, sendMatchAcceptedMatchmakerPushNotification,
   sendMatchAcceptedPushNotification,
@@ -8,11 +7,6 @@ import {
 } from '../../FirebaseManager';
 import { getAndValidateUserAndMatchObjects } from './MatchResolverUtils';
 import { rollbackObject } from '../../../util/util';
-import {
-  recordAcceptMatchRequest,
-  recordMatchOpened,
-  recordRejectMatchRequest,
-} from '../../models/UserActionModel';
 
 const debug = require('debug')('dev:DecideOnMatch');
 const errorLogger = require('debug')('error:DecideOnMatch');
@@ -27,13 +21,7 @@ export const decideOnMatchResolver = async ({ user_id, match_id, decision }) => 
   if (!['reject', 'accept'].includes(decision)) {
     throw new Error(`Unknown match action: ${decision}`);
   }
-  datadogStats.increment('server.stats.match_decision_made');
   const acceptedMatch = decision === 'accept';
-  if (acceptedMatch) {
-    datadogStats.increment('server.stats.user_accepted_match');
-  } else {
-    datadogStats.increment('server.stats.user_rejected_match');
-  }
   // verifies that user exists, match exists, user is part of match, user hasn't yet taken
   // accept/reject action on match
   const promisesResult = await getAndValidateUserAndMatchObjects(
@@ -162,13 +150,7 @@ export const decideOnMatchResolver = async ({ user_id, match_id, decision }) => 
       message,
     };
   }
-  if (acceptedMatch) {
-    recordAcceptMatchRequest({ user, match, otherUser });
-  } else {
-    recordRejectMatchRequest({ user, match, otherUser });
-  }
   if (isAMatch) {
-    datadogStats.increment('server.stats.match_double_accepted');
     sendMatchAcceptedServerMessage({ chatID: match.firebaseChatDocumentID });
     sendMatchAcceptedPushNotification({ user, otherUser });
     sendMatchAcceptedPushNotification({ otherUser, user });
@@ -186,7 +168,6 @@ export const decideOnMatchResolver = async ({ user_id, match_id, decision }) => 
       },
     }).exec();
     if (matchmakerMade) {
-      datadogStats.increment('server.stats.match_double_accepted_matchmaker');
       const sentBy = await User.findById(match.sentByUser_id);
       let sentFor;
       let receivedBy;
@@ -220,12 +201,6 @@ export const decideOnMatchResolver = async ({ user_id, match_id, decision }) => 
           pearPoints: 1,
         },
       }).exec();
-      recordMatchOpened({
-        user, match, otherUser, sentBy,
-      });
-    } else {
-      datadogStats.increment('server.stats.match_double_accepted_personal');
-      recordMatchOpened({ user, match, otherUser });
     }
   }
   return {

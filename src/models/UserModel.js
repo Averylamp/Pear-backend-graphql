@@ -1,14 +1,6 @@
 import { MatchingDemographicsSchema, MatchingPreferencesSchema } from './MatchingSchemas';
 import { ImageContainerSchema } from './ImageSchemas';
 import { EdgeSummarySchema } from './MatchModel';
-import { EndorsementEdgeSchema } from './EndorsementModels';
-import {
-  BioSchema,
-  BoastSchema, DontSchema, DoSchema, InterestSchema,
-  QuestionUserResponseSchema,
-  RoastSchema,
-  VibeSchema,
-} from './ContentModels';
 
 const mongoose = require('mongoose');
 const debug = require('debug')('dev:UserModel');
@@ -24,7 +16,7 @@ extend type Query {
   # send a push notification indicating new message
   notifyNewMessage(fromUser_id: ID!, toUser_id: ID!): Boolean!
   # return a sub-array of a list of phone numbers, representing users who are already on pear
-  alreadyOnPear(myPhoneNumber: String!, phoneNumbers: [String!]!): [String!]!
+  alreadyOnPlatform(myPhoneNumber: String!, phoneNumbers: [String!]!): [String!]!
   # get fake user count
   getUserCount: Int!
   
@@ -45,14 +37,8 @@ extend type Mutation{
   # Updates a User's photos or photo bank
   updateUserPhotos(updateUserPhotosInput: UpdateUserPhotosInput!): UserMutationResponse!
 
-  # an endorser can edit the things they've written for a user
-  editEndorsement(editEndorsementInput: EditEndorsementInput!): UserMutationResponse!
-  
   # DEVMODE ONLY: delete a user object. when called from prod, this is no-op
   deleteUser(user_id: ID!): UserDeletionResponse!
-  
-  # adds an event code for the user
-  addEventCode(user_id: ID!, code: String!): UserMutationResponse!
   
   # mark a profile as high quality
   markHighQuality(user_id: ID!): UserMutationResponse!
@@ -114,25 +100,6 @@ input UpdateUserInput {
   age: Int
   birthdate: String
   
-  questionResponses: [QuestionUserResponseInput!]
-  
-  ethnicity: [EthnicityEnum]
-  ethnicityVisible: Boolean
-  educationLevel: EducationLevelEnum
-  educationLevelVisible: Boolean
-  religion: [ReligionEnum]
-  religionVisible: Boolean
-  politicalView: PoliticsEnum
-  politicalViewVisible: Boolean
-  drinking: HabitsEnum
-  drinkingVisible: Boolean
-  smoking: HabitsEnum
-  smokingVisible: Boolean
-  cannabis: HabitsEnum
-  cannabisVisible: Boolean
-  drugs: HabitsEnum
-  drugsVisible: Boolean
-
   school: String
   schoolYear: String
   schoolEmail: String
@@ -165,23 +132,6 @@ input UpdateUserPhotosInput {
 
 `;
 
-const editEndorsementInput = `
-input EditEndorsementInput {
-  endorser_id: ID!
-  user_id: ID!
-
-  boasts: [BoastInput!]
-  roasts: [RoastInput!]
-  questionResponses: [QuestionUserResponseInput!]
-  vibes: [VibeInput!]
-
-  bio: BioInput
-  dos: [DoInput!]
-  donts: [DontInput!]
-  interests: [InterestInput!]
-}
-`;
-
 const userType = `
 type User {
   _id: ID!
@@ -202,18 +152,7 @@ type User {
   birthdate: String
 
   # profile content. ordered
-  bios: [Bio!]!
-  boasts: [Boast!]!
-  roasts: [Roast!]!
-  questionResponses: [QuestionUserResponse!]!
-  vibes: [Vibe!]!
-  
-  questionResponsesCount: Int!
-
-  # deprecating?
-  dos: [Do!]!
-  donts: [Dont!]!
-  interests: [Interest!]!
+  bio:  String
 
   school: String
   schoolYear: String
@@ -230,32 +169,9 @@ type User {
   # All images uploaded for a user
   bankImages: [ImageContainer!]!
 
-  pearPoints: Int!
-
-  # All users who have endorsed this user
-  endorser_ids: [ID!]!
-  endorsers: [User]!
-  endorserCount: Int!
-
-  # All users this user has endorsed
-  endorsedUser_ids: [ID!]!
-  endorsedUsers: [User]!
-  endorsedUsersCount: Int!
-
-  # All pending endorsements this user has created
-  detachedProfile_ids: [ID!]!
-  detachedProfiles: [DetachedProfile!]!
-  detachedProfilesCount: Int!
-
-  # metainfo about endorser/endorsee chats
-  endorsementEdges: [EndorsementEdge!]!
-
   discoveryQueue_id: ID!
   discoveryQueueObj: DiscoveryQueue!
   
-  actionSummary_id: ID!
-  actionSummaryObj: UserActionSummary!
-
   matchingPreferences: MatchingPreferences!
   matchingDemographics: MatchingDemographics!
 
@@ -270,21 +186,10 @@ type User {
   currentMatch_ids: [ID!]!
   currentMatches: [Match!]!
 
-  # All users this user has ever been part of a match with (whether request, accepted, unmatched)
-  # This field is not stored in MongoDB. Rather, the resolver pulls this information from
-  # the EdgeSummaries field.
-  edgeUser_ids: [ID!]!
-
-  # FOR TESTING ONLY:
-  # edgeSummaries: [EdgeSummary!]!
-
   # referral codes
   referredByCode: String
   referralCode: String
   
-  # events the user is a part of
-  event_ids: [ID!]!
-  events: [Event!]!
 
   # seeded / lowQuality profile?
   seeded: Boolean!
@@ -294,6 +199,10 @@ type User {
   lastEditedTimes: [String!]!
   lastActive: String!
   createdAt: String!
+
+  hostingEventIDs:[ID!]!
+  hostingEvents:[Event!]!
+
 }
 
 `;
@@ -325,7 +234,6 @@ export const typeDef = queryRoutes
   + createUserInputs
   + updateUserInputs
   + updateUserPhotosInput
-  + editEndorsementInput
   + userType
   + mutationResponse
   + genderEnum;
@@ -334,12 +242,6 @@ const UserSchema = new Schema({
   deactivated: { type: Boolean, required: true, default: false },
   firebaseAuthID: {
     type: String, required: true, index: true, unique: true,
-  },
-  facebookId: {
-    type: String, required: false, unique: true, index: true, sparse: true,
-  },
-  facebookAccessToken: {
-    type: String, required: false, unique: true, index: true, sparse: true,
   },
   email: { type: String, required: false },
   emailVerified: { type: Boolean, required: true, default: false },
@@ -360,17 +262,8 @@ const UserSchema = new Schema({
   },
   birthdate: { type: Date, required: false },
 
-  bios: { type: [BioSchema], required: true, default: [] },
-  biosCount: {
-    type: Number, required: true, index: true, default: 0,
-  },
-  boasts: { type: [BoastSchema], required: true, default: [] },
-  roasts: { type: [RoastSchema], required: true, default: [] },
-  questionResponses: { type: [QuestionUserResponseSchema], required: true, default: [] },
-  questionResponsesCount: {
-    type: Number, required: true, index: true, default: 0,
-  },
-  vibes: { type: [VibeSchema], required: true, default: [] },
+  bio: { type: String, required: true, default: '' },
+
   personalMatchesSentCount: { // total number of personal match requests sent
     type: Number, required: true, index: true, default: 0,
   },
@@ -400,11 +293,6 @@ const UserSchema = new Schema({
   },
   profileCompletedTime: { type: Date, required: false },
 
-  // dos, donts, interests are not used currently
-  dos: { type: [DoSchema], required: true, default: [] },
-  donts: { type: [DontSchema], required: true, default: [] },
-  interests: { type: [InterestSchema], required: true, default: [] },
-
   school: { type: String, required: false },
   schoolYear: { type: String, required: false },
   schoolEmail: { type: String, required: false },
@@ -414,13 +302,6 @@ const UserSchema = new Schema({
   hometown: { type: String, required: false },
   isSeeking: { type: Boolean, required: true, default: true },
 
-  pearPoints: {
-    type: Number,
-    required: true,
-    index: true,
-    default: 0,
-  },
-
   displayedImages: { type: [ImageContainerSchema], required: true, default: [] },
   displayedImagesCount: {
     type: Number,
@@ -429,29 +310,6 @@ const UserSchema = new Schema({
     default: 0,
   },
   bankImages: { type: [ImageContainerSchema], required: true, default: [] },
-
-  endorser_ids: {
-    type: [Schema.Types.ObjectId], required: true, index: true, default: [],
-  },
-  endorserCount: {
-    type: Number, required: true, index: true, default: 0,
-  },
-  endorsedUser_ids: {
-    type: [Schema.Types.ObjectId], required: true, index: true, default: [],
-  },
-  endorsedUsersCount: {
-    type: Number, required: true, index: true, default: 0,
-  },
-  detachedProfile_ids: {
-    type: [Schema.Types.ObjectId], required: true, index: true, default: [],
-  },
-  detachedProfilesCount: {
-    type: Number, required: true, index: true, default: 0,
-  },
-
-  endorsementEdges: {
-    type: [EndorsementEdgeSchema], required: true, default: [],
-  },
 
   discoveryQueue_id: { type: Schema.Types.ObjectId, required: true },
   actionSummary_id: { type: Schema.Types.ObjectId, required: true },
@@ -493,10 +351,6 @@ const UserSchema = new Schema({
   lowQuality: {
     type: Boolean, required: true, default: false,
   },
-  event_ids: {
-    type: [Schema.Types.ObjectId], required: false, index: true, default: [],
-  },
-
   lastActiveTimes: {
     type: [Date],
     required: true,
@@ -515,6 +369,8 @@ const UserSchema = new Schema({
     index: true,
     default: new Date(),
   },
+  hostingEventIDs: { type: [Schema.Types.ObjectId], required: true, default: [] },
+
 }, { timestamps: true });
 
 UserSchema.virtual('fullName')

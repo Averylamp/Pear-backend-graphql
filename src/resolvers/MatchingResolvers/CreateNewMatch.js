@@ -18,8 +18,6 @@ import {
 import { createMatchObject } from '../../models/MatchModel';
 import { rollbackObject } from '../../../util/util';
 import { generateSentryErrorForResolver } from '../../SentryHelper';
-import { datadogStats } from '../../DatadogHelper';
-import { recordCreateMatch } from '../../models/UserActionModel';
 
 const debug = require('debug')('dev:CreateNewMatch');
 const errorLogger = require('debug')('error:CreateNewMatch');
@@ -203,16 +201,13 @@ export const createNewMatchResolver = async ({
   // create the match object
   let endorsementEdge = null;
   if (matchmakerMade) {
-    datadogStats.increment('server.stats.match_request_matchmaker_sent');
     const endorsementEdges = sentBy.endorsementEdges.filter(
       edge => edge.otherUser_id.toString() === sentFor._id.toString(),
     );
     if (endorsementEdges.length > 0) {
       [endorsementEdge] = endorsementEdges;
     }
-  } else {
-    datadogStats.increment('server.stats.match_request_personal_sent');
-  }
+  } 
 
   const firebaseId = nanoid(20);
 
@@ -409,9 +404,6 @@ export const createNewMatchResolver = async ({
     });
   }
   sendMatchReceivedByPushNotification({ receivedBy });
-  recordCreateMatch({
-    sentByUser_id, sentForUser_id, receivedByUser_id, match_id: match._id,
-  });
   return {
     success: true,
     match,

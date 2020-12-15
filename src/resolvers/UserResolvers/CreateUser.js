@@ -2,9 +2,6 @@ import { pick } from 'lodash';
 import { createUserObject } from '../../models/UserModel';
 import { createDiscoveryQueueObject } from '../../models/DiscoveryQueueModel';
 import { CREATE_USER_ERROR } from '../ResolverErrorStrings';
-import { generateSentryErrorForResolver } from '../../SentryHelper';
-import { postCreateUser } from '../../SlackHelper';
-import { createActionSummaryObject, recordCreateUser } from '../../models/UserActionModel';
 
 const mongoose = require('mongoose');
 const errorLog = require('debug')('error:CreateUserResolver');
@@ -32,7 +29,7 @@ export const createUserResolver = async ({ userInput }) => {
   finalUserInput.matchingPreferences = {};
   finalUserInput.matchingDemographics = {};
   const createUserObj = createUserObject(finalUserInput)
-    .catch(err => err);
+    .catch((err) => err);
 
   const createDiscoveryQueueObj = createDiscoveryQueueObject(
     {
@@ -40,15 +37,9 @@ export const createUserResolver = async ({ userInput }) => {
       _id: discoveryQueueObjectID,
     },
   )
-    .catch(err => err);
+    .catch((err) => err);
 
-  const createUserActionSummaryObj = createActionSummaryObject({
-    user_id: userObjectID,
-    _id: userActionSummaryObjectID,
-  })
-    .catch(err => err);
-
-  return Promise.all([createUserObj, createDiscoveryQueueObj, createUserActionSummaryObj])
+  return Promise.all([createUserObj, createDiscoveryQueueObj])
     .then(async ([userObject, discoveryQueueObject, userActionSummaryObject]) => {
       if (userObject instanceof Error
         || discoveryQueueObject instanceof Error
@@ -89,26 +80,11 @@ export const createUserResolver = async ({ userInput }) => {
           });
         }
         errorLog(errorMessage);
-        generateSentryErrorForResolver({
-          resolverType: 'mutation',
-          routeName: 'createUser',
-          args: { userInput },
-          errorMsg: errorMessage,
-          errorName: CREATE_USER_ERROR,
-        });
         return {
           success: false,
           message: CREATE_USER_ERROR,
         };
       }
-      try {
-        postCreateUser({
-          userPhone: userObject.phoneNumber,
-        });
-      } catch (err) {
-        errorLog(err);
-      }
-      recordCreateUser({ user: userObject });
       return {
         success: true,
         user: userObject,

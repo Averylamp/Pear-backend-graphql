@@ -14,12 +14,6 @@ import {
   resolvers as ImageResolvers,
 } from './resolvers/ImageResolver';
 import {
-  typeDef as DetachedProfileTypeDef,
-} from './models/DetachedProfile';
-import {
-  resolvers as DetachedProfileResolvers,
-} from './resolvers/DetachedProfileResolvers/DetachedProfileResolver';
-import {
   typeDef as MatchTypeDef,
 } from './models/MatchModel';
 import {
@@ -47,33 +41,17 @@ import {
   resolvers as LocationResolvers,
 } from './resolvers/LocationResolver';
 import {
-  typeDef as ContentSchemasTypeDef,
-} from './models/ContentModels';
-import {
-  resolvers as ContentResolvers,
-} from './resolvers/ContentResolvers';
-import {
-  typeDef as EndorsementModelsTypeDef,
-} from './models/EndorsementModels';
-import {
-  typeDef as EventModelsTypeDef,
+  typeDef as EventSchemasTypeDef,
 } from './models/EventModel';
 import {
   resolvers as EventResolvers,
-} from './resolvers/EventResolvers';
-import {
-  typeDef as UserActionSummaryTypeDef,
-} from './models/UserActionModel';
-import {
-  resolvers as UserActionSummaryResolvers,
-} from './resolvers/UserActionResolvers';
+} from './resolvers/EventResolvers/EventResolvers';
 import { devMode } from './constants';
 
 const { ApolloServer } = require('apollo-server-express');
 
 const debug = require('debug')('dev:Start');
 const prodConsole = require('debug')('prod:Start');
-
 
 if (devMode) debug('Dev Mode detected');
 const tracing = process.env.PERF === 'true';
@@ -94,7 +72,7 @@ export const MONGO_URL = `${mongoPrefix}${dbUser}${dbPass}@${dbHost}/${dbName}?r
 const mongoose = require('mongoose');
 
 // see https://github.com/Automattic/mongoose/issues/7150
-mongoose.Schema.Types.String.checkRequired(v => v != null);
+mongoose.Schema.Types.String.checkRequired((v) => v != null);
 
 debug(MONGO_URL);
 prodConsole(`Mongo URL: ${MONGO_URL}`);
@@ -118,17 +96,13 @@ function createApolloServer() {
   const finalTypeDefs = [
     Query,
     UserTypeDef,
-    DetachedProfileTypeDef,
     MatchTypeDef,
     DiscoveryQueueTypeDef,
     TestObjectTypeDef,
     ImageContainerTypeDef,
     MatchingSchemasTypeDef,
     LocationSchemasTypeDef,
-    ContentSchemasTypeDef,
-    EndorsementModelsTypeDef,
-    EventModelsTypeDef,
-    UserActionSummaryTypeDef,
+    EventSchemasTypeDef,
   ];
 
   const resolvers = {
@@ -137,16 +111,12 @@ function createApolloServer() {
 
   const finalResolvers = merge(resolvers,
     UserResolvers,
-    DetachedProfileResolvers,
     MatchResolvers,
     DiscoveryQueueResolvers,
     TestObjectResolvers,
     ImageResolvers,
     LocationResolvers,
-    ContentResolvers,
-    EventResolvers,
-    UserActionSummaryResolvers);
-
+    EventResolvers);
 
   const server = new ApolloServer({
     typeDefs: finalTypeDefs,
@@ -200,6 +170,5 @@ export const start = async () => {
     debug(e);
   }
 };
-
 
 export default start;

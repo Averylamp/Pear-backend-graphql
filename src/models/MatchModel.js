@@ -1,5 +1,4 @@
 import { ImageContainerSchema } from './ImageSchemas';
-import { QuestionUserResponseSchema } from './ContentModels';
 
 const mongoose = require('mongoose');
 
@@ -41,10 +40,6 @@ input CreateMatchRequestInput {
   # Discovered user receiving the request
   receivedByUser_id: ID!
   
-  # Optional text that goes along with the like
-  requestText: String
-  likedPhoto: CreateImageContainer
-  likedPrompt: QuestionUserResponseInput
 }
 `;
 
@@ -65,7 +60,7 @@ enum RequestResponse {
 `;
 
 const matchType = `
-type Match{
+type Match{ 
   _id: ID!
 
   sentByUser_id: ID!
@@ -78,7 +73,6 @@ type Match{
   
   requestText: String
   likedPhoto: ImageContainer
-  likedPrompt: QuestionUserResponse
 
   sentForUserStatus: RequestResponse!
   sentForUserStatusLastUpdated: String!
@@ -131,8 +125,6 @@ const MatchSchema = new Schema({
   isMatchmakerMade: { type: Boolean, required: true },
 
   requestText: { type: String, required: false },
-  likedPhoto: { type: ImageContainerSchema, required: false },
-  likedPrompt: { type: QuestionUserResponseSchema, required: false },
 
   sentForUserStatus: {
     type: String,
