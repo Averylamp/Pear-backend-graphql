@@ -50,7 +50,7 @@
     "lodash": "^4.17.21",
     "mongo-dot-notation": "^2.0.0",
     "mongoose": "^5.4.13",
-    "nanoid": "^3.1.20",
+    "nanoid": "^3.1.31",
     "node-dogstatsd": "^0.0.7",
     "request": "^2.88.0",
     "twilio": "^3.29.0"
